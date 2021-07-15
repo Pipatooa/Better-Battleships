@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/Better-Battleships.iml" filepath="$PROJECT_DIR$/.idea/Better-Battleships.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../Better-Battleships-Old/.idea/Better-Battleships-Old.iml" filepath="$PROJECT_DIR$/../Better-Battleships-Old/.idea/Better-Battleships-Old.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../untitled/.idea/untitled.iml" filepath="$PROJECT_DIR$/../untitled/.idea/untitled.iml" />
+    </modules>
+  </component>
+</project>
