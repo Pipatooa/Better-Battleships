@@ -7,6 +7,7 @@ import path from "path";
 import exphbs from "express-handlebars";
 
 const gameRouter = require('./routes/game');
+const canvasRouter = require('./routes/canvas');
 
 const app = express();
 const port : number = 8080;
@@ -27,6 +28,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/game', gameRouter);
+app.use('/canvas', canvasRouter);
 
 server.listen(port, () => {
     const datetime : Date = new Date();
