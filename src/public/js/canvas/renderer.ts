@@ -1,3 +1,5 @@
+import ScrollEvent = JQuery.ScrollEvent;
+
 let canvasRenderer : CanvasRenderer;
 let grid: Grid;
 
@@ -9,9 +11,50 @@ class CanvasRenderer {
     public readonly canvas: HTMLCanvasElement;
     public readonly context: CanvasRenderingContext2D;
 
+    private _canvasScaleX: number;
+    private _canvasScaleY: number;
+
     constructor() {
+        // Fetch canvas
         this.canvas = $('#game-canvas').get(0) as HTMLCanvasElement;
         this.context = <CanvasRenderingContext2D> this.canvas.getContext('2d');
+
+        // Calculate canvas scale for the first time
+        this._canvasScaleX = this.canvas.width / this.canvas.clientWidth;
+        this._canvasScaleY = this.canvas.height / this.canvas.clientHeight;
+
+        // Register event listeners
+        $(window).on('resize', () => this.onResize());
+    }
+
+    // When the canvas is resized, recalculate canvas scale
+    private onResize() {
+        console.log(0);
+        this._canvasScaleX = this.canvas.width / this.canvas.clientWidth;
+        this._canvasScaleY = this.canvas.height / this.canvas.clientHeight;
+    }
+
+    // Translates mouse coordinates to UV coordinates
+    public translateMouseCoordinateUV(x: number, y: number): [number, number] {
+        let transX = (x - this.canvas.offsetLeft) / this.canvas.clientWidth;
+        let transY = (y - this.canvas.offsetTop) / this.canvas.clientHeight;
+        return [transX, transY];
+    }
+
+    // Translates mouse coordinates to pixel coordinates
+    public translateMouseCoordinatePixel(x: number, y: number): [number, number] {
+        let transX = (x - this.canvas.offsetLeft) * this._canvasScaleX;
+        let transY = (y - this.canvas.offsetTop) * this._canvasScaleY;
+        return [transX, transY];
+    }
+
+    // Getters and setters
+    public get canvasScaleX(): number {
+        return this._canvasScaleX;
+    }
+
+    public get canvasScaleY(): number {
+        return this._canvasScaleY;
     }
 }
 
@@ -47,14 +90,21 @@ class Grid {
     private onScroll(ev: WheelEvent) {
         this.cellSize *= 1 + -ev.deltaY * 0.001;
         this.draw();
+
+        let [uvX, uvY] = canvasRenderer.translateMouseCoordinateUV(ev.x, ev.y);
+        let [pixelX, pixelY] = canvasRenderer.translateMouseCoordinatePixel(ev.x, ev.y);
+        console.log(uvX, uvY, pixelX, pixelY);
     }
 
     private onMouseMove(ev: MouseEvent) {
         if (ev.buttons == 0)
             return;
 
-        this.viewOffsetX += ev.movementX;
-        this.viewOffsetY += ev.movementY;
+        this.mouseLastX = ev.x;
+        this.mouseLastY = ev.y;
+
+        this.viewOffsetX += ev.movementX * canvasRenderer.canvasScaleX;
+        this.viewOffsetY += ev.movementY * canvasRenderer.canvasScaleY;
         this.draw();
     }
 
