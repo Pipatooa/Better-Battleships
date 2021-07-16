@@ -1,5 +1,3 @@
-import ScrollEvent = JQuery.ScrollEvent;
-
 let canvasRenderer : CanvasRenderer;
 let grid: Grid;
 
