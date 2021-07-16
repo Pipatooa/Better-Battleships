@@ -22,6 +22,11 @@ class Grid {
     private cellSize: number = 10;
     private cells: GridCell[][] = [];
 
+    private viewOffsetX: number = 0;
+    private viewOffsetY: number = 0;
+    private mouseLastX: number = 0;
+    private mouseLastY: number = 0;
+
     constructor(sizeX: number, sizeY: number) {
         this.sizeX = sizeX;
         this.sizeY = sizeY;
@@ -35,11 +40,21 @@ class Grid {
         }
 
         // Register event listeners
-        canvasRenderer.canvas.addEventListener('wheel', (ev: WheelEvent) => this.onScroll(ev))
+        canvasRenderer.canvas.addEventListener('wheel', (ev: WheelEvent) => this.onScroll(ev));
+        canvasRenderer.canvas.addEventListener('mousemove', (ev: MouseEvent) => this.onMouseMove(ev));
     }
 
     private onScroll(ev: WheelEvent) {
         this.cellSize *= 1 + -ev.deltaY * 0.001;
+        this.draw();
+    }
+
+    private onMouseMove(ev: MouseEvent) {
+        if (ev.buttons == 0)
+            return;
+
+        this.viewOffsetX += ev.movementX;
+        this.viewOffsetY += ev.movementY;
         this.draw();
     }
 
@@ -50,8 +65,8 @@ class Grid {
 
         this.cells.forEach(cells => cells.forEach(cell => {
             canvasRenderer.context.fillRect(
-                cell.x * this.cellSize,
-                cell.y * this.cellSize,
+                this.viewOffsetX + cell.x * this.cellSize,
+                this.viewOffsetY + cell.y * this.cellSize,
                 this.cellSize - 1,
                 this.cellSize - 1);
         }));
