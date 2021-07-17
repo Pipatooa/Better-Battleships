@@ -3,9 +3,10 @@
   "version": "0.0.0",
   "private": true,
   "main": "build/app.ts",
+  "type": "module",
   "scripts": {
     "tsc": "npx tsc -w",
-    "x": "npm uninstall commonjs"
+    "x": "npm install"
   },
   "dependencies": {
     "cookie-parser": "~1.4.4",

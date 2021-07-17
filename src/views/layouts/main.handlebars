@@ -17,9 +17,8 @@
         <link rel="stylesheet" type="text/css" href="{{stylesheet}}">
     {{/each}}
 
-    <script> const exports = {}; </script>
     {{#each scripts as |script|}}
-        <script src="{{script}}"></script>
+        <script src="{{script}}" type="module"></script>
     {{/each}}
 
     <meta charset="UTF-8">
