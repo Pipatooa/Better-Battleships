@@ -1,40 +1,77 @@
 import {Renderer} from "./renderer.js";
 import {Grid} from "../grid.js";
+import {clamp} from "../../utility.js";
 
 export class GridRenderer {
-    protected gridCellSize: number = 10;
+    protected gridCellSize: number = 0;
     protected gridOffsetX: number = 0;
     protected gridOffsetY: number = 0;
+
+    private readonly wheelListener: (ev: WheelEvent) => any;
+    private readonly mouseMoveListener: (ev: MouseEvent) => any;
+
+    private readonly gridCellSizeLowerBound: number;
+    private readonly gridCellSizeUpperBound: number;
 
     constructor(protected readonly renderer: Renderer,
                 protected readonly grid: Grid) {
 
+        // Calculate limits for grid cell rendering
+        this.gridCellSizeLowerBound = Math.min(this.renderer.canvas.width / this.grid.sizeX, this.renderer.canvas.height / this.grid.sizeY);
+        this.gridCellSizeUpperBound = Math.min(this.renderer.canvas.width, this.renderer.canvas.height) / 5;
+
         // Register event listeners
-        this.renderer.canvas.addEventListener('wheel', (ev: WheelEvent) => this.onScroll(ev));
-        this.renderer.canvas.addEventListener('mousemove', (ev: MouseEvent) => this.onMouseMove(ev));
+        this.wheelListener = (ev: WheelEvent) => this.onScroll(ev);
+        this.mouseMoveListener = (ev: MouseEvent) => this.onMouseMove(ev);
+
+        this.renderer.canvas.addEventListener('wheel', this.wheelListener);
+        this.renderer.canvas.addEventListener('mousemove', this.mouseMoveListener);
 
         // Draw grid for first time
-        this.draw()
-    }
-
-    private onScroll(ev: WheelEvent) {
-        this.gridCellSize *= 1 + -ev.deltaY * 0.001;
+        this.constrainZoom();
         this.draw();
-
-        let [uvX, uvY] = this.renderer.translateMouseCoordinateUV(ev.x, ev.y);
-        let [pixelX, pixelY] = this.renderer.translateMouseCoordinatePixel(ev.x, ev.y);
-        console.log(uvX, uvY, pixelX, pixelY);
     }
 
+    // Control zoom on grid when user scrolls
+    private onScroll(ev: WheelEvent) {
+        let oldGridCellSize = this.gridCellSize;
+        this.gridCellSize *= 1 -ev.deltaY * 0.001;
+        this.constrainZoom();
+
+        let deltaScaleFactor = this.gridCellSize / oldGridCellSize - 1;
+        let [pixelX, pixelY] = this.renderer.translateMouseCoordinatePixel(ev.x, ev.y);
+
+        this.gridOffsetX -= (pixelX - this.gridOffsetX) * deltaScaleFactor;
+        this.gridOffsetY -= (pixelY - this.gridOffsetY) * deltaScaleFactor;
+
+        this.constrainOffsetXY();
+        this.draw();
+    }
+
+    // Control movement of grid when user moves their mouse
     private onMouseMove(ev: MouseEvent) {
         if (ev.buttons == 0)
             return;
 
         this.gridOffsetX += ev.movementX * this.renderer.canvasScaleX;
         this.gridOffsetY += ev.movementY * this.renderer.canvasScaleY;
+
+        this.constrainOffsetXY();
         this.draw();
     }
 
+    // Constrain zoom to lower and upper bound
+    private constrainZoom() {
+        this.gridCellSize = clamp(this.gridCellSize, this.gridCellSizeLowerBound, this.gridCellSizeUpperBound);
+    }
+
+    // Constrain panning to edges of grid
+    private constrainOffsetXY() {
+        this.gridOffsetX = clamp(this.gridOffsetX, -(this.gridCellSize * this.grid.sizeX - this.renderer.canvas.width), 0);
+        this.gridOffsetY = clamp(this.gridOffsetY, -(this.gridCellSize * this.grid.sizeY - this.renderer.canvas.height), 0);
+    }
+
+    // Draw the grid to the canvas
     public draw() {
         this.renderer.context.clearRect(0, 0, this.renderer.canvas.width, this.renderer.canvas.height);
 
@@ -48,7 +85,9 @@ export class GridRenderer {
         }));
     }
 
+    // Removes all event listeners
     public deactivate() {
-        $(this.renderer.canvas).off('')
+        this.renderer.canvas.removeEventListener('wheel', this.wheelListener);
+        this.renderer.canvas.removeEventListener('mousemove', this.mouseMoveListener);
     }
 }
