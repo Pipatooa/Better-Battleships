@@ -1,3 +1,23 @@
 canvas {
     background: #6c757d;
 }
+
+.file-drop {
+    border: var(--bs-dark) 2px dashed;
+    border-radius: 5px;
+    background: #DDD;
+    transition: 150ms linear;
+
+    -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+    -khtml-user-select: none; /* Konqueror HTML */
+    -moz-user-select: none; /* Old versions of Firefox */
+    -ms-user-select: none; /* Internet Explorer/Edge */
+    user-select: none;
+}
+
+.file-drop.file-drop-highlighted {
+    border: var(--bs-blue) 2px dashed;
+    background: #FFF;
+    transition: 150ms linear;
+}
