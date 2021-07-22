@@ -38,7 +38,10 @@ export class GridRenderer {
         this.gridCellSize *= 1 -ev.deltaY * 0.001;
         this.constrainZoom();
 
+        // Compare new size of grid cells to old size of grid cells
         let deltaScaleFactor = this.gridCellSize / oldGridCellSize - 1;
+
+        // Get the mouse position in pixel coordinates
         let [pixelX, pixelY] = this.renderer.translateMouseCoordinatePixel(ev.x, ev.y);
 
         this.gridOffsetX -= (pixelX - this.gridOffsetX) * deltaScaleFactor;
@@ -67,8 +70,8 @@ export class GridRenderer {
 
     // Constrain panning to edges of grid
     private constrainOffsetXY() {
-        this.gridOffsetX = clamp(this.gridOffsetX, -(this.gridCellSize * this.grid.sizeX - this.renderer.canvas.width), 0);
-        this.gridOffsetY = clamp(this.gridOffsetY, -(this.gridCellSize * this.grid.sizeY - this.renderer.canvas.height), 0);
+        this.gridOffsetX = clamp(this.gridOffsetX, this.renderer.canvas.width - this.gridCellSize * this.grid.sizeX, 0);
+        this.gridOffsetY = clamp(this.gridOffsetY, this.renderer.canvas.height - this.gridCellSize * this.grid.sizeY, 0);
     }
 
     // Draw the grid to the canvas
