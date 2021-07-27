@@ -6,6 +6,7 @@ router.get('/', (req, res) => {
     res.render('game', {
         url: "/",
         pageTitle: "Game",
+        pageDescription: "",
         stylesheets: [
             "/css/game.css"
         ],
