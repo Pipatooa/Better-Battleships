@@ -1,8 +1,6 @@
-import {Descriptor} from "./descriptor.js";
-import {TileType} from "./tileType.js";
-import {Tile} from "./tile.js";
-import {GridRenderer} from "./canvas/gridRenderer.js";
-import {Renderer} from "./canvas/renderer.js";
+import {Descriptor} from "./descriptor";
+import {TileType} from "./tileType";
+import {Tile} from "./tile";
 
 export class Grid {
     public readonly tiles: Tile[][] = [];
@@ -47,17 +45,8 @@ export class Grid {
     }
 }
 
-let desc = new Descriptor("Name", "Description");
-
 // Test tiles
-let tileTypeA = new TileType(desc, "000000");
-let tileTypeB = new TileType(desc, "FF0000");
-let tileTypeC = new TileType(desc, "00FF00");
-let tileTypeD = new TileType(desc, "0000FF");
-
-export const grid = new Grid(10, 10, tileTypeA);
-
-grid.generateTestTiles();
-
-let baseRenderer = new Renderer('#game-canvas')
-let gridRenderer = new GridRenderer(baseRenderer, grid);
+export let tileTypeA = new TileType(new Descriptor("Tile A", "Desc"), "000000");
+export let tileTypeB = new TileType(new Descriptor("Tile B", "Desc"), "FF0000");
+export let tileTypeC = new TileType(new Descriptor("Tile C", "Desc"), "00FF00");
+export let tileTypeD = new TileType(new Descriptor("Tile D", "Desc"), "0000FF");

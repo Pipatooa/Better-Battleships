@@ -11,9 +11,7 @@ router.get('/', (req, res) => {
             "/css/game.css"
         ],
         scripts: [
-            // "/js/game/canvas/oldRenderer.js",
-            "/js/game/grid.js",
-            "/js/game/game.js"
+            "/js/game.js"
         ]
     })
 });

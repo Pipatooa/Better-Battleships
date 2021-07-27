@@ -1,4 +1,4 @@
-import {TileType} from "./tileType.js";
+import {TileType} from "./tileType";
 
 export class Tile {
     constructor(public readonly x: number,

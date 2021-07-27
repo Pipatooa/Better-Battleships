@@ -1,6 +1,6 @@
-import {Renderer} from "./renderer.js";
-import {Grid} from "../grid.js";
-import {clamp} from "../../utility.js";
+import {Renderer} from "./renderer";
+import {Grid} from "../../shared/grid";
+import {clamp} from "../../shared/utility";
 
 export class GridRenderer {
     protected gridCellSize: number = 0;
