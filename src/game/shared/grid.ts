@@ -1,4 +1,5 @@
-import {Descriptor} from "./descriptor";
+/*
+import {IDescriptor} from "./i-descriptor";
 import {TileType} from "./tileType";
 import {Tile} from "./tile";
 
@@ -46,7 +47,8 @@ export class Grid {
 }
 
 // Test tiles
-export let tileTypeA = new TileType(new Descriptor("Tile A", "Desc"), "000000");
-export let tileTypeB = new TileType(new Descriptor("Tile B", "Desc"), "FF0000");
-export let tileTypeC = new TileType(new Descriptor("Tile C", "Desc"), "00FF00");
-export let tileTypeD = new TileType(new Descriptor("Tile D", "Desc"), "0000FF");
+export let tileTypeA = new TileType(new IDescriptor("Tile A", "Desc"), "000000");
+export let tileTypeB = new TileType(new IDescriptor("Tile B", "Desc"), "FF0000");
+export let tileTypeC = new TileType(new IDescriptor("Tile C", "Desc"), "00FF00");
+export let tileTypeD = new TileType(new IDescriptor("Tile D", "Desc"), "0000FF");
+*/

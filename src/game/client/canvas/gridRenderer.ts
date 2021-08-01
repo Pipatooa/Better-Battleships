@@ -1,3 +1,4 @@
+/*
 import {Renderer} from "./renderer";
 import {Grid} from "../../shared/grid";
 import {clamp} from "../../shared/utility";
@@ -93,4 +94,4 @@ export class GridRenderer {
         this.renderer.canvas.removeEventListener('wheel', this.wheelListener);
         this.renderer.canvas.removeEventListener('mousemove', this.mouseMoveListener);
     }
-}
+}*/

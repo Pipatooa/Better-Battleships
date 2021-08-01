@@ -1,0 +1,97 @@
+import {Tile} from "./tile";
+import {TileGenerator, tileGeneratorSchema} from "./tile-generator";
+import {UnpackingError} from "./unpacker";
+import Joi from "joi";
+import {TileType, tileTypeSchema} from "./tiletype";
+
+/**
+ * Board Class - Server Version
+ *
+ * Stores all information about the tiles of the board and objects on the board
+ */
+export class Board {
+    public constructor(public readonly tiles: Tile[][],
+                       public readonly generators: TileGenerator[]) { }
+
+    /**
+     * Factory function to generate board from JSON scenario data
+     * @param boardSource - JSON data from 'board.json'
+     * @returns board -- Created Board object
+     */
+    public static async fromSource(boardSource: IBoardSource): Promise<Board> {
+
+        // Validate JSON against schema
+        try {
+            await boardSchema.validateAsync(boardSource);
+        }
+        catch (e) {
+            if (e instanceof Joi.ValidationError)
+                throw UnpackingError.fromJoiValidationError(e);
+        }
+
+        // Unpack palette data
+        let palette: { [char: string]: TileType } = {};
+        for (const entry of Object.entries(boardSource.palette)) {
+
+            // Create new TileType objects indexed by single character strings
+            let [char, tileTypeSource] = entry;
+            palette[char] = await TileType.fromSource(tileTypeSource);
+        }
+
+        // Ensure that the number of entries in 'tiles' matches the declared size of the board
+        if (boardSource.tiles.length != boardSource.size[1])
+            throw new UnpackingError(`"tiles" must contain ${boardSource.size[1]} items to match "size[1]"`);
+
+        // Unpack tile data
+        let tiles: Tile[][] = [];
+        boardSource.tiles.forEach((row, y) => {
+
+            // Ensure that the number of tiles within a row matches the declared size of the board
+            if (row.length != boardSource.size[0])
+                throw new UnpackingError(`"tiles[${y}]" length must be ${boardSource.size[0]} characters long to match "size[0]"`);
+
+            // Iterate through each character, each representing a tile
+            for (let x = 0; x < boardSource.size[0]; x++) {
+                let c = row.charAt(x);
+
+                // If character did not match any tile type within the palette
+                if (!(c in palette))
+                    throw new UnpackingError(`Could not find tile of type '${c}' in palette at tiles[${y}][${x}] (x=${boardSource.size[0]-x},y=${boardSource.size[1]-y})`)
+
+                // Create and store new tile created from tile type
+                let tileType = palette[c];
+                let tile = new Tile(x, y, tileType);
+                if (y == 0)
+                    tiles[x] = [];
+                tiles[x][y] = tile;
+            }
+        });
+
+        // Return board object
+        return new Board(tiles, []);
+    }
+}
+
+/**
+ * Board interface reflecting schema
+ */
+export interface IBoardSource {
+    size: [x: number, y: number];
+    palette: { [char: string]: TileType },
+    tiles: string[],
+    generators: TileGenerator[]
+}
+
+/**
+ * Schema for validating source JSON data
+ */
+export const boardSchema = Joi.object({
+    size: Joi.array().items(
+        Joi.number().integer().min(5)
+    ).length(2).required(),
+    palette: Joi.object().pattern(Joi.string().length(1), tileTypeSchema).required(),
+    tiles: Joi.array().items(
+        Joi.string(),
+    ).required(),
+    generators: Joi.array().items(tileGeneratorSchema).required()
+});
