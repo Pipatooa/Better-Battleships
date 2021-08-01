@@ -9,27 +9,28 @@
     "x": "npm install"
   },
   "dependencies": {
+    "adm-zip": "^0.5.5",
     "cookie-parser": "~1.4.4",
-    "debug": "~2.6.9",
     "express": "~4.16.1",
+    "express-fileupload": "^1.2.1",
     "express-handlebars": "^5.3.2",
+    "formidable": "^1.2.2",
     "handlebars": "^4.7.7",
     "http-errors": "~1.6.3",
     "isomorphic-ws": "^4.0.1",
     "jquery": "^3.6.0",
-    "morgan": "~1.9.1",
-    "ws": "^7.5.3"
+    "morgan": "~1.9.1"
   },
   "devDependencies": {
+    "@types/adm-zip": "^0.4.34",
     "@types/cookie-parser": "^1.4.2",
     "@types/express": "^4.17.13",
     "@types/express-handlebars": "^5.3.1",
+    "@types/formidable": "^1.2.3",
     "@types/handlebars": "^4.1.0",
     "@types/http-errors": "^1.8.1",
     "@types/jquery": "^3.5.6",
-    "@types/morgan": "^1.9.3",
     "@types/node": "^16.3.2",
-    "@types/pug": "^2.0.5",
     "@types/ws": "^7.4.6",
     "concurrently": "^6.2.0",
     "copy-webpack-plugin": "^9.0.1",
