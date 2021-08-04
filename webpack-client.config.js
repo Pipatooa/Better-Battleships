@@ -1,18 +1,22 @@
 const path = require('path');
+const PnpWebpackPlugin = require('pnp-webpack-plugin');
 
 module.exports = {
     entry: {
         game: './src/game/client/game.ts'
     },
     resolve: {
-        extensions: ['.js', '.json', '.ts']
+        extensions: ['.js', '.json', '.ts'],
+        plugins: [PnpWebpackPlugin]
+    },
+    resolveLoader: {
+        plugins: [PnpWebpackPlugin.moduleLoader(module)]
     },
     module: {
         rules: [
             {
                 test: /\.ts$/,
-                use: 'ts-loader',
-                include: [path.resolve(__dirname, 'src')]
+                use: 'ts-loader'
             }
         ]
     },

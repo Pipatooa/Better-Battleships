@@ -1,4 +1,5 @@
 const path = require('path');
+const PnpWebpackPlugin = require('pnp-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
@@ -8,17 +9,16 @@ module.exports = {
     entry: './src/app.ts',
     resolve: {
         extensions: ['.js', '.json', '.ts'],
-        modules: [
-            path.resolve('src'),
-            'node_modules'
-        ]
+        plugins: [PnpWebpackPlugin]
+    },
+    resolveLoader: {
+        plugins: [PnpWebpackPlugin.moduleLoader(module)]
     },
     module: {
         rules: [
             {
                 test: /\.ts$/,
-                use: 'ts-loader',
-                include: [path.resolve(path.dirname(''), 'src')]
+                use: 'ts-loader'
             },
             {
                 test: /\.css$/,
@@ -53,8 +53,12 @@ module.exports = {
     ],
     ignoreWarnings: [
         {
-            module: /^\.\/node_modules/,
+            module: /\.\/\.yarn\/cache\//,
             message: /not found|not supported|Critical dependency/
+        },
+        {
+            module: /\.\/\.yarn\/__virtual__\/ws-virtual/,
+            message: /not found/
         }
     ],
     optimization: {
