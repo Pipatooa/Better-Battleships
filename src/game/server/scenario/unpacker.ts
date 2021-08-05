@@ -2,6 +2,7 @@ import Joi from "joi";
 import AdmZip from "adm-zip";
 import {IScenarioSource, Scenario} from "./scenario";
 import {Board, IBoardSource} from "./board";
+import {buildValueConstraint, IValueConstraintSource} from "./constraints/value-constraint-builder";
 
 /**
  * Unpacks a zip file into a scenario object asynchronously
@@ -11,6 +12,7 @@ import {Board, IBoardSource} from "./board";
 export async function unpack(scenarioZip: AdmZip): Promise<any> {
     let scenario: Scenario;
     let board: Board;
+    let test: any;
 
     // Used to allow unpacking errors to reference the current file that is being processed during unpacking
     let currentFile: string = '';
@@ -25,6 +27,11 @@ export async function unpack(scenarioZip: AdmZip): Promise<any> {
         currentFile = 'board.json';
         let boardSource = getEntryJSON(scenarioZip, currentFile) as unknown as IBoardSource;
         board = await Board.fromSource(boardSource);
+
+        // Test data
+        currentFile = 'test.json';
+        let testSource = getEntryJSON(scenarioZip, currentFile) as unknown as IValueConstraintSource;
+        test = await buildValueConstraint(testSource);
     }
     catch (e) {
         if (e instanceof UnpackingError)
@@ -32,7 +39,7 @@ export async function unpack(scenarioZip: AdmZip): Promise<any> {
         throw e;
     }
 
-    return [scenario, board];
+    return [scenario, board, test];
 }
 
 /**
