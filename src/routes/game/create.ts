@@ -6,6 +6,7 @@ import {unpack, UnpackingError} from "../../game/server/scenario/unpacker";
 
 const router = express.Router();
 
+// Route handler for /game/create
 router.post('/', async (req, res) => {
     const form = formidable({ multiples: true });
 

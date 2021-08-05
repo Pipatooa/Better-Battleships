@@ -2,6 +2,7 @@ import express from "express";
 
 const router = express.Router();
 
+// Route handler for /game
 router.get('/', (req, res) => {
     res.render('game', {
         url: "/",
