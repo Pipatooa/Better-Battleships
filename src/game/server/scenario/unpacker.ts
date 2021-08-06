@@ -2,7 +2,8 @@ import Joi from "joi";
 import AdmZip from "adm-zip";
 import {IScenarioSource, Scenario} from "./scenario";
 import {Board, IBoardSource} from "./board";
-import {buildValueConstraint, IValueConstraintSource} from "./constraints/value-constraint-builder";
+import {buildCondition} from "./conditions/condition-builder";
+import {Condition, IConditionSource} from './conditions/condition';
 
 /**
  * Unpacks a zip file into a scenario object asynchronously
@@ -12,7 +13,7 @@ import {buildValueConstraint, IValueConstraintSource} from "./constraints/value-
 export async function unpack(scenarioZip: AdmZip): Promise<any> {
     let scenario: Scenario;
     let board: Board;
-    let test: any;
+    let test: Condition;
 
     // Used to allow unpacking errors to reference the current file that is being processed during unpacking
     let currentFile: string = '';
@@ -30,10 +31,11 @@ export async function unpack(scenarioZip: AdmZip): Promise<any> {
 
         // Test data
         currentFile = 'test.json';
-        let testSource = getEntryJSON(scenarioZip, currentFile) as unknown as IValueConstraintSource;
-        test = await buildValueConstraint(testSource);
-    }
-    catch (e) {
+        let testSource = getEntryJSON(scenarioZip, currentFile) as unknown as IConditionSource;
+        test = await buildCondition(testSource);
+
+        console.log(test.check());
+    } catch (e) {
         if (e instanceof UnpackingError)
             throw e.withContext(currentFile);
         throw e;
@@ -60,8 +62,7 @@ function getEntryJSON(zip: AdmZip, name: string): JSON {
     let json: JSON;
     try {
         json = JSON.parse(data.toString());
-    }
-    catch (e) {
+    } catch (e) {
         if (e instanceof SyntaxError)
             throw new UnpackingError(e.message).withContext(name);
         throw e;
@@ -72,21 +73,35 @@ function getEntryJSON(zip: AdmZip, name: string): JSON {
 }
 
 /**
- * UnpackingError class thrown when an error is encountered during the scenario unpacking process
+ * UnpackingError - Server Version
+ *
+ * Thrown when an error is encountered during the scenario unpacking process
  */
 export class UnpackingError extends Error {
-    private _context: string | undefined;
-
     public constructor(message: string) {
         super(message);
         Object.setPrototypeOf(this, UnpackingError.prototype);
     }
+
+    private _context: string | undefined;
 
     /**
      * Getter function with formatting for context
      */
     public get context(): string | undefined {
         return `An error occurred whilst parsing ${this._context}`;
+    }
+
+    /**
+     * Factory function to generate UnpackingError based on `Joi.ValidationError`
+     *
+     * Useful for Joi validation
+     *
+     * @param err Joi validation error
+     * @returns UnpackingError -- Created UnpackingError
+     */
+    public static fromJoiValidationError(err: Joi.ValidationError): UnpackingError {
+        return new UnpackingError(err.message.toString());
     }
 
     /**
@@ -97,17 +112,5 @@ export class UnpackingError extends Error {
     public withContext(context: string): UnpackingError {
         this._context = context;
         return this;
-    }
-
-    /**
-     * Factory function to generate UnpackingError based on `Joi.ValidationError`
-     *
-     * Useful for Joi Validation
-     *
-     * @param err Joi validation error
-     * @returns UnpackingError -- Created UnpackingError
-     */
-    public static fromJoiValidationError(err: Joi.ValidationError): UnpackingError {
-        return new UnpackingError(err.message.toString());
     }
 }

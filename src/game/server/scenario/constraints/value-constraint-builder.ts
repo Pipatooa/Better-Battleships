@@ -28,7 +28,6 @@ export async function buildValueConstraint(valueConstraintSource: IValueConstrai
         await valueConstraintSchema.validateAsync(valueConstraintSource);
     }
     catch (e) {
-        console.log(JSON.stringify(e));
         if (e instanceof Joi.ValidationError)
             throw UnpackingError.fromJoiValidationError(e);
     }
