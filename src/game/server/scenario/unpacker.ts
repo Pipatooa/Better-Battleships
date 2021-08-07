@@ -1,9 +1,9 @@
 import AdmZip from 'adm-zip';
 import Joi from 'joi';
 import {Board, IBoardSource} from './board';
-import {Condition, IConditionSource} from './conditions/condition';
-import {buildCondition} from './conditions/condition-builder';
 import {IScenarioSource, Scenario} from './scenario';
+import {IValueSource, Value} from './values/value';
+import {buildValue} from './values/value-builder';
 
 /**
  * Unpacks a zip file into a scenario object asynchronously
@@ -13,7 +13,7 @@ import {IScenarioSource, Scenario} from './scenario';
 export async function unpack(scenarioZip: AdmZip): Promise<any> {
     let scenario: Scenario;
     let board: Board;
-    let test: Condition;
+    let test: Value;
 
     // Used to allow unpacking errors to reference the current file that is being processed during unpacking
     let currentFile: string = '';
@@ -31,10 +31,10 @@ export async function unpack(scenarioZip: AdmZip): Promise<any> {
 
         // Test data
         currentFile = 'test.json';
-        let testSource = getEntryJSON(scenarioZip, currentFile) as unknown as IConditionSource;
-        test = await buildCondition(testSource);
+        let testSource = getEntryJSON(scenarioZip, currentFile) as unknown as IValueSource;
+        test = await buildValue(testSource);
 
-        console.log(test.check());
+        console.log([test.evaluate(), test.evaluate(), test.evaluate(), test.evaluate(), test.evaluate()]);
     } catch (e) {
         if (e instanceof UnpackingError)
             throw e.withContext(currentFile);

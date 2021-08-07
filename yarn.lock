@@ -649,7 +649,7 @@ __metadata:
     handlebars: ^4.7.7
     http-errors: ^1.8.0
     isomorphic-ws: ^4.0.1
-    joi: ^17.4.1
+    joi: ^17.4.2
     jquery: ^3.6.0
     mini-css-extract-plugin: ^2.1.0
     morgan: ^1.10.0
@@ -1902,7 +1902,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"joi@npm:^17.4.1":
+"joi@npm:^17.4.2":
   version: 17.4.2
   resolution: "joi@npm:17.4.2"
   dependencies:
