@@ -1,6 +1,6 @@
-import {ValueConstraint} from "./value-constaint";
-import Joi from "joi";
-import {UnpackingError} from "../unpacker";
+import Joi from 'joi';
+import {UnpackingError} from '../unpacker';
+import {ValueConstraint} from './value-constaint';
 
 /**
  * ValueEqualConstraint - Server Version
@@ -12,11 +12,34 @@ import {UnpackingError} from "../unpacker";
 export class ValueEqualConstraint extends ValueConstraint {
 
     /**
-     * Constructor for ValueEqualConstraint
+     * ValueEqualConstraint constructor
      * @param target Value to check against
      */
-    public constructor(public readonly target: number) {
+    protected constructor(public readonly target: number) {
         super();
+    }
+
+    /**
+     * Factory function to generate ValueEqualConstraint from JSON scenario data
+     * @param valueEqualConstraintSource JSON data for ValueEqualConstraint
+     * @param skipSchemaCheck When true, skips schema validation step
+     * @returns valueEqualConstraint -- Created ValueEqualConstraint object
+     */
+    public static async fromSource(valueEqualConstraintSource: IValueEqualConstraintSource, skipSchemaCheck: boolean = false): Promise<ValueEqualConstraint> {
+
+        // Validate JSON data against schema
+        if (!skipSchemaCheck) {
+            try {
+                valueEqualConstraintSource = await valueEqualConstraintSchema.validateAsync(valueEqualConstraintSource);
+            } catch (e) {
+                if (e instanceof Joi.ValidationError)
+                    throw UnpackingError.fromJoiValidationError(e);
+                throw e;
+            }
+        }
+
+        // Return created ValueEqualConstraint object
+        return new ValueEqualConstraint(valueEqualConstraintSource.exactly);
     }
 
     /**
@@ -36,55 +59,13 @@ export class ValueEqualConstraint extends ValueConstraint {
     public constrain(value: number): number {
         return this.target;
     }
-
-    /**
-     * Checks whether JSON data matches the schema for this object
-     * @param valueEqualConstraintSource JSON data to verify
-     * @returns boolean -- Whether or not the JSON data matched the schema
-     */
-    public static async checkSource(valueEqualConstraintSource: IValueEqualConstraintSource): Promise<boolean> {
-
-        // Validate JSON data against schema
-        try {
-            await valueEqualConstraintSchema.validateAsync(valueEqualConstraintSource);
-        }
-        catch (e) {
-            if (e instanceof Joi.ValidationError)
-                return false;
-            throw e;
-        }
-
-        // If no error occurred, JSON matched schema
-        return true;
-    }
-
-    /**
-     * Factory function to generate value equal constraint from JSON scenario data
-     * @param valueEqualConstraintSource - JSON data for value equal constraint
-     * @returns valueEqualConstraint -- Created ValueEqualConstraint object
-     */
-    public static async fromSource(valueEqualConstraintSource: IValueEqualConstraintSource): Promise<ValueEqualConstraint> {
-
-        // Validate JSON data against schema
-        try {
-            await valueEqualConstraintSchema.validateAsync(valueEqualConstraintSource);
-        }
-        catch (e) {
-            if (e instanceof Joi.ValidationError)
-                throw UnpackingError.fromJoiValidationError(e);
-            throw e;
-        }
-
-        // Return scenario object
-        return new ValueEqualConstraint(valueEqualConstraintSource.exactly);
-    }
 }
 
 /**
- * Value equal constraint interface reflecting scenario schema
+ * JSON source interface reflecting schema
  */
 export interface IValueEqualConstraintSource {
-    exactly: number
+    exactly: number;
 }
 
 /**
@@ -92,4 +73,4 @@ export interface IValueEqualConstraintSource {
  */
 export const valueEqualConstraintSchema = Joi.object({
     exactly: Joi.number().required()
-})
+});

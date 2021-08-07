@@ -1,15 +1,16 @@
-import {UnpackingError} from "./unpacker";
-import Joi from "joi";
-import {IDescriptor} from "../../shared/i-descriptor";
+import Joi from 'joi';
+import {IDescriptor} from '../../shared/i-descriptor';
+import {UnpackingError} from './unpacker';
 
 /**
- * Descriptor Class - Server Version
+ * Descriptor - Server Version
  *
  * Stores a name and a description for another object
  */
 export class Descriptor implements IDescriptor {
     constructor(public readonly name: string,
-                public readonly description: string) { }
+                public readonly description: string) {
+    }
 
     /**
      * Factory function to generate descriptor from JSON scenario data
@@ -20,20 +21,20 @@ export class Descriptor implements IDescriptor {
 
         // Validate JSON data against schema
         try {
-            await descriptorSchema.validateAsync(descriptorSource);
-        }
-        catch (e) {
+            descriptorSource = await descriptorSchema.validateAsync(descriptorSource);
+        } catch (e) {
             if (e instanceof Joi.ValidationError)
                 throw UnpackingError.fromJoiValidationError(e);
+            throw e;
         }
 
-        // Return descriptor object
+        // Return created Descriptor object
         return new Descriptor(descriptorSource.name, descriptorSource.description);
     }
 }
 
 /**
- * Descriptor interface reflecting schema
+ * JSON source interface reflecting schema
  */
 export type IDescriptorSource = IDescriptor;
 

@@ -1,6 +1,6 @@
-import {ValueConstraint} from "./value-constaint";
-import Joi from "joi";
-import {UnpackingError} from "../unpacker";
+import Joi from 'joi';
+import {UnpackingError} from '../unpacker';
+import {ValueConstraint} from './value-constaint';
 
 /**
  * ValueAtLeastConstraint - Server Version
@@ -12,11 +12,34 @@ import {UnpackingError} from "../unpacker";
 export class ValueAtLeastConstraint extends ValueConstraint {
 
     /**
-     * Constructor for ValueAtLeastConstraint
+     * ValueAtLeastConstraint constructor
      * @param min Minimum value that other values can hold to meet this constraint
      */
-    public constructor(public readonly min: number) {
+    protected constructor(public readonly min: number) {
         super();
+    }
+
+    /**
+     * Factory function to generate ValueAtLeastConstraint from JSON scenario data
+     * @param valueAtLeastConstraintSource JSON data for ValueAtLeastConstraint
+     * @param skipSchemaCheck When true, skips schema validation step
+     * @returns valueAtLeastConstraint -- Created ValueAtLeastConstraint object
+     */
+    public static async fromSource(valueAtLeastConstraintSource: IValueAtLeastConstraintSource, skipSchemaCheck: boolean = false) {
+
+        // Validate JSON data against schema
+        if (!skipSchemaCheck) {
+            try {
+                valueAtLeastConstraintSource = await valueAtLeastConstraintSchema.validateAsync(valueAtLeastConstraintSource);
+            } catch (e) {
+                if (e instanceof Joi.ValidationError)
+                    throw UnpackingError.fromJoiValidationError(e);
+                throw e;
+            }
+        }
+
+        // Return created ValueAtLeastConstraint object
+        return new ValueAtLeastConstraint(valueAtLeastConstraintSource.min);
     }
 
     /**
@@ -36,55 +59,13 @@ export class ValueAtLeastConstraint extends ValueConstraint {
     public constrain(value: number): number {
         return Math.max(this.min, value);
     }
-
-    /**
-     * Checks whether JSON data matches the schema for this object
-     * @param valueAtLeastConstraintSource JSON data to verify
-     * @returns boolean -- Whether or not the JSON data matched the schema
-     */
-    public static async checkSource(valueAtLeastConstraintSource: IValueAtLeastConstraintSource): Promise<boolean> {
-
-        // Validate JSON data against schema
-        try {
-            await valueAtLeastConstraintSchema.validateAsync(valueAtLeastConstraintSource);
-        }
-        catch (e) {
-            if (e instanceof Joi.ValidationError)
-                return false;
-            throw e;
-        }
-
-        // If no error occurred, JSON matched schema
-        return true;
-    }
-
-    /**
-     * Factory function to generate value at least constraint from JSON scenario data
-     * @param valueAtLeastConstraintSource - JSON data for value at least constraint
-     * @returns valueAtLeastConstraint -- Created ValueAtLeastConstraint object
-     */
-    public static async fromSource(valueAtLeastConstraintSource: IValueAtLeastConstraintSource) {
-
-        // Validate JSON data against schema
-        try {
-            await valueAtLeastConstraintSchema.validateAsync(valueAtLeastConstraintSource);
-        }
-        catch (e) {
-            if (e instanceof Joi.ValidationError)
-                throw UnpackingError.fromJoiValidationError(e);
-            throw e;
-        }
-
-        // Return scenario object
-        return new ValueAtLeastConstraint(valueAtLeastConstraintSource.min);
-    }
 }
 
 /**
- * Value equal constraint interface reflecting scenario schema
+ * JSON source interface reflecting schema
  */
 export interface IValueAtLeastConstraintSource {
-    min: number
+    min: number;
 }
 
 /**
@@ -92,4 +73,4 @@ export interface IValueAtLeastConstraintSource {
  */
 export const valueAtLeastConstraintSchema = Joi.object({
     min: Joi.number().required()
-})
+});

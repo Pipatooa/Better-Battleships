@@ -1,4 +1,4 @@
-import {bindFileDrop} from "./filedrop";
+import {bindFileDrop} from './filedrop';
 /*import {Grid, tileTypeA} from "../shared/grid";
 import {Renderer} from "./canvas/renderer";
 import {GridRenderer} from "./canvas/gridRenderer";

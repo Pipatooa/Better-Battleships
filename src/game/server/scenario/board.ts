@@ -1,32 +1,33 @@
-import {Tile} from "./tile";
-import {TileGenerator, tileGeneratorSchema} from "./tile-generator";
-import {UnpackingError} from "./unpacker";
-import Joi from "joi";
-import {TileType, tileTypeSchema} from "./tiletype";
+import Joi from 'joi';
+import {Tile} from './tile';
+import {TileGenerator, tileGeneratorSchema} from './tile-generator';
+import {TileType, tileTypeSchema} from './tiletype';
+import {UnpackingError} from './unpacker';
 
 /**
- * Board Class - Server Version
+ * Board - Server Version
  *
  * Stores all information about the tiles of the board and objects on the board
  */
 export class Board {
     public constructor(public readonly tiles: Tile[][],
-                       public readonly generators: TileGenerator[]) { }
+                       public readonly generators: TileGenerator[]) {
+    }
 
     /**
      * Factory function to generate board from JSON scenario data
-     * @param boardSource - JSON data from 'board.json'
+     * @param boardSource JSON data from 'board.json'
      * @returns board -- Created Board object
      */
     public static async fromSource(boardSource: IBoardSource): Promise<Board> {
 
         // Validate JSON against schema
         try {
-            await boardSchema.validateAsync(boardSource);
-        }
-        catch (e) {
+            boardSource = await boardSchema.validateAsync(boardSource);
+        } catch (e) {
             if (e instanceof Joi.ValidationError)
                 throw UnpackingError.fromJoiValidationError(e);
+            throw e;
         }
 
         // Unpack palette data
@@ -56,7 +57,7 @@ export class Board {
 
                 // If character did not match any tile type within the palette
                 if (!(c in palette))
-                    throw new UnpackingError(`Could not find tile of type '${c}' in palette at tiles[${y}][${x}] (x=${boardSource.size[0]-x},y=${boardSource.size[1]-y})`)
+                    throw new UnpackingError(`Could not find tile of type '${c}' in palette at tiles[${y}][${x}] (x=${boardSource.size[0] - x},y=${boardSource.size[1] - y})`);
 
                 // Create and store new tile created from tile type
                 let tileType = palette[c];
@@ -67,13 +68,13 @@ export class Board {
             }
         });
 
-        // Return board object
+        // Return created Board object
         return new Board(tiles, []);
     }
 }
 
 /**
- * Board interface reflecting schema
+ * JSON source interface reflecting schema
  */
 export interface IBoardSource {
     size: [x: number, y: number];
@@ -91,7 +92,7 @@ export const boardSchema = Joi.object({
     ).length(2).required(),
     palette: Joi.object().pattern(Joi.string().length(1), tileTypeSchema).required(),
     tiles: Joi.array().items(
-        Joi.string(),
+        Joi.string()
     ).required(),
     generators: Joi.array().items(tileGeneratorSchema).required()
 });

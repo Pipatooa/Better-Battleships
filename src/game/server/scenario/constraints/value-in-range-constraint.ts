@@ -1,8 +1,7 @@
-import {ValueConstraint} from "./value-constaint";
-import Joi from "joi";
-import {UnpackingError} from "../unpacker";
-import {clamp} from "../../../shared/utility";
-import {IValueAtMostConstraintSource, valueAtMostConstraintSchema} from "./value-at-most-constraint";
+import Joi from 'joi';
+import {clamp} from '../../../shared/utility';
+import {UnpackingError} from '../unpacker';
+import {ValueConstraint} from './value-constaint';
 
 /**
  * ValueInRangeConstraint - Server Version
@@ -15,13 +14,36 @@ import {IValueAtMostConstraintSource, valueAtMostConstraintSchema} from "./value
 export class ValueInRangeConstraint extends ValueConstraint {
 
     /**
-     * Constructor for ValueInRangeConstraint
+     * ValueInRangeConstraint constructor
      * @param min Minimum value that other values can hold to meet this constraint
      * @param max Maximum value that other values can hold to meet this constraint
      */
-    public constructor(public readonly min: number,
-                       public readonly max: number) {
+    protected constructor(public readonly min: number,
+                          public readonly max: number) {
         super();
+    }
+
+    /**
+     * Factory function to generate ValueInRangeConstraint from JSON scenario data
+     * @param valueInRangeConstraintSource JSON data for ValueInRangeConstraint
+     * @param skipSchemaCheck When true, skips schema validation step
+     * @returns valueInRangeConstraint -- Created ValueInRangeConstraint object
+     */
+    public static async fromSource(valueInRangeConstraintSource: IValueInRangeConstraintSource, skipSchemaCheck: boolean = false) {
+
+        // Validate JSON data against schema
+        if (!skipSchemaCheck) {
+            try {
+                await valueInRangeConstraintSchema.validateAsync(valueInRangeConstraintSource);
+            } catch (e) {
+                if (e instanceof Joi.ValidationError)
+                    throw UnpackingError.fromJoiValidationError(e);
+                throw e;
+            }
+        }
+
+        // Return created ValueInRangeConstraint object
+        return new ValueInRangeConstraint(valueInRangeConstraintSource.min, valueInRangeConstraintSource.max);
     }
 
     /**
@@ -41,52 +63,10 @@ export class ValueInRangeConstraint extends ValueConstraint {
     public constrain(value: number): number {
         return clamp(value, this.min, this.max);
     }
-
-    /**
-     * Checks whether JSON data matches the schema for this object
-     * @param valueInRangeConstraintSource JSON data to verify
-     * @returns boolean -- Whether or not the JSON data matched the schema
-     */
-    public static async checkSource(valueInRangeConstraintSource: IValueInRangeConstraintSource): Promise<boolean> {
-
-        // Validate JSON data against schema
-        try {
-            await valueInRangeConstraintSchema.validateAsync(valueInRangeConstraintSource);
-        }
-        catch (e) {
-            if (e instanceof Joi.ValidationError)
-                return false;
-            throw e;
-        }
-
-        // If no error occurred, JSON matched schema
-        return true;
-    }
-
-    /**
-     * Factory function to generate value in range constraint from JSON scenario data
-     * @param valueInRangeConstraintSource - JSON data for value in range constraint
-     * @returns valueInRangeConstraint -- Created ValueInRangeConstraint object
-     */
-    public static async fromSource(valueInRangeConstraintSource: IValueInRangeConstraintSource) {
-
-        // Validate JSON data against schema
-        try {
-            await valueInRangeConstraintSchema.validateAsync(valueInRangeConstraintSource);
-        }
-        catch (e) {
-            if (e instanceof Joi.ValidationError)
-                throw UnpackingError.fromJoiValidationError(e);
-            throw e;
-        }
-
-        // Return scenario object
-        return new ValueInRangeConstraint(valueInRangeConstraintSource.min, valueInRangeConstraintSource.max);
-    }
 }
 
 /**
- * Value equal constraint interface reflecting scenario schema
+ * JSON source interface reflecting schema
  */
 export interface IValueInRangeConstraintSource {
     min: number,
@@ -99,4 +79,4 @@ export interface IValueInRangeConstraintSource {
 export const valueInRangeConstraintSchema = Joi.object({
     min: Joi.number().required(),
     max: Joi.number().min(Joi.ref('min')).required()
-})
+});

@@ -1,6 +1,6 @@
-import {ValueConstraint} from "./value-constaint";
-import Joi from "joi";
-import {UnpackingError} from "../unpacker";
+import Joi from 'joi';
+import {UnpackingError} from '../unpacker';
+import {ValueConstraint} from './value-constaint';
 
 /**
  * ValueAtMostConstraint - Server Version
@@ -12,11 +12,34 @@ import {UnpackingError} from "../unpacker";
 export class ValueAtMostConstraint extends ValueConstraint {
 
     /**
-     * Constructor for ValueAtMostConstraint
+     * ValueAtMostConstraint constructor
      * @param max Maximum value that other values can hold to meet this constraint
      */
-    public constructor(public readonly max: number) {
+    protected constructor(public readonly max: number) {
         super();
+    }
+
+    /**
+     * Factory function to generate ValueAtMostConstraint from JSON scenario data
+     * @param valueAtMostConstraintSource JSON data for ValueAtMostConstraint
+     * @param skipSchemaCheck When true, skips schema validation step
+     * @returns valueAtMostConstraint -- Created ValueAtMostConstraint object
+     */
+    public static async fromSource(valueAtMostConstraintSource: IValueAtMostConstraintSource, skipSchemaCheck: boolean = false) {
+
+        // Validate JSON data against schema
+        if (!skipSchemaCheck) {
+            try {
+                valueAtMostConstraintSource = await valueAtMostConstraintSchema.validateAsync(valueAtMostConstraintSource);
+            } catch (e) {
+                if (e instanceof Joi.ValidationError)
+                    throw UnpackingError.fromJoiValidationError(e);
+                throw e;
+            }
+        }
+
+        // Return created ValueAtMostConstraint object
+        return new ValueAtMostConstraint(valueAtMostConstraintSource.max);
     }
 
     /**
@@ -36,55 +59,13 @@ export class ValueAtMostConstraint extends ValueConstraint {
     public constrain(value: number): number {
         return Math.min(this.max, value);
     }
-
-    /**
-     * Checks whether JSON data matches the schema for this object
-     * @param valueAtMostConstraintSource JSON data to verify
-     * @returns boolean -- Whether or not the JSON data matched the schema
-     */
-    public static async checkSource(valueAtMostConstraintSource: IValueAtMostConstraintSource): Promise<boolean> {
-
-        // Validate JSON data against schema
-        try {
-            await valueAtMostConstraintSchema.validateAsync(valueAtMostConstraintSource);
-        }
-        catch (e) {
-            if (e instanceof Joi.ValidationError)
-                return false;
-            throw e;
-        }
-
-        // If no error occurred, JSON matched schema
-        return true;
-    }
-
-    /**
-     * Factory function to generate value at most constraint from JSON scenario data
-     * @param valueAtMostConstraintSource - JSON data for value at most constraint
-     * @returns valueAtMostConstraint -- Created ValueAtMostConstraint object
-     */
-    public static async fromSource(valueAtMostConstraintSource: IValueAtMostConstraintSource) {
-
-        // Validate JSON data against schema
-        try {
-            await valueAtMostConstraintSchema.validateAsync(valueAtMostConstraintSource);
-        }
-        catch (e) {
-            if (e instanceof Joi.ValidationError)
-                throw UnpackingError.fromJoiValidationError(e);
-            throw e;
-        }
-
-        // Return scenario object
-        return new ValueAtMostConstraint(valueAtMostConstraintSource.max);
-    }
 }
 
 /**
- * Value equal constraint interface reflecting scenario schema
+ * JSON source interface reflecting schema
  */
 export interface IValueAtMostConstraintSource {
-    max: number
+    max: number;
 }
 
 /**
@@ -92,4 +73,4 @@ export interface IValueAtMostConstraintSource {
  */
 export const valueAtMostConstraintSchema = Joi.object({
     max: Joi.number().required()
-})
+});

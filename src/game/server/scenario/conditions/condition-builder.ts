@@ -1,10 +1,10 @@
-import {Condition, conditionSchema, IConditionSource} from "./condition";
-import {UnpackingError} from "../unpacker";
-import Joi from "joi";
-import {ConditionAny} from "./condition-any";
-import {ConditionAll} from "./condition-all";
-import {ConditionSome} from "./condition-some";
-import {ConditionTest} from "./condition-test";
+import Joi from 'joi';
+import {UnpackingError} from '../unpacker';
+import {Condition, conditionSchema, IConditionSource} from './condition';
+import {ConditionAll} from './condition-all';
+import {ConditionAny} from './condition-any';
+import {ConditionSome} from './condition-some';
+import {ConditionTest} from './condition-test';
 
 /**
  * Factory function to generate Condition from JSON scenario data
@@ -21,6 +21,7 @@ export async function buildCondition(conditionSource: IConditionSource, skipSche
         } catch (e) {
             if (e instanceof Joi.ValidationError)
                 throw UnpackingError.fromJoiValidationError(e);
+            throw e;
         }
     }
 
@@ -28,17 +29,17 @@ export async function buildCondition(conditionSource: IConditionSource, skipSche
 
     // Call appropriate factory function based on condition type
     switch (conditionSource.type) {
-        case "any":
-            condition = await ConditionAny.fromSource(conditionSource);
+        case 'any':
+            condition = await ConditionAny.fromSource(conditionSource, true);
             break;
-        case "all":
-            condition = await ConditionAll.fromSource(conditionSource);
+        case 'all':
+            condition = await ConditionAll.fromSource(conditionSource, true);
             break;
-        case "some":
-            condition = await ConditionSome.fromSource(conditionSource);
+        case 'some':
+            condition = await ConditionSome.fromSource(conditionSource, true);
             break;
-        case "test":
-            condition = await ConditionTest.fromSource(conditionSource);
+        case 'test':
+            condition = await ConditionTest.fromSource(conditionSource, true);
     }
 
     // Return created Condition object

@@ -1,4 +1,4 @@
-import WebSocket, {CloseEvent, MessageEvent, OpenEvent} from "isomorphic-ws";
+import WebSocket, {CloseEvent, MessageEvent, OpenEvent} from 'isomorphic-ws';
 
 let socket = new WebSocket(`ws://${location.hostname}:8080/game`);
 let a: OpenEvent | null = null;

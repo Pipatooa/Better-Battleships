@@ -1,9 +1,9 @@
-import {ConditionMultiple, conditionMultipleSchema, IConditionMultipleSource} from "./condition-multiple";
-import {Condition} from "./condition";
-import {IValueConstraintSource, ValueConstraint, valueConstraintSchema} from "../constraints/value-constaint";
-import {buildValueConstraint} from "../constraints/value-constraint-builder";
-import {UnpackingError} from "../unpacker";
-import Joi from "joi";
+import Joi from 'joi';
+import {IValueConstraintSource, ValueConstraint, valueConstraintSchema} from '../constraints/value-constaint';
+import {buildValueConstraint} from '../constraints/value-constraint-builder';
+import {UnpackingError} from '../unpacker';
+import {Condition} from './condition';
+import {ConditionMultiple, conditionMultipleSchema, IConditionMultipleSource} from './condition-multiple';
 
 /**
  * ConditionSome - Server Version
@@ -64,6 +64,7 @@ export class ConditionSome extends ConditionMultiple {
             } catch (e) {
                 if (e instanceof Joi.ValidationError)
                     throw UnpackingError.fromJoiValidationError(e);
+                throw e;
             }
         }
 
@@ -71,7 +72,7 @@ export class ConditionSome extends ConditionMultiple {
         let subConditions: Condition[] = await ConditionMultiple.getSubConditions(conditionSomeSource.subConditions);
 
         // Get value constraint
-        let valueConstraint: ValueConstraint = await buildValueConstraint(conditionSomeSource.valueConstraint);
+        let valueConstraint: ValueConstraint = await buildValueConstraint(conditionSomeSource.valueConstraint, true);
 
         // Return created ConditionSome object
         return new ConditionSome(subConditions, valueConstraint, conditionSomeSource.inverted);
@@ -82,7 +83,7 @@ export class ConditionSome extends ConditionMultiple {
  * JSON source interface reflecting schema
  */
 export interface IConditionSomeSource extends IConditionMultipleSource {
-    type: "some",
+    type: 'some',
     valueConstraint: IValueConstraintSource
 }
 

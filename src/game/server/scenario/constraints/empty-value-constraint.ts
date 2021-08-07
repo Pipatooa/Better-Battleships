@@ -1,4 +1,4 @@
-import {ValueConstraint} from "./value-constaint";
+import {ValueConstraint} from './value-constaint';
 
 /**
  * EmptyValueConstraint - Server Version

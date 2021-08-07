@@ -1,8 +1,8 @@
-import express from "express";
+import AdmZip from 'adm-zip';
+import express from 'express';
 import formidable, {FileJSON} from 'formidable';
-import fs from "fs";
-import AdmZip from "adm-zip";
-import {unpack, UnpackingError} from "../../game/server/scenario/unpacker";
+import fs from 'fs';
+import {unpack, UnpackingError} from '../../game/server/scenario/unpacker';
 
 const router = express.Router();
 
@@ -32,8 +32,7 @@ router.post('/', async (req, res) => {
             const zip = new AdmZip(file.path);
             let res = await unpack(zip);
             console.log(0, res);
-        }
-        catch (e) {
+        } catch (e) {
 
             // If there was an unpacking error, return a JSON object with details
             if (e instanceof UnpackingError) {

@@ -1,7 +1,7 @@
-import {ConditionMultiple, conditionMultipleSchema, IConditionMultipleSource} from "./condition-multiple";
-import {UnpackingError} from "../unpacker";
-import {Condition} from "./condition";
-import Joi from "joi";
+import Joi from 'joi';
+import {UnpackingError} from '../unpacker';
+import {Condition} from './condition';
+import {ConditionMultiple, conditionMultipleSchema, IConditionMultipleSource} from './condition-multiple';
 
 /**
  * ConditionAny - Server Version
@@ -45,6 +45,7 @@ export class ConditionAny extends ConditionMultiple {
             } catch (e) {
                 if (e instanceof Joi.ValidationError)
                     throw UnpackingError.fromJoiValidationError(e);
+                throw e;
             }
         }
 
@@ -60,7 +61,7 @@ export class ConditionAny extends ConditionMultiple {
  * JSON source interface reflecting schema
  */
 export interface IConditionAnySource extends IConditionMultipleSource {
-    type: "any";
+    type: 'any';
 }
 
 /**

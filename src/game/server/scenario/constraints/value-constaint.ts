@@ -1,3 +1,9 @@
+import Joi from 'joi';
+import {IValueAtLeastConstraintSource} from './value-at-least-constraint';
+import {IValueAtMostConstraintSource} from './value-at-most-constraint';
+import {IValueEqualConstraintSource} from './value-equal-constraint';
+import {IValueInRangeConstraintSource} from './value-in-range-constraint';
+
 /**
  * ValueConstraint - Server Version
  *
@@ -19,3 +25,21 @@ export abstract class ValueConstraint {
      */
     abstract constrain(value: number): number;
 }
+
+/**
+ * JSON source interface reflecting schema
+ */
+export type IValueConstraintSource =
+    IValueEqualConstraintSource |
+    IValueInRangeConstraintSource |
+    IValueAtLeastConstraintSource |
+    IValueAtMostConstraintSource;
+
+/**
+ * Schema for validating source JSON data
+ */
+export const valueConstraintSchema = Joi.object({
+    exactly: Joi.number(),
+    min: Joi.number(),
+    max: Joi.number().min(Joi.ref('min'))
+}).without('exactly', ['min', 'max']);

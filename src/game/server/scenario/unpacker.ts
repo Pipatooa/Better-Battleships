@@ -1,9 +1,9 @@
-import Joi from "joi";
-import AdmZip from "adm-zip";
-import {IScenarioSource, Scenario} from "./scenario";
-import {Board, IBoardSource} from "./board";
-import {buildCondition} from "./conditions/condition-builder";
+import AdmZip from 'adm-zip';
+import Joi from 'joi';
+import {Board, IBoardSource} from './board';
 import {Condition, IConditionSource} from './conditions/condition';
+import {buildCondition} from './conditions/condition-builder';
+import {IScenarioSource, Scenario} from './scenario';
 
 /**
  * Unpacks a zip file into a scenario object asynchronously

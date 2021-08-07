@@ -1,9 +1,9 @@
-import DropEvent = JQuery.DropEvent;
-import DragEnterEvent = JQuery.DragEnterEvent;
-import DragOverEvent = JQuery.DragOverEvent;
-import DragExitEvent = JQuery.DragExitEvent;
-import ClickEvent = JQuery.ClickEvent;
 import ChangeEvent = JQuery.ChangeEvent;
+import ClickEvent = JQuery.ClickEvent;
+import DragEnterEvent = JQuery.DragEnterEvent;
+import DragExitEvent = JQuery.DragExitEvent;
+import DragOverEvent = JQuery.DragOverEvent;
+import DropEvent = JQuery.DropEvent;
 
 const fileDrop = $('#file-drop');
 const fileSelect = $('<input type="file" id="file-select" style="display: none;">');
@@ -56,11 +56,11 @@ function handleFile(file: File) {
 
     let formData = new FormData();
     formData.append('file', file);
-    formData.append('test', "hello");
+    formData.append('test', 'hello');
 
     fetch('/game/create', {
         method: 'POST',
-        body: formData,
+        body: formData
     }).then(r => {
         console.log(r);
     });

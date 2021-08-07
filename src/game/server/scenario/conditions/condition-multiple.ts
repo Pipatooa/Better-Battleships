@@ -1,6 +1,6 @@
-import {baseConditionSchema, Condition, conditionSchema, IBaseConditionSource, IConditionSource} from "./condition";
-import Joi from "joi";
-import {buildCondition} from "./condition-builder";
+import Joi from 'joi';
+import {baseConditionSchema, Condition, conditionSchema, IBaseConditionSource, IConditionSource} from './condition';
+import {buildCondition} from './condition-builder';
 
 /**
  * ConditionMultiple - Server Version
@@ -35,7 +35,7 @@ export abstract class ConditionMultiple extends Condition {
         for (let i = 0; i < subConditionSources.length; i++) {
 
             // Build condition from sub condition source and add to list
-            let subCondition = await buildCondition(subConditionSources[i]);
+            let subCondition = await buildCondition(subConditionSources[i], true);
             subConditions.push(subCondition);
         }
 

@@ -1,76 +1,53 @@
-import {IValueEqualConstraintSource, ValueEqualConstraint} from "./value-equal-constraint";
-import {
-    IValueInRangeConstraintSource,
-    ValueInRangeConstraint,
-} from "./value-in-range-constraint";
-import {
-    IValueAtLeastConstraintSource,
-    ValueAtLeastConstraint,
-} from "./value-at-least-constraint";
-import {
-    IValueAtMostConstraintSource,
-    ValueAtMostConstraint,
-} from "./value-at-most-constraint";
-import {ValueConstraint} from "./value-constaint";
-import Joi from "joi";
-import {UnpackingError} from "../unpacker";
-import {EmptyValueConstraint} from "./empty-value-constraint";
+import Joi from 'joi';
+import {UnpackingError} from '../unpacker';
+import {EmptyValueConstraint} from './empty-value-constraint';
+import {ValueAtLeastConstraint} from './value-at-least-constraint';
+import {ValueAtMostConstraint} from './value-at-most-constraint';
+import {IValueConstraintSource, ValueConstraint, valueConstraintSchema} from './value-constaint';
+import {ValueEqualConstraint} from './value-equal-constraint';
+import {ValueInRangeConstraint} from './value-in-range-constraint';
 
 /**
  * Factory function to generate value constraint from JSON scenario data
- * @param valueConstraintSource - JSON data for value constraint
+ * @param valueConstraintSource JSON data for value constraint
+ * @param skipSchemaCheck When true, skips schema validation step
  * @returns valueConstraint -- Created ValueConstraint object
  */
-export async function buildValueConstraint(valueConstraintSource: IValueConstraintSource): Promise<ValueConstraint> {
+export async function buildValueConstraint(valueConstraintSource: IValueConstraintSource, skipSchemaCheck: boolean = false): Promise<ValueConstraint> {
 
     // Validate JSON data against schema
-    try {
-        await valueConstraintSchema.validateAsync(valueConstraintSource);
-    }
-    catch (e) {
-        if (e instanceof Joi.ValidationError)
-            throw UnpackingError.fromJoiValidationError(e);
+    if (!skipSchemaCheck) {
+        try {
+            await valueConstraintSchema.validateAsync(valueConstraintSource);
+        } catch (e) {
+            if (e instanceof Joi.ValidationError)
+                throw UnpackingError.fromJoiValidationError(e);
+            throw e;
+        }
     }
 
     let valueConstraint: ValueConstraint | undefined;
 
-    // Try creating empty value constraint
+    // Create EmptyValueConstraint if object is empty
     if (Object.keys(valueConstraintSource).length == 0)
         valueConstraint = new EmptyValueConstraint();
 
-    // Try creating value equal constraint
-    else if (await ValueEqualConstraint.checkSource(valueConstraintSource as IValueEqualConstraintSource))
-        valueConstraint = await ValueEqualConstraint.fromSource(valueConstraintSource as IValueEqualConstraintSource);
+    // Create ValueEqualConstraint
+    else if ('exactly' in valueConstraintSource)
+        valueConstraint = await ValueEqualConstraint.fromSource(valueConstraintSource, true);
 
-    // Try creating value in range constraint
-    else if (await ValueInRangeConstraint.checkSource(valueConstraintSource as IValueInRangeConstraintSource))
-        valueConstraint = await ValueInRangeConstraint.fromSource(valueConstraintSource as IValueInRangeConstraintSource);
+    // Create ValueInRangeConstraint
+    else if ('min' in valueConstraintSource && 'max' in valueConstraintSource)
+        valueConstraint = await ValueInRangeConstraint.fromSource(valueConstraintSource, true);
 
-    // Try creating value at least constraint
-    else if (await ValueAtLeastConstraint.checkSource(valueConstraintSource as IValueAtLeastConstraintSource))
-        valueConstraint = await ValueAtLeastConstraint.fromSource(valueConstraintSource as IValueAtLeastConstraintSource);
+    // Create ValueAtLeastConstraint
+    else if ('min' in valueConstraintSource)
+        valueConstraint = await ValueAtLeastConstraint.fromSource(valueConstraintSource, true);
 
-    // Try creating value at most constraint
+    // Create ValueAtMostConstraint
     else
-        valueConstraint = await ValueAtMostConstraint.fromSource(valueConstraintSource as IValueAtMostConstraintSource);
+        valueConstraint = await ValueAtMostConstraint.fromSource(valueConstraintSource, true);
 
     return valueConstraint;
 }
 
-/**
- * Value constraint interface reflecting scenario schema
- */
-export type IValueConstraintSource =
-    IValueEqualConstraintSource |
-    IValueInRangeConstraintSource |
-    IValueAtLeastConstraintSource |
-    IValueAtMostConstraintSource;
-
-/**
- * Schema for validating source JSON data
- */
-export const valueConstraintSchema = Joi.object({
-    exactly: Joi.number(),
-    min: Joi.number(),
-    max: Joi.number().min(Joi.ref('min'))
-}).without('exactly', ['min', 'max']);

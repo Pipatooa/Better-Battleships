@@ -1,6 +1,6 @@
-import {baseConditionSchema, Condition, IBaseConditionSource} from "./condition";
-import Joi from "joi";
-import {UnpackingError} from "../unpacker";
+import Joi from 'joi';
+import {UnpackingError} from '../unpacker';
+import {baseConditionSchema, Condition, IBaseConditionSource} from './condition';
 
 /**
  * ConditionTest - Server Version
@@ -44,6 +44,7 @@ export class ConditionTest extends Condition {
             } catch (e) {
                 if (e instanceof Joi.ValidationError)
                     throw UnpackingError.fromJoiValidationError(e);
+                throw e;
             }
         }
 

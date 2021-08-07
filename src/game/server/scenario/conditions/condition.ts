@@ -1,9 +1,9 @@
-import {IConditionAllSource} from "./condition-all";
-import Joi from "joi";
-import {IConditionAnySource} from "./condition-any";
-import {IConditionSomeSource} from "./condition-some";
-import {valueConstraintSchema} from "../constraints/value-constaint";
-import {IConditionTestSource} from "./condition-test";
+import Joi from 'joi';
+import {valueConstraintSchema} from '../constraints/value-constaint';
+import {IConditionAllSource} from './condition-all';
+import {IConditionAnySource} from './condition-any';
+import {IConditionSomeSource} from './condition-some';
+import {IConditionTestSource} from './condition-test';
 
 /**
  * Condition - Server Version
@@ -60,9 +60,9 @@ export const baseConditionSchema = Joi.object({
 export const conditionSchema = baseConditionSchema.keys({
     type: Joi.valid('any', 'all', 'some', 'test').required(),
     subConditions: Joi.array().items(Joi.link('#condition')).min(2).when('type',
-        {is: Joi.valid('any', 'all', 'some'), then: Joi.required(), otherwise: Joi.forbidden()}),
+        { is: Joi.valid('any', 'all', 'some'), then: Joi.required(), otherwise: Joi.forbidden() }),
     valueConstraint: valueConstraintSchema.when('type',
-        {is: 'some', then: Joi.required(), otherwise: Joi.forbidden()}),
+        { is: 'some', then: Joi.required(), otherwise: Joi.forbidden() }),
     result: Joi.boolean().when('type',
-        {is: 'test', then: Joi.required(), otherwise: Joi.forbidden()})
+        { is: 'test', then: Joi.required(), otherwise: Joi.forbidden() })
 }).id('condition');
