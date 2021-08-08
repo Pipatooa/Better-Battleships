@@ -1,4 +1,5 @@
 import Joi from 'joi';
+import {genericNameSchema} from './common/generic-name';
 import {Tile} from './tile';
 import {TileGenerator, tileGeneratorSchema} from './tile-generator';
 import {TileType, tileTypeSchema} from './tiletype';
@@ -91,7 +92,11 @@ export const boardSchema = Joi.object({
         Joi.number().integer().min(5)
     ).length(2).required(),
     palette: Joi.object().pattern(Joi.string().length(1), tileTypeSchema).required(),
+    regionPalette: Joi.object().pattern(Joi.string().length(1), Joi.array().items(genericNameSchema)).required(),
     tiles: Joi.array().items(
+        Joi.string()
+    ).required(),
+    regions: Joi.array().items(
         Joi.string()
     ).required(),
     generators: Joi.array().items(tileGeneratorSchema).required()

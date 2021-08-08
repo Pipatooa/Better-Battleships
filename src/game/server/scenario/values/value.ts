@@ -35,7 +35,7 @@ export type IValueSource =
     IValueRandomSource |
     IValueSumSource |
     IValueProductSource |
-    IValueRoundedSource
+    IValueRoundedSource;
 
 /**
  * Base schema for validating source JSON data

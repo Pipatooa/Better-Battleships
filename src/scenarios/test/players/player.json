@@ -1,0 +1,13 @@
+{
+  "ships": [
+    "battleship",
+    "cruiser"
+  ],
+  "attributes": {
+    "shipCount": {
+      "initialValue": 2,
+      "constraints": [],
+      "readonly": false
+    }
+  }
+}

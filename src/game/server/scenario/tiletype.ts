@@ -1,5 +1,5 @@
 import Joi from 'joi';
-import {Descriptor, descriptorSchema, IDescriptorSource} from './descriptor';
+import {Descriptor, descriptorSchema, IDescriptorSource} from './common/descriptor';
 import {UnpackingError} from './unpacker';
 
 /**

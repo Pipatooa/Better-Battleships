@@ -1,6 +1,6 @@
 import Joi from 'joi';
-import {IDescriptor} from '../../shared/i-descriptor';
-import {UnpackingError} from './unpacker';
+import {IDescriptor} from '../../../shared/i-descriptor';
+import {UnpackingError} from '../unpacker';
 
 /**
  * Descriptor - Server Version
@@ -36,7 +36,10 @@ export class Descriptor implements IDescriptor {
 /**
  * JSON source interface reflecting schema
  */
-export type IDescriptorSource = IDescriptor;
+export interface IDescriptorSource {
+    name: string;
+    description: string;
+}
 
 /**
  * Schema for validating source JSON data

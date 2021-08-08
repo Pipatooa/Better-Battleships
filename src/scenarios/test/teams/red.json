@@ -1,0 +1,22 @@
+{
+  "descriptor": {
+    "name": "Red Team",
+    "description": "This is the red team"
+  },
+  "color": "#FF0000",
+  "playerConfigs": [
+    [
+      { "playerPrototype": "player", "spawnRegion": "spawn-red-1" }
+    ],
+    [
+      { "playerPrototype": "player", "spawnRegion": "spawn-red-2" },
+      { "playerPrototype": "player", "spawnRegion": "spawn-red-3" }
+    ],
+    [
+      { "playerPrototype": "player", "spawnRegion": "spawn-red-1" },
+      { "playerPrototype": "player", "spawnRegion": "spawn-red-2" },
+      { "playerPrototype": "player", "spawnRegion": "spawn-red-3" }
+    ]
+  ],
+  "attributes": {}
+}

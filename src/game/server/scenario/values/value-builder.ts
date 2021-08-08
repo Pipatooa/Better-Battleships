@@ -24,8 +24,6 @@ export async function buildValue(valueSource: IValueSource, skipSchemaCheck: boo
                 throw UnpackingError.fromJoiValidationError(e);
             throw e;
         }
-
-        console.log(valueSource);
     }
 
     let value: Value;

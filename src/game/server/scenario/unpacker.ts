@@ -1,75 +1,118 @@
-import AdmZip from 'adm-zip';
+import AdmZip, {IZipEntry} from 'adm-zip';
 import Joi from 'joi';
-import {Board, IBoardSource} from './board';
 import {IScenarioSource, Scenario} from './scenario';
-import {IValueSource, Value} from './values/value';
-import {buildValue} from './values/value-builder';
+
+export type zipEntryMap = { [name: string]: IZipEntry };
 
 /**
  * Unpacks a zip file into a scenario object asynchronously
  * @param scenarioZip Zip file to extract
  * @returns scenario -- Scenario object
  */
-export async function unpack(scenarioZip: AdmZip): Promise<any> {
+export async function unpack(scenarioZip: AdmZip): Promise<Scenario> {
     let scenario: Scenario;
-    let board: Board;
-    let test: Value;
 
     // Used to allow unpacking errors to reference the current file that is being processed during unpacking
     let currentFile: string = '';
 
     try {
-        // Scenario data
-        currentFile = 'scenario.json';
-        let scenarioSource = getEntryJSON(scenarioZip, currentFile) as unknown as IScenarioSource;
-        scenario = await Scenario.fromSource(scenarioSource);
+        // Get a list of all zip entries
+        let zipEntries = scenarioZip.getEntries();
+
+        // Get entries for named objects
+        let abilityEntries: zipEntryMap = {};
+        let shipEntries: zipEntryMap = {};
+        let playerPrototypeEntries: zipEntryMap = {};
+        let teamEntries: zipEntryMap = {};
+
+        zipEntries.forEach((entry) => {
+
+            // Check entry regex
+            let result = /^(abilities|ships|players|teams)\/([a-z\-]+).json$/.exec(entry.entryName);
+            if (result == null)
+                return;
+
+            // Put entry in correct array of entries
+            switch (result[1]) {
+                case 'abilities':
+                    abilityEntries[result[2]] = entry;
+                    break;
+                case 'ships':
+                    shipEntries[result[2]] = entry;
+                    break;
+                case 'players':
+                    playerPrototypeEntries[result[2]] = entry;
+                    break;
+                case 'teams':
+                    teamEntries[result[2]] = entry;
+                    break;
+            }
+        });
 
         // Board data
         currentFile = 'board.json';
-        let boardSource = getEntryJSON(scenarioZip, currentFile) as unknown as IBoardSource;
-        board = await Board.fromSource(boardSource);
+        let boardEntry = await getEntryFromZip(scenarioZip, currentFile);
 
-        // Test data
-        currentFile = 'test.json';
-        let testSource = getEntryJSON(scenarioZip, currentFile) as unknown as IValueSource;
-        test = await buildValue(testSource);
-
-        console.log([test.evaluate(), test.evaluate(), test.evaluate(), test.evaluate(), test.evaluate()]);
+        // Scenario data
+        currentFile = 'scenario.json';
+        let scenarioEntry = await getEntryFromZip(scenarioZip, currentFile);
+        let scenarioSource = await getJSONFromEntry(scenarioEntry) as unknown as IScenarioSource;
+        scenario = await Scenario.fromSource(scenarioSource, boardEntry,
+            teamEntries, playerPrototypeEntries, shipEntries, abilityEntries);
     } catch (e) {
         if (e instanceof UnpackingError)
-            throw e.withContext(currentFile);
+            throw e.hasContext() ? e : e.withContext(currentFile);
         throw e;
     }
 
-    return [scenario, board, test];
+    return scenario;
 }
 
 /**
- * Gets file entry from a zip file and returns the JSON contents of the decompressed file
+ * Gets file entry from a ZIP file
  * @param zip ZIP file to extract from
  * @param name Name or path to JSON file
- * @returns json -- JSON data returned from ZIP file
+ * @returns zipEntry -- Found zip entry
  */
-function getEntryJSON(zip: AdmZip, name: string): JSON {
-    // Find file in zip file, decompress and retrieve data
-    let data = zip.getEntry(name)?.getData();
+async function getEntryFromZip(zip: AdmZip, name: string): Promise<IZipEntry> {
+    // Find file in zip file
+    let entry: IZipEntry | null = zip.getEntry(name);
 
     // If file was not found
-    if (data == undefined)
+    if (entry == null)
         throw new UnpackingError(`Could not find '${name}'`).withContext(name);
 
-    // Try to parse data as JSON
-    let json: JSON;
-    try {
-        json = JSON.parse(data.toString());
-    } catch (e) {
-        if (e instanceof SyntaxError)
-            throw new UnpackingError(e.message).withContext(name);
-        throw e;
-    }
+    return entry;
+}
 
-    // Return parsed JSON
-    return json;
+/**
+ * Gets decompressed JSON contents from a ZIP entry
+ * @param zipEntry ZIP Entry to decompress and parse JSON data
+ * @returns json -- JSOn data returned from ZIP entry
+ */
+export async function getJSONFromEntry(zipEntry: IZipEntry): Promise<JSON> {
+    return new Promise<JSON>((resolve, reject) => {
+
+        // Decompress and retrieve data
+        zipEntry.getDataAsync(async (data) => {
+            // Try to parse data as JSON
+            let json: JSON;
+            try {
+                json = await JSON.parse(data.toString());
+            } catch (e) {
+                if (e instanceof SyntaxError) {
+                    reject(new UnpackingError(e.message).withContext(zipEntry.entryName));
+                    return;
+                }
+
+                reject(e);
+                return;
+            }
+
+            // Return parsed JSON
+            resolve(json);
+        });
+    });
 }
 
 /**
@@ -89,7 +132,7 @@ export class UnpackingError extends Error {
      * Getter function with formatting for context
      */
     public get context(): string | undefined {
-        return `An error occurred whilst parsing ${this._context}`;
+        return `An error occurred whilst parsing '${this._context}'`;
     }
 
     /**
@@ -112,5 +155,13 @@ export class UnpackingError extends Error {
     public withContext(context: string): UnpackingError {
         this._context = context;
         return this;
+    }
+
+    /**
+     * Returns whether this unpacking error has a context set yet
+     * @returns boolean Whether this unpacking error has a context set already
+     */
+    public hasContext(): boolean {
+        return this._context != undefined;
     }
 }

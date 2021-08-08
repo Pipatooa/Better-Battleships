@@ -1,6 +1,12 @@
 {
+  "author": "Bradley Hall",
   "descriptor": {
     "name": "Test Name",
     "description": "Test Description"
-  }
+  },
+  "teams": [
+    "blue",
+    "red"
+  ],
+  "attributes": {}
 }

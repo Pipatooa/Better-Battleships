@@ -2,6 +2,7 @@ import AdmZip from 'adm-zip';
 import express from 'express';
 import formidable, {FileJSON} from 'formidable';
 import fs from 'fs';
+import {Scenario} from '../../game/server/scenario/scenario';
 import {unpack, UnpackingError} from '../../game/server/scenario/unpacker';
 
 const router = express.Router();
@@ -27,15 +28,17 @@ router.post('/', async (req, res) => {
 
         const file = files.file as unknown as FileJSON;
 
+        let scenario: Scenario;
+
         // Process uploaded scenario zip file
         try {
             const zip = new AdmZip(file.path);
-            let res = await unpack(zip);
-            console.log(0, res);
+            scenario = await unpack(zip);
         } catch (e) {
 
             // If there was an unpacking error, return a JSON object with details
             if (e instanceof UnpackingError) {
+                // throw e;
                 res.status(400);
                 res.send({
                     success: false,
@@ -52,7 +55,8 @@ router.post('/', async (req, res) => {
             throw e;
         }
 
-        res.sendStatus(200);
+        res.status(200);
+        res.send(JSON.stringify(scenario));
     });
 });
 
