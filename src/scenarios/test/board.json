@@ -1,0 +1,27 @@
+{
+  "size": [5, 5],
+  "palette": {
+    ".": {
+      "descriptor": {
+        "name": "Test Tile A",
+        "description": "A test tile"
+      },
+      "color": "#555555"
+    },
+    "#": {
+      "descriptor": {
+        "name": "Test Tile B",
+        "description": "A test tile"
+      },
+      "color": "#777777"
+    }
+  },
+  "tiles": [
+    ".....",
+    "..#..",
+    ".###.",
+    "..#..",
+    "....."
+  ],
+  "generators": []
+}

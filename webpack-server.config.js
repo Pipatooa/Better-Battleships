@@ -1,9 +1,38 @@
 const path = require('path');
 const PnpWebpackPlugin = require('pnp-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+const ZipWebpackPlugin = require('zip-file-webpack-plugin');
+const FileManagerPlugin = require('filemanager-webpack-plugin');
 const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
+const { readdirSync } = require('fs');
+
+const scenarioDirs = readdirSync('./src/scenarios', { withFileTypes: true })
+    .filter(entry => entry.isDirectory())
+    .map(entry => entry.name);
+
+const scenarioPatternEntries = Array.from({ length: scenarioDirs.length }, (_, i) => {
+    let scenarioFolder = scenarioDirs[i];
+
+    return {
+        from: 'src/scenarios/' + scenarioFolder,
+        to: 'tmp/scenarios/' + scenarioFolder
+    };
+});
+
+const scenarioPluginEntries = Array.from({ length: scenarioDirs.length }, (_, i) => {
+    let scenarioFolder = scenarioDirs[i];
+
+    return new ZipWebpackPlugin({
+        path: 'public/scenarios',
+        filename: scenarioFolder + '.zip',
+        pathMapper: function (assetPath) {
+            return assetPath.replace(new RegExp('^tmp/scenarios/' + scenarioFolder + '/'), '');
+        },
+        include: new RegExp('^tmp/scenarios/' + scenarioFolder + '/')
+    });
+});
 
 module.exports = {
     entry: './src/app.ts',
@@ -44,8 +73,19 @@ module.exports = {
                 {
                     from: 'src/views',
                     to: 'views'
-                }
+                },
+                ...scenarioPatternEntries
             ]
+        }),
+        ...scenarioPluginEntries,
+        new FileManagerPlugin({
+            events: {
+                onEnd: {
+                    delete: [
+                        'build/tmp'
+                    ]
+                }
+            }
         }),
         new MiniCssExtractPlugin({
             filename: '[name].[contenthash].css'
