@@ -1,0 +1,21 @@
+{
+  "type": "move",
+  "pattern": {
+    "center": "C",
+    "size": [3, 3],
+    "values": {
+      ".": 0,
+      "#": 1
+    },
+    "pattern": [
+      ".#.",
+      "#C#",
+      ".#."
+    ]
+  },
+  "actions": {
+    "onUse": {
+
+    }
+  }
+}

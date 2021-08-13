@@ -3,8 +3,18 @@
     "name": "Cruiser",
     "description": "This is a cruiser"
   },
-  "abilities": [
-    "test-ability"
-  ],
+  "pattern": {
+    "size": [1, 4],
+    "values": {
+      "#": 1
+    },
+    "pattern": [
+      "#",
+      "#",
+      "#",
+      "#"
+    ]
+  },
+  "abilities": [],
   "attributes": {}
 }

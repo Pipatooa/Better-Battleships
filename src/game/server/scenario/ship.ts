@@ -4,6 +4,8 @@ import {Attribute, IAttributeSource} from './attributes/attribute';
 import {attributeHolderSchema, AttributeMap, IAttributeHolder} from './attributes/i-attribute-holder';
 import {Descriptor, descriptorSchema, IDescriptorSource} from './common/descriptor';
 import {genericNameSchema} from './common/generic-name';
+import {IPatternSource, Pattern, patternSchema} from './common/pattern';
+import {Rotation} from './common/rotation';
 import {ParsingContext} from './parsing-context';
 import {getJSONFromEntry, UnpackingError} from './unpacker';
 
@@ -13,19 +15,55 @@ import {getJSONFromEntry, UnpackingError} from './unpacker';
  * Movable object that exists on the board
  */
 export class Ship implements IAttributeHolder {
+
+    public x: number = 0;
+    public y: number = 0;
+
     public constructor(public readonly descriptor: Descriptor,
+                       protected _pattern: Pattern,
                        public readonly abilities: { [name: string]: Ability },
                        public readonly attributes: AttributeMap) {
+    }
+
+    /**
+     * Rotates the ship in place
+     * @param rotation Amount to rotate ship by
+     */
+    public rotate(rotation: Rotation) {
+        this._pattern = this._pattern.rotated(rotation);
+    }
+
+    /**
+     * Returns a list of the coordinates of every cell that this ship occupies.
+     *
+     * @param offset Optional offset to apply to cell coordinates
+     */
+    public getCells(offset: [number, number] = [0, 0]): [number, number][] {
+        let cells: [number, number][] = [];
+
+        // Iterate through entries in pattern
+        this._pattern.forEachEntry((dx, dy, value) => {
+
+            // Offset pattern entries by the position of the ship and offset provided
+            let x = dx + this.x + offset[0];
+            let y = dy + this.y + offset[1];
+
+            // Add cell coordinate to list of cells
+            cells.push([x, y]);
+        });
+
+        // Return list of cell coordinates
+        return cells;
     }
 
     /**
      * Factory function to generate Ship from JSON scenario data
      * @param parsingContext Context for resolving scenario data
      * @param shipSource JSON data for Ship
-     * @param abilityEntries ZIP entry list of JSON abilities
      * @returns ship -- Created Ship object
      */
     public static async fromSource(parsingContext: ParsingContext, shipSource: IShipSource): Promise<Ship> {
+
         // Validate JSON data against schema
         try {
             shipSource = await shipSchema.validateAsync(shipSource);
@@ -46,6 +84,9 @@ export class Ship implements IAttributeHolder {
 
         // Get descriptor
         let descriptor: Descriptor = await Descriptor.fromSource(parsingContext, shipSource.descriptor);
+
+        // Get pattern
+        let pattern: Pattern = await Pattern.fromSource(parsingContext, shipSource.pattern);
 
         // Get abilities
         let abilities: { [name: string]: Ability } = {};
@@ -72,7 +113,7 @@ export class Ship implements IAttributeHolder {
         }
 
         // Return created Ship object
-        return new Ship(descriptor, abilities, attributes);
+        return new Ship(descriptor, pattern, abilities, attributes);
     }
 }
 
@@ -81,6 +122,7 @@ export class Ship implements IAttributeHolder {
  */
 export interface IShipSource {
     descriptor: IDescriptorSource;
+    pattern: IPatternSource;
     abilities: string[];
     attributes: { [name: string]: IAttributeSource };
 }
@@ -90,5 +132,6 @@ export interface IShipSource {
  */
 export const shipSchema = Joi.object({
     descriptor: descriptorSchema.required(),
+    pattern: patternSchema.required(),
     abilities: Joi.array().items(genericNameSchema).required()
 }).concat(attributeHolderSchema);

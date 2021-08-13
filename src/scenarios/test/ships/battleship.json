@@ -3,8 +3,21 @@
     "name": "Battleship",
     "description": "This is a battleship"
   },
+  "pattern": {
+    "size": [1, 5],
+    "values": {
+      "#": 1
+    },
+    "pattern": [
+      "#",
+      "#",
+      "#",
+      "#",
+      "#"
+    ]
+  },
   "abilities": [
-    "test-ability"
+    "test-move-ability"
   ],
   "attributes": {
     "testAttribute": {

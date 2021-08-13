@@ -1,5 +1,7 @@
 import AdmZip, {IZipEntry} from 'adm-zip';
 import Joi from 'joi';
+import {IPatternSource, Pattern} from './common/pattern';
+import {Rotation} from './common/rotation';
 import {ParsingContext} from './parsing-context';
 import {IScenarioSource, Scenario} from './scenario';
 
@@ -10,8 +12,7 @@ export type ZipEntryMap = { [name: string]: IZipEntry };
  * @param scenarioZip Zip file to extract
  * @returns scenario -- Scenario object
  */
-export async function unpack(scenarioZip: AdmZip): Promise<Scenario> {
-    let scenario: Scenario;
+export async function unpack(scenarioZip: AdmZip): Promise<any> {
 
     // Get a list of all zip entries
     let zipEntries = scenarioZip.getEntries();
@@ -55,9 +56,17 @@ export async function unpack(scenarioZip: AdmZip): Promise<Scenario> {
     // Scenario data
     let scenarioEntry = await getEntryFromZip(scenarioZip, 'scenario.json');
     let scenarioSource = await getJSONFromEntry(scenarioEntry) as unknown as IScenarioSource;
-    scenario = await Scenario.fromSource(parsingContext, scenarioSource);
+    let scenario: Scenario = await Scenario.fromSource(parsingContext, scenarioSource);
 
-    return scenario;
+    // Test data
+    let testEntry = await getEntryFromZip(scenarioZip, 'test.json');
+    let testSource = await getJSONFromEntry(testEntry) as unknown as IPatternSource;
+    let test: Pattern = await Pattern.fromSource(parsingContext, testSource);
+
+    return [scenario, test,
+        test.rotated(Rotation.Clockwise90),
+        test.rotated(Rotation.Clockwise180),
+        test.rotated(Rotation.Clockwise270)];
 }
 
 /**
