@@ -1,4 +1,5 @@
 import Joi from 'joi';
+import {genericNameRegex} from '../common/generic-name';
 import {Attribute, attributeSchema, IAttributeSource} from './attribute';
 
 export type AttributeMap = { [name: string]: Attribute };
@@ -9,5 +10,5 @@ export interface IAttributeHolder {
 }
 
 export const attributeHolderSchema = Joi.object({
-    attributes: Joi.object().pattern(/[a-z\-]+/, attributeSchema).required()
+    attributes: Joi.object().pattern(genericNameRegex, attributeSchema).required()
 });

@@ -1,4 +1,5 @@
 import Joi from 'joi';
+import {ParsingContext} from '../parsing-context';
 import {UnpackingError} from '../unpacker';
 import {baseValueSchema, IBaseValueSource, IValueSource, Value, valueSchema} from './value';
 import {buildValue} from './value-builder';
@@ -69,11 +70,12 @@ export class ValueRandom extends Value {
 
     /**
      * Factory function to generate ValueRandom from JSON scenario data
+     * @param parsingContext Context for resolving scenario data
      * @param valueRandomSource JSON data for ValueRandom
      * @param skipSchemaCheck When true, skips schema validation step
      * @returns valueRandom -- Created ValueRandom object
      */
-    public static async fromSource(valueRandomSource: IValueRandomSource, skipSchemaCheck: boolean = false): Promise<ValueRandom> {
+    public static async fromSource(parsingContext: ParsingContext, valueRandomSource: IValueRandomSource, skipSchemaCheck: boolean = false): Promise<ValueRandom> {
 
         // Validate JSON data against schema
         if (!skipSchemaCheck) {
@@ -87,11 +89,11 @@ export class ValueRandom extends Value {
         }
 
         // Unpack min, max and step values
-        let min = await buildValue(valueRandomSource.min, true);
-        let max = await buildValue(valueRandomSource.max, true);
+        let min = await buildValue(parsingContext, valueRandomSource.min, true);
+        let max = await buildValue(parsingContext, valueRandomSource.max, true);
         let step = valueRandomSource.step == undefined ?
             undefined :
-            await buildValue(valueRandomSource.step, true);
+            await buildValue(parsingContext, valueRandomSource.step, true);
 
         // Return created ValueRandom object
         return new ValueRandom(min, max, step, valueRandomSource.generateOnce);

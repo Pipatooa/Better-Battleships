@@ -1,6 +1,7 @@
 import Joi from 'joi';
 import {IValueConstraintSource, ValueConstraint, valueConstraintSchema} from '../constraints/value-constaint';
 import {buildValueConstraint} from '../constraints/value-constraint-builder';
+import {ParsingContext} from '../parsing-context';
 import {UnpackingError} from '../unpacker';
 import {IValueSource, Value, valueSchema} from '../values/value';
 import {buildValue} from '../values/value-builder';
@@ -19,12 +20,22 @@ export class Attribute {
         this._value = initialValue.evaluate();
     }
 
+    /**
+     * Get the value of this attribute
+     */
     public get value(): number {
         return this._value;
     }
 
+    /**
+     * Set the value of this attribute
+     *
+     * Will constrain given value to meet all held value constraints.
+     * If attribute is readonly, new value will be ignored
+     * @param value New value
+     */
     public set value(value: number | Value) {
-        // If value is readonly, ignore set request
+        // If value is readonly, ignore new value
         if (this.readonly)
             return;
 
@@ -41,7 +52,13 @@ export class Attribute {
         this._value = value;
     }
 
-    public static async fromSource(attributeSource: IAttributeSource): Promise<Attribute> {
+    /**
+     * Factory function to generate Attribute from JSON scenario data
+     * @param parsingContext Context for resolving scenario data
+     * @param attributeSource JSON data for Attribute
+     * @returns attribute -- Created Attribute object
+     */
+    public static async fromSource(parsingContext: ParsingContext, attributeSource: IAttributeSource): Promise<Attribute> {
         // Validate JSON data against schema
         try {
             attributeSource = await attributeSchema.validateAsync(attributeSource);
@@ -52,12 +69,12 @@ export class Attribute {
         }
 
         // Get initial value
-        let initialValue: Value = await buildValue(attributeSource.initialValue);
+        let initialValue: Value = await buildValue(parsingContext, attributeSource.initialValue);
 
         // Get constraints
         let constraints: ValueConstraint[] = [];
         for (let constraintSource of attributeSource.constraints) {
-            constraints.push(await buildValueConstraint(constraintSource));
+            constraints.push(await buildValueConstraint(parsingContext, constraintSource));
         }
 
         // Return created Attribute object
@@ -65,12 +82,18 @@ export class Attribute {
     }
 }
 
+/**
+ * JSON source interface reflecting schema
+ */
 export interface IAttributeSource {
     initialValue: IValueSource;
     constraints: IValueConstraintSource[];
     readonly: boolean;
 }
 
+/**
+ * Schema for validating source JSON data
+ */
 export const attributeSchema = Joi.object({
     initialValue: valueSchema.required(),
     constraints: Joi.array().items(valueConstraintSchema).required(),

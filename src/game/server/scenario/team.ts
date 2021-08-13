@@ -9,8 +9,9 @@ import {
 import {colorSchema} from './common/color';
 import {Descriptor, descriptorSchema, IDescriptorSource} from './common/descriptor';
 import {genericNameSchema} from './common/generic-name';
+import {ParsingContext} from './parsing-context';
 import {IPlayerSource, Player} from './player';
-import {getJSONFromEntry, UnpackingError, zipEntryMap} from './unpacker';
+import {getJSONFromEntry, UnpackingError} from './unpacker';
 
 /**
  * Team - Server Version
@@ -36,16 +37,11 @@ export class Team implements IAttributeHolder {
 
     /**
      * Factory function to generate Team from JSON scenario data
+     * @param parsingContext Context for resolving scenario data
      * @param teamSource JSON data for Team
-     * @param playerEntries ZIP entry list of JSON players
-     * @param shipEntries ZIP entry list of JSON ships
-     * @param abilityEntries ZIP entry list of JSON abilities
      * @returns team -- Created Team object
      */
-    public static async fromSource(teamSource: ITeamSource,
-                                   playerEntries: zipEntryMap,
-                                   shipEntries: zipEntryMap,
-                                   abilityEntries: zipEntryMap): Promise<Team> {
+    public static async fromSource(parsingContext: ParsingContext, teamSource: ITeamSource): Promise<Team> {
         // Validate JSON data against schema
         try {
             teamSource = await teamSchema.validateAsync(teamSource);
@@ -55,8 +51,17 @@ export class Team implements IAttributeHolder {
             throw e;
         }
 
+        // Get attributes
+        let attributes: AttributeMap = {};
+        for (let [name, attributeSource] of Object.entries(teamSource.attributes)) {
+            attributes[name] = await Attribute.fromSource(parsingContext, attributeSource);
+        }
+
+        // Update parsing context
+        parsingContext = parsingContext.withTeamAttributes(attributes);
+
         // Get descriptor
-        let descriptor: Descriptor = await Descriptor.fromSource(teamSource.descriptor);
+        let descriptor: Descriptor = await Descriptor.fromSource(parsingContext, teamSource.descriptor);
 
         // Get player prototypes for each possible player count
         let playerPrototypes: Player[][] = [];
@@ -73,14 +78,14 @@ export class Team implements IAttributeHolder {
             for (let playerConfig of playerConfigs) {
 
                 // If player does not exist
-                if (!(playerConfig.playerPrototype in playerEntries))
+                if (!(playerConfig.playerPrototype in parsingContext.playerPrototypeEntries))
                     throw new UnpackingError(`Could not find 'players/${playerConfig.playerPrototype}.json'`);
 
                 // Unpack player
-                let playerSource = await getJSONFromEntry(playerEntries[playerConfig.playerPrototype]) as unknown as IPlayerSource;
+                let playerSource = await getJSONFromEntry(parsingContext.playerPrototypeEntries[playerConfig.playerPrototype]) as unknown as IPlayerSource;
 
                 try {
-                    players.push(await Player.fromSource(playerConfig.spawnRegion, playerSource, shipEntries, abilityEntries));
+                    players.push(await Player.fromSource(parsingContext, playerConfig.spawnRegion, playerSource));
                 } catch (e) {
                     if (e instanceof UnpackingError)
                         throw e.hasContext() ? e : e.withContext(`players/${playerConfig.playerPrototype}.json`);
@@ -89,12 +94,6 @@ export class Team implements IAttributeHolder {
             }
 
             playerPrototypes.push(players);
-        }
-
-        // Get attributes
-        let attributes: AttributeMap = {};
-        for (let [name, attributeSource] of Object.entries(teamSource.attributes)) {
-            attributes[name] = await Attribute.fromSource(attributeSource);
         }
 
         // Return created Team object

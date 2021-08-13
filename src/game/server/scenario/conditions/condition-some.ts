@@ -1,6 +1,7 @@
 import Joi from 'joi';
 import {IValueConstraintSource, ValueConstraint, valueConstraintSchema} from '../constraints/value-constaint';
 import {buildValueConstraint} from '../constraints/value-constraint-builder';
+import {ParsingContext} from '../parsing-context';
 import {UnpackingError} from '../unpacker';
 import {Condition} from './condition';
 import {ConditionMultiple, conditionMultipleSchema, IConditionMultipleSource} from './condition-multiple';
@@ -51,11 +52,12 @@ export class ConditionSome extends ConditionMultiple {
 
     /**
      * Factory function to generate ConditionAll from JSON scenario data
+     * @param parsingContext Context for resolving scenario data
      * @param conditionSomeSource JSON data for ConditionAll
      * @param skipSchemaCheck When true, skips schema validation step
      * @returns conditionAll -- Created ConditionAll object
      */
-    public static async fromSource(conditionSomeSource: IConditionSomeSource, skipSchemaCheck: boolean = false): Promise<ConditionSome> {
+    public static async fromSource(parsingContext: ParsingContext, conditionSomeSource: IConditionSomeSource, skipSchemaCheck: boolean = false): Promise<ConditionSome> {
 
         // Validate JSON data against schema
         if (!skipSchemaCheck) {
@@ -69,10 +71,10 @@ export class ConditionSome extends ConditionMultiple {
         }
 
         // Unpack sub conditions
-        let subConditions: Condition[] = await ConditionMultiple.getSubConditions(conditionSomeSource.subConditions);
+        let subConditions: Condition[] = await ConditionMultiple.getSubConditions(parsingContext, conditionSomeSource.subConditions);
 
         // Get value constraint
-        let valueConstraint: ValueConstraint = await buildValueConstraint(conditionSomeSource.valueConstraint, true);
+        let valueConstraint: ValueConstraint = await buildValueConstraint(parsingContext, conditionSomeSource.valueConstraint, true);
 
         // Return created ConditionSome object
         return new ConditionSome(subConditions, valueConstraint, conditionSomeSource.inverted);

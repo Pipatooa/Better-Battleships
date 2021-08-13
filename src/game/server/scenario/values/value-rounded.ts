@@ -1,4 +1,5 @@
 import Joi from 'joi';
+import {ParsingContext} from '../parsing-context';
 import {UnpackingError} from '../unpacker';
 import {baseValueSchema, IBaseValueSource, IValueSource, Value, valueSchema} from './value';
 import {buildValue} from './value-builder';
@@ -35,11 +36,12 @@ export class ValueRounded extends Value {
 
     /**
      * Factory function to generate ValueRounded from JSON scenario data
+     * @param parsingContext Context for resolving scenario data
      * @param valueRoundedSource JSON data for ValueRounded
      * @param skipSchemaCheck When true, skips schema validation step
      * @returns valueFixed -- Created ValueRounded object
      */
-    public static async fromSource(valueRoundedSource: IValueRoundedSource, skipSchemaCheck: boolean = false): Promise<ValueRounded> {
+    public static async fromSource(parsingContext: ParsingContext, valueRoundedSource: IValueRoundedSource, skipSchemaCheck: boolean = false): Promise<ValueRounded> {
 
         // Validate JSON data against schema
         if (!skipSchemaCheck) {
@@ -53,8 +55,8 @@ export class ValueRounded extends Value {
         }
 
         // Get value and step
-        let value = await buildValue(valueRoundedSource.value, true);
-        let step = await buildValue(valueRoundedSource.step, true);
+        let value = await buildValue(parsingContext, valueRoundedSource.value, true);
+        let step = await buildValue(parsingContext, valueRoundedSource.step, true);
 
         // Return created ValueRounded object
         return new ValueRounded(value, step);

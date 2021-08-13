@@ -1,4 +1,5 @@
 import Joi from 'joi';
+import {ParsingContext} from '../parsing-context';
 import {UnpackingError} from '../unpacker';
 import {Condition} from './condition';
 import {ConditionMultiple, conditionMultipleSchema, IConditionMultipleSource} from './condition-multiple';
@@ -32,11 +33,12 @@ export class ConditionAll extends ConditionMultiple {
 
     /**
      * Factory function to generate ConditionAll from JSON scenario data
+     * @param parsingContext Context for resolving scenario data
      * @param conditionAllSource JSON data for ConditionAll
      * @param skipSchemaCheck When true, skips schema validation step
      * @returns conditionAll -- Created ConditionAll object
      */
-    public static async fromSource(conditionAllSource: IConditionAllSource, skipSchemaCheck: boolean = false): Promise<ConditionAll> {
+    public static async fromSource(parsingContext: ParsingContext, conditionAllSource: IConditionAllSource, skipSchemaCheck: boolean = false): Promise<ConditionAll> {
 
         // Validate JSON data against schema
         if (!skipSchemaCheck) {
@@ -50,7 +52,7 @@ export class ConditionAll extends ConditionMultiple {
         }
 
         // Unpack sub conditions
-        let subConditions: Condition[] = await ConditionMultiple.getSubConditions(conditionAllSource.subConditions);
+        let subConditions: Condition[] = await ConditionMultiple.getSubConditions(parsingContext, conditionAllSource.subConditions);
 
         // Return created ConditionAll object
         return new ConditionAll(subConditions, conditionAllSource.inverted);

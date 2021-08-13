@@ -1,5 +1,6 @@
 import Joi from 'joi';
 import {genericNameSchema} from './common/generic-name';
+import {ParsingContext} from './parsing-context';
 import {Tile} from './tile';
 import {TileGenerator, tileGeneratorSchema} from './tile-generator';
 import {TileType, tileTypeSchema} from './tiletype';
@@ -17,10 +18,11 @@ export class Board {
 
     /**
      * Factory function to generate board from JSON scenario data
+     * @param parsingContext Context for resolving scenario data
      * @param boardSource JSON data from 'board.json'
      * @returns board -- Created Board object
      */
-    public static async fromSource(boardSource: IBoardSource): Promise<Board> {
+    public static async fromSource(parsingContext: ParsingContext, boardSource: IBoardSource): Promise<Board> {
 
         // Validate JSON against schema
         try {
@@ -37,7 +39,7 @@ export class Board {
 
             // Create new TileType objects indexed by single character strings
             let [char, tileTypeSource] = entry;
-            palette[char] = await TileType.fromSource(tileTypeSource);
+            palette[char] = await TileType.fromSource(parsingContext, tileTypeSource);
         }
 
         // Ensure that the number of entries in 'tiles' matches the declared size of the board

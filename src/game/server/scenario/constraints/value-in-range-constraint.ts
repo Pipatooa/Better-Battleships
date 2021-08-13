@@ -1,5 +1,6 @@
 import Joi from 'joi';
 import {clamp} from '../../../shared/utility';
+import {ParsingContext} from '../parsing-context';
 import {UnpackingError} from '../unpacker';
 import {ValueConstraint} from './value-constaint';
 
@@ -25,11 +26,12 @@ export class ValueInRangeConstraint extends ValueConstraint {
 
     /**
      * Factory function to generate ValueInRangeConstraint from JSON scenario data
+     * @param parsingContext Context for resolving scenario data
      * @param valueInRangeConstraintSource JSON data for ValueInRangeConstraint
      * @param skipSchemaCheck When true, skips schema validation step
      * @returns valueInRangeConstraint -- Created ValueInRangeConstraint object
      */
-    public static async fromSource(valueInRangeConstraintSource: IValueInRangeConstraintSource, skipSchemaCheck: boolean = false) {
+    public static async fromSource(parsingContext: ParsingContext, valueInRangeConstraintSource: IValueInRangeConstraintSource, skipSchemaCheck: boolean = false) {
 
         // Validate JSON data against schema
         if (!skipSchemaCheck) {

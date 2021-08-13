@@ -1,6 +1,8 @@
 import Joi from 'joi';
+import {ParsingContext} from '../parsing-context';
 import {UnpackingError} from '../unpacker';
 import {IValueSource, Value, valueSchema} from './value';
+import {ValueAttributeReference} from './value-attribute-reference';
 import {ValueFixed} from './value-fixed';
 import {ValueProduct} from './value-product';
 import {ValueRandom} from './value-random';
@@ -9,11 +11,12 @@ import {ValueSum} from './value-sum';
 
 /**
  * Factory function to generate Value from JSON scenario data
+ * @param parsingContext Context for resolving scenario data
  * @param valueSource JSON data for Value
  * @param skipSchemaCheck When true, skips schema validation step
  * @returns condition -- Created Condition object
  */
-export async function buildValue(valueSource: IValueSource, skipSchemaCheck: boolean = false): Promise<Value> {
+export async function buildValue(parsingContext: ParsingContext, valueSource: IValueSource, skipSchemaCheck: boolean = false): Promise<Value> {
 
     // Validate JSON data against schema
     if (!skipSchemaCheck) {
@@ -30,22 +33,25 @@ export async function buildValue(valueSource: IValueSource, skipSchemaCheck: boo
 
     // If source is a number, parse as a fixed value
     if (typeof valueSource == 'number')
-        value = await ValueFixed.fromSource(valueSource, true);
+        value = await ValueFixed.fromSource(parsingContext, valueSource, true);
     else
 
         // Call appropriate factory function based on condition type
         switch (valueSource.type) {
             case 'random':
-                value = await ValueRandom.fromSource(valueSource, true);
+                value = await ValueRandom.fromSource(parsingContext, valueSource, true);
                 break;
             case 'sum':
-                value = await ValueSum.fromSource(valueSource, true);
+                value = await ValueSum.fromSource(parsingContext, valueSource, true);
                 break;
             case 'product':
-                value = await ValueProduct.fromSource(valueSource, true);
+                value = await ValueProduct.fromSource(parsingContext, valueSource, true);
                 break;
             case 'round':
-                value = await ValueRounded.fromSource(valueSource, true);
+                value = await ValueRounded.fromSource(parsingContext, valueSource, true);
+                break;
+            case 'attributeReference':
+                value = await ValueAttributeReference.fromSource(parsingContext, valueSource, true);
                 break;
         }
 

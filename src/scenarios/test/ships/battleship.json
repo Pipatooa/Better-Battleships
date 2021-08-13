@@ -1,7 +1,19 @@
 {
   "descriptor": {
     "name": "Battleship",
-    "description": ""
+    "description": "This is a battleship"
   },
-  "attributes": {}
+  "abilities": [
+    "test-ability"
+  ],
+  "attributes": {
+    "testAttribute": {
+      "initialValue": {
+        "type": "attributeReference",
+        "attribute": "player.shipCount"
+      },
+      "constraints": [],
+      "readonly": false
+    }
+  }
 }

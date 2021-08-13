@@ -1,12 +1,12 @@
-import {IZipEntry} from 'adm-zip';
 import Joi from 'joi';
 import {Attribute, IAttributeSource} from './attributes/attribute';
 import {attributeHolderSchema, AttributeMap, IAttributeHolder} from './attributes/i-attribute-holder';
 import {Board, IBoardSource} from './board';
 import {Descriptor, descriptorSchema, IDescriptorSource} from './common/descriptor';
 import {genericNameSchema} from './common/generic-name';
+import {ParsingContext} from './parsing-context';
 import {ITeamSource, Team} from './team';
-import {getJSONFromEntry, UnpackingError, zipEntryMap} from './unpacker';
+import {getJSONFromEntry, UnpackingError} from './unpacker';
 
 /**
  * Scenario - Server Version
@@ -23,60 +23,55 @@ export class Scenario implements IAttributeHolder {
 
     /**
      * Factory function to generate Scenario from JSON scenario data
+     * @param parsingContext Context for resolving scenario data
      * @param scenarioSource JSON data from 'scenario.json'
-     * @param boardEntry ZIP entry for board JSON
-     * @param teamEntries ZIP entry list of JSON teams
-     * @param playerEntries ZIP entry list of JSON players
-     * @param shipEntries ZIP entry list of JSON ships
-     * @param abilityEntries ZIP entry list of JSON abilities
      * @returns scenario -- Created Scenario object
      */
-    public static async fromSource(scenarioSource: IScenarioSource, boardEntry: IZipEntry,
-                                   teamEntries: zipEntryMap,
-                                   playerEntries: zipEntryMap,
-                                   shipEntries: zipEntryMap,
-                                   abilityEntries: zipEntryMap): Promise<Scenario> {
+    public static async fromSource(parsingContext: ParsingContext, scenarioSource: IScenarioSource): Promise<Scenario> {
 
         // Validate JSON data against schema
         try {
             scenarioSource = await scenarioSchema.validateAsync(scenarioSource);
         } catch (e) {
             if (e instanceof Joi.ValidationError)
-                throw UnpackingError.fromJoiValidationError(e);
+                throw UnpackingError.fromJoiValidationError(e).withContext('scenario.json');
             throw e;
         }
 
+        // Get attributes
+        let attributes: AttributeMap = {};
+        for (let [name, attributeSource] of Object.entries(scenarioSource.attributes)) {
+            attributes[name] = await Attribute.fromSource(parsingContext, attributeSource);
+        }
+
+        // Update parsing context
+        parsingContext = parsingContext.withScenarioAttributes(attributes);
+
         // Get descriptor
-        let descriptor: Descriptor = await Descriptor.fromSource(scenarioSource.descriptor);
+        let descriptor: Descriptor = await Descriptor.fromSource(parsingContext, scenarioSource.descriptor);
 
         // Get board
-        let boardSource = await getJSONFromEntry(boardEntry) as unknown as IBoardSource;
-        let board: Board = await Board.fromSource(boardSource);
+        let boardSource = await getJSONFromEntry(parsingContext.boardEntry) as unknown as IBoardSource;
+        let board: Board = await Board.fromSource(parsingContext, boardSource);
 
         // Get teams
         let teams: { [name: string]: Team } = {};
         for (let teamName of scenarioSource.teams) {
 
             // If team does not exist
-            if (!(teamName in teamEntries))
+            if (!(teamName in parsingContext.teamEntries))
                 throw new UnpackingError(`Could not find 'teams/${teamName}.json'`).withContext('scenario.json');
 
             // Unpack team data
-            let teamSource = await getJSONFromEntry(teamEntries[teamName]) as unknown as ITeamSource;
+            let teamSource = await getJSONFromEntry(parsingContext.teamEntries[teamName]) as unknown as ITeamSource;
 
             try {
-                teams[teamName] = await Team.fromSource(teamSource, playerEntries, shipEntries, abilityEntries);
+                teams[teamName] = await Team.fromSource(parsingContext, teamSource);
             } catch (e) {
                 if (e instanceof UnpackingError)
                     throw e.hasContext() ? e : e.withContext(`teams/${teamName}.json`);
                 throw e;
             }
-        }
-
-        // Get attributes
-        let attributes: AttributeMap = {};
-        for (let [name, attributeSource] of Object.entries(scenarioSource.attributes)) {
-            attributes[name] = await Attribute.fromSource(attributeSource);
         }
 
         // Return created Scenario object

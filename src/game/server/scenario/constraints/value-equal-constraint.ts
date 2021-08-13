@@ -1,4 +1,5 @@
 import Joi from 'joi';
+import {ParsingContext} from '../parsing-context';
 import {UnpackingError} from '../unpacker';
 import {ValueConstraint} from './value-constaint';
 
@@ -21,11 +22,12 @@ export class ValueEqualConstraint extends ValueConstraint {
 
     /**
      * Factory function to generate ValueEqualConstraint from JSON scenario data
+     * @param parsingContext Context for resolving scenario data
      * @param valueEqualConstraintSource JSON data for ValueEqualConstraint
      * @param skipSchemaCheck When true, skips schema validation step
      * @returns valueEqualConstraint -- Created ValueEqualConstraint object
      */
-    public static async fromSource(valueEqualConstraintSource: IValueEqualConstraintSource, skipSchemaCheck: boolean = false): Promise<ValueEqualConstraint> {
+    public static async fromSource(parsingContext: ParsingContext, valueEqualConstraintSource: IValueEqualConstraintSource, skipSchemaCheck: boolean = false): Promise<ValueEqualConstraint> {
 
         // Validate JSON data against schema
         if (!skipSchemaCheck) {

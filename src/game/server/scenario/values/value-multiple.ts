@@ -1,4 +1,5 @@
 import Joi from 'joi';
+import {ParsingContext} from '../parsing-context';
 import {baseValueSchema, IBaseValueSource, IValueSource, Value, valueSchema} from './value';
 import {buildValue} from './value-builder';
 
@@ -20,11 +21,12 @@ export abstract class ValueMultiple extends Value {
 
     /**
      * Converts a list of value sources into a list of values
+     * @param parsingContext Context for resolving scenario data
      * @param subValueSources JSON data for sub values
      * @returns subValues -- List of parsed Value objects
      * @protected
      */
-    protected static async getSubValues(subValueSources: IValueSource[]): Promise<Value[]> {
+    protected static async getSubValues(parsingContext: ParsingContext, subValueSources: IValueSource[]): Promise<Value[]> {
 
         // List for created values
         let subValues: Value[] = [];
@@ -33,7 +35,7 @@ export abstract class ValueMultiple extends Value {
         for (let i = 0; i < subValueSources.length; i++) {
 
             // Build sub value from sub value source and add to list
-            let subValue = await buildValue(subValueSources[i], true);
+            let subValue = await buildValue(parsingContext, subValueSources[i], true);
             subValues.push(subValue);
         }
 

@@ -1,4 +1,5 @@
 import Joi from 'joi';
+import {ParsingContext} from '../parsing-context';
 import {UnpackingError} from '../unpacker';
 import {EmptyValueConstraint} from './empty-value-constraint';
 import {ValueAtLeastConstraint} from './value-at-least-constraint';
@@ -9,11 +10,12 @@ import {ValueInRangeConstraint} from './value-in-range-constraint';
 
 /**
  * Factory function to generate value constraint from JSON scenario data
+ * @param parsingContext Context for resolving scenario data
  * @param valueConstraintSource JSON data for value constraint
  * @param skipSchemaCheck When true, skips schema validation step
  * @returns valueConstraint -- Created ValueConstraint object
  */
-export async function buildValueConstraint(valueConstraintSource: IValueConstraintSource, skipSchemaCheck: boolean = false): Promise<ValueConstraint> {
+export async function buildValueConstraint(parsingContext: ParsingContext, valueConstraintSource: IValueConstraintSource, skipSchemaCheck: boolean = false): Promise<ValueConstraint> {
 
     // Validate JSON data against schema
     if (!skipSchemaCheck) {
@@ -34,19 +36,19 @@ export async function buildValueConstraint(valueConstraintSource: IValueConstrai
 
     // Create ValueEqualConstraint
     else if ('exactly' in valueConstraintSource)
-        valueConstraint = await ValueEqualConstraint.fromSource(valueConstraintSource, true);
+        valueConstraint = await ValueEqualConstraint.fromSource(parsingContext, valueConstraintSource, true);
 
     // Create ValueInRangeConstraint
     else if ('min' in valueConstraintSource && 'max' in valueConstraintSource)
-        valueConstraint = await ValueInRangeConstraint.fromSource(valueConstraintSource, true);
+        valueConstraint = await ValueInRangeConstraint.fromSource(parsingContext, valueConstraintSource, true);
 
     // Create ValueAtLeastConstraint
     else if ('min' in valueConstraintSource)
-        valueConstraint = await ValueAtLeastConstraint.fromSource(valueConstraintSource, true);
+        valueConstraint = await ValueAtLeastConstraint.fromSource(parsingContext, valueConstraintSource, true);
 
     // Create ValueAtMostConstraint
     else
-        valueConstraint = await ValueAtMostConstraint.fromSource(valueConstraintSource, true);
+        valueConstraint = await ValueAtMostConstraint.fromSource(parsingContext, valueConstraintSource, true);
 
     return valueConstraint;
 }

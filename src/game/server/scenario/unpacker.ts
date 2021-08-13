@@ -1,8 +1,9 @@
 import AdmZip, {IZipEntry} from 'adm-zip';
 import Joi from 'joi';
+import {ParsingContext} from './parsing-context';
 import {IScenarioSource, Scenario} from './scenario';
 
-export type zipEntryMap = { [name: string]: IZipEntry };
+export type ZipEntryMap = { [name: string]: IZipEntry };
 
 /**
  * Unpacks a zip file into a scenario object asynchronously
@@ -12,58 +13,49 @@ export type zipEntryMap = { [name: string]: IZipEntry };
 export async function unpack(scenarioZip: AdmZip): Promise<Scenario> {
     let scenario: Scenario;
 
-    // Used to allow unpacking errors to reference the current file that is being processed during unpacking
-    let currentFile: string = '';
+    // Get a list of all zip entries
+    let zipEntries = scenarioZip.getEntries();
 
-    try {
-        // Get a list of all zip entries
-        let zipEntries = scenarioZip.getEntries();
+    // Get entries for named objects
+    let abilityEntries: ZipEntryMap = {};
+    let shipEntries: ZipEntryMap = {};
+    let playerPrototypeEntries: ZipEntryMap = {};
+    let teamEntries: ZipEntryMap = {};
 
-        // Get entries for named objects
-        let abilityEntries: zipEntryMap = {};
-        let shipEntries: zipEntryMap = {};
-        let playerPrototypeEntries: zipEntryMap = {};
-        let teamEntries: zipEntryMap = {};
+    zipEntries.forEach((entry) => {
 
-        zipEntries.forEach((entry) => {
+        // Check entry regex
+        let result = /^(abilities|ships|players|teams)\/([a-z\-]+).json$/.exec(entry.entryName);
+        if (result == null)
+            return;
 
-            // Check entry regex
-            let result = /^(abilities|ships|players|teams)\/([a-z\-]+).json$/.exec(entry.entryName);
-            if (result == null)
-                return;
+        // Put entry in correct array of entries
+        switch (result[1]) {
+            case 'abilities':
+                abilityEntries[result[2]] = entry;
+                break;
+            case 'ships':
+                shipEntries[result[2]] = entry;
+                break;
+            case 'players':
+                playerPrototypeEntries[result[2]] = entry;
+                break;
+            case 'teams':
+                teamEntries[result[2]] = entry;
+                break;
+        }
+    });
 
-            // Put entry in correct array of entries
-            switch (result[1]) {
-                case 'abilities':
-                    abilityEntries[result[2]] = entry;
-                    break;
-                case 'ships':
-                    shipEntries[result[2]] = entry;
-                    break;
-                case 'players':
-                    playerPrototypeEntries[result[2]] = entry;
-                    break;
-                case 'teams':
-                    teamEntries[result[2]] = entry;
-                    break;
-            }
-        });
+    // Board data
+    let boardEntry = await getEntryFromZip(scenarioZip, 'board.json');
 
-        // Board data
-        currentFile = 'board.json';
-        let boardEntry = await getEntryFromZip(scenarioZip, currentFile);
+    // Create parsing context
+    let parsingContext = new ParsingContext(boardEntry, teamEntries, playerPrototypeEntries, shipEntries, abilityEntries);
 
-        // Scenario data
-        currentFile = 'scenario.json';
-        let scenarioEntry = await getEntryFromZip(scenarioZip, currentFile);
-        let scenarioSource = await getJSONFromEntry(scenarioEntry) as unknown as IScenarioSource;
-        scenario = await Scenario.fromSource(scenarioSource, boardEntry,
-            teamEntries, playerPrototypeEntries, shipEntries, abilityEntries);
-    } catch (e) {
-        if (e instanceof UnpackingError)
-            throw e.hasContext() ? e : e.withContext(currentFile);
-        throw e;
-    }
+    // Scenario data
+    let scenarioEntry = await getEntryFromZip(scenarioZip, 'scenario.json');
+    let scenarioSource = await getJSONFromEntry(scenarioEntry) as unknown as IScenarioSource;
+    scenario = await Scenario.fromSource(parsingContext, scenarioSource);
 
     return scenario;
 }

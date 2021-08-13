@@ -1,5 +1,6 @@
 import Joi from 'joi';
 import {Descriptor, descriptorSchema, IDescriptorSource} from './common/descriptor';
+import {ParsingContext} from './parsing-context';
 import {UnpackingError} from './unpacker';
 
 /**
@@ -14,10 +15,11 @@ export class TileType {
 
     /**
      * Factory function to generate tile type from JSON scenario data
+     * @param parsingContext Context for resolving scenario data
      * @param tileTypeSource JSON data for tile type
      * @returns tileType -- Created TileType object
      */
-    public static async fromSource(tileTypeSource: ITileTypeSource): Promise<TileType> {
+    public static async fromSource(parsingContext: ParsingContext, tileTypeSource: ITileTypeSource): Promise<TileType> {
 
         // Validate JSON data against schema
         try {
@@ -29,7 +31,7 @@ export class TileType {
         }
 
         // Create sub-objects
-        let descriptor = await Descriptor.fromSource(tileTypeSource.descriptor);
+        let descriptor = await Descriptor.fromSource(parsingContext, tileTypeSource.descriptor);
 
         // Return tile type object
         return new TileType(descriptor, tileTypeSource.color);

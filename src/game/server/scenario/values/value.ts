@@ -1,4 +1,6 @@
 import Joi from 'joi';
+import {attributeReferenceSchema} from '../attributes/attribute-reference';
+import {IValueAttributeReferenceSource} from './value-attribute-reference';
 import {IValueFixedSource} from './value-fixed';
 import {IValueProductSource} from './value-product';
 import {IValueRandomSource} from './value-random';
@@ -35,7 +37,8 @@ export type IValueSource =
     IValueRandomSource |
     IValueSumSource |
     IValueProductSource |
-    IValueRoundedSource;
+    IValueRoundedSource |
+    IValueAttributeReferenceSource;
 
 /**
  * Base schema for validating source JSON data
@@ -52,7 +55,7 @@ export const baseValueSchema = Joi.object({
 export const valueSchema = Joi.alternatives(
     Joi.number().required(),
     Joi.object({
-        type: Joi.valid('random', 'sum', 'product', 'round').required(),
+        type: Joi.valid('random', 'sum', 'product', 'round', 'attributeReference').required(),
         min: Joi.link('#valueSchema').when('type',
             { is: 'random', then: Joi.required(), otherwise: Joi.forbidden() }),
         max: Joi.link('#valueSchema').when('type',
@@ -69,6 +72,8 @@ export const valueSchema = Joi.alternatives(
         values: Joi.array().items(Joi.link('#valueSchema')).min(2).when('type',
             { is: Joi.valid('sum', 'product'), then: Joi.required(), otherwise: Joi.forbidden() }),
         value: Joi.link('#valueSchema').when('type',
-            { is: 'round', then: Joi.required(), otherwise: Joi.forbidden() })
+            { is: 'round', then: Joi.required(), otherwise: Joi.forbidden() }),
+        attribute: attributeReferenceSchema.when('type',
+            { is: 'attributeReference', then: Joi.required(), otherwise: Joi.forbidden() })
     }).required()
 ).id('valueSchema');

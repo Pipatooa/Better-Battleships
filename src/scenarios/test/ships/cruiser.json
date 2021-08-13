@@ -1,7 +1,10 @@
 {
   "descriptor": {
     "name": "Cruiser",
-    "description": ""
+    "description": "This is a cruiser"
   },
+  "abilities": [
+    "test-ability"
+  ],
   "attributes": {}
 }

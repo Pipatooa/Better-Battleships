@@ -1,4 +1,5 @@
 import Joi from 'joi';
+import {ParsingContext} from '../parsing-context';
 import {UnpackingError} from '../unpacker';
 import {Value} from './value';
 
@@ -27,11 +28,12 @@ export class ValueFixed extends Value {
 
     /**
      * Factory function to generate ValueFixed from JSON scenario data
+     * @param parsingContext Context for resolving scenario data
      * @param valueFixedSource JSON data for ValueFixed
      * @param skipSchemaCheck When true, skips schema validation step
      * @returns valueFixed -- Created ValueFixed object
      */
-    public static async fromSource(valueFixedSource: IValueFixedSource, skipSchemaCheck: boolean = false): Promise<ValueFixed> {
+    public static async fromSource(parsingContext: ParsingContext, valueFixedSource: IValueFixedSource, skipSchemaCheck: boolean = false): Promise<ValueFixed> {
 
         // Validate JSON data against schema
         if (!skipSchemaCheck) {

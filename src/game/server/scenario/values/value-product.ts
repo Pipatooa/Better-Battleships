@@ -1,4 +1,5 @@
 import Joi from 'joi';
+import {ParsingContext} from '../parsing-context';
 import {UnpackingError} from '../unpacker';
 import {Value} from './value';
 import {IValueMultipleSource, ValueMultiple, valueMultipleSchema} from './value-multiple';
@@ -31,11 +32,13 @@ export class ValueProduct extends ValueMultiple {
 
     /**
      * Factory function to generate ValueProduct from JSON scenario data
+     * @param parsingContext Context for resolving scenario data
+     * @param parsingContext Context for resolving scenario data
      * @param valueProductSource JSON data for ValueProduct
      * @param skipSchemaCheck When true, skips schema validation step
      * @returns valueSum -- Created ValueProduct object
      */
-    public static async fromSource(valueProductSource: IValueProductSource, skipSchemaCheck: boolean = false): Promise<ValueProduct> {
+    public static async fromSource(parsingContext: ParsingContext, valueProductSource: IValueProductSource, skipSchemaCheck: boolean = false): Promise<ValueProduct> {
 
         // Validate JSON data against schema
         if (!skipSchemaCheck) {
@@ -49,7 +52,7 @@ export class ValueProduct extends ValueMultiple {
         }
 
         // Unpack sub values
-        let subValues: Value[] = await ValueMultiple.getSubValues(valueProductSource.values);
+        let subValues: Value[] = await ValueMultiple.getSubValues(parsingContext, valueProductSource.values);
 
         // Return created ValueRandom object
         return new ValueProduct(subValues);

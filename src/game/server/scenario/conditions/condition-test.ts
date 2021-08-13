@@ -1,4 +1,5 @@
 import Joi from 'joi';
+import {ParsingContext} from '../parsing-context';
 import {UnpackingError} from '../unpacker';
 import {baseConditionSchema, Condition, IBaseConditionSource} from './condition';
 
@@ -31,11 +32,12 @@ export class ConditionTest extends Condition {
 
     /**
      * Factory function to generate ConditionTest from JSON scenario data
+     * @param parsingContext Context for resolving scenario data
      * @param conditionTestSource JSON data for ConditionTest
      * @param skipSchemaCheck When true, skips schema validation step
      * @returns conditionTest -- Created ConditionTest object
      */
-    public static async fromSource(conditionTestSource: IConditionTestSource, skipSchemaCheck: boolean = false): Promise<ConditionTest> {
+    public static async fromSource(parsingContext: ParsingContext, conditionTestSource: IConditionTestSource, skipSchemaCheck: boolean = false): Promise<ConditionTest> {
 
         // Validate JSON data against schema
         if (!skipSchemaCheck) {

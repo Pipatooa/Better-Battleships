@@ -1,5 +1,6 @@
 import Joi from 'joi';
 import {IDescriptor} from '../../../shared/i-descriptor';
+import {ParsingContext} from '../parsing-context';
 import {UnpackingError} from '../unpacker';
 
 /**
@@ -14,10 +15,11 @@ export class Descriptor implements IDescriptor {
 
     /**
      * Factory function to generate descriptor from JSON scenario data
+     * @param parsingContext Context for resolving scenario data
      * @param descriptorSource JSON data for descriptor
      * @returns descriptor -- Created Descriptor object
      */
-    public static async fromSource(descriptorSource: IDescriptorSource): Promise<Descriptor> {
+    public static async fromSource(parsingContext: ParsingContext, descriptorSource: IDescriptorSource): Promise<Descriptor> {
 
         // Validate JSON data against schema
         try {

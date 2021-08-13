@@ -1,4 +1,5 @@
 import Joi from 'joi';
+import {ParsingContext} from '../parsing-context';
 import {baseConditionSchema, Condition, conditionSchema, IBaseConditionSource, IConditionSource} from './condition';
 import {buildCondition} from './condition-builder';
 
@@ -22,11 +23,12 @@ export abstract class ConditionMultiple extends Condition {
 
     /**
      * Converts a list of sub condition sources into a list of conditions
+     * @param parsingContext Context for resolving scenario data
      * @param subConditionSources JSON data for sub conditions
      * @returns subConditions -- List of parsed Condition objects
      * @protected
      */
-    protected static async getSubConditions(subConditionSources: IConditionSource[]): Promise<Condition[]> {
+    protected static async getSubConditions(parsingContext: ParsingContext, subConditionSources: IConditionSource[]): Promise<Condition[]> {
 
         // List for created sub conditions
         let subConditions: Condition[] = [];
@@ -35,7 +37,7 @@ export abstract class ConditionMultiple extends Condition {
         for (let i = 0; i < subConditionSources.length; i++) {
 
             // Build condition from sub condition source and add to list
-            let subCondition = await buildCondition(subConditionSources[i], true);
+            let subCondition = await buildCondition(parsingContext, subConditionSources[i], true);
             subConditions.push(subCondition);
         }
 

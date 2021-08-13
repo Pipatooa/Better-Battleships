@@ -1,3 +1,4 @@
 import Joi from 'joi';
 
-export const genericNameSchema = Joi.string().regex(/[a-z\-]+/);
+export const genericNameRegex = /[a-zA-Z\-_]+/;
+export const genericNameSchema = Joi.string().regex(genericNameRegex);

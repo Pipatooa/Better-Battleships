@@ -1,7 +1,9 @@
 import Joi from 'joi';
+import {attributeSchema} from '../attributes/attribute';
 import {valueConstraintSchema} from '../constraints/value-constaint';
 import {IConditionAllSource} from './condition-all';
 import {IConditionAnySource} from './condition-any';
+import {IConditionAttributeSource} from './condition-attribute';
 import {IConditionSomeSource} from './condition-some';
 import {IConditionTestSource} from './condition-test';
 
@@ -42,7 +44,8 @@ export type IConditionSource =
     IConditionAnySource |
     IConditionAllSource |
     IConditionSomeSource |
-    IConditionTestSource
+    IConditionTestSource |
+    IConditionAttributeSource
 
 /**
  * Base schema for validating source JSON data
@@ -58,11 +61,13 @@ export const baseConditionSchema = Joi.object({
  * Able to verify all conditions
  */
 export const conditionSchema = baseConditionSchema.keys({
-    type: Joi.valid('any', 'all', 'some', 'test').required(),
+    type: Joi.valid('any', 'all', 'some', 'test', 'attribute').required(),
     subConditions: Joi.array().items(Joi.link('#condition')).min(2).when('type',
         { is: Joi.valid('any', 'all', 'some'), then: Joi.required(), otherwise: Joi.forbidden() }),
     valueConstraint: valueConstraintSchema.when('type',
         { is: 'some', then: Joi.required(), otherwise: Joi.forbidden() }),
     result: Joi.boolean().when('type',
-        { is: 'test', then: Joi.required(), otherwise: Joi.forbidden() })
+        { is: 'test', then: Joi.required(), otherwise: Joi.forbidden() }),
+    attribute: attributeSchema.when('type',
+        { is: 'attribute', then: Joi.required(), otherwise: Joi.forbidden() })
 }).id('condition');

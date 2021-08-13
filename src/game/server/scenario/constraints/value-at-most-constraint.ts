@@ -1,4 +1,5 @@
 import Joi from 'joi';
+import {ParsingContext} from '../parsing-context';
 import {UnpackingError} from '../unpacker';
 import {ValueConstraint} from './value-constaint';
 
@@ -21,11 +22,12 @@ export class ValueAtMostConstraint extends ValueConstraint {
 
     /**
      * Factory function to generate ValueAtMostConstraint from JSON scenario data
+     * @param parsingContext Context for resolving scenario data
      * @param valueAtMostConstraintSource JSON data for ValueAtMostConstraint
      * @param skipSchemaCheck When true, skips schema validation step
      * @returns valueAtMostConstraint -- Created ValueAtMostConstraint object
      */
-    public static async fromSource(valueAtMostConstraintSource: IValueAtMostConstraintSource, skipSchemaCheck: boolean = false) {
+    public static async fromSource(parsingContext: ParsingContext, valueAtMostConstraintSource: IValueAtMostConstraintSource, skipSchemaCheck: boolean = false) {
 
         // Validate JSON data against schema
         if (!skipSchemaCheck) {
