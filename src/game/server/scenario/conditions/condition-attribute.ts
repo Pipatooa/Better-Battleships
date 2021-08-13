@@ -33,7 +33,7 @@ export class ConditionAttribute extends Condition {
      */
     public check(): boolean {
         // Check attribute value against value constraint
-        let result = this.valueConstraint.check(this.attribute.value);
+        let result: boolean = this.valueConstraint.check(this.attribute.value);
 
         // Return result (invert if necessary)
         return this.inverted ? !result : result;
@@ -60,10 +60,10 @@ export class ConditionAttribute extends Condition {
         }
 
         // Get attribute
-        let attribute = parsingContext.getAttribute(parsingContext, conditionAttributeSource.attribute);
+        let attribute: Attribute = parsingContext.getAttribute(parsingContext, conditionAttributeSource.attribute);
 
         // Get value constraint
-        let valueConstraint = await buildValueConstraint(parsingContext, conditionAttributeSource.valueConstraint, true);
+        let valueConstraint: ValueConstraint = await buildValueConstraint(parsingContext, conditionAttributeSource.valueConstraint, true);
 
         // Return created ConditionAttribute object
         return new ConditionAttribute(attribute, valueConstraint, conditionAttributeSource.inverted);
@@ -76,7 +76,7 @@ export class ConditionAttribute extends Condition {
 export interface IConditionAttributeSource extends IBaseConditionSource {
     type: 'attribute';
     attribute: AttributeReference;
-    valueConstraint: IValueConstraintSource
+    valueConstraint: IValueConstraintSource;
 }
 
 /**

@@ -50,7 +50,7 @@ export class ValueEqualConstraint extends ValueConstraint {
      * @returns boolean -- Whether value met this constraint
      */
     public check(value: number): boolean {
-        return value == this.target;
+        return value === this.target;
     }
 
     /**

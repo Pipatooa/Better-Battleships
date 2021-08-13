@@ -27,7 +27,7 @@ export class ValueAtLeastConstraint extends ValueConstraint {
      * @param skipSchemaCheck When true, skips schema validation step
      * @returns valueAtLeastConstraint -- Created ValueAtLeastConstraint object
      */
-    public static async fromSource(parsingContext: ParsingContext, valueAtLeastConstraintSource: IValueAtLeastConstraintSource, skipSchemaCheck: boolean = false) {
+    public static async fromSource(parsingContext: ParsingContext, valueAtLeastConstraintSource: IValueAtLeastConstraintSource, skipSchemaCheck: boolean = false): Promise<ValueAtLeastConstraint> {
 
         // Validate JSON data against schema
         if (!skipSchemaCheck) {

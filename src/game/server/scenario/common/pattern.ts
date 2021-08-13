@@ -10,7 +10,7 @@ import {Rotation} from './rotation';
  */
 export class Pattern {
 
-    protected readonly patternEntryMap: { [key: string]: number};
+    protected readonly patternEntryMap: { [key: string]: number };
 
     /**
      * Pattern constructor
@@ -23,7 +23,7 @@ export class Pattern {
         this.patternEntryMap = {};
 
         for (const patternEntry of patternEntries) {
-            let key = `${patternEntry.x},${patternEntry.y}`
+            let key: string = `${patternEntry.x},${patternEntry.y}`;
             this.patternEntryMap[key] = patternEntry.value;
         }
     }
@@ -34,11 +34,11 @@ export class Pattern {
      * @returns newPattern -- New Pattern object with all entries rotated about the center of the pattern
      */
     public rotated(rotation: Rotation): Pattern {
-        let patternEntries = this.patternEntries.map((patternEntry) => {
+        let patternEntries: PatternEntry[] = this.patternEntries.map((patternEntry: PatternEntry) => {
 
             // Get dx and dy of pattern entry from pattern center
-            let dx = patternEntry.x - this.center[0];
-            let dy = patternEntry.y - this.center[1];
+            let dx: number = patternEntry.x - this.center[0];
+            let dy: number = patternEntry.y - this.center[1];
 
             let newDx: number;
             let newDy: number;
@@ -60,8 +60,8 @@ export class Pattern {
             }
 
             // Offset new dx and dy from pattern center
-            let newX = newDx + this.center[0];
-            let newY = newDy + this.center[1];
+            let newX: number = newDx + this.center[0];
+            let newY: number = newDy + this.center[1];
 
             return new PatternEntry(newX, newY, patternEntry.value);
         });
@@ -78,7 +78,7 @@ export class Pattern {
      * @returns value -- Value at position
      */
     public query(x: number, y: number): number {
-        let key = `${x},${y}`;
+        let key: string = `${x},${y}`;
 
         // If query position is not within the pattern
         if (!(key in this.patternEntryMap))
@@ -105,7 +105,7 @@ export class Pattern {
      * @param skipSchemaCheck When true, skips schema validation step
      * @returns pattern -- Created Pattern object
      */
-    public static async fromSource(parsingContext: ParsingContext, patternSource: IPatternSource, skipSchemaCheck: boolean = false) {
+    public static async fromSource(parsingContext: ParsingContext, patternSource: IPatternSource, skipSchemaCheck: boolean = false): Promise<Pattern> {
 
         // Validate JSON against schema
         if (!skipSchemaCheck) {
@@ -127,35 +127,35 @@ export class Pattern {
         }
 
         // Ensure that the number of entries in 'pattern' matches the declared size of the pattern
-        if (patternSource.pattern.length != patternSource.size[1])
+        if (patternSource.pattern.length !== patternSource.size[1])
             throw new UnpackingError(`"pattern" must contain ${patternSource.size[1]} items to match "size[1]"`);
 
         // Calculate center of the pattern
-        let centerX = (patternSource.size[0] - 1) / 2;
-        let centerY = (patternSource.size[1] - 1) / 2;
+        let centerX: number = (patternSource.size[0] - 1) / 2;
+        let centerY: number = (patternSource.size[1] - 1) / 2;
 
         // Unpack pattern data
         let patternEntries: PatternEntry[] = [];
-        for (let y = 0; y < patternSource.pattern.length; y++){
-            const row = patternSource.pattern[y];
+        for (let y = 0; y < patternSource.pattern.length; y++) {
+            const row: string = patternSource.pattern[y];
 
             // Ensure that the number of patterns entries within a row matches the declared size of the board
-            if (row.length != patternSource.size[0])
+            if (row.length !== patternSource.size[0])
                 throw new UnpackingError(`"pattern[${y}]" length must be ${patternSource.size[0]} characters long to match "size[0]"`);
 
             // Iterate through each character, each representing a pattern entry
             for (let x = 0; x < patternSource.size[0]; x++) {
-                let c = row.charAt(x);
+                let c: string = row.charAt(x);
 
                 // If character did not match any value within the values map
                 if (!(c in values))
                     throw new UnpackingError(`Could not find value for the character '${c}' in value map at pattern[${y}][${x}]`);
 
                 // Get value for entry
-                let value = values[c];
+                let value: number = values[c];
 
                 // If entry has no value, do not store it in the pattern
-                if (value == 0)
+                if (value === 0)
                     continue;
 
                 // Create new entry and store in pattern entries

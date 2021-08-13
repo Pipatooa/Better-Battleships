@@ -9,9 +9,9 @@ import {ValueEqualConstraint} from './value-equal-constraint';
 import {ValueInRangeConstraint} from './value-in-range-constraint';
 
 /**
- * Factory function to generate value constraint from JSON scenario data
+ * Factory function to generate ValueConstraint from JSON scenario data
  * @param parsingContext Context for resolving scenario data
- * @param valueConstraintSource JSON data for value constraint
+ * @param valueConstraintSource JSON data for ValueConstraint
  * @param skipSchemaCheck When true, skips schema validation step
  * @returns valueConstraint -- Created ValueConstraint object
  */
@@ -31,7 +31,7 @@ export async function buildValueConstraint(parsingContext: ParsingContext, value
     let valueConstraint: ValueConstraint | undefined;
 
     // Create EmptyValueConstraint if object is empty
-    if (Object.keys(valueConstraintSource).length == 0)
+    if (Object.keys(valueConstraintSource).length === 0)
         valueConstraint = new EmptyValueConstraint();
 
     // Create ValueEqualConstraint
@@ -50,6 +50,7 @@ export async function buildValueConstraint(parsingContext: ParsingContext, value
     else
         valueConstraint = await ValueAtMostConstraint.fromSource(parsingContext, valueConstraintSource, true);
 
+    // Return created ValueConstraint object
     return valueConstraint;
 }
 

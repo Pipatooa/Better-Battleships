@@ -48,11 +48,11 @@ export class Scenario implements IAttributeHolder {
         parsingContext = parsingContext.withScenarioAttributes(attributes);
 
         // Get descriptor
-        let descriptor: Descriptor = await Descriptor.fromSource(parsingContext, scenarioSource.descriptor);
+        let descriptor = await Descriptor.fromSource(parsingContext, scenarioSource.descriptor);
 
         // Get board
-        let boardSource = await getJSONFromEntry(parsingContext.boardEntry) as unknown as IBoardSource;
-        let board: Board = await Board.fromSource(parsingContext, boardSource);
+        let boardSource: IBoardSource = await getJSONFromEntry(parsingContext.boardEntry) as unknown as IBoardSource;
+        let board = await Board.fromSource(parsingContext, boardSource);
 
         // Get teams
         let teams: { [name: string]: Team } = {};
@@ -63,7 +63,7 @@ export class Scenario implements IAttributeHolder {
                 throw new UnpackingError(`Could not find 'teams/${teamName}.json'`).withContext('scenario.json');
 
             // Unpack team data
-            let teamSource = await getJSONFromEntry(parsingContext.teamEntries[teamName]) as unknown as ITeamSource;
+            let teamSource: ITeamSource = await getJSONFromEntry(parsingContext.teamEntries[teamName]) as unknown as ITeamSource;
 
             try {
                 teams[teamName] = await Team.fromSource(parsingContext, teamSource);

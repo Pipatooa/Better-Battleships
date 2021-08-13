@@ -24,7 +24,7 @@ export class ParsingContext {
 
         [selectorStr, attributeName] = attributePath.split('.');
 
-        let attributeSelector = selectorStr as AttributeSelector;
+        let attributeSelector: 'scenario' | 'team' | 'player' | 'ship' | 'ability' = selectorStr as AttributeSelector;
         let attributeMap: AttributeMap | undefined;
 
         switch (attributeSelector) {
@@ -45,23 +45,23 @@ export class ParsingContext {
                 break;
         }
 
-        if (attributeMap == undefined || !(attributeName in attributeMap))
+        if (attributeMap === undefined || !(attributeName in attributeMap))
             throw new UnpackingError(`Could not find attribute '${attributePath}' in current context '${this.getContextName()}'`);
 
         return attributeMap[attributeName];
     }
 
     public getContextName(): AttributeSelector {
-        if (!(this.abilityAttributes == undefined))
+        if (this.abilityAttributes !== undefined)
             return 'ability';
 
-        if (!(this.shipAttributes == undefined))
+        if (this.shipAttributes !== undefined)
             return 'ship';
 
-        if (!(this.playerAttributes == undefined))
+        if (this.playerAttributes !== undefined)
             return 'player';
 
-        if (!(this.teamAttributes == undefined))
+        if (this.teamAttributes !== undefined)
             return 'team';
 
         return 'scenario';

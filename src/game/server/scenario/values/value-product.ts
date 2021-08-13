@@ -22,9 +22,9 @@ export class ValueProduct extends ValueMultiple {
         let product: number = 1;
 
         // Loop through sub values and add to running product
-        this.subValues.forEach((subValue) => {
+        for (const subValue of this.subValues) {
             product *= subValue.evaluate();
-        });
+        }
 
         // Return product
         return product;

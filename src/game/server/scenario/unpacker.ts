@@ -15,7 +15,7 @@ export type ZipEntryMap = { [name: string]: IZipEntry };
 export async function unpack(scenarioZip: AdmZip): Promise<any> {
 
     // Get a list of all zip entries
-    let zipEntries = scenarioZip.getEntries();
+    let zipEntries: AdmZip.IZipEntry[] = scenarioZip.getEntries();
 
     // Get entries for named objects
     let abilityEntries: ZipEntryMap = {};
@@ -23,12 +23,12 @@ export async function unpack(scenarioZip: AdmZip): Promise<any> {
     let playerPrototypeEntries: ZipEntryMap = {};
     let teamEntries: ZipEntryMap = {};
 
-    zipEntries.forEach((entry) => {
+    for (const entry of zipEntries) {
 
         // Check entry regex
-        let result = /^(abilities|ships|players|teams)\/([a-z\-]+).json$/.exec(entry.entryName);
-        if (result == null)
-            return;
+        let result: RegExpExecArray | null = /^(abilities|ships|players|teams)\/([a-z\-]+).json$/.exec(entry.entryName);
+        if (result === null)
+            continue;
 
         // Put entry in correct array of entries
         switch (result[1]) {
@@ -45,23 +45,23 @@ export async function unpack(scenarioZip: AdmZip): Promise<any> {
                 teamEntries[result[2]] = entry;
                 break;
         }
-    });
+    }
 
     // Board data
-    let boardEntry = await getEntryFromZip(scenarioZip, 'board.json');
+    let boardEntry: IZipEntry = await getEntryFromZip(scenarioZip, 'board.json');
 
     // Create parsing context
     let parsingContext = new ParsingContext(boardEntry, teamEntries, playerPrototypeEntries, shipEntries, abilityEntries);
 
     // Scenario data
-    let scenarioEntry = await getEntryFromZip(scenarioZip, 'scenario.json');
-    let scenarioSource = await getJSONFromEntry(scenarioEntry) as unknown as IScenarioSource;
-    let scenario: Scenario = await Scenario.fromSource(parsingContext, scenarioSource);
+    let scenarioEntry: IZipEntry = await getEntryFromZip(scenarioZip, 'scenario.json');
+    let scenarioSource: IScenarioSource = await getJSONFromEntry(scenarioEntry) as unknown as IScenarioSource;
+    let scenario = await Scenario.fromSource(parsingContext, scenarioSource);
 
     // Test data
-    let testEntry = await getEntryFromZip(scenarioZip, 'test.json');
-    let testSource = await getJSONFromEntry(testEntry) as unknown as IPatternSource;
-    let test: Pattern = await Pattern.fromSource(parsingContext, testSource);
+    let testEntry: IZipEntry = await getEntryFromZip(scenarioZip, 'test.json');
+    let testSource: IPatternSource = await getJSONFromEntry(testEntry) as unknown as IPatternSource;
+    let test = await Pattern.fromSource(parsingContext, testSource);
 
     return [scenario, test,
         test.rotated(Rotation.Clockwise90),
@@ -95,7 +95,7 @@ export async function getJSONFromEntry(zipEntry: IZipEntry): Promise<JSON> {
     return new Promise<JSON>((resolve, reject) => {
 
         // Decompress and retrieve data
-        zipEntry.getDataAsync(async (data) => {
+        zipEntry.getDataAsync(async (data: Buffer) => {
             // Try to parse data as JSON
             let json: JSON;
             try {
@@ -163,6 +163,6 @@ export class UnpackingError extends Error {
      * @returns boolean Whether this unpacking error has a context set already
      */
     public hasContext(): boolean {
-        return this._context != undefined;
+        return this._context !== undefined;
     }
 }

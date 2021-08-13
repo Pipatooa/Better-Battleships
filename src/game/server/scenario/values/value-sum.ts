@@ -22,9 +22,9 @@ export class ValueSum extends ValueMultiple {
         let sum: number = 0;
 
         // Loop through sub values and add to running sum
-        this.subValues.forEach((subValue) => {
+        for (const subValue of this.subValues) {
             sum += subValue.evaluate();
-        });
+        }
 
         // Return sum
         return sum;

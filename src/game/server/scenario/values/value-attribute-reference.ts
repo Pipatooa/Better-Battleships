@@ -6,18 +6,15 @@ import {UnpackingError} from '../unpacker';
 import {baseValueSchema, IBaseValueSource, Value} from './value';
 
 /**
- * ValueRandom - Server Version
+ * ValueAttributeReference - Server Version
  *
- * When evaluated, returns a random value between a minimum and maximum value
- *
- * Optionally, the value can be given as a multiple of a step value
- *
- * If generateOnce is true, the random value will be generated once and returned for all new evaluation calls
+ * When evaluated, returns the value that an attribute currently holds
  */
 export class ValueAttributeReference extends Value {
     /**
-     * ValueRandom constructor
-     * @param attribute     * @protected
+     * ValueAttributeReference constructor
+     * @param attribute Attribute to take value from
+     * @protected
      */
     protected constructor(public readonly attribute: Attribute) {
         super();
@@ -51,7 +48,7 @@ export class ValueAttributeReference extends Value {
         }
 
         // Get attribute
-        let attribute = parsingContext.getAttribute(parsingContext, valueAttributeReferenceSource.attribute);
+        let attribute: Attribute = parsingContext.getAttribute(parsingContext, valueAttributeReferenceSource.attribute);
 
         // Return created ValueAttributeReference object
         return new ValueAttributeReference(attribute);

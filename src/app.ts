@@ -41,6 +41,6 @@ socketRegister(wss);
 
 // Start the server
 server.listen(port, () => {
-    const datetime: Date = new Date();
+    const datetime = new Date();
     console.log(`Started server on port ${port}. The time is ${datetime.toLocaleTimeString()}`);
 });

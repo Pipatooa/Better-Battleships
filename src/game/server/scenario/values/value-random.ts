@@ -41,12 +41,12 @@ export class ValueRandom extends Value {
     protected getRandom(): number {
 
         // Evaluate sub-values to numbers
-        let min = this.min.evaluate();
-        let max = this.max.evaluate();
-        let step = this.step?.evaluate();
+        let min: number = this.min.evaluate();
+        let max: number = this.max.evaluate();
+        let step: number | undefined = this.step?.evaluate();
 
         // Returns free-floating random value between min and max
-        if (step == undefined) {
+        if (step === undefined) {
             return Math.random() * (max - min) + min;
         }
 
@@ -59,7 +59,7 @@ export class ValueRandom extends Value {
      */
     public evaluate(): number {
         if (this.generateOnce) {
-            if (this.generatedValue == undefined)
+            if (this.generatedValue === undefined)
                 this.generatedValue = this.getRandom();
 
             return this.generatedValue;
@@ -89,9 +89,9 @@ export class ValueRandom extends Value {
         }
 
         // Unpack min, max and step values
-        let min = await buildValue(parsingContext, valueRandomSource.min, true);
-        let max = await buildValue(parsingContext, valueRandomSource.max, true);
-        let step = valueRandomSource.step == undefined ?
+        let min: Value = await buildValue(parsingContext, valueRandomSource.min, true);
+        let max: Value = await buildValue(parsingContext, valueRandomSource.max, true);
+        let step: Value | undefined = valueRandomSource.step === undefined ?
             undefined :
             await buildValue(parsingContext, valueRandomSource.step, true);
 

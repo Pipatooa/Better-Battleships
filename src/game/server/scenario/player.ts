@@ -65,7 +65,7 @@ export class Player implements IAttributeHolder {
                 throw new UnpackingError(`Could not find 'ships/${shipName}.json'`);
 
             // Unpack ship data
-            let shipSource = await getJSONFromEntry(parsingContext.shipEntries[shipName]) as unknown as IShipSource;
+            let shipSource: IShipSource = await getJSONFromEntry(parsingContext.shipEntries[shipName]) as unknown as IShipSource;
 
             try {
                 ships.push(await Ship.fromSource(parsingContext, shipSource));

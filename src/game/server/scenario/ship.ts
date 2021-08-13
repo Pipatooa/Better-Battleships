@@ -29,7 +29,7 @@ export class Ship implements IAttributeHolder {
      * Rotates the ship in place
      * @param rotation Amount to rotate ship by
      */
-    public rotate(rotation: Rotation) {
+    public rotate(rotation: Rotation): void {
         this._pattern = this._pattern.rotated(rotation);
     }
 
@@ -42,11 +42,11 @@ export class Ship implements IAttributeHolder {
         let cells: [number, number][] = [];
 
         // Iterate through entries in pattern
-        this._pattern.forEachEntry((dx, dy, value) => {
+        this._pattern.forEachEntry((dx: number, dy: number, value: number) => {
 
             // Offset pattern entries by the position of the ship and offset provided
-            let x = dx + this.x + offset[0];
-            let y = dy + this.y + offset[1];
+            let x: number = dx + this.x + offset[0];
+            let y: number = dy + this.y + offset[1];
 
             // Add cell coordinate to list of cells
             cells.push([x, y]);
@@ -83,10 +83,10 @@ export class Ship implements IAttributeHolder {
         parsingContext = parsingContext.withShipAttributes(attributes);
 
         // Get descriptor
-        let descriptor: Descriptor = await Descriptor.fromSource(parsingContext, shipSource.descriptor);
+        let descriptor = await Descriptor.fromSource(parsingContext, shipSource.descriptor);
 
         // Get pattern
-        let pattern: Pattern = await Pattern.fromSource(parsingContext, shipSource.pattern);
+        let pattern = await Pattern.fromSource(parsingContext, shipSource.pattern);
 
         // Get abilities
         let abilities: { [name: string]: Ability } = {};
@@ -101,7 +101,7 @@ export class Ship implements IAttributeHolder {
                 throw new UnpackingError(`Cannot define `);
 
             // Unpack ability data
-            let abilitySource = await getJSONFromEntry(parsingContext.abilityEntries[abilityName]) as unknown as IAbilitySource;
+            let abilitySource: IAbilitySource = await getJSONFromEntry(parsingContext.abilityEntries[abilityName]) as unknown as IAbilitySource;
 
             try {
                 abilities[abilityName] = await Ability.fromSource(parsingContext, abilitySource);

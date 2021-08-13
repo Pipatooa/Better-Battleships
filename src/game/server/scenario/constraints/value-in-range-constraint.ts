@@ -31,7 +31,7 @@ export class ValueInRangeConstraint extends ValueConstraint {
      * @param skipSchemaCheck When true, skips schema validation step
      * @returns valueInRangeConstraint -- Created ValueInRangeConstraint object
      */
-    public static async fromSource(parsingContext: ParsingContext, valueInRangeConstraintSource: IValueInRangeConstraintSource, skipSchemaCheck: boolean = false) {
+    public static async fromSource(parsingContext: ParsingContext, valueInRangeConstraintSource: IValueInRangeConstraintSource, skipSchemaCheck: boolean = false): Promise<ValueInRangeConstraint> {
 
         // Validate JSON data against schema
         if (!skipSchemaCheck) {

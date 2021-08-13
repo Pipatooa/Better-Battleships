@@ -61,16 +61,16 @@ export class Team implements IAttributeHolder {
         parsingContext = parsingContext.withTeamAttributes(attributes);
 
         // Get descriptor
-        let descriptor: Descriptor = await Descriptor.fromSource(parsingContext, teamSource.descriptor);
+        let descriptor = await Descriptor.fromSource(parsingContext, teamSource.descriptor);
 
         // Get player prototypes for each possible player count
         let playerPrototypes: Player[][] = [];
         for (let i = 0; i < teamSource.playerConfigs.length; i++) {
-            let playerConfigs = teamSource.playerConfigs[i];
-            let playerCount = i + 1;
+            let playerConfigs: IPlayerConfig[] = teamSource.playerConfigs[i];
+            let playerCount: number = i + 1;
 
             // Check player count and length of specified player configs are the same
-            if (playerCount != playerConfigs.length)
+            if (playerCount !== playerConfigs.length)
                 throw new UnpackingError(`'playerConfigs[${i}]' must contain ${playerCount} items`);
 
             // Get players from player configs
@@ -82,7 +82,7 @@ export class Team implements IAttributeHolder {
                     throw new UnpackingError(`Could not find 'players/${playerConfig.playerPrototype}.json'`);
 
                 // Unpack player
-                let playerSource = await getJSONFromEntry(parsingContext.playerPrototypeEntries[playerConfig.playerPrototype]) as unknown as IPlayerSource;
+                let playerSource: IPlayerSource = await getJSONFromEntry(parsingContext.playerPrototypeEntries[playerConfig.playerPrototype]) as unknown as IPlayerSource;
 
                 try {
                     players.push(await Player.fromSource(parsingContext, playerConfig.spawnRegion, playerSource));

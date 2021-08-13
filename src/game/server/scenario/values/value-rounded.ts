@@ -28,7 +28,7 @@ export class ValueRounded extends Value {
     public evaluate(): number {
 
         // Evaluate step value once in-case it is changing
-        let step = this.step.evaluate();
+        let step: number = this.step.evaluate();
 
         // Round evaluated sub-value and round to nearest multiple of step
         return Math.round(this.value.evaluate() / step) * step;
@@ -55,8 +55,8 @@ export class ValueRounded extends Value {
         }
 
         // Get value and step
-        let value = await buildValue(parsingContext, valueRoundedSource.value, true);
-        let step = await buildValue(parsingContext, valueRoundedSource.step, true);
+        let value: Value = await buildValue(parsingContext, valueRoundedSource.value, true);
+        let step: Value = await buildValue(parsingContext, valueRoundedSource.step, true);
 
         // Return created ValueRounded object
         return new ValueRounded(value, step);

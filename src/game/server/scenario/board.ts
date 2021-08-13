@@ -17,7 +17,7 @@ export class Board {
     }
 
     /**
-     * Factory function to generate board from JSON scenario data
+     * Factory function to generate Board from JSON scenario data
      * @param parsingContext Context for resolving scenario data
      * @param boardSource JSON data from 'board.json'
      * @returns board -- Created Board object
@@ -43,33 +43,34 @@ export class Board {
         }
 
         // Ensure that the number of entries in 'tiles' matches the declared size of the board
-        if (boardSource.tiles.length != boardSource.size[1])
+        if (boardSource.tiles.length !== boardSource.size[1])
             throw new UnpackingError(`"tiles" must contain ${boardSource.size[1]} items to match "size[1]"`);
 
         // Unpack tile data
         let tiles: Tile[][] = [];
-        boardSource.tiles.forEach((row, y) => {
+        for (let y = 0; y < boardSource.tiles.length; y++) {
+            const row: string = boardSource.tiles[y];
 
             // Ensure that the number of tiles within a row matches the declared size of the board
-            if (row.length != boardSource.size[0])
+            if (row.length !== boardSource.size[0])
                 throw new UnpackingError(`"tiles[${y}]" length must be ${boardSource.size[0]} characters long to match "size[0]"`);
 
             // Iterate through each character, each representing a tile
             for (let x = 0; x < boardSource.size[0]; x++) {
-                let c = row.charAt(x);
+                let c: string = row.charAt(x);
 
                 // If character did not match any tile type within the palette
                 if (!(c in palette))
                     throw new UnpackingError(`Could not find tile of type '${c}' in palette at tiles[${y}][${x}] (x=${boardSource.size[0] - x},y=${boardSource.size[1] - y})`);
 
                 // Create and store new tile created from tile type
-                let tileType = palette[c];
+                let tileType: TileType = palette[c];
                 let tile = new Tile(x, y, tileType);
-                if (y == 0)
+                if (y === 0)
                     tiles[x] = [];
                 tiles[x][y] = tile;
             }
-        });
+        }
 
         // Return created Board object
         return new Board(tiles, []);
@@ -96,10 +97,10 @@ export const boardSchema = Joi.object({
     palette: Joi.object().pattern(Joi.string().length(1), tileTypeSchema).required(),
     regionPalette: Joi.object().pattern(Joi.string().length(1), Joi.array().items(genericNameSchema)).required(),
     tiles: Joi.array().items(
-        Joi.string()
-    ).required(),
+        Joi.string().min(5)
+    ).min(5).required(),
     regions: Joi.array().items(
-        Joi.string()
-    ).required(),
+        Joi.string().min(5)
+    ).min(5).required(),
     generators: Joi.array().items(tileGeneratorSchema).required()
 });
