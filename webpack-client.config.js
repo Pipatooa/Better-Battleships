@@ -3,7 +3,8 @@ const PnpWebpackPlugin = require('pnp-webpack-plugin');
 
 module.exports = {
     entry: {
-        game: './src/game/client/game.ts'
+        'game': './src/game/client/game.ts',
+        'create-game': './src/game/client/create-game.ts'
     },
     resolve: {
         extensions: ['.js', '.json', '.ts'],

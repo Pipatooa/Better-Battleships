@@ -5,6 +5,7 @@ canvas {
 .file-drop {
     border: var(--bs-dark) 2px dashed;
     border-radius: 5px;
+
     background: #DDD;
     transition: 150ms linear;
 

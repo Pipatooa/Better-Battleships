@@ -1,7 +1,6 @@
 import Joi from 'joi';
 import {ParsingContext} from '../parsing-context';
 import {checkAgainstSchema} from '../schema-checker';
-import {valueAtLeastConstraintSchema} from './value-at-least-constraint';
 import {ValueConstraint} from './value-constaint';
 
 /**

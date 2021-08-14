@@ -23,7 +23,7 @@
     "testAttribute": {
       "initialValue": {
         "type": "attributeReference",
-        "attribute": "player.shiCount"
+        "attribute": "player.shipCount"
       },
       "constraints": [],
       "readonly": false

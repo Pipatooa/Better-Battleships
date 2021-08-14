@@ -1,12 +1,11 @@
 import ChangeEvent = JQuery.ChangeEvent;
-import ClickEvent = JQuery.ClickEvent;
-import DragEnterEvent = JQuery.DragEnterEvent;
-import DragExitEvent = JQuery.DragExitEvent;
 import DragOverEvent = JQuery.DragOverEvent;
 import DropEvent = JQuery.DropEvent;
 
 const fileDrop = $('#file-drop');
 const fileSelect = $('<input type="file" id="file-select" style="display: none;">');
+
+export let file: File;
 
 export function bindFileDrop() {
     fileDrop.on('drop', onDrop);
@@ -22,7 +21,7 @@ function onDrop(ev: DropEvent) {
 
     let files = ev.originalEvent?.dataTransfer?.files;
     if (files?.length) {
-        handleFile(files[0]);
+        file = files[0];
     }
 
     fileDrop.removeClass('file-drop-highlighted');
@@ -32,38 +31,23 @@ function onDragOver(ev: DragOverEvent) {
     ev.preventDefault();
 }
 
-function onDragEnter(ev: DragEnterEvent) {
+function onDragEnter() {
     fileDrop.addClass('file-drop-highlighted');
 }
 
-function onDragExit(ev: DragExitEvent) {
+function onDragExit() {
     fileDrop.removeClass('file-drop-highlighted');
 }
 
-function onClick(ev: ClickEvent) {
+function onClick() {
     fileSelect.trigger('click');
 }
 
 function onChange(ev: ChangeEvent) {
     let files = ev.currentTarget.files;
     if (files.length) {
-        handleFile(files[0]);
+        file = files[0];
     }
-}
-
-function handleFile(file: File) {
-    console.log(file);
-
-    let formData = new FormData();
-    formData.append('file', file);
-    formData.append('test', 'hello');
-
-    fetch('/game/create', {
-        method: 'POST',
-        body: formData
-    }).then(r => {
-        console.log(r);
-    });
 }
 
 export function unbindFileDrop() {

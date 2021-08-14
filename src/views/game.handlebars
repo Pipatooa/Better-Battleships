@@ -1,19 +1,19 @@
-<div class="py-5 jumbotron text-center">
-    <h1>Better Battleships</h1>
-    <p>This is some text about Better Battleships!</p>
-</div>
+{{> better-battleships-banner}}
 
 <div class="container row text-center mx-auto">
-    <div class="col-md-8">
-        <h3>Play Grid Test</h3>
-        <canvas class="w-75" id="game-canvas" width="300" height="300">
+    <div class="col-md">
+        <canvas class="w-100" id="game-canvas" width="300" height="300">
             Sorry, your browser does not support the canvas element.
         </canvas>
     </div>
-    <div class="col-md-4">
-        <h3>Title</h3>
-        <div class="file-drop w-100 align-items-center row mx-auto" id="file-drop">
-            <span class="py-3">Drag and drop scenario file here.</span>
-        </div>
+    <div class="col-md">
+        <h3>Right Panel</h3>
+    </div>
+</div>
+
+<div class="container text-center py-3 my-5 w-50 grey-container">
+    <h3>Invite link:</h3>
+    <div>
+        <p class="px-2 mx-auto" style="width: max-content;" id="share-link" data-toggle="tooltip" data-bs-placement="right"  title="Copy to clipboard">{{baseUrl}}{{gameUrl}}</p>
     </div>
 </div>

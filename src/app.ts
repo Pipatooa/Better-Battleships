@@ -5,7 +5,7 @@ import http from 'http';
 import WebSocket from 'isomorphic-ws';
 import path from 'path';
 
-import socketRegister from './game/server/sockets';
+import socketRegister from './game/server/sockets/register';
 
 import gameRouter from './routes/game';
 import gameCreateRouter from './routes/game/create';
@@ -24,7 +24,7 @@ app.set('view engine', 'handlebars');
 
 // Set handlebars variables
 app.locals.siteName = 'Better Battleships';
-app.locals.baseUrl = '';
+app.locals.baseUrl = 'http://localhost:8080';
 
 // Express middleware setup
 app.use(express.json());
@@ -33,8 +33,8 @@ app.use(cookieParser());
 app.use(express.static(path.join(process.cwd(), 'public')));
 
 // Register route handlers for express
-app.use('/game', gameRouter);
 app.use('/game/create', gameCreateRouter);
+app.use('/game', gameRouter);
 
 // Register socket handles for the websocket server
 socketRegister(wss);

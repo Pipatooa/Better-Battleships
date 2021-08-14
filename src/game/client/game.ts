@@ -1,15 +1,23 @@
-import {bindFileDrop} from './filedrop';
-/*import {Grid, tileTypeA} from "../shared/grid";
-import {Renderer} from "./canvas/renderer";
-import {GridRenderer} from "./canvas/gridRenderer";
-import e from './sockets/test';*/
+import {openSocketConnection} from './sockets/opener';
 
-/*export let grid = new Grid(10, 10, tileTypeA);
-grid.generateTestTiles();
+openSocketConnection();
 
-let baseRenderer = new Renderer('#game-canvas')
-let gridRenderer = new GridRenderer(baseRenderer, grid);*/
+$(document).ready(() => {
+    let shareLinkElement = $('#share-link');
 
-bindFileDrop();
+    (shareLinkElement as any).tooltip();
 
-// console.log(e);
+    shareLinkElement.on('click', () => {
+        let temp = $('<input>');
+        $('body').append(temp);
+        temp.val(shareLinkElement.html()).select();
+        document.execCommand('copy');
+        temp.remove();
+        shareLinkElement.attr('data-bs-original-title', 'Copied to clipboard!');
+        (shareLinkElement as any).tooltip('show');
+    });
+
+    shareLinkElement.on('hidden.bs.tooltip', () => {
+        shareLinkElement.attr('data-bs-original-title', 'Copy to clipboard');
+    });
+});

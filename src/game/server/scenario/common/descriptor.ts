@@ -1,5 +1,4 @@
 import Joi from 'joi';
-import {IDescriptor} from '../../../shared/i-descriptor';
 import {ParsingContext} from '../parsing-context';
 import {checkAgainstSchema} from '../schema-checker';
 
@@ -8,7 +7,7 @@ import {checkAgainstSchema} from '../schema-checker';
  *
  * Stores a name and a description for another object
  */
-export class Descriptor implements IDescriptor {
+export class Descriptor {
     constructor(public readonly name: string,
                 public readonly description: string) {
     }
