@@ -1,6 +1,6 @@
 import Joi from 'joi';
 import {ParsingContext} from '../parsing-context';
-import {UnpackingError} from '../unpacker';
+import {checkAgainstSchema} from '../schema-checker';
 import {ValueConstraint} from './value-constaint';
 
 /**
@@ -24,21 +24,14 @@ export class ValueEqualConstraint extends ValueConstraint {
      * Factory function to generate ValueEqualConstraint from JSON scenario data
      * @param parsingContext Context for resolving scenario data
      * @param valueEqualConstraintSource JSON data for ValueEqualConstraint
-     * @param skipSchemaCheck When true, skips schema validation step
+     * @param checkSchema When true, validates source JSON data against schema
      * @returns valueEqualConstraint -- Created ValueEqualConstraint object
      */
-    public static async fromSource(parsingContext: ParsingContext, valueEqualConstraintSource: IValueEqualConstraintSource, skipSchemaCheck: boolean = false): Promise<ValueEqualConstraint> {
+    public static async fromSource(parsingContext: ParsingContext, valueEqualConstraintSource: IValueEqualConstraintSource, checkSchema: boolean): Promise<ValueEqualConstraint> {
 
         // Validate JSON data against schema
-        if (!skipSchemaCheck) {
-            try {
-                valueEqualConstraintSource = await valueEqualConstraintSchema.validateAsync(valueEqualConstraintSource);
-            } catch (e) {
-                if (e instanceof Joi.ValidationError)
-                    throw UnpackingError.fromJoiValidationError(e);
-                throw e;
-            }
-        }
+        if (checkSchema)
+            valueEqualConstraintSource = await checkAgainstSchema(valueEqualConstraintSource, valueEqualConstraintSchema, parsingContext);
 
         // Return created ValueEqualConstraint object
         return new ValueEqualConstraint(valueEqualConstraintSource.exactly);

@@ -1,8 +1,7 @@
-import Joi from 'joi';
 import {Attribute} from '../attributes/attribute';
 import {AttributeReference, attributeReferenceSchema} from '../attributes/attribute-reference';
 import {ParsingContext} from '../parsing-context';
-import {UnpackingError} from '../unpacker';
+import {checkAgainstSchema} from '../schema-checker';
 import {baseValueSchema, IBaseValueSource, Value} from './value';
 
 /**
@@ -31,24 +30,17 @@ export class ValueAttributeReference extends Value {
      * Factory function to generate ValueAttributeReference from JSON scenario data
      * @param parsingContext Context for resolving scenario data
      * @param valueAttributeReferenceSource JSON data for ValueAttributeReference
-     * @param skipSchemaCheck When true, skips schema validation step
+     * @param checkSchema When true, validates source JSON data against schema
      * @returns valueAttributeReference -- Created ValueAttributeReference object
      */
-    public static async fromSource(parsingContext: ParsingContext, valueAttributeReferenceSource: IValueAttributeReferenceSource, skipSchemaCheck: boolean = false): Promise<ValueAttributeReference> {
+    public static async fromSource(parsingContext: ParsingContext, valueAttributeReferenceSource: IValueAttributeReferenceSource, checkSchema: boolean): Promise<ValueAttributeReference> {
 
         // Validate JSON data against schema
-        if (!skipSchemaCheck) {
-            try {
-                valueAttributeReferenceSource = await valueAttributeReferenceSchema.validateAsync(valueAttributeReferenceSource);
-            } catch (e) {
-                if (e instanceof Joi.ValidationError)
-                    throw UnpackingError.fromJoiValidationError(e);
-                throw e;
-            }
-        }
+        if (checkSchema)
+            valueAttributeReferenceSource = await checkAgainstSchema(valueAttributeReferenceSource, valueAttributeReferenceSchema, parsingContext);
 
-        // Get attribute
-        let attribute: Attribute = parsingContext.getAttribute(parsingContext, valueAttributeReferenceSource.attribute);
+        // Get attribute from source
+        let attribute: Attribute = parsingContext.getAttribute(parsingContext.withExtendedPath('.attribute'), valueAttributeReferenceSource.attribute);
 
         // Return created ValueAttributeReference object
         return new ValueAttributeReference(attribute);

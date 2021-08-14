@@ -1,7 +1,7 @@
 import Joi from 'joi';
 import {clamp} from '../../../shared/utility';
 import {ParsingContext} from '../parsing-context';
-import {UnpackingError} from '../unpacker';
+import {checkAgainstSchema} from '../schema-checker';
 import {ValueConstraint} from './value-constaint';
 
 /**
@@ -28,21 +28,14 @@ export class ValueInRangeConstraint extends ValueConstraint {
      * Factory function to generate ValueInRangeConstraint from JSON scenario data
      * @param parsingContext Context for resolving scenario data
      * @param valueInRangeConstraintSource JSON data for ValueInRangeConstraint
-     * @param skipSchemaCheck When true, skips schema validation step
+     * @param checkSchema When true, validates source JSON data against schema
      * @returns valueInRangeConstraint -- Created ValueInRangeConstraint object
      */
-    public static async fromSource(parsingContext: ParsingContext, valueInRangeConstraintSource: IValueInRangeConstraintSource, skipSchemaCheck: boolean = false): Promise<ValueInRangeConstraint> {
+    public static async fromSource(parsingContext: ParsingContext, valueInRangeConstraintSource: IValueInRangeConstraintSource, checkSchema: boolean): Promise<ValueInRangeConstraint> {
 
         // Validate JSON data against schema
-        if (!skipSchemaCheck) {
-            try {
-                await valueInRangeConstraintSchema.validateAsync(valueInRangeConstraintSource);
-            } catch (e) {
-                if (e instanceof Joi.ValidationError)
-                    throw UnpackingError.fromJoiValidationError(e);
-                throw e;
-            }
-        }
+        if (checkSchema)
+            valueInRangeConstraintSource = await checkAgainstSchema(valueInRangeConstraintSource, valueInRangeConstraintSchema, parsingContext);
 
         // Return created ValueInRangeConstraint object
         return new ValueInRangeConstraint(valueInRangeConstraintSource.min, valueInRangeConstraintSource.max);

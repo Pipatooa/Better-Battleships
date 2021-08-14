@@ -1,10 +1,9 @@
-import Joi from 'joi';
 import {Attribute} from '../attributes/attribute';
 import {AttributeReference, attributeReferenceSchema} from '../attributes/attribute-reference';
 import {IValueConstraintSource, ValueConstraint, valueConstraintSchema} from '../constraints/value-constaint';
 import {buildValueConstraint} from '../constraints/value-constraint-builder';
 import {ParsingContext} from '../parsing-context';
-import {UnpackingError} from '../unpacker';
+import {checkAgainstSchema} from '../schema-checker';
 import {baseConditionSchema, Condition, IBaseConditionSource} from './condition';
 
 /**
@@ -43,27 +42,18 @@ export class ConditionAttribute extends Condition {
      * Factory function to generate ConditionAttribute from JSON scenario data
      * @param parsingContext Context for resolving scenario data
      * @param conditionAttributeSource JSON data for ConditionAttribute
-     * @param skipSchemaCheck When true, skips schema validation step
+     * @param checkSchema When true, validates source JSON data against schema
      * @returns conditionTest -- Created ConditionAttribute object
      */
-    public static async fromSource(parsingContext: ParsingContext, conditionAttributeSource: IConditionAttributeSource, skipSchemaCheck: boolean = false): Promise<ConditionAttribute> {
+    public static async fromSource(parsingContext: ParsingContext, conditionAttributeSource: IConditionAttributeSource, checkSchema: boolean): Promise<ConditionAttribute> {
 
         // Validate JSON data against schema
-        if (!skipSchemaCheck) {
-            try {
-                conditionAttributeSource = await conditionAttributeSchema.validateAsync(conditionAttributeSource);
-            } catch (e) {
-                if (e instanceof Joi.ValidationError)
-                    throw UnpackingError.fromJoiValidationError(e);
-                throw e;
-            }
-        }
+        if (checkSchema)
+            conditionAttributeSource = await checkAgainstSchema(conditionAttributeSource, conditionAttributeSchema, parsingContext);
 
-        // Get attribute
-        let attribute: Attribute = parsingContext.getAttribute(parsingContext, conditionAttributeSource.attribute);
-
-        // Get value constraint
-        let valueConstraint: ValueConstraint = await buildValueConstraint(parsingContext, conditionAttributeSource.valueConstraint, true);
+        // Get attribute and value constraint from source
+        let attribute: Attribute = parsingContext.getAttribute(parsingContext.withExtendedPath('.attribute'), conditionAttributeSource.attribute);
+        let valueConstraint: ValueConstraint = await buildValueConstraint(parsingContext.withExtendedPath('.valueConstraint'), conditionAttributeSource.valueConstraint, true);
 
         // Return created ConditionAttribute object
         return new ConditionAttribute(attribute, valueConstraint, conditionAttributeSource.inverted);

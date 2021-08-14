@@ -1,6 +1,5 @@
-import Joi from 'joi';
 import {ParsingContext} from '../parsing-context';
-import {UnpackingError} from '../unpacker';
+import {checkAgainstSchema} from '../schema-checker';
 import {baseValueSchema, IBaseValueSource, IValueSource, Value, valueSchema} from './value';
 import {buildValue} from './value-builder';
 
@@ -38,25 +37,18 @@ export class ValueRounded extends Value {
      * Factory function to generate ValueRounded from JSON scenario data
      * @param parsingContext Context for resolving scenario data
      * @param valueRoundedSource JSON data for ValueRounded
-     * @param skipSchemaCheck When true, skips schema validation step
+     * @param checkSchema When true, validates source JSON data against schema
      * @returns valueFixed -- Created ValueRounded object
      */
-    public static async fromSource(parsingContext: ParsingContext, valueRoundedSource: IValueRoundedSource, skipSchemaCheck: boolean = false): Promise<ValueRounded> {
+    public static async fromSource(parsingContext: ParsingContext, valueRoundedSource: IValueRoundedSource, checkSchema: boolean): Promise<ValueRounded> {
 
         // Validate JSON data against schema
-        if (!skipSchemaCheck) {
-            try {
-                valueRoundedSource = await valueRoundedSchema.validateAsync(valueRoundedSource);
-            } catch (e) {
-                if (e instanceof Joi.ValidationError)
-                    throw UnpackingError.fromJoiValidationError(e);
-                throw e;
-            }
-        }
+        if (checkSchema)
+            valueRoundedSource = await checkAgainstSchema(valueRoundedSource, valueRoundedSchema, parsingContext);
 
-        // Get value and step
-        let value: Value = await buildValue(parsingContext, valueRoundedSource.value, true);
-        let step: Value = await buildValue(parsingContext, valueRoundedSource.step, true);
+        // Get value and step from source
+        let value: Value = await buildValue(parsingContext.withExtendedPath('.value'), valueRoundedSource.value, true);
+        let step: Value = await buildValue(parsingContext.withExtendedPath('.step'), valueRoundedSource.step, true);
 
         // Return created ValueRounded object
         return new ValueRounded(value, step);

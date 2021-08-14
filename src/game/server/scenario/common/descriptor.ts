@@ -1,7 +1,7 @@
 import Joi from 'joi';
 import {IDescriptor} from '../../../shared/i-descriptor';
 import {ParsingContext} from '../parsing-context';
-import {UnpackingError} from '../unpacker';
+import {checkAgainstSchema} from '../schema-checker';
 
 /**
  * Descriptor - Server Version
@@ -17,18 +17,14 @@ export class Descriptor implements IDescriptor {
      * Factory function to generate descriptor from JSON scenario data
      * @param parsingContext Context for resolving scenario data
      * @param descriptorSource JSON data for descriptor
+     * @param checkSchema When true, validates source JSON data against schema
      * @returns descriptor -- Created Descriptor object
      */
-    public static async fromSource(parsingContext: ParsingContext, descriptorSource: IDescriptorSource): Promise<Descriptor> {
+    public static async fromSource(parsingContext: ParsingContext, descriptorSource: IDescriptorSource, checkSchema: boolean): Promise<Descriptor> {
 
         // Validate JSON data against schema
-        try {
-            descriptorSource = await descriptorSchema.validateAsync(descriptorSource);
-        } catch (e) {
-            if (e instanceof Joi.ValidationError)
-                throw UnpackingError.fromJoiValidationError(e);
-            throw e;
-        }
+        if (checkSchema)
+            descriptorSource = await checkAgainstSchema(descriptorSource, descriptorSchema, parsingContext);
 
         // Return created Descriptor object
         return new Descriptor(descriptorSource.name, descriptorSource.description);

@@ -1,6 +1,5 @@
-import Joi from 'joi';
 import {ParsingContext} from '../parsing-context';
-import {UnpackingError} from '../unpacker';
+import {checkAgainstSchema} from '../schema-checker';
 import {Condition} from './condition';
 import {ConditionMultiple, conditionMultipleSchema, IConditionMultipleSource} from './condition-multiple';
 
@@ -35,24 +34,17 @@ export class ConditionAll extends ConditionMultiple {
      * Factory function to generate ConditionAll from JSON scenario data
      * @param parsingContext Context for resolving scenario data
      * @param conditionAllSource JSON data for ConditionAll
-     * @param skipSchemaCheck When true, skips schema validation step
+     * @param checkSchema When true, validates source JSON data against schema
      * @returns conditionAll -- Created ConditionAll object
      */
-    public static async fromSource(parsingContext: ParsingContext, conditionAllSource: IConditionAllSource, skipSchemaCheck: boolean = false): Promise<ConditionAll> {
+    public static async fromSource(parsingContext: ParsingContext, conditionAllSource: IConditionAllSource, checkSchema: boolean): Promise<ConditionAll> {
 
         // Validate JSON data against schema
-        if (!skipSchemaCheck) {
-            try {
-                conditionAllSource = await conditionAllSchema.validateAsync(conditionAllSource);
-            } catch (e) {
-                if (e instanceof Joi.ValidationError)
-                    throw UnpackingError.fromJoiValidationError(e);
-                throw e;
-            }
-        }
+        if (checkSchema)
+            conditionAllSource = await checkAgainstSchema(conditionAllSource, conditionAllSchema, parsingContext);
 
-        // Unpack sub conditions
-        let subConditions: Condition[] = await ConditionMultiple.getSubConditions(parsingContext, conditionAllSource.subConditions);
+        // Get sub conditions from source
+        let subConditions: Condition[] = await ConditionMultiple.getSubConditions(parsingContext.withExtendedPath('.subConditions'), conditionAllSource.subConditions);
 
         // Return created ConditionAll object
         return new ConditionAll(subConditions, conditionAllSource.inverted);

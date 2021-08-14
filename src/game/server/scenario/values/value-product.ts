@@ -1,6 +1,5 @@
-import Joi from 'joi';
 import {ParsingContext} from '../parsing-context';
-import {UnpackingError} from '../unpacker';
+import {checkAgainstSchema} from '../schema-checker';
 import {Value} from './value';
 import {IValueMultipleSource, ValueMultiple, valueMultipleSchema} from './value-multiple';
 
@@ -35,24 +34,17 @@ export class ValueProduct extends ValueMultiple {
      * @param parsingContext Context for resolving scenario data
      * @param parsingContext Context for resolving scenario data
      * @param valueProductSource JSON data for ValueProduct
-     * @param skipSchemaCheck When true, skips schema validation step
+     * @param checkSchema When true, validates source JSON data against schema
      * @returns valueSum -- Created ValueProduct object
      */
-    public static async fromSource(parsingContext: ParsingContext, valueProductSource: IValueProductSource, skipSchemaCheck: boolean = false): Promise<ValueProduct> {
+    public static async fromSource(parsingContext: ParsingContext, valueProductSource: IValueProductSource, checkSchema: boolean): Promise<ValueProduct> {
 
         // Validate JSON data against schema
-        if (!skipSchemaCheck) {
-            try {
-                valueProductSource = await valueProductSchema.validateAsync(valueProductSource);
-            } catch (e) {
-                if (e instanceof Joi.ValidationError)
-                    throw UnpackingError.fromJoiValidationError(e);
-                throw e;
-            }
-        }
+        if (checkSchema)
+            valueProductSource = await checkAgainstSchema(valueProductSource, valueProductSchema, parsingContext);
 
-        // Unpack sub values
-        let subValues: Value[] = await ValueMultiple.getSubValues(parsingContext, valueProductSource.values);
+        // Get sub values from source
+        let subValues: Value[] = await ValueMultiple.getSubValues(parsingContext.withExtendedPath('.values'), valueProductSource.values);
 
         // Return created ValueRandom object
         return new ValueProduct(subValues);

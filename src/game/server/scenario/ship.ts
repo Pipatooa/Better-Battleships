@@ -7,6 +7,7 @@ import {genericNameSchema} from './common/generic-name';
 import {IPatternSource, Pattern, patternSchema} from './common/pattern';
 import {Rotation} from './common/rotation';
 import {ParsingContext} from './parsing-context';
+import {checkAgainstSchema} from './schema-checker';
 import {getJSONFromEntry, UnpackingError} from './unpacker';
 
 /**
@@ -60,56 +61,47 @@ export class Ship implements IAttributeHolder {
      * Factory function to generate Ship from JSON scenario data
      * @param parsingContext Context for resolving scenario data
      * @param shipSource JSON data for Ship
+     * @param checkSchema When true, validates source JSON data against schema
      * @returns ship -- Created Ship object
      */
-    public static async fromSource(parsingContext: ParsingContext, shipSource: IShipSource): Promise<Ship> {
+    public static async fromSource(parsingContext: ParsingContext, shipSource: IShipSource, checkSchema: boolean): Promise<Ship> {
 
         // Validate JSON data against schema
-        try {
-            shipSource = await shipSchema.validateAsync(shipSource);
-        } catch (e) {
-            if (e instanceof Joi.ValidationError)
-                throw UnpackingError.fromJoiValidationError(e);
-            throw e;
-        }
+        if (checkSchema)
+            shipSource = await checkAgainstSchema(shipSource, shipSchema, parsingContext);
 
         // Get attributes
         let attributes: AttributeMap = {};
         for (let [name, attributeSource] of Object.entries(shipSource.attributes)) {
-            attributes[name] = await Attribute.fromSource(parsingContext, attributeSource);
+            attributes[name] = await Attribute.fromSource(parsingContext.withExtendedPath(`.attributes.${name}`), attributeSource, true);
         }
 
         // Update parsing context
         parsingContext = parsingContext.withShipAttributes(attributes);
 
         // Get descriptor
-        let descriptor = await Descriptor.fromSource(parsingContext, shipSource.descriptor);
+        let descriptor = await Descriptor.fromSource(parsingContext.withExtendedPath('.descriptor'), shipSource.descriptor, true);
 
         // Get pattern
-        let pattern = await Pattern.fromSource(parsingContext, shipSource.pattern);
+        let pattern = await Pattern.fromSource(parsingContext.withExtendedPath('.pattern'), shipSource.pattern, true);
 
         // Get abilities
         let abilities: { [name: string]: Ability } = {};
-        for (let abilityName of shipSource.abilities) {
+        for (let i = 0; i < shipSource.abilities.length; i++) {
+            let abilityName = shipSource.abilities[i];
 
             // If ship does not exist
             if (!(abilityName in parsingContext.abilityEntries))
-                throw new UnpackingError(`Could not find 'abilities/${abilityName}.json'`);
+                throw new UnpackingError(`Could not find 'abilities/${abilityName}.json'`, parsingContext);
 
             // If ability already exists
             if (abilityName in abilities)
-                throw new UnpackingError(`Cannot define `);
+                throw new UnpackingError(`Ship cannot define the same ability twice '${abilityName}' at '${parsingContext.currentPath}.abilities[${i}]'`, parsingContext);
 
             // Unpack ability data
             let abilitySource: IAbilitySource = await getJSONFromEntry(parsingContext.abilityEntries[abilityName]) as unknown as IAbilitySource;
+            abilities[abilityName] = await Ability.fromSource(parsingContext.withUpdatedFile(`abilities/${abilityName}.json`), abilitySource, false);
 
-            try {
-                abilities[abilityName] = await Ability.fromSource(parsingContext, abilitySource);
-            } catch (e) {
-                if (e instanceof UnpackingError)
-                    throw e.hasContext() ? e : e.withContext(`abilities/${abilityName}.json`);
-                throw e;
-            }
         }
 
         // Return created Ship object

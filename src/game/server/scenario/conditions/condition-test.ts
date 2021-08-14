@@ -1,6 +1,6 @@
 import Joi from 'joi';
 import {ParsingContext} from '../parsing-context';
-import {UnpackingError} from '../unpacker';
+import {checkAgainstSchema} from '../schema-checker';
 import {baseConditionSchema, Condition, IBaseConditionSource} from './condition';
 
 /**
@@ -34,21 +34,14 @@ export class ConditionTest extends Condition {
      * Factory function to generate ConditionTest from JSON scenario data
      * @param parsingContext Context for resolving scenario data
      * @param conditionTestSource JSON data for ConditionTest
-     * @param skipSchemaCheck When true, skips schema validation step
+     * @param checkSchema When true, validates source JSON data against schema
      * @returns conditionTest -- Created ConditionTest object
      */
-    public static async fromSource(parsingContext: ParsingContext, conditionTestSource: IConditionTestSource, skipSchemaCheck: boolean = false): Promise<ConditionTest> {
+    public static async fromSource(parsingContext: ParsingContext, conditionTestSource: IConditionTestSource, checkSchema: boolean): Promise<ConditionTest> {
 
         // Validate JSON data against schema
-        if (!skipSchemaCheck) {
-            try {
-                conditionTestSource = await conditionTestSchema.validateAsync(conditionTestSource);
-            } catch (e) {
-                if (e instanceof Joi.ValidationError)
-                    throw UnpackingError.fromJoiValidationError(e);
-                throw e;
-            }
-        }
+        if (checkSchema)
+            conditionTestSource = await checkAgainstSchema(conditionTestSource, conditionTestSchema, parsingContext);
 
         // Return created ConditionTest object
         return new ConditionTest(conditionTestSource.result, conditionTestSource.inverted);

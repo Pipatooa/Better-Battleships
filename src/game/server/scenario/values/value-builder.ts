@@ -1,6 +1,5 @@
-import Joi from 'joi';
 import {ParsingContext} from '../parsing-context';
-import {UnpackingError} from '../unpacker';
+import {checkAgainstSchema} from '../schema-checker';
 import {IValueSource, Value, valueSchema} from './value';
 import {ValueAttributeReference} from './value-attribute-reference';
 import {ValueFixed} from './value-fixed';
@@ -13,21 +12,14 @@ import {ValueSum} from './value-sum';
  * Factory function to generate Value from JSON scenario data
  * @param parsingContext Context for resolving scenario data
  * @param valueSource JSON data for Value
- * @param skipSchemaCheck When true, skips schema validation step
+ * @param checkSchema When true, validates source JSON data against schema
  * @returns condition -- Created Condition object
  */
-export async function buildValue(parsingContext: ParsingContext, valueSource: IValueSource, skipSchemaCheck: boolean = false): Promise<Value> {
+export async function buildValue(parsingContext: ParsingContext, valueSource: IValueSource, checkSchema: boolean): Promise<Value> {
 
     // Validate JSON data against schema
-    if (!skipSchemaCheck) {
-        try {
-            valueSource = await valueSchema.validateAsync(valueSource);
-        } catch (e) {
-            if (e instanceof Joi.ValidationError)
-                throw UnpackingError.fromJoiValidationError(e);
-            throw e;
-        }
-    }
+    if (checkSchema)
+        valueSource = await checkAgainstSchema(valueSource, valueSchema, parsingContext);
 
     let value: Value;
 

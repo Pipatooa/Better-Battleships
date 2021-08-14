@@ -2,7 +2,7 @@ import Joi from 'joi';
 import {IValueConstraintSource, ValueConstraint, valueConstraintSchema} from '../constraints/value-constaint';
 import {buildValueConstraint} from '../constraints/value-constraint-builder';
 import {ParsingContext} from '../parsing-context';
-import {UnpackingError} from '../unpacker';
+import {checkAgainstSchema} from '../schema-checker';
 import {IValueSource, Value, valueSchema} from '../values/value';
 import {buildValue} from '../values/value-builder';
 
@@ -56,25 +56,23 @@ export class Attribute {
      * Factory function to generate Attribute from JSON scenario data
      * @param parsingContext Context for resolving scenario data
      * @param attributeSource JSON data for Attribute
+     * @param checkSchema When true, validates source JSON data against schema
      * @returns attribute -- Created Attribute object
      */
-    public static async fromSource(parsingContext: ParsingContext, attributeSource: IAttributeSource): Promise<Attribute> {
+    public static async fromSource(parsingContext: ParsingContext, attributeSource: IAttributeSource, checkSchema: boolean): Promise<Attribute> {
+
         // Validate JSON data against schema
-        try {
-            attributeSource = await attributeSchema.validateAsync(attributeSource);
-        } catch (e) {
-            if (e instanceof Joi.ValidationError)
-                throw UnpackingError.fromJoiValidationError(e);
-            throw e;
-        }
+        if (checkSchema)
+            attributeSource = await checkAgainstSchema(attributeSource, attributeSchema, parsingContext);
 
         // Get initial value
-        let initialValue: Value = await buildValue(parsingContext, attributeSource.initialValue);
+        let initialValue: Value = await buildValue(parsingContext.withExtendedPath('.initialValue'), attributeSource.initialValue, true);
 
         // Get constraints
         let constraints: ValueConstraint[] = [];
-        for (let constraintSource of attributeSource.constraints) {
-            constraints.push(await buildValueConstraint(parsingContext, constraintSource));
+        for (let i = 0; i < attributeSource.constraints.length; i++) {
+            let constraintSource = attributeSource.constraints[i];
+            constraints.push(await buildValueConstraint(parsingContext.withExtendedPath(`.constraints[${i}]`), constraintSource, true));
         }
 
         // Return created Attribute object

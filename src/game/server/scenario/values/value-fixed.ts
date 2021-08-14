@@ -1,6 +1,6 @@
 import Joi from 'joi';
 import {ParsingContext} from '../parsing-context';
-import {UnpackingError} from '../unpacker';
+import {checkAgainstSchema} from '../schema-checker';
 import {Value} from './value';
 
 /**
@@ -30,21 +30,14 @@ export class ValueFixed extends Value {
      * Factory function to generate ValueFixed from JSON scenario data
      * @param parsingContext Context for resolving scenario data
      * @param valueFixedSource JSON data for ValueFixed
-     * @param skipSchemaCheck When true, skips schema validation step
+     * @param checkSchema When true, validates source JSON data against schema
      * @returns valueFixed -- Created ValueFixed object
      */
-    public static async fromSource(parsingContext: ParsingContext, valueFixedSource: IValueFixedSource, skipSchemaCheck: boolean = false): Promise<ValueFixed> {
+    public static async fromSource(parsingContext: ParsingContext, valueFixedSource: IValueFixedSource, checkSchema: boolean): Promise<ValueFixed> {
 
         // Validate JSON data against schema
-        if (!skipSchemaCheck) {
-            try {
-                valueFixedSource = await valueFixedSchema.validateAsync(valueFixedSource);
-            } catch (e) {
-                if (e instanceof Joi.ValidationError)
-                    throw UnpackingError.fromJoiValidationError(e);
-                throw e;
-            }
-        }
+        if (checkSchema)
+            valueFixedSource = await checkAgainstSchema(valueFixedSource, valueFixedSchema, parsingContext);
 
         // Return created ValueFixed object
         return new ValueFixed(valueFixedSource);

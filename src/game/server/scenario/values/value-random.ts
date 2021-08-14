@@ -1,6 +1,6 @@
 import Joi from 'joi';
 import {ParsingContext} from '../parsing-context';
-import {UnpackingError} from '../unpacker';
+import {checkAgainstSchema} from '../schema-checker';
 import {baseValueSchema, IBaseValueSource, IValueSource, Value, valueSchema} from './value';
 import {buildValue} from './value-builder';
 
@@ -72,28 +72,21 @@ export class ValueRandom extends Value {
      * Factory function to generate ValueRandom from JSON scenario data
      * @param parsingContext Context for resolving scenario data
      * @param valueRandomSource JSON data for ValueRandom
-     * @param skipSchemaCheck When true, skips schema validation step
+     * @param checkSchema When true, validates source JSON data against schema
      * @returns valueRandom -- Created ValueRandom object
      */
-    public static async fromSource(parsingContext: ParsingContext, valueRandomSource: IValueRandomSource, skipSchemaCheck: boolean = false): Promise<ValueRandom> {
+    public static async fromSource(parsingContext: ParsingContext, valueRandomSource: IValueRandomSource, checkSchema: boolean): Promise<ValueRandom> {
 
         // Validate JSON data against schema
-        if (!skipSchemaCheck) {
-            try {
-                valueRandomSource = await valueRandomSchema.validateAsync(valueRandomSource);
-            } catch (e) {
-                if (e instanceof Joi.ValidationError)
-                    throw UnpackingError.fromJoiValidationError(e);
-                throw e;
-            }
-        }
+        if (checkSchema)
+            valueRandomSource = await checkAgainstSchema(valueRandomSource, valueRandomSchema, parsingContext);
 
-        // Unpack min, max and step values
-        let min: Value = await buildValue(parsingContext, valueRandomSource.min, true);
-        let max: Value = await buildValue(parsingContext, valueRandomSource.max, true);
+        // Get min, max and step from source
+        let min: Value = await buildValue(parsingContext.withExtendedPath('.min'), valueRandomSource.min, true);
+        let max: Value = await buildValue(parsingContext.withExtendedPath('.max'), valueRandomSource.max, true);
         let step: Value | undefined = valueRandomSource.step === undefined ?
             undefined :
-            await buildValue(parsingContext, valueRandomSource.step, true);
+            await buildValue(parsingContext.withExtendedPath('.step'), valueRandomSource.step, true);
 
         // Return created ValueRandom object
         return new ValueRandom(min, max, step, valueRandomSource.generateOnce);

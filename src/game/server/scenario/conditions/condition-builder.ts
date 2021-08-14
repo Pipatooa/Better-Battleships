@@ -1,6 +1,5 @@
-import Joi from 'joi';
 import {ParsingContext} from '../parsing-context';
-import {UnpackingError} from '../unpacker';
+import {checkAgainstSchema} from '../schema-checker';
 import {Condition, conditionSchema, IConditionSource} from './condition';
 import {ConditionAll} from './condition-all';
 import {ConditionAny} from './condition-any';
@@ -12,21 +11,14 @@ import {ConditionTest} from './condition-test';
  * Factory function to generate Condition from JSON scenario data
  * @param parsingContext Context for resolving scenario data
  * @param conditionSource JSON data for Condition
- * @param skipSchemaCheck When true, skips schema validation step
+ * @param checkSchema When true, validates source JSON data against schema
  * @returns condition -- Created Condition object
  */
-export async function buildCondition(parsingContext: ParsingContext, conditionSource: IConditionSource, skipSchemaCheck: boolean = false): Promise<Condition> {
+export async function buildCondition(parsingContext: ParsingContext, conditionSource: IConditionSource, checkSchema: boolean): Promise<Condition> {
 
     // Validate JSON data against schema
-    if (!skipSchemaCheck) {
-        try {
-            conditionSource = await conditionSchema.validateAsync(conditionSource);
-        } catch (e) {
-            if (e instanceof Joi.ValidationError)
-                throw UnpackingError.fromJoiValidationError(e);
-            throw e;
-        }
-    }
+    if (checkSchema)
+        conditionSource = await checkAgainstSchema(conditionSource, conditionSchema, parsingContext);
 
     let condition: Condition;
 

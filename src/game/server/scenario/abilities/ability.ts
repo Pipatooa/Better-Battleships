@@ -16,7 +16,7 @@ import {ParsingContext} from '../parsing-context';
 export class Ability implements IAttributeHolder {
     public readonly attributes: AttributeMap = {};
 
-    public static async fromSource(parsingContext: ParsingContext, abilitySource: IAbilitySource): Promise<Ability> {
+    public static async fromSource(parsingContext: ParsingContext, abilitySource: IAbilitySource, checkSchema: boolean): Promise<Ability> {
         return new Ability();
     }
 }

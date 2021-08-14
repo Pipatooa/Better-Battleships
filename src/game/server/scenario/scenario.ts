@@ -5,6 +5,7 @@ import {Board, IBoardSource} from './board';
 import {Descriptor, descriptorSchema, IDescriptorSource} from './common/descriptor';
 import {genericNameSchema} from './common/generic-name';
 import {ParsingContext} from './parsing-context';
+import {WithSchema} from './schema-checker';
 import {ITeamSource, Team} from './team';
 import {getJSONFromEntry, UnpackingError} from './unpacker';
 
@@ -25,34 +26,27 @@ export class Scenario implements IAttributeHolder {
      * Factory function to generate Scenario from JSON scenario data
      * @param parsingContext Context for resolving scenario data
      * @param scenarioSource JSON data from 'scenario.json'
+     * @param checkSchema When true, validates source JSON data against schema
      * @returns scenario -- Created Scenario object
      */
-    public static async fromSource(parsingContext: ParsingContext, scenarioSource: IScenarioSource): Promise<Scenario> {
-
-        // Validate JSON data against schema
-        try {
-            scenarioSource = await scenarioSchema.validateAsync(scenarioSource);
-        } catch (e) {
-            if (e instanceof Joi.ValidationError)
-                throw UnpackingError.fromJoiValidationError(e).withContext('scenario.json');
-            throw e;
-        }
+    @WithSchema()
+    public static async fromSource(parsingContext: ParsingContext, scenarioSource: IScenarioSource, checkSchema: boolean): Promise<Scenario> {
 
         // Get attributes
         let attributes: AttributeMap = {};
         for (let [name, attributeSource] of Object.entries(scenarioSource.attributes)) {
-            attributes[name] = await Attribute.fromSource(parsingContext, attributeSource);
+            attributes[name] = await Attribute.fromSource(parsingContext.withExtendedPath(`.attributes.${name}`), attributeSource, true);
         }
 
         // Update parsing context
         parsingContext = parsingContext.withScenarioAttributes(attributes);
 
         // Get descriptor
-        let descriptor = await Descriptor.fromSource(parsingContext, scenarioSource.descriptor);
+        let descriptor = await Descriptor.fromSource(parsingContext.withExtendedPath('.descriptor'), scenarioSource.descriptor, true);
 
         // Get board
         let boardSource: IBoardSource = await getJSONFromEntry(parsingContext.boardEntry) as unknown as IBoardSource;
-        let board = await Board.fromSource(parsingContext, boardSource);
+        let board = await Board.fromSource(parsingContext.withUpdatedFile('board.json'), boardSource, true);
 
         // Get teams
         let teams: { [name: string]: Team } = {};
@@ -60,23 +54,25 @@ export class Scenario implements IAttributeHolder {
 
             // If team does not exist
             if (!(teamName in parsingContext.teamEntries))
-                throw new UnpackingError(`Could not find 'teams/${teamName}.json'`).withContext('scenario.json');
+                throw new UnpackingError(`Could not find 'teams/${teamName}.json'`, parsingContext);
 
             // Unpack team data
             let teamSource: ITeamSource = await getJSONFromEntry(parsingContext.teamEntries[teamName]) as unknown as ITeamSource;
-
-            try {
-                teams[teamName] = await Team.fromSource(parsingContext, teamSource);
-            } catch (e) {
-                if (e instanceof UnpackingError)
-                    throw e.hasContext() ? e : e.withContext(`teams/${teamName}.json`);
-                throw e;
-            }
+            teams[teamName] = await Team.fromSource(parsingContext.withUpdatedFile(`teams/${teamName}.json`), teamSource, false);
         }
 
         // Return created Scenario object
         return new Scenario(descriptor, board, teams, attributes);
     }
+
+    /**
+     * Schema for validating source JSON data
+     */
+    public static schema = Joi.object({
+        author: Joi.string().required(),
+        descriptor: descriptorSchema.required(),
+        teams: Joi.array().items(genericNameSchema).min(2).max(8).required()
+    }).concat(attributeHolderSchema);
 }
 
 /**

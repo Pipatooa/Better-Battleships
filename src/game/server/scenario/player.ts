@@ -8,6 +8,7 @@ import {
 } from './attributes/i-attribute-holder';
 import {genericNameSchema} from './common/generic-name';
 import {ParsingContext} from './parsing-context';
+import {checkAgainstSchema} from './schema-checker';
 import {IShipSource, Ship} from './ship';
 import {getJSONFromEntry, UnpackingError} from './unpacker';
 
@@ -35,22 +36,19 @@ export class Player implements IAttributeHolder {
      * @param parsingContext Context for resolving scenario data
      * @param spawnRegion Region that the player should first be allowed to place ships in
      * @param playerSource JSON data for Player
+     * @param checkSchema When true, validates source JSON data against schema
      * @returns player -- Created Player object
      */
-    public static async fromSource(parsingContext: ParsingContext, spawnRegion: string, playerSource: IPlayerSource): Promise<Player> {
+    public static async fromSource(parsingContext: ParsingContext, spawnRegion: string, playerSource: IPlayerSource, checkSchema: boolean): Promise<Player> {
+
         // Validate JSON data against schema
-        try {
-            playerSource = await playerSchema.validateAsync(playerSource);
-        } catch (e) {
-            if (e instanceof Joi.ValidationError)
-                throw UnpackingError.fromJoiValidationError(e);
-            throw e;
-        }
+        if (checkSchema)
+            playerSource = await checkAgainstSchema(playerSource, playerSchema, parsingContext);
 
         // Get attributes
         let attributes: AttributeMap = {};
         for (let [name, attributeSource] of Object.entries(playerSource.attributes)) {
-            attributes[name] = await Attribute.fromSource(parsingContext, attributeSource);
+            attributes[name] = await Attribute.fromSource(parsingContext.withExtendedPath(`.attributes.${name}`), attributeSource, true);
         }
 
         // Update parsing context
@@ -62,18 +60,11 @@ export class Player implements IAttributeHolder {
 
             // If ship does not exist
             if (!(shipName in parsingContext.shipEntries))
-                throw new UnpackingError(`Could not find 'ships/${shipName}.json'`);
+                throw new UnpackingError(`Could not find 'ships/${shipName}.json'`, parsingContext);
 
             // Unpack ship data
             let shipSource: IShipSource = await getJSONFromEntry(parsingContext.shipEntries[shipName]) as unknown as IShipSource;
-
-            try {
-                ships.push(await Ship.fromSource(parsingContext, shipSource));
-            } catch (e) {
-                if (e instanceof UnpackingError)
-                    throw e.hasContext() ? e : e.withContext(`ships/${shipName}.json`);
-                throw e;
-            }
+            ships.push(await Ship.fromSource(parsingContext.withUpdatedFile(`ships/${shipName}.json`), shipSource, false));
         }
 
         // Return created Player object

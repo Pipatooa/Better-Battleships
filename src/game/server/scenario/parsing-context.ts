@@ -6,7 +6,9 @@ import {UnpackingError, ZipEntryMap} from './unpacker';
 
 export class ParsingContext {
 
-    public constructor(public readonly boardEntry: IZipEntry,
+    public constructor(protected _currentFile: string,
+                       protected _currentPath: string,
+                       public readonly boardEntry: IZipEntry,
                        public readonly teamEntries: ZipEntryMap,
                        public readonly playerPrototypeEntries: ZipEntryMap,
                        public readonly shipEntries: ZipEntryMap,
@@ -46,7 +48,8 @@ export class ParsingContext {
         }
 
         if (attributeMap === undefined || !(attributeName in attributeMap))
-            throw new UnpackingError(`Could not find attribute '${attributePath}' in current context '${this.getContextName()}'`);
+            throw new UnpackingError(`Could not find attribute '${attributePath}' defined at '${parsingContext.currentPath}' in current context '${this.getContextName()}'`,
+                parsingContext.currentFile);
 
         return attributeMap[attributeName];
     }
@@ -69,6 +72,8 @@ export class ParsingContext {
 
     public getCopy(): ParsingContext {
         return new ParsingContext(
+            this._currentFile,
+            this._currentPath,
             this.boardEntry,
             this.teamEntries,
             this.playerPrototypeEntries,
@@ -79,6 +84,19 @@ export class ParsingContext {
             this.playerAttributes,
             this.shipAttributes,
             this.abilityAttributes);
+    }
+
+    public withUpdatedFile(newFile: string): ParsingContext {
+        let copy: ParsingContext = this.getCopy();
+        copy._currentFile = newFile;
+        copy._currentPath = '';
+        return copy;
+    }
+
+    public withExtendedPath(pathExtension: string): ParsingContext {
+        let copy: ParsingContext = this.getCopy();
+        copy._currentPath += pathExtension;
+        return copy;
     }
 
     public withScenarioAttributes(scenarioAttributes: AttributeMap): ParsingContext {
@@ -110,5 +128,19 @@ export class ParsingContext {
         copy.abilityAttributes = abilityAttributes;
         return copy;
     }
-}
 
+    // Getters and setters
+    public get currentFile(): string {
+        return this._currentFile;
+    }
+
+    public get currentPath(): string {
+        return this._currentPath.replace(/^\./, '');
+    }
+
+    public get currentPathPrefix(): string {
+        if (this._currentPath === '')
+            return '';
+        return this.currentPath + '.';
+    }
+}

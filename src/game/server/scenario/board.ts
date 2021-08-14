@@ -1,6 +1,7 @@
 import Joi from 'joi';
 import {genericNameSchema} from './common/generic-name';
 import {ParsingContext} from './parsing-context';
+import {checkAgainstSchema} from './schema-checker';
 import {Tile} from './tile';
 import {TileGenerator, tileGeneratorSchema} from './tile-generator';
 import {TileType, tileTypeSchema} from './tiletype';
@@ -20,18 +21,14 @@ export class Board {
      * Factory function to generate Board from JSON scenario data
      * @param parsingContext Context for resolving scenario data
      * @param boardSource JSON data from 'board.json'
+     * @param checkSchema When true, validates source JSON data against schema
      * @returns board -- Created Board object
      */
-    public static async fromSource(parsingContext: ParsingContext, boardSource: IBoardSource): Promise<Board> {
+    public static async fromSource(parsingContext: ParsingContext, boardSource: IBoardSource, checkSchema: boolean): Promise<Board> {
 
         // Validate JSON against schema
-        try {
-            boardSource = await boardSchema.validateAsync(boardSource);
-        } catch (e) {
-            if (e instanceof Joi.ValidationError)
-                throw UnpackingError.fromJoiValidationError(e);
-            throw e;
-        }
+        if (checkSchema)
+            boardSource = await checkAgainstSchema(boardSource, boardSchema, parsingContext);
 
         // Unpack palette data
         let palette: { [char: string]: TileType } = {};
@@ -39,12 +36,12 @@ export class Board {
 
             // Create new TileType objects indexed by single character strings
             let [char, tileTypeSource] = entry;
-            palette[char] = await TileType.fromSource(parsingContext, tileTypeSource);
+            palette[char] = await TileType.fromSource(parsingContext.withExtendedPath(`.palette.${char}`), tileTypeSource, true);
         }
 
         // Ensure that the number of entries in 'tiles' matches the declared size of the board
         if (boardSource.tiles.length !== boardSource.size[1])
-            throw new UnpackingError(`"tiles" must contain ${boardSource.size[1]} items to match "size[1]"`);
+            throw new UnpackingError(`"${parsingContext.currentPathPrefix}tiles" must contain ${boardSource.size[1]} items to match "${parsingContext.currentPathPrefix}size[1]"`, parsingContext);
 
         // Unpack tile data
         let tiles: Tile[][] = [];
@@ -53,7 +50,7 @@ export class Board {
 
             // Ensure that the number of tiles within a row matches the declared size of the board
             if (row.length !== boardSource.size[0])
-                throw new UnpackingError(`"tiles[${y}]" length must be ${boardSource.size[0]} characters long to match "size[0]"`);
+                throw new UnpackingError(`"${parsingContext.currentPathPrefix}tiles[${y}]" length must be ${boardSource.size[0]} characters long to match "${parsingContext.currentPathPrefix}size[0]"`, parsingContext);
 
             // Iterate through each character, each representing a tile
             for (let x = 0; x < boardSource.size[0]; x++) {
@@ -61,7 +58,7 @@ export class Board {
 
                 // If character did not match any tile type within the palette
                 if (!(c in palette))
-                    throw new UnpackingError(`Could not find tile of type '${c}' in palette at tiles[${y}][${x}] (x=${boardSource.size[0] - x},y=${boardSource.size[1] - y})`);
+                    throw new UnpackingError(`Could not find tile of type '${c}' defined at '${parsingContext.currentPathPrefix}tiles[${y}][${x}]' within the palette defined at '${parsingContext.currentPathPrefix}palette'`, parsingContext);
 
                 // Create and store new tile created from tile type
                 let tileType: TileType = palette[c];

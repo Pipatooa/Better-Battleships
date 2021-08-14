@@ -1,5 +1,6 @@
 import Joi from 'joi';
 import {ParsingContext} from '../parsing-context';
+import {checkAgainstSchema} from '../schema-checker';
 import {UnpackingError} from '../unpacker';
 import {Rotation} from './rotation';
 
@@ -102,33 +103,25 @@ export class Pattern {
      * Factory function to generate Pattern from JSON source data
      * @param parsingContext Context for resolving scenario data
      * @param patternSource JSON data for Pattern
-     * @param skipSchemaCheck When true, skips schema validation step
+     * @param checkSchema When true, validates source JSON data against schema
      * @returns pattern -- Created Pattern object
      */
-    public static async fromSource(parsingContext: ParsingContext, patternSource: IPatternSource, skipSchemaCheck: boolean = false): Promise<Pattern> {
+    public static async fromSource(parsingContext: ParsingContext, patternSource: IPatternSource, checkSchema: boolean): Promise<Pattern> {
 
         // Validate JSON against schema
-        if (!skipSchemaCheck) {
-            try {
-                patternSource = await patternSchema.validateAsync(patternSource);
-            } catch (e) {
-                if (e instanceof Joi.ValidationError)
-                    throw UnpackingError.fromJoiValidationError(e);
-                throw e;
-            }
-        }
+        if (checkSchema)
+            patternSource = await checkAgainstSchema(patternSource, patternSchema, parsingContext);
 
         // Unpack value data
         let values: { [char: string]: number } = {};
         for (const entry of Object.entries(patternSource.values)) {
-
             let [char, value] = entry;
             values[char] = value;
         }
 
         // Ensure that the number of entries in 'pattern' matches the declared size of the pattern
         if (patternSource.pattern.length !== patternSource.size[1])
-            throw new UnpackingError(`"pattern" must contain ${patternSource.size[1]} items to match "size[1]"`);
+            throw new UnpackingError(`"${parsingContext.currentPathPrefix}pattern" must contain ${patternSource.size[1]} items to match "${parsingContext.currentPathPrefix}size[1]"`, parsingContext);
 
         // Calculate center of the pattern
         let centerX: number = (patternSource.size[0] - 1) / 2;
@@ -141,7 +134,7 @@ export class Pattern {
 
             // Ensure that the number of patterns entries within a row matches the declared size of the board
             if (row.length !== patternSource.size[0])
-                throw new UnpackingError(`"pattern[${y}]" length must be ${patternSource.size[0]} characters long to match "size[0]"`);
+                throw new UnpackingError(`"${parsingContext.currentPathPrefix}pattern[${y}]" length must be ${patternSource.size[0]} characters long to match "${parsingContext.currentPathPrefix}size[0]"`, parsingContext);
 
             // Iterate through each character, each representing a pattern entry
             for (let x = 0; x < patternSource.size[0]; x++) {
@@ -149,7 +142,7 @@ export class Pattern {
 
                 // If character did not match any value within the values map
                 if (!(c in values))
-                    throw new UnpackingError(`Could not find value for the character '${c}' in value map at pattern[${y}][${x}]`);
+                    throw new UnpackingError(`Could not find value for the character '${c}' in value map at '${parsingContext.currentPathPrefix}pattern[${y}][${x}]'`, parsingContext);
 
                 // Get value for entry
                 let value: number = values[c];

@@ -51,17 +51,17 @@ export async function unpack(scenarioZip: AdmZip): Promise<any> {
     let boardEntry: IZipEntry = await getEntryFromZip(scenarioZip, 'board.json');
 
     // Create parsing context
-    let parsingContext = new ParsingContext(boardEntry, teamEntries, playerPrototypeEntries, shipEntries, abilityEntries);
+    let parsingContext = new ParsingContext('scenario.json', '', boardEntry, teamEntries, playerPrototypeEntries, shipEntries, abilityEntries);
 
     // Scenario data
     let scenarioEntry: IZipEntry = await getEntryFromZip(scenarioZip, 'scenario.json');
     let scenarioSource: IScenarioSource = await getJSONFromEntry(scenarioEntry) as unknown as IScenarioSource;
-    let scenario = await Scenario.fromSource(parsingContext, scenarioSource);
+    let scenario = await Scenario.fromSource(parsingContext, scenarioSource, false);
 
     // Test data
     let testEntry: IZipEntry = await getEntryFromZip(scenarioZip, 'test.json');
     let testSource: IPatternSource = await getJSONFromEntry(testEntry) as unknown as IPatternSource;
-    let test = await Pattern.fromSource(parsingContext, testSource);
+    let test = await Pattern.fromSource(parsingContext, testSource, false);
 
     return [scenario, test,
         test.rotated(Rotation.Clockwise90),
@@ -81,7 +81,7 @@ async function getEntryFromZip(zip: AdmZip, name: string): Promise<IZipEntry> {
 
     // If file was not found
     if (entry == null)
-        throw new UnpackingError(`Could not find '${name}'`).withContext(name);
+        throw new UnpackingError(`Could not find '${name}'`, 'root');
 
     return entry;
 }
@@ -102,7 +102,7 @@ export async function getJSONFromEntry(zipEntry: IZipEntry): Promise<JSON> {
                 json = await JSON.parse(data.toString());
             } catch (e) {
                 if (e instanceof SyntaxError) {
-                    reject(new UnpackingError(e.message).withContext(zipEntry.entryName));
+                    reject(new UnpackingError(e.message, zipEntry.entryName));
                     return;
                 }
 
@@ -122,18 +122,17 @@ export async function getJSONFromEntry(zipEntry: IZipEntry): Promise<JSON> {
  * Thrown when an error is encountered during the scenario unpacking process
  */
 export class UnpackingError extends Error {
-    public constructor(message: string) {
+    public readonly context: string;
+
+    public constructor(message: string, context: string | ParsingContext) {
         super(message);
+
+        if (context instanceof ParsingContext)
+            this.context = `An error occurred whilst parsing '${context.currentFile}'`;
+        else
+            this.context = `An error occurred whilst parsing '${context}'`;
+
         Object.setPrototypeOf(this, UnpackingError.prototype);
-    }
-
-    private _context: string | undefined;
-
-    /**
-     * Getter function with formatting for context
-     */
-    public get context(): string | undefined {
-        return `An error occurred whilst parsing '${this._context}'`;
     }
 
     /**
@@ -142,27 +141,10 @@ export class UnpackingError extends Error {
      * Useful for Joi validation
      *
      * @param err Joi validation error
+     * @param parsingContext Parsing context to use for context
      * @returns UnpackingError -- Created UnpackingError
      */
-    public static fromJoiValidationError(err: Joi.ValidationError): UnpackingError {
-        return new UnpackingError(err.message.toString());
-    }
-
-    /**
-     * Sets the context for this unpacking error. Also returns this object
-     * @param context New context to use
-     * @returns self
-     */
-    public withContext(context: string): UnpackingError {
-        this._context = context;
-        return this;
-    }
-
-    /**
-     * Returns whether this unpacking error has a context set yet
-     * @returns boolean Whether this unpacking error has a context set already
-     */
-    public hasContext(): boolean {
-        return this._context !== undefined;
+    public static fromJoiValidationError(err: Joi.ValidationError, parsingContext: ParsingContext): UnpackingError {
+        return new UnpackingError(err.message.toString(), parsingContext);
     }
 }

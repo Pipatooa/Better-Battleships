@@ -11,6 +11,7 @@ import {Descriptor, descriptorSchema, IDescriptorSource} from './common/descript
 import {genericNameSchema} from './common/generic-name';
 import {ParsingContext} from './parsing-context';
 import {IPlayerSource, Player} from './player';
+import {checkAgainstSchema} from './schema-checker';
 import {getJSONFromEntry, UnpackingError} from './unpacker';
 
 /**
@@ -39,29 +40,26 @@ export class Team implements IAttributeHolder {
      * Factory function to generate Team from JSON scenario data
      * @param parsingContext Context for resolving scenario data
      * @param teamSource JSON data for Team
+     * @param checkSchema When true, validates source JSON data against schema
      * @returns team -- Created Team object
      */
-    public static async fromSource(parsingContext: ParsingContext, teamSource: ITeamSource): Promise<Team> {
+    public static async fromSource(parsingContext: ParsingContext, teamSource: ITeamSource, checkSchema: boolean): Promise<Team> {
+
         // Validate JSON data against schema
-        try {
-            teamSource = await teamSchema.validateAsync(teamSource);
-        } catch (e) {
-            if (e instanceof Joi.ValidationError)
-                throw UnpackingError.fromJoiValidationError(e);
-            throw e;
-        }
+        if (checkSchema)
+            teamSource = await checkAgainstSchema(teamSource, teamSchema, parsingContext);
 
         // Get attributes
         let attributes: AttributeMap = {};
         for (let [name, attributeSource] of Object.entries(teamSource.attributes)) {
-            attributes[name] = await Attribute.fromSource(parsingContext, attributeSource);
+            attributes[name] = await Attribute.fromSource(parsingContext.withExtendedPath(`.attributes.${name}`), attributeSource, true);
         }
 
         // Update parsing context
         parsingContext = parsingContext.withTeamAttributes(attributes);
 
         // Get descriptor
-        let descriptor = await Descriptor.fromSource(parsingContext, teamSource.descriptor);
+        let descriptor = await Descriptor.fromSource(parsingContext.withExtendedPath('.descriptor'), teamSource.descriptor, true);
 
         // Get player prototypes for each possible player count
         let playerPrototypes: Player[][] = [];
@@ -71,28 +69,24 @@ export class Team implements IAttributeHolder {
 
             // Check player count and length of specified player configs are the same
             if (playerCount !== playerConfigs.length)
-                throw new UnpackingError(`'playerConfigs[${i}]' must contain ${playerCount} items`);
+                throw new UnpackingError(`'${parsingContext.currentPath}playerConfigs[${i}]' must contain ${playerCount} items`, parsingContext);
 
             // Get players from player configs
             let players: Player[] = [];
             for (let playerConfig of playerConfigs) {
 
+                let playerName = playerConfig.playerPrototype;
+
                 // If player does not exist
-                if (!(playerConfig.playerPrototype in parsingContext.playerPrototypeEntries))
-                    throw new UnpackingError(`Could not find 'players/${playerConfig.playerPrototype}.json'`);
+                if (!(playerName in parsingContext.playerPrototypeEntries))
+                    throw new UnpackingError(`Could not find 'players/${playerName}.json'`, parsingContext);
 
                 // Unpack player
-                let playerSource: IPlayerSource = await getJSONFromEntry(parsingContext.playerPrototypeEntries[playerConfig.playerPrototype]) as unknown as IPlayerSource;
-
-                try {
-                    players.push(await Player.fromSource(parsingContext, playerConfig.spawnRegion, playerSource));
-                } catch (e) {
-                    if (e instanceof UnpackingError)
-                        throw e.hasContext() ? e : e.withContext(`players/${playerConfig.playerPrototype}.json`);
-                    throw e;
-                }
+                let playerSource: IPlayerSource = await getJSONFromEntry(parsingContext.playerPrototypeEntries[playerName]) as unknown as IPlayerSource;
+                players.push(await Player.fromSource(parsingContext.withUpdatedFile(`players/${playerName}.json`), playerConfig.spawnRegion, playerSource, false));
             }
 
+            // Add list of players to list of possible player configurations
             playerPrototypes.push(players);
         }
 

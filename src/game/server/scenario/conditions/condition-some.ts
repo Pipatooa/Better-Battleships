@@ -1,8 +1,7 @@
-import Joi from 'joi';
 import {IValueConstraintSource, ValueConstraint, valueConstraintSchema} from '../constraints/value-constaint';
 import {buildValueConstraint} from '../constraints/value-constraint-builder';
 import {ParsingContext} from '../parsing-context';
-import {UnpackingError} from '../unpacker';
+import {checkAgainstSchema} from '../schema-checker';
 import {Condition} from './condition';
 import {ConditionMultiple, conditionMultipleSchema, IConditionMultipleSource} from './condition-multiple';
 
@@ -54,27 +53,18 @@ export class ConditionSome extends ConditionMultiple {
      * Factory function to generate ConditionAll from JSON scenario data
      * @param parsingContext Context for resolving scenario data
      * @param conditionSomeSource JSON data for ConditionAll
-     * @param skipSchemaCheck When true, skips schema validation step
+     * @param checkSchema When true, validates source JSON data against schema
      * @returns conditionAll -- Created ConditionAll object
      */
-    public static async fromSource(parsingContext: ParsingContext, conditionSomeSource: IConditionSomeSource, skipSchemaCheck: boolean = false): Promise<ConditionSome> {
+    public static async fromSource(parsingContext: ParsingContext, conditionSomeSource: IConditionSomeSource, checkSchema: boolean): Promise<ConditionSome> {
 
         // Validate JSON data against schema
-        if (!skipSchemaCheck) {
-            try {
-                conditionSomeSource = await conditionSomeSchema.validateAsync(conditionSomeSource);
-            } catch (e) {
-                if (e instanceof Joi.ValidationError)
-                    throw UnpackingError.fromJoiValidationError(e);
-                throw e;
-            }
-        }
+        if (checkSchema)
+            conditionSomeSource = await checkAgainstSchema(conditionSomeSource, conditionSomeSchema, parsingContext);
 
-        // Unpack sub conditions
-        let subConditions: Condition[] = await ConditionMultiple.getSubConditions(parsingContext, conditionSomeSource.subConditions);
-
-        // Get value constraint
-        let valueConstraint: ValueConstraint = await buildValueConstraint(parsingContext, conditionSomeSource.valueConstraint, true);
+        // Get sub conditions and value constraint from source
+        let subConditions: Condition[] = await ConditionMultiple.getSubConditions(parsingContext.withExtendedPath('.subConditions'), conditionSomeSource.subConditions);
+        let valueConstraint: ValueConstraint = await buildValueConstraint(parsingContext.withExtendedPath('.valueConstraint'), conditionSomeSource.valueConstraint, true);
 
         // Return created ConditionSome object
         return new ConditionSome(subConditions, valueConstraint, conditionSomeSource.inverted);

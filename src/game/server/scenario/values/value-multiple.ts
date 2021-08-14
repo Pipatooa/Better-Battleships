@@ -35,7 +35,7 @@ export abstract class ValueMultiple extends Value {
         for (let i = 0; i < subValueSources.length; i++) {
 
             // Build sub value from sub value source and add to list
-            let subValue: Value = await buildValue(parsingContext, subValueSources[i], true);
+            let subValue: Value = await buildValue(parsingContext.withExtendedPath(`[${i}]`), subValueSources[i], true);
             subValues.push(subValue);
         }
 

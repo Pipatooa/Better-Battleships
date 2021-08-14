@@ -1,7 +1,7 @@
 import Joi from 'joi';
 import {Descriptor, descriptorSchema, IDescriptorSource} from './common/descriptor';
 import {ParsingContext} from './parsing-context';
-import {UnpackingError} from './unpacker';
+import {checkAgainstSchema} from './schema-checker';
 
 /**
  * TileType - Server Version
@@ -17,21 +17,17 @@ export class TileType {
      * Factory function to generate tile type from JSON scenario data
      * @param parsingContext Context for resolving scenario data
      * @param tileTypeSource JSON data for tile type
+     * @param checkSchema When true, validates source JSON data against schema
      * @returns tileType -- Created TileType object
      */
-    public static async fromSource(parsingContext: ParsingContext, tileTypeSource: ITileTypeSource): Promise<TileType> {
+    public static async fromSource(parsingContext: ParsingContext, tileTypeSource: ITileTypeSource, checkSchema: boolean): Promise<TileType> {
 
         // Validate JSON data against schema
-        try {
-            await tileTypeSchema.validateAsync(tileTypeSource);
-        } catch (e) {
-            if (e instanceof Joi.ValidationError)
-                throw UnpackingError.fromJoiValidationError(e);
-            throw e;
-        }
+        if (checkSchema)
+            tileTypeSource = await checkAgainstSchema(tileTypeSource, tileTypeSchema, parsingContext);
 
         // Create sub-objects
-        let descriptor = await Descriptor.fromSource(parsingContext, tileTypeSource.descriptor);
+        let descriptor = await Descriptor.fromSource(parsingContext.withExtendedPath('.descriptor'), tileTypeSource.descriptor, true);
 
         // Return tile type object
         return new TileType(descriptor, tileTypeSource.color);

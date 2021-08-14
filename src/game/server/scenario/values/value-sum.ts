@@ -1,6 +1,5 @@
-import Joi from 'joi';
 import {ParsingContext} from '../parsing-context';
-import {UnpackingError} from '../unpacker';
+import {checkAgainstSchema} from '../schema-checker';
 import {Value} from './value';
 import {IValueMultipleSource, ValueMultiple, valueMultipleSchema} from './value-multiple';
 
@@ -34,24 +33,17 @@ export class ValueSum extends ValueMultiple {
      * Factory function to generate ValueSum from JSON scenario data
      * @param parsingContext Context for resolving scenario data
      * @param valueSumSource JSON data for ValueSum
-     * @param skipSchemaCheck When true, skips schema validation step
+     * @param checkSchema When true, validates source JSON data against schema
      * @returns valueSum -- Created ValueSum object
      */
-    public static async fromSource(parsingContext: ParsingContext, valueSumSource: IValueSumSource, skipSchemaCheck: boolean = false): Promise<ValueSum> {
+    public static async fromSource(parsingContext: ParsingContext, valueSumSource: IValueSumSource, checkSchema: boolean): Promise<ValueSum> {
 
         // Validate JSON data against schema
-        if (!skipSchemaCheck) {
-            try {
-                valueSumSource = await valueSumSchema.validateAsync(valueSumSource);
-            } catch (e) {
-                if (e instanceof Joi.ValidationError)
-                    throw UnpackingError.fromJoiValidationError(e);
-                throw e;
-            }
-        }
+        if (checkSchema)
+            valueSumSource = await checkAgainstSchema(valueSumSource, valueSumSchema, parsingContext);
 
-        // Unpack sub values
-        let subValues: Value[] = await ValueMultiple.getSubValues(parsingContext, valueSumSource.values);
+        // Get sub values from source
+        let subValues: Value[] = await ValueMultiple.getSubValues(parsingContext.withExtendedPath('.values'), valueSumSource.values);
 
         // Return created ValueRandom object
         return new ValueSum(subValues);

@@ -1,6 +1,5 @@
-import Joi from 'joi';
 import {ParsingContext} from '../parsing-context';
-import {UnpackingError} from '../unpacker';
+import {checkAgainstSchema} from '../schema-checker';
 import {EmptyValueConstraint} from './empty-value-constraint';
 import {ValueAtLeastConstraint} from './value-at-least-constraint';
 import {ValueAtMostConstraint} from './value-at-most-constraint';
@@ -12,21 +11,14 @@ import {ValueInRangeConstraint} from './value-in-range-constraint';
  * Factory function to generate ValueConstraint from JSON scenario data
  * @param parsingContext Context for resolving scenario data
  * @param valueConstraintSource JSON data for ValueConstraint
- * @param skipSchemaCheck When true, skips schema validation step
+ * @param checkSchema When true, validates source JSON data against schema
  * @returns valueConstraint -- Created ValueConstraint object
  */
-export async function buildValueConstraint(parsingContext: ParsingContext, valueConstraintSource: IValueConstraintSource, skipSchemaCheck: boolean = false): Promise<ValueConstraint> {
+export async function buildValueConstraint(parsingContext: ParsingContext, valueConstraintSource: IValueConstraintSource, checkSchema: boolean): Promise<ValueConstraint> {
 
     // Validate JSON data against schema
-    if (!skipSchemaCheck) {
-        try {
-            await valueConstraintSchema.validateAsync(valueConstraintSource);
-        } catch (e) {
-            if (e instanceof Joi.ValidationError)
-                throw UnpackingError.fromJoiValidationError(e);
-            throw e;
-        }
-    }
+    if (checkSchema)
+        valueConstraintSource = await checkAgainstSchema(valueConstraintSource, valueConstraintSchema, parsingContext);
 
     let valueConstraint: ValueConstraint | undefined;
 
