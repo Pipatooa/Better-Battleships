@@ -1,5 +1,7 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="app.js" type="NodeJSConfigurationType" node-parameters="--unhandled-rejections=strict" path-to-js-file="app.js" working-dir="$PROJECT_DIR$/build">
-    <method v="2" />
+  <configuration default="false" name="app.js" type="NodeJSConfigurationType" node-parameters="--unhandled-rejections=strict" path-to-js-file="app.js" working-dir="$PROJECT_DIR$/dist">
+    <method v="2">
+      <option name="RunConfigurationTask" enabled="true" run_configuration_name="webpack" run_configuration_type="js.build_tools.npm" />
+    </method>
   </configuration>
 </component>

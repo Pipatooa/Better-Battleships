@@ -4,6 +4,7 @@ import exphbs from 'express-handlebars';
 import http from 'http';
 import WebSocket from 'isomorphic-ws';
 import path from 'path';
+import * as process from 'process';
 
 import socketRegister from './game/server/sockets/register';
 
@@ -12,6 +13,9 @@ import gameCreateRouter from './routes/game/create';
 
 const app = express();
 const port: number = 8080;
+
+// Set current working directory to be where this file is located
+process.chdir(__dirname);
 
 // Create a http server and an accompanying websocket server located on /game
 const server = http.createServer(app);

@@ -4,8 +4,8 @@
   "private": true,
   "main": "build/app.ts",
   "scripts": {
-    "webpack-dev": "concurrently --kill-others \"webpack --watch --mode=development --config webpack-server.config.js\" \"webpack --watch --mode=development --config webpack-client.config.js\"",
-    "webpack": "concurrently \"webpack --mode=production --config webpack-server.config.js\" \"webpack --mode=production --config webpack-client.config.js\"",
+    "webpack-dev": "webpack --watch --mode development --stats=minimal --config webpack.config.js",
+    "webpack": "webpack --mode production --config webpack.config.js",
     "x": "yarn install"
   },
   "dependencies": {
@@ -37,10 +37,11 @@
     "@types/node": "^16.3.2",
     "@types/uuid": "^8.3.1",
     "@types/ws": "^7.4.6",
-    "concurrently": "^6.2.0",
     "copy-webpack-plugin": "^9.0.1",
     "filemanager-webpack-plugin": "^6.1.4",
     "mini-css-extract-plugin": "^2.1.0",
+    "nodemon": "^2.0.12",
+    "nodemon-webpack-plugin": "^4.5.2",
     "optimize-css-assets-webpack-plugin": "^6.0.1",
     "pnp-webpack-plugin": "^1.7.0",
     "terser-webpack-plugin": "^5.1.4",

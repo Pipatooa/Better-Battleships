@@ -1,5 +1,6 @@
 const path = require('path');
 const PnpWebpackPlugin = require('pnp-webpack-plugin');
+const NodemonPlugin = require('nodemon-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const ZipWebpackPlugin = require('zip-file-webpack-plugin');
 const FileManagerPlugin = require('filemanager-webpack-plugin');
@@ -7,6 +8,74 @@ const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
 const { readdirSync } = require('fs');
+const fs = require('fs');
+
+/**
+ * Prebuild tasks
+ */
+
+fs.rmdirSync(path.resolve(__dirname, './dist'), { recursive: true });
+
+/**
+ * Common config
+ */
+
+const commonConfig = {
+    resolve: {
+        extensions: ['.js', '.json', '.ts'],
+        plugins: [PnpWebpackPlugin]
+    },
+    resolveLoader: {
+        plugins: [PnpWebpackPlugin.moduleLoader(module)]
+    }
+}
+
+/**
+ * Webpack Node config
+ */
+
+const nodeConfig = {
+    name: 'node',
+    entry: './src/app.ts',
+    ...commonConfig,
+    module: {
+        rules: [
+            {
+                test: /\.ts$/,
+                use: 'ts-loader'
+            }
+        ]
+    },
+    output: {
+        filename: 'app.js',
+        path: path.resolve(__dirname, './dist')
+    },
+    target: 'node',
+    ignoreWarnings: [
+        {
+            module: /\.\/\.yarn\/cache\//,
+            message: /not found|not supported|Critical dependency/
+        },
+        {
+            module: /\.\/\.yarn\/__virtual__\/ws-virtual/,
+            message: /not found/
+        }
+    ],
+    plugins: [
+        new TerserPlugin({
+            parallel: true
+        }),
+        new NodemonPlugin({
+            watch: path.resolve(__dirname, './dist/app.js'),
+            nodeArgs: ['--unhandled-rejections=strict']
+        })
+    ]
+};
+
+
+/**
+ * Webpack web config
+ */
 
 const scenarioDirs = readdirSync('./src/scenarios', { withFileTypes: true })
     .filter(entry => entry.isDirectory())
@@ -34,15 +103,13 @@ const scenarioPluginEntries = Array.from({ length: scenarioDirs.length }, (_, i)
     });
 });
 
-module.exports = {
-    entry: './src/app.ts',
-    resolve: {
-        extensions: ['.js', '.json', '.ts'],
-        plugins: [PnpWebpackPlugin]
+const webConfig = {
+    name: 'web',
+    entry: {
+        'game': './src/game/client/game.ts',
+        'create-game': './src/game/client/create-game.ts'
     },
-    resolveLoader: {
-        plugins: [PnpWebpackPlugin.moduleLoader(module)]
-    },
+    ...commonConfig,
     module: {
         rules: [
             {
@@ -59,10 +126,9 @@ module.exports = {
         ]
     },
     output: {
-        filename: 'app.js',
-        path: path.resolve(path.dirname(''), 'build')
+        filename: './public/js/[name].js',
+        path: path.resolve(__dirname, './dist')
     },
-    target: 'node',
     plugins: [
         new CopyWebpackPlugin({
             patterns: [
@@ -82,7 +148,7 @@ module.exports = {
             events: {
                 onEnd: {
                     delete: [
-                        'build/tmp'
+                        'dist/tmp'
                     ]
                 }
             }
@@ -90,16 +156,6 @@ module.exports = {
         new MiniCssExtractPlugin({
             filename: '[name].[contenthash].css'
         })
-    ],
-    ignoreWarnings: [
-        {
-            module: /\.\/\.yarn\/cache\//,
-            message: /not found|not supported|Critical dependency/
-        },
-        {
-            module: /\.\/\.yarn\/__virtual__\/ws-virtual/,
-            message: /not found/
-        }
     ],
     optimization: {
         minimizer: [
@@ -110,3 +166,5 @@ module.exports = {
         ]
     }
 };
+
+module.exports = [nodeConfig, webConfig];
