@@ -24,5 +24,6 @@ export interface IJoinRequest extends IBaseRequest {
 }
 
 export const joinRequestSchema = baseRequestSchema.keys({
+    request: 'join',
     gameID: Joi.string().length(gameIDLength).required()
 });

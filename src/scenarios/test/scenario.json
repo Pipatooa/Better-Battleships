@@ -2,11 +2,12 @@
   "author": "Bradley Hall",
   "descriptor": {
     "name": "Test Name",
-    "description": "Test Description"
+    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Pharetra massa massa ultricies mi quis hendrerit dolor magna. Imperdiet sed euismod nisi porta lorem. Et molestie ac feugiat sed lectus vestibulum. Vehicula ipsum a arcu cursus vitae congue. Integer quis auctor elit sed vulputate mi sit amet mauris. Rhoncus urna neque viverra justo nec. Amet luctus venenatis lectus magna fringilla. Rutrum quisque non tellus orci ac auctor augue. Dui faucibus in ornare quam viverra orci sagittis. Dictum non consectetur a erat nam at lectus. Curabitur vitae nunc sed velit dignissim. Tincidunt nunc pulvinar sapien et. Vitae aliquet nec ullamcorper sit amet risus nullam eget felis."
   },
   "teams": [
     "blue",
-    "red"
+    "red",
+    "blue-2"
   ],
   "attributes": {}
 }

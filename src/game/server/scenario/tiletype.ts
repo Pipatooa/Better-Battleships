@@ -27,7 +27,7 @@ export class TileType {
             tileTypeSource = await checkAgainstSchema(tileTypeSource, tileTypeSchema, parsingContext);
 
         // Create sub-objects
-        let descriptor = await Descriptor.fromSource(parsingContext.withExtendedPath('.descriptor'), tileTypeSource.descriptor, true);
+        let descriptor = await Descriptor.fromSource(parsingContext.withExtendedPath('.descriptor'), tileTypeSource.descriptor, false);
 
         // Return tile type object
         return new TileType(descriptor, tileTypeSource.color);

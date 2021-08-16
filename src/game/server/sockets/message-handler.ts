@@ -2,7 +2,8 @@ import {Data} from 'isomorphic-ws';
 import Joi from 'joi';
 import {Client} from './client';
 import {baseRequestSchema, IRequest, RequestID} from './i-request';
-import {handleJoinRequest, joinRequestSchema} from './request-handlers/join-request-handler';
+import {handleJoinRequest, joinRequestSchema} from './request-handlers/join-request';
+import {handleJoinTeamRequest, joinTeamRequestSchema} from './request-handlers/join-team';
 
 export async function handleMessage(client: Client, msg: Data) {
 
@@ -37,6 +38,7 @@ export async function handleMessage(client: Client, msg: Data) {
     }
 }
 
-export const requestInformation: Record<RequestID, [Joi.Schema, (client: Client, request: IRequest) => void]> = {
-    join: [joinRequestSchema, handleJoinRequest]
+export const requestInformation: Record<RequestID, [Joi.Schema, (client: Client, request: any) => void]> = {
+    join: [joinRequestSchema, handleJoinRequest],
+    joinTeam: [joinTeamRequestSchema, handleJoinTeamRequest]
 };

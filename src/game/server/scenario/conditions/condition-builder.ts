@@ -25,19 +25,19 @@ export async function buildCondition(parsingContext: ParsingContext, conditionSo
     // Call appropriate factory function based on condition type
     switch (conditionSource.type) {
         case 'any':
-            condition = await ConditionAny.fromSource(parsingContext, conditionSource, true);
+            condition = await ConditionAny.fromSource(parsingContext, conditionSource, false);
             break;
         case 'all':
-            condition = await ConditionAll.fromSource(parsingContext, conditionSource, true);
+            condition = await ConditionAll.fromSource(parsingContext, conditionSource, false);
             break;
         case 'some':
-            condition = await ConditionSome.fromSource(parsingContext, conditionSource, true);
+            condition = await ConditionSome.fromSource(parsingContext, conditionSource, false);
             break;
         case 'test':
-            condition = await ConditionTest.fromSource(parsingContext, conditionSource, true);
+            condition = await ConditionTest.fromSource(parsingContext, conditionSource, false);
             break;
         case 'attribute':
-            condition = await ConditionAttribute.fromSource(parsingContext, conditionSource, true);
+            condition = await ConditionAttribute.fromSource(parsingContext, conditionSource, false);
             break;
     }
 

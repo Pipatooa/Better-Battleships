@@ -28,7 +28,7 @@ const commonConfig = {
     resolveLoader: {
         plugins: [PnpWebpackPlugin.moduleLoader(module)]
     }
-}
+};
 
 /**
  * Webpack Node config

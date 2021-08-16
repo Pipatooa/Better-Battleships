@@ -2,7 +2,7 @@
   "name": "better-battleships",
   "version": "0.0.0",
   "private": true,
-  "main": "build/app.ts",
+  "main": "dist/app.js",
   "scripts": {
     "webpack-dev": "webpack --watch --mode development --stats=minimal --config webpack.config.js",
     "webpack": "webpack --mode production --config webpack.config.js",

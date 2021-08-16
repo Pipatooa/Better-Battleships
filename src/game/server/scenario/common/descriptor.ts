@@ -1,4 +1,5 @@
 import Joi from 'joi';
+import {IDescriptorInfo} from '../../../shared/network/i-descriptor-info';
 import {ParsingContext} from '../parsing-context';
 import {checkAgainstSchema} from '../schema-checker';
 
@@ -27,6 +28,18 @@ export class Descriptor {
 
         // Return created Descriptor object
         return new Descriptor(descriptorSource.name, descriptorSource.description);
+    }
+
+    /**
+     * Returns network transportable form of this object.
+     *
+     * May not include all details of the object. Just those that the client needs to know.
+     */
+    public makeTransportable(): IDescriptorInfo {
+        return {
+            name: this.name,
+            description: this.description
+        };
     }
 }
 

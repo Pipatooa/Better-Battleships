@@ -25,25 +25,25 @@ export async function buildValue(parsingContext: ParsingContext, valueSource: IV
 
     // If source is a number, parse as a fixed value
     if (typeof valueSource == 'number')
-        value = await ValueFixed.fromSource(parsingContext, valueSource, true);
+        value = await ValueFixed.fromSource(parsingContext, valueSource, false);
     else
 
         // Call appropriate factory function based on condition type
         switch (valueSource.type) {
             case 'random':
-                value = await ValueRandom.fromSource(parsingContext, valueSource, true);
+                value = await ValueRandom.fromSource(parsingContext, valueSource, false);
                 break;
             case 'sum':
-                value = await ValueSum.fromSource(parsingContext, valueSource, true);
+                value = await ValueSum.fromSource(parsingContext, valueSource, false);
                 break;
             case 'product':
-                value = await ValueProduct.fromSource(parsingContext, valueSource, true);
+                value = await ValueProduct.fromSource(parsingContext, valueSource, false);
                 break;
             case 'round':
-                value = await ValueRounded.fromSource(parsingContext, valueSource, true);
+                value = await ValueRounded.fromSource(parsingContext, valueSource, false);
                 break;
             case 'attributeReference':
-                value = await ValueAttributeReference.fromSource(parsingContext, valueSource, true);
+                value = await ValueAttributeReference.fromSource(parsingContext, valueSource, false);
                 break;
         }
 

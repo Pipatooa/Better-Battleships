@@ -1,7 +1,5 @@
 import AdmZip, {IZipEntry} from 'adm-zip';
 import Joi from 'joi';
-import {IPatternSource, Pattern} from './common/pattern';
-import {Rotation} from './common/rotation';
 import {ParsingContext} from './parsing-context';
 import {IScenarioSource, Scenario} from './scenario';
 
@@ -12,7 +10,7 @@ export type ZipEntryMap = { [name: string]: IZipEntry };
  * @param scenarioZip Zip file to extract
  * @returns scenario -- Scenario object
  */
-export async function unpack(scenarioZip: AdmZip): Promise<any> {
+export async function unpack(scenarioZip: AdmZip): Promise<Scenario> {
 
     // Get a list of all zip entries
     let zipEntries: AdmZip.IZipEntry[] = scenarioZip.getEntries();
@@ -26,7 +24,7 @@ export async function unpack(scenarioZip: AdmZip): Promise<any> {
     for (const entry of zipEntries) {
 
         // Check entry regex
-        let result: RegExpExecArray | null = /^(abilities|ships|players|teams)\/([a-z\-]+).json$/.exec(entry.entryName);
+        let result: RegExpExecArray | null = /^(abilities|ships|players|teams)\/([a-zA-Z\-_\d]+).json$/.exec(entry.entryName);
         if (result === null)
             continue;
 
@@ -56,17 +54,7 @@ export async function unpack(scenarioZip: AdmZip): Promise<any> {
     // Scenario data
     let scenarioEntry: IZipEntry = await getEntryFromZip(scenarioZip, 'scenario.json');
     let scenarioSource: IScenarioSource = await getJSONFromEntry(scenarioEntry) as unknown as IScenarioSource;
-    let scenario = await Scenario.fromSource(parsingContext, scenarioSource, false);
-
-    // Test data
-    let testEntry: IZipEntry = await getEntryFromZip(scenarioZip, 'test.json');
-    let testSource: IPatternSource = await getJSONFromEntry(testEntry) as unknown as IPatternSource;
-    let test = await Pattern.fromSource(parsingContext, testSource, false);
-
-    return [scenario, test,
-        test.rotated(Rotation.Clockwise90),
-        test.rotated(Rotation.Clockwise180),
-        test.rotated(Rotation.Clockwise270)];
+    return await Scenario.fromSource(parsingContext, scenarioSource, true);
 }
 
 /**

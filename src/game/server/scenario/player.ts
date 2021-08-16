@@ -48,7 +48,7 @@ export class Player implements IAttributeHolder {
         // Get attributes
         let attributes: AttributeMap = {};
         for (let [name, attributeSource] of Object.entries(playerSource.attributes)) {
-            attributes[name] = await Attribute.fromSource(parsingContext.withExtendedPath(`.attributes.${name}`), attributeSource, true);
+            attributes[name] = await Attribute.fromSource(parsingContext.withExtendedPath(`.attributes.${name}`), attributeSource, false);
         }
 
         // Update parsing context
@@ -64,7 +64,7 @@ export class Player implements IAttributeHolder {
 
             // Unpack ship data
             let shipSource: IShipSource = await getJSONFromEntry(parsingContext.shipEntries[shipName]) as unknown as IShipSource;
-            ships.push(await Ship.fromSource(parsingContext.withUpdatedFile(`ships/${shipName}.json`), shipSource, false));
+            ships.push(await Ship.fromSource(parsingContext.withUpdatedFile(`ships/${shipName}.json`), shipSource, true));
         }
 
         // Return created Player object

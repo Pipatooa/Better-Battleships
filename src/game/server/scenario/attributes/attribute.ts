@@ -66,13 +66,13 @@ export class Attribute {
             attributeSource = await checkAgainstSchema(attributeSource, attributeSchema, parsingContext);
 
         // Get initial value
-        let initialValue: Value = await buildValue(parsingContext.withExtendedPath('.initialValue'), attributeSource.initialValue, true);
+        let initialValue: Value = await buildValue(parsingContext.withExtendedPath('.initialValue'), attributeSource.initialValue, false);
 
         // Get constraints
         let constraints: ValueConstraint[] = [];
         for (let i = 0; i < attributeSource.constraints.length; i++) {
             let constraintSource = attributeSource.constraints[i];
-            constraints.push(await buildValueConstraint(parsingContext.withExtendedPath(`.constraints[${i}]`), constraintSource, true));
+            constraints.push(await buildValueConstraint(parsingContext.withExtendedPath(`.constraints[${i}]`), constraintSource, false));
         }
 
         // Return created Attribute object

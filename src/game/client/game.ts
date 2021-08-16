@@ -1,4 +1,4 @@
-import {openSocketConnection} from './sockets/opener';
+import {openSocketConnection} from './game/sockets/opener';
 
 openSocketConnection();
 

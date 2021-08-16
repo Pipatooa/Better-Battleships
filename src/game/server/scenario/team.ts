@@ -1,4 +1,5 @@
 import Joi from 'joi';
+import {ITeamInfo} from '../../shared/network/i-team-info';
 import {Attribute} from './attributes/attribute';
 import {
     attributeHolderSchema,
@@ -24,12 +25,14 @@ export class Team implements IAttributeHolder {
 
     /**
      * Team constructor
+     * @param id ID for team
      * @param descriptor Descriptor for team
      * @param playerPrototypes Array of potential players for the team
      * @param color Team color
      * @param attributes Attributes for the team
      */
-    public constructor(public readonly descriptor: Descriptor,
+    public constructor(public readonly id: string,
+                       public readonly descriptor: Descriptor,
                        public readonly playerPrototypes: Player[][],
                        public readonly color: string,
                        public readonly attributes: AttributeMap) {
@@ -40,10 +43,11 @@ export class Team implements IAttributeHolder {
      * Factory function to generate Team from JSON scenario data
      * @param parsingContext Context for resolving scenario data
      * @param teamSource JSON data for Team
+     * @param id ID for team
      * @param checkSchema When true, validates source JSON data against schema
      * @returns team -- Created Team object
      */
-    public static async fromSource(parsingContext: ParsingContext, teamSource: ITeamSource, checkSchema: boolean): Promise<Team> {
+    public static async fromSource(parsingContext: ParsingContext, teamSource: ITeamSource, id: string, checkSchema: boolean): Promise<Team> {
 
         // Validate JSON data against schema
         if (checkSchema)
@@ -52,14 +56,14 @@ export class Team implements IAttributeHolder {
         // Get attributes
         let attributes: AttributeMap = {};
         for (let [name, attributeSource] of Object.entries(teamSource.attributes)) {
-            attributes[name] = await Attribute.fromSource(parsingContext.withExtendedPath(`.attributes.${name}`), attributeSource, true);
+            attributes[name] = await Attribute.fromSource(parsingContext.withExtendedPath(`.attributes.${name}`), attributeSource, false);
         }
 
         // Update parsing context
         parsingContext = parsingContext.withTeamAttributes(attributes);
 
         // Get descriptor
-        let descriptor = await Descriptor.fromSource(parsingContext.withExtendedPath('.descriptor'), teamSource.descriptor, true);
+        let descriptor = await Descriptor.fromSource(parsingContext.withExtendedPath('.descriptor'), teamSource.descriptor, false);
 
         // Get player prototypes for each possible player count
         let playerPrototypes: Player[][] = [];
@@ -83,7 +87,7 @@ export class Team implements IAttributeHolder {
 
                 // Unpack player
                 let playerSource: IPlayerSource = await getJSONFromEntry(parsingContext.playerPrototypeEntries[playerName]) as unknown as IPlayerSource;
-                players.push(await Player.fromSource(parsingContext.withUpdatedFile(`players/${playerName}.json`), playerConfig.spawnRegion, playerSource, false));
+                players.push(await Player.fromSource(parsingContext.withUpdatedFile(`players/${playerName}.json`), playerConfig.spawnRegion, playerSource, true));
             }
 
             // Add list of players to list of possible player configurations
@@ -91,7 +95,19 @@ export class Team implements IAttributeHolder {
         }
 
         // Return created Team object
-        return new Team(descriptor, playerPrototypes, teamSource.color, attributes);
+        return new Team(id, descriptor, playerPrototypes, teamSource.color, attributes);
+    }
+
+    /**
+     * Returns network transportable form of this object.
+     *
+     * May not include all details of the object. Just those that the client needs to know.
+     */
+    public makeTransportable(): ITeamInfo {
+        return {
+            descriptor: this.descriptor.makeTransportable(),
+            maxPlayers: this.playerPrototypes.length
+        };
     }
 }
 

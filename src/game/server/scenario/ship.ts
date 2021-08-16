@@ -73,17 +73,17 @@ export class Ship implements IAttributeHolder {
         // Get attributes
         let attributes: AttributeMap = {};
         for (let [name, attributeSource] of Object.entries(shipSource.attributes)) {
-            attributes[name] = await Attribute.fromSource(parsingContext.withExtendedPath(`.attributes.${name}`), attributeSource, true);
+            attributes[name] = await Attribute.fromSource(parsingContext.withExtendedPath(`.attributes.${name}`), attributeSource, false);
         }
 
         // Update parsing context
         parsingContext = parsingContext.withShipAttributes(attributes);
 
         // Get descriptor
-        let descriptor = await Descriptor.fromSource(parsingContext.withExtendedPath('.descriptor'), shipSource.descriptor, true);
+        let descriptor = await Descriptor.fromSource(parsingContext.withExtendedPath('.descriptor'), shipSource.descriptor, false);
 
         // Get pattern
-        let pattern = await Pattern.fromSource(parsingContext.withExtendedPath('.pattern'), shipSource.pattern, true);
+        let pattern = await Pattern.fromSource(parsingContext.withExtendedPath('.pattern'), shipSource.pattern, false);
 
         // Get abilities
         let abilities: { [name: string]: Ability } = {};
@@ -100,7 +100,7 @@ export class Ship implements IAttributeHolder {
 
             // Unpack ability data
             let abilitySource: IAbilitySource = await getJSONFromEntry(parsingContext.abilityEntries[abilityName]) as unknown as IAbilitySource;
-            abilities[abilityName] = await Ability.fromSource(parsingContext.withUpdatedFile(`abilities/${abilityName}.json`), abilitySource, false);
+            abilities[abilityName] = await Ability.fromSource(parsingContext.withUpdatedFile(`abilities/${abilityName}.json`), abilitySource, true);
 
         }
 

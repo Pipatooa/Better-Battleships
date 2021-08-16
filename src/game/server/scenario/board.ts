@@ -36,7 +36,7 @@ export class Board {
 
             // Create new TileType objects indexed by single character strings
             let [char, tileTypeSource] = entry;
-            palette[char] = await TileType.fromSource(parsingContext.withExtendedPath(`.palette.${char}`), tileTypeSource, true);
+            palette[char] = await TileType.fromSource(parsingContext.withExtendedPath(`.palette.${char}`), tileTypeSource, false);
         }
 
         // Ensure that the number of entries in 'tiles' matches the declared size of the board

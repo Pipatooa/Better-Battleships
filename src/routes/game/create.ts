@@ -90,8 +90,25 @@ router.post('/', async (req, res) => {
                 return;
             }
 
-            // Otherwise rethrow error
-            throw e;
+            if (e.message.startsWith('Invalid or unsupported zip format')) {
+                res.status(400);
+                res.send({
+                    success: false,
+                    message: e.message,
+                    context: 'An error occurred whilst trying to parse the request'
+                });
+                return;
+            }
+
+            // Otherwise, log error
+            console.error(e);
+            res.status(500);
+            res.send({
+                success: false,
+                message: 'Internal server error',
+                context: 'An error occurred whilst trying to parse the request'
+            });
+            return;
         }
 
         // Create a new game

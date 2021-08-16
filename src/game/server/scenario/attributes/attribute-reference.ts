@@ -1,6 +1,6 @@
 import Joi from 'joi';
 
-export const attributeReferenceSchema = Joi.string().regex(/^(scenario|team|player|ship|ability)\.[a-zA-Z\-_]+$/).required();
+export const attributeReferenceSchema = Joi.string().regex(/^(scenario|team|player|ship|ability)\.[a-zA-Z\-_\d]+$/).required();
 
 export type AttributeReference = string;
 

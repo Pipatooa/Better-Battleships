@@ -28,19 +28,19 @@ export async function buildValueConstraint(parsingContext: ParsingContext, value
 
     // Create ValueEqualConstraint
     else if ('exactly' in valueConstraintSource)
-        valueConstraint = await ValueEqualConstraint.fromSource(parsingContext, valueConstraintSource, true);
+        valueConstraint = await ValueEqualConstraint.fromSource(parsingContext, valueConstraintSource, false);
 
     // Create ValueInRangeConstraint
     else if ('min' in valueConstraintSource && 'max' in valueConstraintSource)
-        valueConstraint = await ValueInRangeConstraint.fromSource(parsingContext, valueConstraintSource, true);
+        valueConstraint = await ValueInRangeConstraint.fromSource(parsingContext, valueConstraintSource, false);
 
     // Create ValueAtLeastConstraint
     else if ('min' in valueConstraintSource)
-        valueConstraint = await ValueAtLeastConstraint.fromSource(parsingContext, valueConstraintSource, true);
+        valueConstraint = await ValueAtLeastConstraint.fromSource(parsingContext, valueConstraintSource, false);
 
     // Create ValueAtMostConstraint
     else
-        valueConstraint = await ValueAtMostConstraint.fromSource(parsingContext, valueConstraintSource, true);
+        valueConstraint = await ValueAtMostConstraint.fromSource(parsingContext, valueConstraintSource, false);
 
     // Return created ValueConstraint object
     return valueConstraint;

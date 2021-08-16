@@ -1,6 +1,6 @@
 {{> better-battleships-banner}}
 
-<div class="container row text-center mx-auto">
+<div class="container row text-center mx-auto d-none">
     <div class="col-md">
         <canvas class="w-100" id="game-canvas" width="300" height="300">
             Sorry, your browser does not support the canvas element.
@@ -8,6 +8,26 @@
     </div>
     <div class="col-md">
         <h3>Right Panel</h3>
+    </div>
+</div>
+
+<div class="container row text-center mx-auto py-4 px-2" style="border: solid black 2px; border-radius: 5px">
+    <div class="col-md-8" style="border-right: 1px solid;">
+        <div class="h-100 d-flex flex-column">
+            <h3>Teams:</h3>
+            <div class="h-divider py-2"></div>
+            <div class="container row flex-grow-1 px-0" id="team-pane"></div>
+            <div class="h-divider py-2"></div>
+            <h3>Unassigned:</h3>
+            <div class="container row flex-grow-1" id="unassigned-pane"></div>
+        </div>
+    </div>
+    <div class="col-md-4 text-start">
+        <h3>Scenario:</h3>
+        <p class="mb-0"><b>Name: </b></p>
+        <p id="scenario-name-field"></p>
+        <p class="mb-0"><b>Description:</b></p>
+        <p class="text-wrap" id="scenario-description-field"></p>
     </div>
 </div>
 

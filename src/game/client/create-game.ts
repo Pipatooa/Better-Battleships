@@ -1,4 +1,4 @@
-import {bindFileDrop, file} from './filedrop';
+import {bindFileDrop, file} from './create-game/filedrop';
 import ClickEvent = JQuery.ClickEvent;
 
 let submitButton: JQuery;
