@@ -3,6 +3,7 @@ import {joinTeam} from '../join-team';
 
 export function handleGameInfoMessage(gameInfo: IGameInfo) {
     $('#scenario-name-field').html(gameInfo.scenario.descriptor.name);
+    $('#scenario-author-field').html(gameInfo.scenario.author);
     $('#scenario-description-field').html(gameInfo.scenario.descriptor.description);
 
     let teamPaneElement = $('#team-pane');

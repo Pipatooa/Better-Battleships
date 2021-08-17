@@ -18,7 +18,8 @@ import {getJSONFromEntry, UnpackingError} from './unpacker';
  */
 export class Scenario implements IAttributeHolder {
 
-    public constructor(public readonly descriptor: Descriptor,
+    public constructor(public readonly author: string,
+                       public readonly descriptor: Descriptor,
                        public readonly board: Board,
                        public readonly teams: { [name: string]: Team },
                        public readonly attributes: AttributeMap) {
@@ -64,7 +65,7 @@ export class Scenario implements IAttributeHolder {
         }
 
         // Return created Scenario object
-        return new Scenario(descriptor, board, teams, attributes);
+        return new Scenario(scenarioSource.author, descriptor, board, teams, attributes);
     }
 
     /**
@@ -82,6 +83,7 @@ export class Scenario implements IAttributeHolder {
 
         // Return scenario info
         return {
+            author: this.author,
             descriptor: this.descriptor.makeTransportable(),
             teams: teamInfo
         };
