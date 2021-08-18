@@ -6,10 +6,11 @@
   "scripts": {
     "webpack-dev": "webpack --watch --mode development --stats=minimal --config webpack.config.js",
     "webpack": "webpack --mode production --config webpack.config.js",
-    "x": "yarn install"
+    "x": "yarn add @types/bcryptjs -D"
   },
   "dependencies": {
     "adm-zip": "^0.5.5",
+    "bcryptjs": "^2.4.3",
     "console": "^0.7.2",
     "cookie-parser": "^1.4.4",
     "express": "^4.17.1",
@@ -22,12 +23,15 @@
     "joi": "^17.4.2",
     "jquery": "^3.6.0",
     "morgan": "^1.10.0",
+    "mysql": "^2.18.1",
+    "node-gyp": "^8.1.0",
     "toml": "^3.0.0",
     "uuid": "^8.3.2",
     "ws": "^8.0.0"
   },
   "devDependencies": {
     "@types/adm-zip": "^0.4.34",
+    "@types/bcryptjs": "^2.4.2",
     "@types/cookie-parser": "^1.4.2",
     "@types/express": "^4.17.13",
     "@types/express-handlebars": "^5.3.1",
@@ -35,6 +39,7 @@
     "@types/handlebars": "^4.1.0",
     "@types/http-errors": "^1.8.1",
     "@types/jquery": "^3.5.6",
+    "@types/mysql": "^2.15.19",
     "@types/node": "^16.3.2",
     "@types/uuid": "^8.3.1",
     "@types/ws": "^7.4.6",

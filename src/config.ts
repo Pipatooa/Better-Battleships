@@ -14,7 +14,10 @@ export class Config {
     public readonly sqlHost: string;
     public readonly sqlUser: string;
     public readonly sqlPassword: string;
-    public readonly sqlDatabaseName: string;
+    public readonly sqlDatabase: string;
+    public readonly sqlConnectionLimit: number;
+
+    public readonly authHashRounds: number;
 
     protected configRaw: any;
 
@@ -27,17 +30,22 @@ export class Config {
         this.configRaw = configRaw;
 
         // Game section
-        assert.deepStrictEqual(typeof configRaw.game, "object");
+        assert.deepStrictEqual(typeof configRaw.game, 'object', 'Config: could not find section game');
         this.gameLimit = this.getFromConfig('number', 'game.limit');
         this.gameIDLength = this.getFromConfig('number', 'game.idLength');
         this.gameJoinTimeout = this.getFromConfig('number', 'game.joinTimeout');
 
         // Sql section
-        assert.deepStrictEqual(typeof configRaw.sql, 'object', 'sql');
+        assert.deepStrictEqual(typeof configRaw.sql, 'object', 'Config: could not find section sql');
         this.sqlHost = this.getFromConfig('string', 'sql.host');
         this.sqlUser = this.getFromConfig( 'string', 'sql.user');
         this.sqlPassword = this.getFromConfig( 'string', 'sql.password');
-        this.sqlDatabaseName = this.getFromConfig( 'string', 'sql.database');
+        this.sqlDatabase = this.getFromConfig( 'string', 'sql.database');
+        this.sqlConnectionLimit = this.getFromConfig('number', 'sql.connectionLimit');
+
+        // Auth section
+        assert.deepStrictEqual(typeof configRaw.sql, 'object', 'Config: could not find section auth');
+        this.authHashRounds = this.getFromConfig('number', 'auth.hashRounds');
     }
 
     /**
@@ -56,7 +64,7 @@ export class Config {
         }
 
         // Assert type equality
-        assert.deepStrictEqual(typeof value, typeString, `${name} must be of type '${typeString}'.`);
+        assert.deepStrictEqual(typeof value, typeString, `Config: ${name} must be of type '${typeString}'.`);
 
         // Return value if assertion did not throw error
         return value;
@@ -77,6 +85,11 @@ host = ""
 user = ""
 password = ""
 database = ""
+connectionLimit = 1
+
+[auth]
+hashRounds = 10
+
 `.trimStart();
 
 // If config file does not exist, create default config file

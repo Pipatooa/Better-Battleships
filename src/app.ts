@@ -10,6 +10,8 @@ import socketRegister from './game/server/sockets/register';
 
 import gameRouter from './routes/game';
 import gameCreateRouter from './routes/game/create';
+import loginRouter from './routes/login';
+import registerRouter from './routes/register';
 
 const app = express();
 const port: number = 8080;
@@ -31,14 +33,16 @@ app.locals.siteName = 'Better Battleships';
 app.locals.baseUrl = 'http://localhost:8080';
 
 // Express middleware setup
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+// app.use(express.json());
+// app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(process.cwd(), 'public')));
 
 // Register route handlers for express
 app.use('/game/create', gameCreateRouter);
 app.use('/game', gameRouter);
+app.use('/login', loginRouter);
+app.use('/register', registerRouter);
 
 // Register socket handles for the websocket server
 socketRegister(wss);

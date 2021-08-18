@@ -144,6 +144,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/bcryptjs@npm:^2.4.2":
+  version: 2.4.2
+  resolution: "@types/bcryptjs@npm:2.4.2"
+  checksum: 220dade7b0312b41e23ccfb15f2ddde7804eb3c7ef41db41a6c49054be1e19a15eb3dd8c8ef196494f0866307cce22ad6f3f272941387124707d81dc66155bbc
+  languageName: node
+  linkType: hard
+
 "@types/body-parser@npm:*":
   version: 1.19.1
   resolution: "@types/body-parser@npm:1.19.1"
@@ -300,6 +307,15 @@ __metadata:
   version: 3.0.5
   resolution: "@types/minimatch@npm:3.0.5"
   checksum: c41d136f67231c3131cf1d4ca0b06687f4a322918a3a5adddc87ce90ed9dbd175a3610adee36b106ae68c0b92c637c35e02b58c8a56c424f71d30993ea220b92
+  languageName: node
+  linkType: hard
+
+"@types/mysql@npm:^2.15.19":
+  version: 2.15.19
+  resolution: "@types/mysql@npm:2.15.19"
+  dependencies:
+    "@types/node": "*"
+  checksum: aa926fdb40ec471b794a3951ca619803a367772a7837968990a5961e2214ccfea1f9ca2121222be7091511abf3db0f09d9c6ac151f40ad147d27e05ef8f7c2c8
   languageName: node
   linkType: hard
 
@@ -914,11 +930,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"bcryptjs@npm:^2.4.3":
+  version: 2.4.3
+  resolution: "bcryptjs@npm:2.4.3"
+  checksum: 0e80ed852a41f5dfb1853f53ee14a7390b0ef263ce05dba6e2ef3cd919dfad025a7c21ebcfe5bc7fa04b100990edf90c7a877ff7fe623d3e479753253131b629
+  languageName: node
+  linkType: hard
+
 "better-battleships@workspace:.":
   version: 0.0.0-use.local
   resolution: "better-battleships@workspace:."
   dependencies:
     "@types/adm-zip": ^0.4.34
+    "@types/bcryptjs": ^2.4.2
     "@types/cookie-parser": ^1.4.2
     "@types/express": ^4.17.13
     "@types/express-handlebars": ^5.3.1
@@ -926,10 +950,12 @@ __metadata:
     "@types/handlebars": ^4.1.0
     "@types/http-errors": ^1.8.1
     "@types/jquery": ^3.5.6
+    "@types/mysql": ^2.15.19
     "@types/node": ^16.3.2
     "@types/uuid": ^8.3.1
     "@types/ws": ^7.4.6
     adm-zip: ^0.5.5
+    bcryptjs: ^2.4.3
     console: ^0.7.2
     cookie-parser: ^1.4.4
     copy-webpack-plugin: ^9.0.1
@@ -945,6 +971,8 @@ __metadata:
     jquery: ^3.6.0
     mini-css-extract-plugin: ^2.1.0
     morgan: ^1.10.0
+    mysql: ^2.18.1
+    node-gyp: ^8.1.0
     nodemon: ^2.0.12
     nodemon-webpack-plugin: ^4.5.2
     optimize-css-assets-webpack-plugin: ^6.0.1
@@ -962,6 +990,13 @@ __metadata:
     zip-file-webpack-plugin: ^1.2.0
   languageName: unknown
   linkType: soft
+
+"bignumber.js@npm:9.0.0":
+  version: 9.0.0
+  resolution: "bignumber.js@npm:9.0.0"
+  checksum: 51f37890bca58bded63720add832b1c4898cf5b8ad95b5d4d9c3e763c461163d0355d11d91b740b0216b02e4e8cbb02455b28ee32140b775d96a39bbd817fdf6
+  languageName: node
+  linkType: hard
 
 "binary-extensions@npm:^2.0.0":
   version: 2.2.0
@@ -3839,6 +3874,18 @@ fsevents@~2.3.2:
   languageName: node
   linkType: hard
 
+"mysql@npm:^2.18.1":
+  version: 2.18.1
+  resolution: "mysql@npm:2.18.1"
+  dependencies:
+    bignumber.js: 9.0.0
+    readable-stream: 2.3.7
+    safe-buffer: 5.1.2
+    sqlstring: 2.3.1
+  checksum: 430dec8525e849bbb53f78ffc7aa85b2d1535f49f96ae06064089219cfabfdb9b4051e1fabcbacc0e5b85174ae4c762b071b99d4fb4d062e98f90e723b1def0a
+  languageName: node
+  linkType: hard
+
 "nanoid@npm:^3.1.23":
   version: 3.1.23
   resolution: "nanoid@npm:3.1.23"
@@ -3888,7 +3935,7 @@ fsevents@~2.3.2:
   languageName: node
   linkType: hard
 
-"node-gyp@npm:latest":
+"node-gyp@npm:^8.1.0, node-gyp@npm:latest":
   version: 8.1.0
   resolution: "node-gyp@npm:8.1.0"
   dependencies:
@@ -4852,7 +4899,7 @@ fsevents@~2.3.2:
   languageName: node
   linkType: hard
 
-"readable-stream@npm:^2.0.0, readable-stream@npm:^2.0.5, readable-stream@npm:^2.0.6":
+"readable-stream@npm:2.3.7, readable-stream@npm:^2.0.0, readable-stream@npm:^2.0.5, readable-stream@npm:^2.0.6":
   version: 2.3.7
   resolution: "readable-stream@npm:2.3.7"
   dependencies:
@@ -5389,6 +5436,13 @@ resolve@^1.9.0:
   dependencies:
     extend-shallow: ^3.0.0
   checksum: ae5af5c91bdc3633628821bde92fdf9492fa0e8a63cf6a0376ed6afde93c701422a1610916f59be61972717070119e848d10dfbbd5024b7729d6a71972d2a84c
+  languageName: node
+  linkType: hard
+
+"sqlstring@npm:2.3.1":
+  version: 2.3.1
+  resolution: "sqlstring@npm:2.3.1"
+  checksum: de4299cf9bd0f49abae5b4eddde42c7ae7c447e035498ec50b3264610d6f0efbe433eeed2d20d48b6362bf46fd96c85cf6db240e994dbe6d5c3f9dac6d7ffd31
   languageName: node
   linkType: hard
 
