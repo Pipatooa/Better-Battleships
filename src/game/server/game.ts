@@ -1,5 +1,5 @@
 import * as console from 'console';
-import {gameJoinTimeout} from './game-manager';
+import config from '../../config';
 import {Scenario} from './scenario/scenario';
 import {Client} from './sockets/client';
 
@@ -11,7 +11,7 @@ export class Game {
                        public readonly scenario: Scenario,
                        protected readonly timeoutFunction: (gameID: string) => void) {
 
-        this.startTimeout(gameJoinTimeout);
+        this.startTimeout(config.gameJoinTimeout);
     }
 
     public joinClient(client: Client) {
@@ -42,7 +42,7 @@ export class Game {
 
             // If no clients are connected to this game, start a game timeout
             if (this._clients.length === 0)
-                this.startTimeout(gameJoinTimeout);
+                this.startTimeout(config.gameJoinTimeout);
         });
 
         // Send client information about the scenario

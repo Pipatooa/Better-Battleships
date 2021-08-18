@@ -8,13 +8,6 @@ const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
 const { readdirSync } = require('fs');
-const fs = require('fs');
-
-/**
- * Prebuild tasks
- */
-
-fs.rmdirSync(path.resolve(__dirname, './dist'), { recursive: true });
 
 /**
  * Common config

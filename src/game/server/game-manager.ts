@@ -1,16 +1,13 @@
 import * as console from 'console';
+import config from '../../config';
 import {Game} from './game';
 import {Scenario} from './scenario/scenario';
-
-const gameLimit: number = 8;
-export const gameJoinTimeout: number = 5000;
-export const gameIDLength = 6;
 
 const games: { [id: string]: Game } = {};
 let numGames: number = 0;
 
 export function capacityReached(): boolean {
-    return numGames >= gameLimit;
+    return numGames >= config.gameLimit;
 }
 
 function generateGameID(): string {
@@ -18,7 +15,7 @@ function generateGameID(): string {
 
     // Generate IDs until an ID which isn't used has been generated
     do {
-        gameID = Math.random().toString().substr(2, gameIDLength);
+        gameID = Math.random().toString().substr(2, config.gameIDLength);
     } while (gameID in games);
 
     // Return unique game ID
@@ -36,7 +33,7 @@ export function createGame(scenario: Scenario): Game {
     numGames += 1;
 
     // Start timeout
-    game.startTimeout(gameJoinTimeout);
+    game.startTimeout(config.gameJoinTimeout);
 
     // Debug
     console.log(`Created game with id '${gameID}'. Current games: ${numGames}`);

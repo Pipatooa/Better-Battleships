@@ -1,6 +1,7 @@
 import Joi from 'joi';
+import config from '../../../../config';
 import {Game} from '../../game';
-import {gameIDLength, queryGame} from '../../game-manager';
+import {queryGame} from '../../game-manager';
 import {Client} from '../client';
 import {baseRequestSchema, IBaseRequest} from '../i-request';
 
@@ -25,5 +26,5 @@ export interface IJoinRequest extends IBaseRequest {
 
 export const joinRequestSchema = baseRequestSchema.keys({
     request: 'join',
-    gameID: Joi.string().length(gameIDLength).required()
+    gameID: Joi.string().length(config.gameIDLength).required()
 });
