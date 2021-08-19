@@ -1,5 +1,5 @@
 import Joi from 'joi';
-import {clamp} from '../../../shared/utility';
+import {clamp} from '../../../../shared/utility';
 import {ParsingContext} from '../parsing-context';
 import {checkAgainstSchema} from '../schema-checker';
 import {ValueConstraint} from './value-constaint';

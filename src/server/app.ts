@@ -6,7 +6,7 @@ import WebSocket from 'isomorphic-ws';
 import path from 'path';
 import * as process from 'process';
 
-import socketRegister from './game/server/sockets/register';
+import socketRegister from './game/sockets/register';
 
 import gameRouter from './routes/game';
 import gameCreateRouter from './routes/game/create';

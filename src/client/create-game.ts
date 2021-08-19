@@ -29,7 +29,7 @@ $(document).ready(() => {
         let jsonResponse: IServerResponse = await res.json();
 
         if (jsonResponse.success)
-            window.location.href = `/game/${jsonResponse.gameID}`;
+            window.location.href = `game/${jsonResponse.gameID}`;
         else {
             errorContainer.removeClass('d-none');
             errorMessageElement.html(jsonResponse.message);

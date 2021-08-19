@@ -1,5 +1,5 @@
 import * as console from 'console';
-import config from '../../config';
+import config from '../config';
 import {Game} from './game';
 import {Scenario} from './scenario/scenario';
 

@@ -1,5 +1,5 @@
 import Joi from 'joi';
-import {IDescriptorInfo} from '../../../shared/network/i-descriptor-info';
+import {IDescriptorInfo} from '../../../../shared/network/i-descriptor-info';
 import {ParsingContext} from '../parsing-context';
 import {checkAgainstSchema} from '../schema-checker';
 

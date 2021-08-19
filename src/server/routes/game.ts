@@ -1,6 +1,6 @@
 import express from 'express';
-import {Game} from '../game/server/game';
-import {queryGame} from '../game/server/game-manager';
+import {Game} from '../game/game';
+import {queryGame} from '../game/game-manager';
 
 const router = express.Router();
 

@@ -2,5 +2,5 @@
 * text=auto
 
 # Exclude from linguist statistics
-src/public/bootstrap/** linguist-vendored
+src/static/public/bootstrap/** linguist-vendored
 .yarn/releases/*

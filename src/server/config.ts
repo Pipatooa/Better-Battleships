@@ -38,9 +38,9 @@ export class Config {
         // Sql section
         assert.deepStrictEqual(typeof configRaw.sql, 'object', 'Config: could not find section sql');
         this.sqlHost = this.getFromConfig('string', 'sql.host');
-        this.sqlUser = this.getFromConfig( 'string', 'sql.user');
-        this.sqlPassword = this.getFromConfig( 'string', 'sql.password');
-        this.sqlDatabase = this.getFromConfig( 'string', 'sql.database');
+        this.sqlUser = this.getFromConfig('string', 'sql.user');
+        this.sqlPassword = this.getFromConfig('string', 'sql.password');
+        this.sqlDatabase = this.getFromConfig('string', 'sql.database');
         this.sqlConnectionLimit = this.getFromConfig('number', 'sql.connectionLimit');
 
         // Auth section

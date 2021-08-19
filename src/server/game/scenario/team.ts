@@ -1,5 +1,5 @@
 import Joi from 'joi';
-import {ITeamInfo} from '../../shared/network/i-team-info';
+import {ITeamInfo} from '../../../shared/network/i-team-info';
 import {Attribute} from './attributes/attribute';
 import {
     attributeHolderSchema,

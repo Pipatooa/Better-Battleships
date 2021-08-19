@@ -1,5 +1,5 @@
 import Joi from 'joi';
-import config from '../../../../config';
+import config from '../../../config';
 import {Game} from '../../game';
 import {queryGame} from '../../game-manager';
 import {Client} from '../client';

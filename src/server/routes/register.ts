@@ -61,7 +61,7 @@ router.post('/', async (req, res) => {
             return;
         }
 
-         // Get password hash for user and store to database
+        // Get password hash for user and store to database
         let hash = await hashPassword(checkedFields.password);
         query = 'INSERT INTO `user` VALUES (?, ?)';
         await queryDatabase(query, [checkedFields.username, hash]);

@@ -29,7 +29,7 @@ const commonConfig = {
 
 const nodeConfig = {
     name: 'node',
-    entry: './src/app.ts',
+    entry: './src/server/app.ts',
     ...commonConfig,
     module: {
         rules: [
@@ -70,7 +70,7 @@ const nodeConfig = {
  * Webpack web config
  */
 
-const scenarioDirs = readdirSync('./src/scenarios', { withFileTypes: true })
+const scenarioDirs = readdirSync('./src/static/scenarios', { withFileTypes: true })
     .filter(entry => entry.isDirectory())
     .map(entry => entry.name);
 
@@ -78,7 +78,7 @@ const scenarioPatternEntries = Array.from({ length: scenarioDirs.length }, (_, i
     let scenarioFolder = scenarioDirs[i];
 
     return {
-        from: 'src/scenarios/' + scenarioFolder,
+        from: 'src/static/scenarios/' + scenarioFolder,
         to: 'tmp/scenarios/' + scenarioFolder
     };
 });
@@ -99,9 +99,9 @@ const scenarioPluginEntries = Array.from({ length: scenarioDirs.length }, (_, i)
 const webConfig = {
     name: 'web',
     entry: {
-        'game': './src/game/client/game.ts',
-        'create-game': './src/game/client/create-game.ts',
-        'register': './src/game/client/register.ts'
+        'game': './src/client/game.ts',
+        'create-game': './src/client/create-game.ts',
+        'register': './src/client/register.ts'
     },
     ...commonConfig,
     module: {
@@ -127,11 +127,11 @@ const webConfig = {
         new CopyWebpackPlugin({
             patterns: [
                 {
-                    from: 'src/public',
+                    from: 'src/static/public',
                     to: 'public'
                 },
                 {
-                    from: 'src/views',
+                    from: 'src/static/views',
                     to: 'views'
                 },
                 ...scenarioPatternEntries

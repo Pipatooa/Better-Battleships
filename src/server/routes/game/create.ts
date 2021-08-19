@@ -2,10 +2,10 @@ import AdmZip from 'adm-zip';
 import express from 'express';
 import formidable, {FileJSON} from 'formidable';
 import fs from 'fs';
-import {Game} from '../../game/server/game';
-import {capacityReached, createGame} from '../../game/server/game-manager';
-import {Scenario} from '../../game/server/scenario/scenario';
-import {unpack, UnpackingError} from '../../game/server/scenario/unpacker';
+import {Game} from '../../game/game';
+import {capacityReached, createGame} from '../../game/game-manager';
+import {Scenario} from '../../game/scenario/scenario';
+import {unpack, UnpackingError} from '../../game/scenario/unpacker';
 
 const router = express.Router();
 
