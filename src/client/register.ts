@@ -1,3 +1,5 @@
+import console from 'console';
+
 let usernameElement: JQuery;
 let passwordElement: JQuery;
 let password2Element: JQuery;
@@ -5,8 +7,6 @@ let password2Element: JQuery;
 let usernameFeedbackElement: JQuery;
 let passwordFeedbackElement: JQuery;
 let password2FeedbackElement: JQuery;
-
-let formElement: JQuery;
 
 /**
  * Username field validation for registration form
@@ -89,13 +89,63 @@ $(document).ready(() => {
     passwordFeedbackElement = $('#password-feedback');
     password2FeedbackElement = $('#password2-feedback');
 
-    formElement = $('#form');
-
     usernameElement.on('change keyup', checkUsername);
     passwordElement.on('change keyup', () => checkPassword);
     password2Element.on('change keyup', checkPassword2);
 
-    formElement.on('submit', () => {
-        return checkUsername() && checkPassword() && checkPassword2();
+    let formElement = $('#form');
+
+    // Update registration link to include search query parameters
+    $('#login-link').attr('href', `/login${window.location.search}`);
+
+    formElement.on('submit', async () => {
+
+        // Check if form data is valid
+        let valid = checkUsername() && checkPassword() && checkPassword2();
+        if (!valid)
+            return;
+
+        // Submit form data
+        let response = await fetch('', {
+            method: 'POST',
+            body: new FormData(formElement.get(0) as HTMLFormElement)
+        });
+
+        // Unpack JSON data
+        let registrationResponse = await response.json() as IRegistrationResponse;
+
+        // If request was successful, redirect user
+        if (registrationResponse.success) {
+
+            // Unpack search parameters
+            let params = new URLSearchParams(window.location.search);
+
+            // Redirect user to url if provided in search parameters, or to home page otherwise
+            window.location.href = params.has('r') ? params.get('r') as string : '/';
+            return;
+        }
+
+        // If username was taken
+        if (registrationResponse.message === 'Username taken') {
+            usernameElement.addClass('is-invalid');
+            usernameFeedbackElement.html('Username taken');
+            return;
+        }
+
+        // Other failure mode
+        console.log(registrationResponse);
     });
 });
+
+type IRegistrationResponse =
+    IRegistrationSuccessResponse |
+    IRegistrationFailureResponse;
+
+interface IRegistrationSuccessResponse {
+    success: true
+}
+
+interface IRegistrationFailureResponse {
+    success: false,
+    message: string
+}

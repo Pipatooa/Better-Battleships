@@ -972,7 +972,6 @@ __metadata:
     mini-css-extract-plugin: ^2.1.0
     morgan: ^1.10.0
     mysql: ^2.18.1
-    node-gyp: ^8.1.0
     nodemon: ^2.0.12
     nodemon-webpack-plugin: ^4.5.2
     optimize-css-assets-webpack-plugin: ^6.0.1
@@ -3935,7 +3934,7 @@ fsevents@~2.3.2:
   languageName: node
   linkType: hard
 
-"node-gyp@npm:^8.1.0, node-gyp@npm:latest":
+"node-gyp@npm:latest":
   version: 8.1.0
   resolution: "node-gyp@npm:8.1.0"
   dependencies:

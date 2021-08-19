@@ -101,7 +101,8 @@ const webConfig = {
     entry: {
         'game': './src/client/game.ts',
         'create-game': './src/client/create-game.ts',
-        'register': './src/client/register.ts'
+        'register': './src/client/register.ts',
+        'login': './src/client/login.ts'
     },
     ...commonConfig,
     module: {

@@ -32,7 +32,10 @@ router.post('/', async (req, res) => {
         // If error parsing form
         if (err) {
             res.status(400);
-            res.send('Invalid form data');
+            res.send({
+                success: false,
+                message: 'Invalid form data'
+            });
             return;
         }
 
@@ -43,7 +46,10 @@ router.post('/', async (req, res) => {
         } catch (e) {
             if (e instanceof Joi.ValidationError) {
                 res.status(400);
-                res.send(e.message);
+                res.send({
+                    success: false,
+                    message: e.message
+                });
                 return;
             }
 
@@ -57,7 +63,10 @@ router.post('/', async (req, res) => {
         // If username is already taken
         if (rows.length !== 0) {
             res.status(400);
-            res.send({ message: 'Username taken' });
+            res.send({
+                success: false,
+                message: 'Username taken'
+            });
             return;
         }
 
@@ -66,7 +75,10 @@ router.post('/', async (req, res) => {
         query = 'INSERT INTO `user` VALUES (?, ?)';
         await queryDatabase(query, [checkedFields.username, hash]);
 
-        res.sendStatus(200);
+        res.status(200);
+        res.send({
+            success: true
+        });
     });
 });
 

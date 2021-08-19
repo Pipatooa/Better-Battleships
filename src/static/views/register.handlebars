@@ -6,7 +6,7 @@
             <div class="card border-0 shadow rounded-3">
                 <div class="card-body p-4 p-sm-5">
                     <h5 class="card-title text-center mb-5">Register as a new user!</h5>
-                    <form method="post" class="needs-validation" id="form">
+                    <form class="needs-validation" id="form" onsubmit="return false;">
                         <div class="form-floating mb-3">
                             <input type="text" class="form-control" id="username" name="username" placeholder="Username">
                             <label for="username">Username</label>
@@ -24,6 +24,7 @@
                         </div>
                         <button class="btn btn-primary btn-login w-100" type="submit"><b>REGISTER</b></button>
                     </form>
+                    <p class="pt-3 mb-0">Already registered? <a class="link-primary" id="login-link" href="/login">Login</a></p>
                 </div>
             </div>
         </div>

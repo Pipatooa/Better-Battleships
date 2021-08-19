@@ -6,7 +6,7 @@
             <div class="card border-0 shadow rounded-3">
                 <div class="card-body p-4 p-sm-5">
                     <h5 class="card-title text-center mb-5">Login</h5>
-                    <form method="post">
+                    <form id="form" onsubmit="return false;">
                         <div class="form-floating mb-3">
                             <input type="text" class="form-control" id="username" name="username" placeholder="Username">
                             <label for="username">Username</label>
@@ -16,8 +16,12 @@
                             <input type="password" class="form-control" id="password" name="password" placeholder="Password">
                             <label for="password">Password</label>
                         </div>
+                        <div class="text-danger mb-3">
+                            <small id="form-feedback"></small>
+                        </div>
                         <button class="btn btn-primary btn-login w-100" type="submit"><b>LOGIN</b></button>
                     </form>
+                    <p class="pt-3 mb-0">Not a registered user? <a class="link-primary" id="register-link" href="/register">Register</a></p>
                 </div>
             </div>
         </div>
