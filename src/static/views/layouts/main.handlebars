@@ -9,12 +9,15 @@
     <meta name="msapplication-TileColor" content="#2b5797">
     <meta name="msapplication-config" content="/favicons/browserconfig.xml">
 
+    {{#if csrfToken}}
+        <meta name="csrf-token" content="{{csrfToken}}">
+    {{/if}}
+
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://unpkg.com/@popperjs/core@2"></script>
 
     <link rel="stylesheet" type="text/css" href="/bootstrap/css/bootstrap.min.css">
     <script src="/bootstrap/js/bootstrap.min.js"></script>
-
 
     {{#each stylesheets as |stylesheet|}}
         <link rel="stylesheet" type="text/css" href="{{stylesheet}}">

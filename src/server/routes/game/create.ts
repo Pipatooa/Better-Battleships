@@ -6,11 +6,13 @@ import {Game} from '../../game/game';
 import {capacityReached, createGame} from '../../game/game-manager';
 import {Scenario} from '../../game/scenario/scenario';
 import {unpack, UnpackingError} from '../../game/scenario/unpacker';
+import {preventCSRF, requireAuth} from '../../middleware';
 
 const router = express.Router();
 
-router.get('/', (req, res) => {
+router.get('/', preventCSRF, requireAuth, (req, res) => {
     res.render('create-game', {
+        csrfToken: req.csrfToken(),
         url: req.baseUrl + req.url,
         pageTitle: `Create Game`,
         pageDescription: '',
@@ -25,7 +27,7 @@ router.get('/', (req, res) => {
 });
 
 // Route handler for /game/create
-router.post('/', async (req, res) => {
+router.post('/', preventCSRF, async (req, res) => {
 
     // Check if game server is full
     if (capacityReached()) {
@@ -38,7 +40,7 @@ router.post('/', async (req, res) => {
         return;
     }
 
-    const form = formidable({ multiples: true });
+    let form = formidable({ multiples: true });
 
     // Parse form data from request
     form.parse(req, async (err, fields, files) => {

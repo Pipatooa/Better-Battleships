@@ -3,12 +3,14 @@ import formidable from 'formidable';
 import Joi from 'joi';
 import {hashPassword} from '../auth/password-hasher';
 import {queryDatabase} from '../db/query';
+import {preventCSRF} from '../middleware';
 
 const router = express.Router();
 
 // Route handler for /register
-router.get('/', (req, res) => {
+router.get('/', preventCSRF, (req, res) => {
     res.render('register', {
+        csrfToken: req.csrfToken(),
         url: req.baseUrl + req.url,
         pageTitle: `Register`,
         pageDescription: '',
@@ -22,9 +24,9 @@ router.get('/', (req, res) => {
     });
 });
 
-router.post('/', async (req, res) => {
+router.post('/', preventCSRF, async (req, res) => {
 
-    const form = formidable({ multiples: true });
+    let form = formidable({ multiples: true });
 
     // Parse form data from request
     form.parse(req, async (err, fields, files) => {

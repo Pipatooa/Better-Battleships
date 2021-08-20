@@ -1,5 +1,6 @@
 import * as assert from 'assert';
 import fs from 'fs';
+import ms from 'ms';
 import * as path from 'path';
 import toml from 'toml';
 
@@ -18,6 +19,8 @@ export class Config {
     public readonly sqlConnectionLimit: number;
 
     public readonly authHashRounds: number;
+    public readonly authJwtSecretToken: string;
+    public readonly authJwtExpiryTimeSeconds: number;
 
     protected configRaw: any;
 
@@ -46,6 +49,8 @@ export class Config {
         // Auth section
         assert.deepStrictEqual(typeof configRaw.sql, 'object', 'Config: could not find section auth');
         this.authHashRounds = this.getFromConfig('number', 'auth.hashRounds');
+        this.authJwtSecretToken = this.getFromConfig('string', 'auth.jwtSecretToken');
+        this.authJwtExpiryTimeSeconds = ms(this.getFromConfig('string', 'auth.jwtExpiryTime')) as unknown as number;
     }
 
     /**
@@ -89,7 +94,8 @@ connectionLimit = 1
 
 [auth]
 hashRounds = 10
-
+jwtSecretToken = ""
+jwtExpiryTime = ""
 `.trimStart();
 
 // If config file does not exist, create default config file

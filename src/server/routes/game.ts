@@ -1,11 +1,12 @@
 import express from 'express';
 import {Game} from '../game/game';
 import {queryGame} from '../game/game-manager';
+import {requireAuth} from '../middleware';
 
 const router = express.Router();
 
 // Route handler for /game
-router.get('/:gameID', (req, res) => {
+router.get('/:gameID', requireAuth, (req, res) => {
 
     // Check game ID
     let gameID: string = req.params.gameID;

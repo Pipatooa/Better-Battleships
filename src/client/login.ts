@@ -7,9 +7,16 @@ $(document).ready(() => {
 
     formElement.on('submit', async () => {
 
+        // Get CSRF token and create headers for request
+        let csrfToken = $('meta[name="csrf-token"]').attr('content');
+        let headers = new Headers();
+        headers.set('CSRF-Token', csrfToken as string);
+
         // Submit form data
         let response = await fetch('', {
             method: 'POST',
+            credentials: 'same-origin',
+            headers: headers,
             body: new FormData(formElement.get(0) as HTMLFormElement)
         });
 

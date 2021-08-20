@@ -2,13 +2,17 @@ import express from 'express';
 import formidable from 'formidable';
 import Joi from 'joi';
 import {checkPassword} from '../auth/password-hasher';
+import {signNewJwtToken} from '../auth/token-handler';
+import config from '../config';
 import {queryDatabase} from '../db/query';
+import {preventCSRF} from '../middleware';
 
 const router = express.Router();
 
 // Route handler for /login
-router.get('/', (req, res) => {
+router.get('/', preventCSRF, (req, res) => {
     res.render('login', {
+        csrfToken: req.csrfToken(),
         url: req.baseUrl + req.url,
         pageTitle: `Login`,
         pageDescription: '',
@@ -22,9 +26,9 @@ router.get('/', (req, res) => {
     });
 });
 
-router.post('/', async (req, res) => {
+router.post('/', preventCSRF, async (req, res) => {
 
-    const form = formidable({ multiples: true });
+    let form = formidable({ multiples: true });
 
     // Parse form data from request
     form.parse(req, async (err, fields, files) => {
@@ -33,8 +37,8 @@ router.post('/', async (req, res) => {
         if (err) {
             res.status(400);
             res.send({
-               success: false,
-               message: 'Invalid form data'
+                success: false,
+                message: 'Invalid form data'
             });
             return;
         }
@@ -81,9 +85,20 @@ router.post('/', async (req, res) => {
             return;
         }
 
+        // Sign new JWT
+        let token = await signNewJwtToken({
+            username: checkedFields.username
+        });
+
         res.status(200);
+        res.cookie('user-token', token, {
+            sameSite: 'lax',
+            secure: true,
+            httpOnly: true,
+            maxAge: config.authJwtExpiryTimeSeconds
+        });
         res.send({
-           success: true
+            success: true
         });
     });
 });

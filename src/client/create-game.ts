@@ -21,15 +21,21 @@ $(document).ready(() => {
         formData.append('file', file);
         formData.append('test', 'hello');
 
+        let csrfToken = $('meta[name="csrf-token"]').attr('content');
+        let headers = new Headers();
+        headers.set('CSRF-Token', csrfToken as string);
+
         let res: Response = await fetch('/game/create', {
             method: 'POST',
+            credentials: 'same-origin',
+            headers: headers,
             body: formData
         });
 
         let jsonResponse: IServerResponse = await res.json();
 
         if (jsonResponse.success)
-            window.location.href = `game/${jsonResponse.gameID}`;
+            window.location.href = `/game/${jsonResponse.gameID}`;
         else {
             errorContainer.removeClass('d-none');
             errorMessageElement.html(jsonResponse.message);
