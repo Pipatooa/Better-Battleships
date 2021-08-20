@@ -1,6 +1,6 @@
 export interface IPlayerJoin {
     dataType: 'playerJoin',
     playerID: string,
-    team: string | null,
+    team: string | undefined,
     ready: boolean
 }
