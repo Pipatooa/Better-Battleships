@@ -29,6 +29,13 @@ function checkUsername(): boolean {
         return false;
     }
 
+    // Username contains unsupported character
+    if (!/^[a-zA-Z\-_\d.]+$/.test(username)) {
+        usernameElement.addClass('is-invalid');
+        usernameFeedbackElement.html('Username can only contain latin letters, digits, and the special characters - _ and .');
+        return false;
+    }
+
     usernameElement.removeClass('is-invalid');
     return true;
 }
@@ -54,6 +61,42 @@ function checkPassword(): boolean {
         return false;
     }
 
+    // Password must contain lowercase letter
+    if (!/[a-z]/.test(password)) {
+        passwordElement.addClass('is-invalid');
+        passwordFeedbackElement.html('Password must contain lowercase letter');
+        return false;
+    }
+
+    // Password must contain uppercase letter
+    if (!/[A-Z]/.test(password)) {
+        passwordElement.addClass('is-invalid');
+        passwordFeedbackElement.html('Password must contain uppercase letter');
+        return false;
+    }
+
+    // Password must contain digit
+    if (!/\d/.test(password)) {
+        passwordElement.addClass('is-invalid');
+        passwordFeedbackElement.html('Password must contain a digit');
+        return false;
+    }
+
+    // Password must contain at least one symbol
+    if (!/[ -/:-@\[-`{-~]/.test(password)) {
+        passwordElement.addClass('is-invalid');
+        passwordFeedbackElement.html('Password must contain at least one symbol');
+        return false;
+    }
+
+    // Password contains unsupported character
+    if (!/^[a-zA-Z\d -/:-@\[-`{-~]+$/.test(password)) {
+        passwordElement.addClass('is-invalid');
+        passwordFeedbackElement.html('Password contains unsupported character');
+        return false;
+    }
+
+    // Password is valid
     passwordElement.removeClass('is-invalid');
     return true;
 }
@@ -127,8 +170,8 @@ $(document).ready(() => {
             // Unpack search parameters
             let params = new URLSearchParams(window.location.search);
 
-            // Redirect user to url if provided in search parameters, or to home page otherwise
-            window.location.href = params.has('r') ? params.get('r') as string : '/';
+            // Redirect user to login page
+            window.location.href = `/login${params.has('r') ? params.get('r') : ''}`;
             return;
         }
 

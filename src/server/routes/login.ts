@@ -17,8 +17,7 @@ router.get('/', preventCSRF, (req, res) => {
         pageTitle: `Login`,
         pageDescription: '',
         stylesheets: [
-            '/css/style.css',
-            '/css/login.css'
+            '/css/style.css'
         ],
         scripts: [
             '/js/login.js'

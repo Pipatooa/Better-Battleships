@@ -15,8 +15,7 @@ router.get('/', preventCSRF, (req, res) => {
         pageTitle: `Register`,
         pageDescription: '',
         stylesheets: [
-            '/css/style.css',
-            '/css/register.css'
+            '/css/style.css'
         ],
         scripts: [
             '/js/register.js'
@@ -97,8 +96,8 @@ interface IRegisterFields {
  * Schema for validating form fields
  */
 const registerFieldSchema = Joi.object({
-    username: Joi.string().min(1).max(32).required(),
-    password: Joi.string().min(8).required(),
+    username: Joi.string().min(3).max(32).regex(/^[a-zA-Z\-_\d.]+$/).required(),
+    password: Joi.string().min(8).regex(/^(?=.*?[a-z])(?=.*?[A-Z])(?=.*?\d)(?=.*?[ -/:-@\[-`{-~]).+$/).required(),
     password2: Joi.valid(Joi.ref('password')).required()
 });
 
