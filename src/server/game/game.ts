@@ -8,6 +8,8 @@ export class Game {
     protected timeoutID: NodeJS.Timeout | undefined;
     protected _clients: Client[] = [];
 
+    protected _started: boolean = false;
+
     public constructor(public readonly internalID: number,
                        public readonly gameID: string,
                        public readonly scenario: Scenario,
@@ -74,6 +76,18 @@ export class Game {
         }
     }
 
+    public startGame() {
+        console.log(`Starting game ${this.gameID}`);
+        this._started = true;
+
+        // Broadcast game start
+        for (let client of this._clients) {
+            client.ws.send(JSON.stringify({
+                dataType: 'gameStart'
+            }));
+        }
+    }
+
     public startTimeout(duration: number) {
         if (this.timeoutID !== undefined)
             this.stopTimeout();
@@ -90,5 +104,9 @@ export class Game {
     // Getters and setters
     public get clients(): Client[] {
         return this._clients;
+    }
+
+    public get started(): boolean {
+        return this._started;
     }
 }

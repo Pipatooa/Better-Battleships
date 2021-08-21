@@ -68,6 +68,12 @@ export default function register(server: http.Server, wss: WebSocket.Server) {
             // Increment connection count
             currentConnections += 1;
 
+            // Send client connection information
+            ws.send(JSON.stringify({
+                dataType: 'connectionInfo',
+                identity: client.identity
+            }));
+
             // Broadcast connection event for connection handler
             wss.emit('connection', ws, req, client);
         });

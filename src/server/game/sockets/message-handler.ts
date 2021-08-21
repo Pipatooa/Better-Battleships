@@ -3,6 +3,7 @@ import Joi from 'joi';
 import {Client} from './client';
 import {baseRequestSchema, IRequest, RequestID} from './i-request';
 import {handleJoinTeamRequest, joinTeamRequestSchema} from './request-handlers/join-team';
+import {handleReadyRequest, readyRequestSchema} from './request-handlers/ready';
 
 export async function handleMessage(client: Client, msg: Data) {
 
@@ -38,5 +39,6 @@ export async function handleMessage(client: Client, msg: Data) {
 }
 
 export const requestInformation: Record<RequestID, [Joi.Schema, (client: Client, request: any) => void]> = {
-    joinTeam: [joinTeamRequestSchema, handleJoinTeamRequest]
+    joinTeam: [joinTeamRequestSchema, handleJoinTeamRequest],
+    ready: [readyRequestSchema, handleReadyRequest]
 };

@@ -1,18 +1,18 @@
-import {MessageEvent} from 'isomorphic-ws';
 import {IGameInfo} from '../../../shared/network/i-game-info';
-import {IPlayerJoin} from '../network/i-player-join';
-import {IPlayerLeave} from '../network/i-player-leave';
-import {IServerMessage} from '../network/i-server-message';
-import {ITeamAssignment} from '../network/i-team-assignment';
+import {handleConnectionInfo, IConnectionInfo} from './message-handlers/connection-info';
 import {handleGameInfoMessage} from './message-handlers/game-info';
-import {handlePlayerJoin} from './message-handlers/player-join';
-import {handlePlayerLeave} from './message-handlers/player-leave';
-import {handleTeamAssignment} from './message-handlers/team-assignment';
+import {handlePlayerJoin, IPlayerJoin} from './message-handlers/player-join';
+import {handlePlayerLeave, IPlayerLeave} from './message-handlers/player-leave';
+import {handlePlayerReady, IPlayerReady} from './message-handlers/player-ready';
+import {handleTeamAssignment, ITeamAssignment} from './message-handlers/team-assignment';
 
 export function handleMessage(e: MessageEvent) {
     let serverMessage = JSON.parse(e.data.toString()) as IServerMessage;
 
     switch (serverMessage.dataType) {
+        case 'connectionInfo':
+            handleConnectionInfo(serverMessage as unknown as IConnectionInfo)
+            return;
         case 'gameInfo':
             handleGameInfoMessage(serverMessage as unknown as IGameInfo);
             return;
@@ -25,7 +25,14 @@ export function handleMessage(e: MessageEvent) {
         case 'playerLeave':
             handlePlayerLeave(serverMessage as unknown as IPlayerLeave);
             return;
+        case 'playerReady':
+            handlePlayerReady(serverMessage as unknown as IPlayerReady);
+            return;
     }
 
     console.log(`Unknown data type '${serverMessage.dataType}'`);
+}
+
+export interface IServerMessage {
+    dataType: string;
 }

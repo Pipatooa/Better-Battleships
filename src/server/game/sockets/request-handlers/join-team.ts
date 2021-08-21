@@ -5,8 +5,13 @@ import {baseRequestSchema, IBaseRequest} from '../i-request';
 
 export function handleJoinTeamRequest(client: Client, joinTeamRequest: IJoinTeamRequest) {
 
-    let team: Team | undefined = client.game?.scenario.teams[joinTeamRequest.team];
+    // If game has already started, ignore request
+    if (client.game.started)
+        return;
 
+    let team: Team | undefined = client.game.scenario.teams[joinTeamRequest.team];
+
+    // If no team was found that matched the ID provided
     if (team === undefined) {
         client.ws.close(1013, 'Team does not exist');
         return;
@@ -16,7 +21,7 @@ export function handleJoinTeamRequest(client: Client, joinTeamRequest: IJoinTeam
     client.team = team;
 
     // Broadcast team assignment to existing clients
-    for (let existingClient of client.game?.clients || []) {
+    for (let existingClient of client.game.clients) {
         existingClient.ws.send(JSON.stringify({
             dataType: 'teamAssignment',
             playerIdentity: client.identity,

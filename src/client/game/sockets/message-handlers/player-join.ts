@@ -1,4 +1,3 @@
-import {IPlayerJoin} from '../../network/i-player-join';
 import {nameFromIdentity} from '../unpack-identity';
 
 export function handlePlayerJoin(playerJoin: IPlayerJoin) {
@@ -17,4 +16,11 @@ export function handlePlayerJoin(playerJoin: IPlayerJoin) {
     let playerElement = $(`<div class="" id="player-${playerJoin.playerIdentity}"></div>`);
     playerElement.text(nameFromIdentity(playerJoin.playerIdentity));
     pane.append(playerElement);
+}
+
+export interface IPlayerJoin {
+    dataType: 'playerJoin',
+    playerIdentity: string,
+    team: string | undefined,
+    ready: boolean
 }

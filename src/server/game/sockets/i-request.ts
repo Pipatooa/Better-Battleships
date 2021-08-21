@@ -1,15 +1,18 @@
 import Joi from 'joi';
 import {IJoinTeamRequest} from './request-handlers/join-team';
+import {IReadyRequest} from './request-handlers/ready';
 
 export interface IBaseRequest {
     request: RequestID;
 }
 
 export type IRequest =
-    IJoinTeamRequest;
+    IJoinTeamRequest |
+    IReadyRequest;
 
 export const requestIDs = [
-    'joinTeam'
+    'joinTeam',
+    'ready'
 ] as const;
 
 export type RequestID = typeof requestIDs[number];

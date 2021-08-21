@@ -16,7 +16,7 @@ router.get('/:gameID', requireAuth, async (req, res) => {
 
     // If game does not exist
     if (game === undefined) {
-        res.render('game-does-not-exist', {
+        res.render('game-not-found', {
             url: req.baseUrl + req.url,
             pageTitle: `Game does not exist!`,
             pageDescription: '',

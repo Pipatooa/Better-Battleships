@@ -1,10 +1,9 @@
-import {openSocketConnection} from './game/sockets/opener';
+import {openSocketConnection, socket} from './game/sockets/opener';
 
 openSocketConnection();
 
 $(document).ready(() => {
     let shareLinkElement = $('#share-link');
-
     (shareLinkElement as any).tooltip();
 
     shareLinkElement.on('click', () => {
@@ -19,5 +18,12 @@ $(document).ready(() => {
 
     shareLinkElement.on('hidden.bs.tooltip', () => {
         shareLinkElement.attr('data-bs-original-title', 'Copy to clipboard');
+    });
+
+    $('#ready-button').on('click', () => {
+        socket.send(JSON.stringify({
+            request: 'ready',
+            value: true
+        }));
     });
 });
