@@ -1,5 +1,5 @@
 export interface ITeamAssignment {
     dataType: 'teamAssignment',
-    playerID: string,
+    playerIdentity: string,
     team: string
 }

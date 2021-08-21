@@ -1,8 +1,6 @@
 import csurf from 'csurf';
-import {IncomingMessage, OutgoingHttpHeaders } from 'http';
 import {Forbidden} from 'http-errors';
 import {checkRequestAuth} from './auth/request-handler';
-import {verifyToken} from './auth/token-handler';
 
 let csurfProtection = csurf({ cookie: { sameSite: 'lax', secure: true, httpOnly: true } });
 
@@ -39,7 +37,8 @@ export async function requireAuth(req: any, res: any, next: any) {
 
     // If not authorised, redirect user to login page
     if (payload === undefined) {
-        res.redirect(`/login?r=${req.baseUrl + req.url}`);
+        let encodedUri = encodeURI(req.baseUrl + req.url);
+        res.redirect(`/login?r=${encodedUri}`);
         return;
     }
 

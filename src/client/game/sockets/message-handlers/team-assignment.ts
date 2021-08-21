@@ -1,8 +1,6 @@
 import {ITeamAssignment} from '../../network/i-team-assignment';
 
 export function handleTeamAssignment(teamAssignment: ITeamAssignment) {
-    let playerElement = $(`#player-${teamAssignment.playerID}`);
-
-    console.log(`#player-${teamAssignment.playerID}`, playerElement);
+    let playerElement = $(`#player-${teamAssignment.playerIdentity.replace(':', '\\:')}`);
     playerElement.appendTo($(`#team-${teamAssignment.team}`));
 }

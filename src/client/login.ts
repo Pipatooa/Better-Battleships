@@ -3,7 +3,8 @@ $(document).ready(() => {
     let formFeedbackElement = $('#form-feedback');
 
     // Update registration link to include search query parameters
-    $('#register-link').attr('href', `/register${window.location.search}`);
+    let escapedSearchParams = encodeURI(decodeURIComponent(window.location.search));
+    $('#register-link').attr('href', `/register${escapedSearchParams}`);
 
     formElement.on('submit', async () => {
 

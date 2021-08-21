@@ -19,7 +19,7 @@ export function handleJoinTeamRequest(client: Client, joinTeamRequest: IJoinTeam
     for (let existingClient of client.game?.clients || []) {
         existingClient.ws.send(JSON.stringify({
             dataType: 'teamAssignment',
-            playerID: client.id,
+            playerIdentity: client.identity,
             team: joinTeamRequest.team
         }));
     }

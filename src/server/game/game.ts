@@ -30,13 +30,13 @@ export class Game {
             this._clients = this._clients.filter(c => c !== client);
 
             // Debug
-            console.log(`Client ${client.id} disconnected from game ${this.id}`);
+            console.log(`Client ${client.identity} disconnected from game ${this.id}`);
 
             // Broadcast disconnect event to existing clients
             for (let existingClient of this._clients) {
                 existingClient.ws.send(JSON.stringify({
                     dataType: 'playerLeave',
-                    playerID: client.id
+                    playerIdentity: client.identity
                 }));
             }
 
@@ -55,7 +55,7 @@ export class Game {
         for (let existingClient of this._clients) {
             existingClient.ws.send(JSON.stringify({
                 dataType: 'playerJoin',
-                playerID: client.id,
+                playerIdentity: client.identity,
                 team: client.team?.id,
                 ready: client.ready
             }));
@@ -64,7 +64,7 @@ export class Game {
             if (existingClient !== client) {
                 client.ws.send(JSON.stringify({
                     dataType: 'playerJoin',
-                    playerID: existingClient.id,
+                    playerIdentity: existingClient.identity,
                     team: existingClient.team?.id,
                     ready: client.ready
                 }));

@@ -139,7 +139,8 @@ $(document).ready(() => {
     let formElement = $('#form');
 
     // Update registration link to include search query parameters
-    $('#login-link').attr('href', `/login${window.location.search}`);
+    let escapedSearchParams = encodeURI(decodeURIComponent(window.location.search));
+    $('#login-link').attr('href', `/login${escapedSearchParams}`);
 
     formElement.on('submit', async () => {
 
