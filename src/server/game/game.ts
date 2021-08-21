@@ -38,10 +38,10 @@ export class Game {
 
             // Broadcast disconnect event to existing clients
             for (let existingClient of this._clients) {
-                existingClient.ws.send(JSON.stringify({
-                    dataType: 'playerLeave',
+                existingClient.sendEvent({
+                    event: 'playerLeave',
                     playerIdentity: client.identity
-                }));
+                });
             }
 
             // If no clients are connected to this game, start a game timeout
@@ -50,28 +50,28 @@ export class Game {
         });
 
         // Send client information about the scenario
-        client.ws.send(JSON.stringify({
-            dataType: 'gameInfo',
+        client.sendEvent({
+            event: 'gameInfo',
             scenario: this.scenario.makeTransportable()
-        }));
+        });
 
         // Broadcast player join to all existing clients
         for (let existingClient of this._clients) {
-            existingClient.ws.send(JSON.stringify({
-                dataType: 'playerJoin',
+            existingClient.sendEvent({
+                event: 'playerJoin',
                 playerIdentity: client.identity,
                 team: client.team?.id,
                 ready: client.ready
-            }));
+            })
 
             // Broadcast existing client information to new client
             if (existingClient !== client) {
-                client.ws.send(JSON.stringify({
-                    dataType: 'playerJoin',
+                client.sendEvent({
+                    event: 'playerJoin',
                     playerIdentity: existingClient.identity,
                     team: existingClient.team?.id,
                     ready: client.ready
-                }));
+                });
             }
         }
     }
@@ -82,9 +82,9 @@ export class Game {
 
         // Broadcast game start
         for (let client of this._clients) {
-            client.ws.send(JSON.stringify({
-                dataType: 'gameStart'
-            }));
+            client.sendEvent({
+                event: 'gameStart'
+            })
         }
     }
 

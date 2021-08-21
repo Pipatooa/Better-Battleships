@@ -69,10 +69,10 @@ export default function register(server: http.Server, wss: WebSocket.Server) {
             currentConnections += 1;
 
             // Send client connection information
-            ws.send(JSON.stringify({
-                dataType: 'connectionInfo',
+            client.sendEvent({
+                event: 'connectionInfo',
                 identity: client.identity
-            }));
+            });
 
             // Broadcast connection event for connection handler
             wss.emit('connection', ws, req, client);

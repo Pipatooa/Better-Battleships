@@ -1,7 +1,8 @@
 import Joi from 'joi';
+import {baseRequestSchema} from '../../../../shared/network/requests/i-client-request';
+import {IJoinTeamRequest} from '../../../../shared/network/requests/i-join-team';
 import {Team} from '../../scenario/team';
 import {Client} from '../client';
-import {baseRequestSchema, IBaseRequest} from '../i-request';
 
 export function handleJoinTeamRequest(client: Client, joinTeamRequest: IJoinTeamRequest) {
 
@@ -22,17 +23,12 @@ export function handleJoinTeamRequest(client: Client, joinTeamRequest: IJoinTeam
 
     // Broadcast team assignment to existing clients
     for (let existingClient of client.game.clients) {
-        existingClient.ws.send(JSON.stringify({
-            dataType: 'teamAssignment',
+        existingClient.sendEvent({
+            event: 'teamAssignment',
             playerIdentity: client.identity,
             team: joinTeamRequest.team
-        }));
+        });
     }
-}
-
-export interface IJoinTeamRequest extends IBaseRequest {
-    request: 'joinTeam',
-    team: string
 }
 
 export const joinTeamRequestSchema = baseRequestSchema.keys({

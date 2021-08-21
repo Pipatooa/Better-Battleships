@@ -195,6 +195,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/escape-html@npm:^1.0.1":
+  version: 1.0.1
+  resolution: "@types/escape-html@npm:1.0.1"
+  checksum: 141d6e44dd514b0bf8a1c5e7730d6b9fa291bb11a52bcc3434d269252b10622f52bd7458553efc2c95ca8341bafab836fe696f8fe72f82c5809204239b8ba791
+  languageName: node
+  linkType: hard
+
 "@types/eslint-scope@npm:^3.7.0":
   version: 3.7.1
   resolution: "@types/eslint-scope@npm:3.7.1"
@@ -978,6 +985,7 @@ __metadata:
     "@types/cookie": ^0.4.1
     "@types/cookie-parser": ^1.4.2
     "@types/csurf": ^1.11.2
+    "@types/escape-html": ^1.0.1
     "@types/express": ^4.17.13
     "@types/express-handlebars": ^5.3.1
     "@types/formidable": ^1.2.3
@@ -997,6 +1005,7 @@ __metadata:
     cookie-parser: ^1.4.4
     copy-webpack-plugin: ^9.0.1
     csurf: ^1.11.0
+    escape-html: ^1.0.3
     express: ^4.17.1
     express-fileupload: ^1.2.1
     express-handlebars: ^5.3.2
@@ -2147,7 +2156,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"escape-html@npm:~1.0.3":
+"escape-html@npm:^1.0.3, escape-html@npm:~1.0.3":
   version: 1.0.3
   resolution: "escape-html@npm:1.0.3"
   checksum: 6213ca9ae00d0ab8bccb6d8d4e0a98e76237b2410302cf7df70aaa6591d509a2a37ce8998008cbecae8fc8ffaadf3fb0229535e6a145f3ce0b211d060decbb24

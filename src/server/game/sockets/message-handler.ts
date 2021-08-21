@@ -1,13 +1,14 @@
 import {Data} from 'isomorphic-ws';
 import Joi from 'joi';
+import {baseRequestSchema, ClientRequestID, IClientRequest} from '../../../shared/network/requests/i-client-request';
 import {Client} from './client';
-import {baseRequestSchema, IRequest, RequestID} from './i-request';
 import {handleJoinTeamRequest, joinTeamRequestSchema} from './request-handlers/join-team';
 import {handleReadyRequest, readyRequestSchema} from './request-handlers/ready';
 
+
 export async function handleMessage(client: Client, msg: Data) {
 
-    let request: IRequest;
+    let request: IClientRequest;
 
     try {
         request = await JSON.parse(msg.toString());
@@ -23,7 +24,7 @@ export async function handleMessage(client: Client, msg: Data) {
     try {
         request = await baseRequestSchema.validateAsync(request);
 
-        let [schema, handlerFunction] = requestInformation[request.request];
+        let [schema, handlerFunction] = requestSchemaAndHandlers[request.request];
         request = await schema.validateAsync(request);
 
         // Parse message in handler function
@@ -38,7 +39,7 @@ export async function handleMessage(client: Client, msg: Data) {
     }
 }
 
-export const requestInformation: Record<RequestID, [Joi.Schema, (client: Client, request: any) => void]> = {
+const requestSchemaAndHandlers: Record<ClientRequestID, [Joi.Schema, (client: Client, request: any) => void]> = {
     joinTeam: [joinTeamRequestSchema, handleJoinTeamRequest],
     ready: [readyRequestSchema, handleReadyRequest]
 };

@@ -1,4 +1,5 @@
-import {openSocketConnection, socket} from './game/sockets/opener';
+import {ready} from './game/sockets/button-functions';
+import {openSocketConnection} from './game/sockets/opener';
 
 openSocketConnection();
 
@@ -20,10 +21,5 @@ $(document).ready(() => {
         shareLinkElement.attr('data-bs-original-title', 'Copy to clipboard');
     });
 
-    $('#ready-button').on('click', () => {
-        socket.send(JSON.stringify({
-            request: 'ready',
-            value: true
-        }));
-    });
+    $('#ready-button').on('click', () => ready(true));
 });

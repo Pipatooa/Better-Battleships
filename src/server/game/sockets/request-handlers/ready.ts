@@ -1,6 +1,7 @@
 import Joi from 'joi';
+import {baseRequestSchema} from '../../../../shared/network/requests/i-client-request';
+import {IReadyRequest} from '../../../../shared/network/requests/i-ready';
 import {Client} from '../client';
-import {baseRequestSchema, IBaseRequest} from '../i-request';
 
 export function handleReadyRequest(client: Client, readyRequest: IReadyRequest) {
 
@@ -19,11 +20,11 @@ export function handleReadyRequest(client: Client, readyRequest: IReadyRequest) 
 
     // Broadcast ready event
     for (let existingClient of client.game.clients) {
-        existingClient.ws.send(JSON.stringify({
-            dataType: 'playerReady',
+        existingClient.sendEvent({
+            event: 'playerReady',
             playerIdentity: client.identity,
             ready: client.ready
-        }));
+        });
 
         // If client is not ready, set all ready flag to false
         if (allReady && !existingClient.ready)
@@ -33,11 +34,6 @@ export function handleReadyRequest(client: Client, readyRequest: IReadyRequest) 
     if (allReady) {
         client.game.startGame();
     }
-}
-
-export interface IReadyRequest extends IBaseRequest {
-    request: 'ready',
-    value: boolean
 }
 
 export const readyRequestSchema = baseRequestSchema.keys({

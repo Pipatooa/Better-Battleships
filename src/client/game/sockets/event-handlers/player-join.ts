@@ -1,6 +1,9 @@
-import {nameFromIdentity} from '../unpack-identity';
+import {IPlayerJoinEvent} from '../../../../shared/network/events/i-player-join';
+import {IPlayerReadyEvent} from '../../../../shared/network/events/i-player-ready';
+import {nameFromIdentity} from '../../../../shared/utility';
+import {handlePlayerReady} from './player-ready';
 
-export function handlePlayerJoin(playerJoin: IPlayerJoin) {
+export function handlePlayerJoin(playerJoin: IPlayerJoinEvent) {
 
     // Get correct team pane for the player's team
     let pane: JQuery;
@@ -16,11 +19,6 @@ export function handlePlayerJoin(playerJoin: IPlayerJoin) {
     let playerElement = $(`<div class="" id="player-${playerJoin.playerIdentity}"></div>`);
     playerElement.text(nameFromIdentity(playerJoin.playerIdentity));
     pane.append(playerElement);
-}
 
-export interface IPlayerJoin {
-    dataType: 'playerJoin',
-    playerIdentity: string,
-    team: string | undefined,
-    ready: boolean
+    handlePlayerReady(playerJoin as unknown as IPlayerReadyEvent);
 }

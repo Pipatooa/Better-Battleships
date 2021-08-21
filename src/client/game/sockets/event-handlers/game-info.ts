@@ -1,8 +1,8 @@
-import {IGameInfo} from '../../../../shared/network/i-game-info';
-import {escapeHtml} from '../../escape-html';
-import {joinTeam} from '../join-team';
+import escapeHtml from 'escape-html';
+import {IGameInfoEvent} from '../../../../shared/network/events/i-game-info';
+import {joinTeam} from '../button-functions';
 
-export function handleGameInfoMessage(gameInfo: IGameInfo) {
+export function handleGameInfo(gameInfo: IGameInfoEvent) {
     $('#scenario-name-field').html(escapeHtml(gameInfo.scenario.descriptor.name));
     $('#scenario-author-field').html(escapeHtml(gameInfo.scenario.author));
     $('#scenario-description-field').html(escapeHtml(gameInfo.scenario.descriptor.description));
