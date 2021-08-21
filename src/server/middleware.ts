@@ -1,5 +1,7 @@
 import csurf from 'csurf';
+import {IncomingMessage, OutgoingHttpHeaders } from 'http';
 import {Forbidden} from 'http-errors';
+import {checkRequestAuth} from './auth/request-handler';
 import {verifyToken} from './auth/token-handler';
 
 let csurfProtection = csurf({ cookie: { sameSite: 'lax', secure: true, httpOnly: true } });
@@ -32,19 +34,10 @@ export async function preventCSRF(req: any, res: any, next: any) {
  */
 export async function requireAuth(req: any, res: any, next: any) {
 
-    // Extract auth token from cookies
-    let token: string = req.cookies['user-token'];
+    // Check authorisation of request
+    let payload = await checkRequestAuth(req);
 
-    // If no authorisation token was provided, redirect user to login page
-    if (token === undefined) {
-        res.redirect(`/login?r=${req.baseUrl + req.url}`);
-        return;
-    }
-
-    // Verify token and extract payload
-    let payload = await verifyToken(token);
-
-    // If token was invalid, redirect user to login page
+    // If not authorised, redirect user to login page
     if (payload === undefined) {
         res.redirect(`/login?r=${req.baseUrl + req.url}`);
         return;

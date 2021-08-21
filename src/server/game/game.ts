@@ -70,9 +70,6 @@ export class Game {
                 }));
             }
         }
-
-        // Assign this game to the client
-        client.game = this;
     }
 
     public startTimeout(duration: number) {

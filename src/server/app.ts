@@ -21,7 +21,7 @@ process.chdir(__dirname);
 
 // Create a http server and an accompanying websocket server located on /game
 const server = http.createServer(app);
-const wss = new WebSocket.Server({ server: server, path: '/game' });
+const wss = new WebSocket.Server({ noServer: true });
 
 // Express views configuration
 app.engine('handlebars', exphbs({ defaultLayout: 'main' }));
@@ -33,10 +33,8 @@ app.locals.siteName = 'Better Battleships';
 app.locals.baseUrl = 'http://localhost:8080';
 
 // Express middleware setup
-// app.use(express.json());
-// app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
 app.use(express.static(path.join(process.cwd(), 'public')));
+app.use(cookieParser());
 
 // Register route handlers for express
 app.use('/game/create', gameCreateRouter);
@@ -45,7 +43,7 @@ app.use('/login', loginRouter);
 app.use('/register', registerRouter);
 
 // Register socket handles for the websocket server
-socketRegister(wss);
+socketRegister(server, wss);
 
 // Start the server
 server.listen(port, () => {
