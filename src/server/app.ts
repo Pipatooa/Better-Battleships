@@ -5,6 +5,7 @@ import http from 'http';
 import WebSocket from 'isomorphic-ws';
 import path from 'path';
 import * as process from 'process';
+import {executeDBStartupScript} from './db/startup';
 
 import socketRegister from './game/sockets/register';
 
@@ -19,34 +20,38 @@ const port: number = 8080;
 // Set current working directory to be where this file is located
 process.chdir(__dirname);
 
-// Create a http server and an accompanying websocket server located on /game
-const server = http.createServer(app);
-const wss = new WebSocket.Server({ noServer: true });
+// Execute database startup script
+executeDBStartupScript().then(() => {
 
-// Express views configuration
-app.engine('handlebars', exphbs({ defaultLayout: 'main' }));
-app.set('views', path.join(process.cwd(), 'views'));
-app.set('view engine', 'handlebars');
+    // Create a http server and an accompanying websocket server
+    const server = http.createServer(app);
+    const wss = new WebSocket.Server({ noServer: true });
 
-// Set handlebars variables
-app.locals.siteName = 'Better Battleships';
-app.locals.baseUrl = 'http://localhost:8080';
+    // Express views configuration
+    app.engine('handlebars', exphbs({ defaultLayout: 'main' }));
+    app.set('views', path.join(process.cwd(), 'views'));
+    app.set('view engine', 'handlebars');
 
-// Express middleware setup
-app.use(express.static(path.join(process.cwd(), 'public')));
-app.use(cookieParser());
+    // Set handlebars variables
+    app.locals.siteName = 'Better Battleships';
+    app.locals.baseUrl = 'http://localhost:8080';
 
-// Register route handlers for express
-app.use('/game/create', gameCreateRouter);
-app.use('/game', gameRouter);
-app.use('/login', loginRouter);
-app.use('/register', registerRouter);
+    // Express middleware setup
+    app.use(express.static(path.join(process.cwd(), 'public')));
+    app.use(cookieParser());
 
-// Register socket handles for the websocket server
-socketRegister(server, wss);
+    // Register route handlers for express
+    app.use('/game/create', gameCreateRouter);
+    app.use('/game', gameRouter);
+    app.use('/login', loginRouter);
+    app.use('/register', registerRouter);
 
-// Start the server
-server.listen(port, () => {
-    const datetime = new Date();
-    console.log(`Started server on port ${port}. The time is ${datetime.toLocaleTimeString()}`);
+    // Register socket handles for the websocket server
+    socketRegister(server, wss);
+
+    // Start the server
+    server.listen(port, () => {
+        const datetime = new Date();
+        console.log(`Started server on port ${port}. The time is ${datetime.toLocaleTimeString()}`);
+    });
 });

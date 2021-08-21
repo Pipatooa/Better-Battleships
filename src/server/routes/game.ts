@@ -1,4 +1,6 @@
+import * as console from 'console';
 import express from 'express';
+import {queryDatabase} from '../db/query';
 import {Game} from '../game/game';
 import {queryGame} from '../game/game-manager';
 import {requireAuth} from '../middleware';
@@ -6,7 +8,7 @@ import {requireAuth} from '../middleware';
 const router = express.Router();
 
 // Route handler for /game
-router.get('/:gameID', requireAuth, (req, res) => {
+router.get('/:gameID', requireAuth, async (req, res) => {
 
     // Check game ID
     let gameID: string = req.params.gameID;
@@ -26,6 +28,18 @@ router.get('/:gameID', requireAuth, (req, res) => {
             gameID: gameID
         });
         return;
+    }
+
+    // Get username for user
+    let username = (req as any).auth.username;
+
+    // Check for existing game session for user
+    let query = 'SELECT `current_session` FROM `user` WHERE `username` = ?';
+    let rows = await queryDatabase(query, [username]);
+
+    // If session exists
+    if (rows.length !== 0) {
+        console.log(rows);
     }
 
     res.render('game', {

@@ -1,5 +1,6 @@
 import * as console from 'console';
 import config from '../config';
+import {queryDatabase} from '../db/query';
 import {Game} from './game';
 import {Scenario} from './scenario/scenario';
 
@@ -22,13 +23,23 @@ function generateGameID(): string {
     return gameID;
 }
 
-export function createGame(scenario: Scenario): Game {
+export async function createGame(scenario: Scenario): Promise<Game> {
 
     // Create a random ID for the game
     let gameID: string = generateGameID();
 
+    // Create database entry for uploaded scenario
+    let query = 'INSERT INTO `scenario` (`builtin`, `name`, `description`) VALUES (FALSE, ?, ?) RETURNING `id`;';
+    let rows = await queryDatabase(query, [scenario.descriptor.name, scenario.descriptor.description]);
+    let scenarioID = rows[0].id;
+
+    // Create database entry for game
+    query = 'INSERT INTO `game` (`game_id`, `scenario`) VALUES (?, ?) RETURNING `id`;';
+    rows = await queryDatabase(query, [gameID, scenarioID]);
+    let gameInternalID = rows[0].id;
+
     // Create game object and save it to list of games
-    let game = new Game(gameID, scenario, removeGame);
+    let game = new Game(gameInternalID, gameID, scenario, timeoutRemoveGame);
     games[gameID] = game;
     numGames += 1;
 
@@ -42,7 +53,7 @@ export function createGame(scenario: Scenario): Game {
     return game;
 }
 
-export function removeGame(gameID: string) {
+export function timeoutRemoveGame(gameID: string) {
     delete games[gameID];
     numGames -= 1;
 

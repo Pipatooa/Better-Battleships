@@ -1,4 +1,5 @@
 import AdmZip, {IZipEntry} from 'adm-zip';
+import {FileJSON} from 'formidable';
 import Joi from 'joi';
 import {ParsingContext} from './parsing-context';
 import {IScenarioSource, Scenario} from './scenario';
@@ -7,10 +8,13 @@ export type ZipEntryMap = { [name: string]: IZipEntry };
 
 /**
  * Unpacks a zip file into a scenario object asynchronously
- * @param scenarioZip Zip file to extract
+ * @param fileJSON Scenario file information
  * @returns scenario -- Scenario object
  */
-export async function unpack(scenarioZip: AdmZip): Promise<Scenario> {
+export async function unpack(fileJSON: FileJSON): Promise<Scenario> {
+
+    // Read scenario zip file
+    let scenarioZip = new AdmZip(fileJSON.path);
 
     // Get a list of all zip entries
     let zipEntries: AdmZip.IZipEntry[] = scenarioZip.getEntries();
@@ -49,7 +53,7 @@ export async function unpack(scenarioZip: AdmZip): Promise<Scenario> {
     let boardEntry: IZipEntry = await getEntryFromZip(scenarioZip, 'board.json');
 
     // Create parsing context
-    let parsingContext = new ParsingContext('scenario.json', '', boardEntry, teamEntries, playerPrototypeEntries, shipEntries, abilityEntries);
+    let parsingContext = new ParsingContext(fileJSON, 'scenario.json', '', boardEntry, teamEntries, playerPrototypeEntries, shipEntries, abilityEntries);
 
     // Scenario data
     let scenarioEntry: IZipEntry = await getEntryFromZip(scenarioZip, 'scenario.json');

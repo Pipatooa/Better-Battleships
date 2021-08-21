@@ -57,7 +57,7 @@ export default function register(server: http.Server, wss: WebSocket.Server) {
         }
 
         // Otherwise, continue with upgrade process
-        wss.handleUpgrade(req, socket, head, (ws) => {
+        wss.handleUpgrade(req, socket, head, async (ws) => {
 
             // Create client from websocket, assigning them a uuid
             let client = new Client(ws, payload as IAuthPayload, game as Game);

@@ -1,3 +1,5 @@
+import AdmZip from 'adm-zip';
+import {FileJSON} from 'formidable';
 import Joi from 'joi';
 import {IScenarioInfo} from '../../../shared/network/i-scenario-info';
 import {ITeamInfo} from '../../../shared/network/i-team-info';
@@ -18,7 +20,8 @@ import {getJSONFromEntry, UnpackingError} from './unpacker';
  */
 export class Scenario implements IAttributeHolder {
 
-    public constructor(public readonly author: string,
+    public constructor(public readonly fileJSON: FileJSON,
+                       public readonly author: string,
                        public readonly descriptor: Descriptor,
                        public readonly board: Board,
                        public readonly teams: { [name: string]: Team },
@@ -65,7 +68,7 @@ export class Scenario implements IAttributeHolder {
         }
 
         // Return created Scenario object
-        return new Scenario(scenarioSource.author, descriptor, board, teams, attributes);
+        return new Scenario(parsingContext.scenarioFile, scenarioSource.author, descriptor, board, teams, attributes);
     }
 
     /**

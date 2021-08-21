@@ -135,6 +135,10 @@ const webConfig = {
                     from: 'src/static/views',
                     to: 'views'
                 },
+                {
+                    from: 'src/static/db-scripts',
+                    to: 'db-scripts'
+                },
                 ...scenarioPatternEntries
             ]
         }),

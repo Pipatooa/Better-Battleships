@@ -1,4 +1,5 @@
-import {IZipEntry} from 'adm-zip';
+import AdmZip, {IZipEntry} from 'adm-zip';
+import {FileJSON} from 'formidable';
 import {Attribute} from './attributes/attribute';
 import {AttributeReference, AttributeSelector} from './attributes/attribute-reference';
 import {AttributeMap} from './attributes/i-attribute-holder';
@@ -6,7 +7,8 @@ import {UnpackingError, ZipEntryMap} from './unpacker';
 
 export class ParsingContext {
 
-    public constructor(protected _currentFile: string,
+    public constructor(public readonly scenarioFile: FileJSON,
+                       protected _currentFile: string,
                        protected _currentPath: string,
                        public readonly boardEntry: IZipEntry,
                        public readonly teamEntries: ZipEntryMap,
@@ -72,6 +74,7 @@ export class ParsingContext {
 
     public getCopy(): ParsingContext {
         return new ParsingContext(
+            this.scenarioFile,
             this._currentFile,
             this._currentPath,
             this.boardEntry,

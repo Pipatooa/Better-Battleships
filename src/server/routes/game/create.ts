@@ -73,8 +73,7 @@ router.post('/', preventCSRF, async (req, res) => {
 
         // Process uploaded scenario zip file
         try {
-            const zip = new AdmZip(file.path);
-            scenario = await unpack(zip);
+            scenario = await unpack(file);
         } catch (e) {
 
             // If there was an unpacking error, return a JSON object with details
@@ -114,10 +113,10 @@ router.post('/', preventCSRF, async (req, res) => {
         }
 
         // Create a new game
-        let game: Game = createGame(scenario);
+        let game: Game = await createGame(scenario);
         res.send({
             success: true,
-            gameID: game.id,
+            gameID: game.gameID,
             debug: JSON.parse(JSON.stringify(scenario))
         });
     });

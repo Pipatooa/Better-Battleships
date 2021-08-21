@@ -1,5 +1,6 @@
 import * as console from 'console';
 import config from '../config';
+import {queryDatabase} from '../db/query';
 import {Scenario} from './scenario/scenario';
 import {Client} from './sockets/client';
 
@@ -7,7 +8,8 @@ export class Game {
     protected timeoutID: NodeJS.Timeout | undefined;
     protected _clients: Client[] = [];
 
-    public constructor(public readonly id: string,
+    public constructor(public readonly internalID: number,
+                       public readonly gameID: string,
                        public readonly scenario: Scenario,
                        protected readonly timeoutFunction: (gameID: string) => void) {
 
@@ -17,7 +19,7 @@ export class Game {
     public joinClient(client: Client) {
 
         // Debug
-        console.log(`Client ${client.id} joined game ${this.id}`);
+        console.log(`Client ${client.id} joined game ${this.gameID}`);
 
         // Stop game timeout
         this.stopTimeout();
@@ -30,7 +32,7 @@ export class Game {
             this._clients = this._clients.filter(c => c !== client);
 
             // Debug
-            console.log(`Client ${client.identity} disconnected from game ${this.id}`);
+            console.log(`Client ${client.identity} disconnected from game ${this.gameID}`);
 
             // Broadcast disconnect event to existing clients
             for (let existingClient of this._clients) {
@@ -76,7 +78,7 @@ export class Game {
         if (this.timeoutID !== undefined)
             this.stopTimeout();
 
-        this.timeoutID = setTimeout(() => this.timeoutFunction(this.id), duration);
+        this.timeoutID = setTimeout(() => this.timeoutFunction(this.gameID), duration);
     }
 
     public stopTimeout() {
