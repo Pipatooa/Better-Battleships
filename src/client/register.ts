@@ -172,7 +172,7 @@ $(document).ready(() => {
             let params = new URLSearchParams(window.location.search);
 
             // Redirect user to login page
-            window.location.href = `/login${params.has('r') ? params.get('r') : ''}`;
+            window.location.href = `/login${params.toString() ? `?${params.toString()}` : ''}`;
             return;
         }
 
