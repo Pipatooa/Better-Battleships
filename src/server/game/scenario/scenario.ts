@@ -1,4 +1,3 @@
-import AdmZip from 'adm-zip';
 import {FileJSON} from 'formidable';
 import Joi from 'joi';
 import {IScenarioInfo} from '../../../shared/network/i-scenario-info';
@@ -9,7 +8,7 @@ import {Board, IBoardSource} from './board';
 import {Descriptor, descriptorSchema, IDescriptorSource} from './common/descriptor';
 import {genericNameSchema} from './common/generic-name';
 import {ParsingContext} from './parsing-context';
-import {WithSchema} from './schema-checker';
+import {checkAgainstSchema} from './schema-checker';
 import {ITeamSource, Team} from './team';
 import {getJSONFromEntry, UnpackingError} from './unpacker';
 
@@ -35,8 +34,11 @@ export class Scenario implements IAttributeHolder {
      * @param checkSchema When true, validates source JSON data against schema
      * @returns scenario -- Created Scenario object
      */
-    @WithSchema()
     public static async fromSource(parsingContext: ParsingContext, scenarioSource: IScenarioSource, checkSchema: boolean): Promise<Scenario> {
+
+        // Validate JSON data against schema
+        if (checkSchema)
+            scenarioSource = await checkAgainstSchema(scenarioSource, scenarioSchema, parsingContext);
 
         // Get attributes
         let attributes: AttributeMap = {};
@@ -91,15 +93,6 @@ export class Scenario implements IAttributeHolder {
             teams: teamInfo
         };
     }
-
-    /**
-     * Schema for validating source JSON data
-     */
-    public static schema = Joi.object({
-        author: Joi.string().required(),
-        descriptor: descriptorSchema.required(),
-        teams: Joi.array().items(genericNameSchema).min(2).max(8).required()
-    }).concat(attributeHolderSchema);
 }
 
 /**

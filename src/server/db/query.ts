@@ -1,6 +1,11 @@
-import {MysqlError, QueryOptions} from 'mysql';
+import {QueryOptions} from 'mysql';
 import {pool} from './connection';
 
+/**
+ * Queries the database asynchronously
+ * @param query Query to send to the database
+ * @param values Values to insert into prepared query statement in place of '?'
+ */
 export async function queryDatabase(query: string | QueryOptions, values?: any): Promise<any> {
     return new Promise<any>((resolve, reject) => {
         pool.query(query, values, (err, results) => {

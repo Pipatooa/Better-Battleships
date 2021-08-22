@@ -7,6 +7,9 @@ const fileSelect = $('<input type="file" id="file-select" style="display: none;"
 
 export let file: File;
 
+/**
+ * Binds event handlers for file drop
+ */
 export function bindFileDrop() {
     fileDrop.on('drop', onDrop);
     fileDrop.on('dragover', onDragOver);
@@ -19,6 +22,7 @@ export function bindFileDrop() {
 function onDrop(ev: DropEvent) {
     ev.preventDefault();
 
+    // Set file to file dropped into file drop
     let files = ev.originalEvent?.dataTransfer?.files;
     if (files?.length) {
         file = files[0];
@@ -48,8 +52,4 @@ function onChange(ev: ChangeEvent) {
     if (files.length) {
         file = files[0];
     }
-}
-
-export function unbindFileDrop() {
-    fileDrop.off();
 }

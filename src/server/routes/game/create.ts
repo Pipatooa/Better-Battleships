@@ -1,4 +1,3 @@
-import AdmZip from 'adm-zip';
 import express from 'express';
 import formidable, {FileJSON} from 'formidable';
 import fs from 'fs';
@@ -10,7 +9,14 @@ import {preventCSRF, requireAuth} from '../../middleware';
 
 const router = express.Router();
 
+/**
+ * GET Route handler for /game/create
+ *
+ * Requires auth
+ */
 router.get('/', preventCSRF, requireAuth, (req, res) => {
+
+    // Deliver page content
     res.render('create-game', {
         csrfToken: req.csrfToken(),
         url: req.baseUrl + req.url,
@@ -26,8 +32,12 @@ router.get('/', preventCSRF, requireAuth, (req, res) => {
     });
 });
 
-// Route handler for /game/create
-router.post('/', preventCSRF, async (req, res) => {
+/**
+ * POST Route handler for /game/create
+ *
+ * Requires auth
+ */
+router.post('/', preventCSRF, requireAuth, async (req, res) => {
 
     // Check if game server is full
     if (capacityReached()) {
@@ -78,7 +88,6 @@ router.post('/', preventCSRF, async (req, res) => {
 
             // If there was an unpacking error, return a JSON object with details
             if (e instanceof UnpackingError) {
-                // throw e;
                 res.status(400);
                 res.send({
                     success: false,
@@ -91,6 +100,7 @@ router.post('/', preventCSRF, async (req, res) => {
                 return;
             }
 
+            // If uploaded scenario was not a zip file
             if (e.message.startsWith('Invalid or unsupported zip format')) {
                 res.status(400);
                 res.send({

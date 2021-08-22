@@ -45,7 +45,7 @@ type ILoginResponse =
     ILoginFailureResponse;
 
 interface ILoginSuccessResponse {
-    success: true
+    success: true;
 }
 
 interface ILoginFailureResponse {

@@ -2,7 +2,7 @@ import fs from 'fs';
 import {queryDatabase} from './query';
 
 /**
- * Executes startup database scripts
+ * Executes startup database script
  */
 export async function executeDBStartupScript() {
     let queryData = fs.readFileSync('./db-scripts/startup.sql');

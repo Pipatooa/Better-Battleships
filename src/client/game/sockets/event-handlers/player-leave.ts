@@ -1,5 +1,11 @@
 import {IPlayerLeaveEvent} from '../../../../shared/network/events/i-player-leave';
 
+/**
+ * Handles a player leave event from the server
+ * @param playerLeave Event object to handle
+ */
 export function handlePlayerLeave(playerLeave: IPlayerLeaveEvent) {
-    $(`#player-${playerLeave.playerIdentity}`).remove();
+
+    // Select and remove player element
+    $(`#player-${playerLeave.playerIdentity.replace(':', '\\:')}`).remove();
 }

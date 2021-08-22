@@ -13,6 +13,12 @@ import {UnpackingError} from './unpacker';
  * Stores all information about the tiles of the board and objects on the board
  */
 export class Board {
+
+    /**
+     * Board constructor
+     * @param tiles 2d array of tiles
+     * @param generators List of tile generators
+     */
     public constructor(public readonly tiles: Tile[][],
                        public readonly generators: TileGenerator[]) {
     }

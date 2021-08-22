@@ -52,7 +52,7 @@ export class ConditionAttribute extends Condition {
             conditionAttributeSource = await checkAgainstSchema(conditionAttributeSource, conditionAttributeSchema, parsingContext);
 
         // Get attribute and value constraint from source
-        let attribute: Attribute = parsingContext.getAttribute(parsingContext.withExtendedPath('.attribute'), conditionAttributeSource.attribute);
+        let attribute: Attribute = parsingContext.withExtendedPath('.attribute').getAttribute(conditionAttributeSource.attribute);
         let valueConstraint: ValueConstraint = await buildValueConstraint(parsingContext.withExtendedPath('.valueConstraint'), conditionAttributeSource.valueConstraint, true);
 
         // Return created ConditionAttribute object

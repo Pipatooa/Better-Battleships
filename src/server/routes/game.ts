@@ -7,7 +7,11 @@ import {requireAuth} from '../middleware';
 
 const router = express.Router();
 
-// Route handler for /game
+/**
+ * GET Route handler for /game
+ *
+ * Requires auth
+ */
 router.get('/:gameID', requireAuth, async (req, res) => {
 
     // Check game ID
@@ -16,6 +20,8 @@ router.get('/:gameID', requireAuth, async (req, res) => {
 
     // If game does not exist
     if (game === undefined) {
+
+        // Deliver page content
         res.render('game-not-found', {
             url: req.baseUrl + req.url,
             pageTitle: `Game does not exist!`,
@@ -42,6 +48,7 @@ router.get('/:gameID', requireAuth, async (req, res) => {
         console.log(rows);
     }
 
+    // Deliver page content
     res.render('game', {
         url: req.baseUrl + req.url,
         pageTitle: `Game (${gameID})`,

@@ -21,11 +21,17 @@ export class Ability implements IAttributeHolder {
     }
 }
 
+/**
+ * JSON source interface reflecting schema
+ */
 export interface IAbilitySource {
     descriptor: IDescriptorSource;
     attributes: AttributeMapSource;
 }
 
+/**
+ * Schema for validating source JSON data
+ */
 export const abilitySchema = Joi.object({
     descriptor: descriptorSchema.required()
 }).concat(attributeHolderSchema);

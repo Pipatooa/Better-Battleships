@@ -6,10 +6,16 @@ import {IPlayerLeaveEvent} from './i-player-leave';
 import {IPlayerReadyEvent} from './i-player-ready';
 import {ITeamAssignmentEvent} from './i-team-assignment';
 
+/**
+ * Base server event which all server events extend
+ */
 export interface IBaseServerEvent {
-    event: ServerEventID
+    event: ServerEventID;
 }
 
+/**
+ * Type matching any server event
+ */
 export type IServerEvent =
     IConnectionInfoEvent |
     IGameInfoEvent |
@@ -19,5 +25,12 @@ export type IServerEvent =
     IPlayerReadyEvent |
     IGameStartEvent;
 
+
+/**
+ * Intermediate variable to trick Typescript
+ */
 let x: IServerEvent;
+/**
+ * Type matching all event name strings
+ */
 export type ServerEventID = typeof x.event;

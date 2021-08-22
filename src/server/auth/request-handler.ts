@@ -7,7 +7,7 @@ import {verifyToken} from './token-handler';
  * @param req
  * @returns payload -- Payload | Undefined if error
  */
-export async function checkRequestAuth(req: any): Promise<IAuthPayload|undefined> {
+export async function checkRequestAuth(req: any): Promise<IAuthPayload | undefined> {
 
     let token: string;
 
@@ -22,5 +22,5 @@ export async function checkRequestAuth(req: any): Promise<IAuthPayload|undefined
         return undefined;
 
     // Verify token and extract payload
-    return await verifyToken(token) as unknown as IAuthPayload|undefined;
+    return await verifyToken(token) as unknown as IAuthPayload | undefined;
 }

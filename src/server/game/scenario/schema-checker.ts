@@ -11,9 +11,6 @@ import {UnpackingError} from './unpacker';
  */
 export async function checkAgainstSchema<T>(source: T, schema: Joi.Schema, parsingContext: ParsingContext): Promise<T> {
 
-    // Debug
-    // console.log(`Checking ${source} in context ${parsingContext.currentFile} / ${parsingContext.currentPath}`);
-
     // Validate JSON data against schema
     try {
         source = await schema.validateAsync(source);

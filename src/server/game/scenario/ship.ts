@@ -20,6 +20,13 @@ export class Ship implements IAttributeHolder {
     public x: number = 0;
     public y: number = 0;
 
+    /**
+     * Ship constructor
+     * @param descriptor Descriptor for ship
+     * @param _pattern Pattern describing shape of ship
+     * @param abilities Dictionary of abilities available to the ship
+     * @param attributes Attributes for the ship
+     */
     public constructor(public readonly descriptor: Descriptor,
                        protected _pattern: Pattern,
                        public readonly abilities: { [name: string]: Ability },

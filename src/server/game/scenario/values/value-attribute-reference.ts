@@ -40,7 +40,7 @@ export class ValueAttributeReference extends Value {
             valueAttributeReferenceSource = await checkAgainstSchema(valueAttributeReferenceSource, valueAttributeReferenceSchema, parsingContext);
 
         // Get attribute from source
-        let attribute: Attribute = parsingContext.getAttribute(parsingContext.withExtendedPath('.attribute'), valueAttributeReferenceSource.attribute);
+        let attribute: Attribute = parsingContext.withExtendedPath('.attribute').getAttribute(valueAttributeReferenceSource.attribute);
 
         // Return created ValueAttributeReference object
         return new ValueAttributeReference(attribute);

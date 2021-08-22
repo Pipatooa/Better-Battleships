@@ -98,6 +98,9 @@ jwtSecretToken = ""
 jwtExpiryTime = ""
 `.trimStart();
 
+
+// ----- On Module Load ----- //
+
 // If config file does not exist, create default config file
 const configFilePath = path.join(__dirname, './config.tml');
 if (!fs.existsSync(configFilePath))

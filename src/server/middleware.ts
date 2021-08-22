@@ -6,6 +6,8 @@ let csurfProtection = csurf({ cookie: { sameSite: 'lax', secure: true, httpOnly:
 
 /**
  * Middleware function to prevent CSRF attacks
+ *
+ * Wraps csurf middleware function for custom error messages and async/await support
  * @param req
  * @param res
  * @param next

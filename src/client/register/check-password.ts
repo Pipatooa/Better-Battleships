@@ -1,0 +1,81 @@
+/**
+ * Password field validation for registration form
+ * @returns boolean -- Whether field value was valid
+ */
+export function checkPassword(passwordElement: JQuery, passwordFeedbackElement: JQuery): boolean {
+    let password = passwordElement.val() as string;
+
+    // Password field empty
+    if (password === '') {
+        passwordElement.addClass('is-invalid');
+        passwordFeedbackElement.html('Password required');
+        return false;
+    }
+
+    // Password too short
+    if (password.length < 8) {
+        passwordElement.addClass('is-invalid');
+        passwordFeedbackElement.html('Password too short');
+        return false;
+    }
+
+    // Password must contain lowercase letter
+    if (!/[a-z]/.test(password)) {
+        passwordElement.addClass('is-invalid');
+        passwordFeedbackElement.html('Password must contain lowercase letter');
+        return false;
+    }
+
+    // Password must contain uppercase letter
+    if (!/[A-Z]/.test(password)) {
+        passwordElement.addClass('is-invalid');
+        passwordFeedbackElement.html('Password must contain uppercase letter');
+        return false;
+    }
+
+    // Password must contain digit
+    if (!/\d/.test(password)) {
+        passwordElement.addClass('is-invalid');
+        passwordFeedbackElement.html('Password must contain a digit');
+        return false;
+    }
+
+    // Password must contain at least one symbol
+    if (!/[ -/:-@\[-`{-~]/.test(password)) {
+        passwordElement.addClass('is-invalid');
+        passwordFeedbackElement.html('Password must contain at least one symbol');
+        return false;
+    }
+
+    // Password contains unsupported character
+    if (!/^[a-zA-Z\d -/:-@\[-`{-~]+$/.test(password)) {
+        passwordElement.addClass('is-invalid');
+        passwordFeedbackElement.html('Password contains unsupported character');
+        return false;
+    }
+
+    // Password is valid
+    passwordElement.removeClass('is-invalid');
+    return true;
+}
+
+/**
+ * Password confirm field validation for registration form
+ * @returns boolean -- Whether field value was valid
+ */
+export function checkPassword2(passwordElement: JQuery, password2Element: JQuery, password2FeedbackElement: JQuery): boolean {
+
+    // Get password and password2 field values
+    let password = passwordElement.val() as string;
+    let password2 = password2Element.val() as string;
+
+    // Passwords don't match
+    if (password !== password2) {
+        password2Element.addClass('is-invalid');
+        password2FeedbackElement.html('Passwords must match');
+        return false;
+    }
+
+    password2Element.removeClass('is-invalid');
+    return true;
+}

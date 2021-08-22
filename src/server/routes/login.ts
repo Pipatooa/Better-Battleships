@@ -9,8 +9,12 @@ import {preventCSRF} from '../middleware';
 
 const router = express.Router();
 
-// Route handler for /login
+/**
+ * GET Route handler for /login
+ */
 router.get('/', preventCSRF, (req, res) => {
+
+    // Deliver page content
     res.render('login', {
         csrfToken: req.csrfToken(),
         url: req.baseUrl + req.url,
@@ -25,6 +29,9 @@ router.get('/', preventCSRF, (req, res) => {
     });
 });
 
+/**
+ * POST Route handler for /login
+ */
 router.post('/', preventCSRF, async (req, res) => {
 
     let form = formidable({ multiples: true });
