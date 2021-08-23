@@ -13,7 +13,7 @@ $(document).ready(() => {
     let passwordFeedbackElement = $('#password-feedback');
     let password2FeedbackElement = $('#password2-feedback');
 
-    let formElement = $('#form-element');
+    let formElement = $('#form');
 
     // Register event handlers for form fields
     usernameElement.on('change keyup', () => {

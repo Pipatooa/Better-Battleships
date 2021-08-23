@@ -46,6 +46,10 @@ export class Pattern {
 
             // Perform rotation transforms
             switch (rotation) {
+                case Rotation.NoChange:
+                    newDx = dx;
+                    newDy = dy;
+                    break;
                 case Rotation.Clockwise90:
                     newDx = dy;
                     newDy = -dx;

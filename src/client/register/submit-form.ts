@@ -10,10 +10,14 @@ export async function submitForm(formElement: JQuery,
                                  passwordElement: JQuery, passwordFeedbackElement: JQuery,
                                  password2Element: JQuery, password2FeedbackElement: JQuery) {
 
+    console.log('a');
+
     // Check if form data is valid
     let valid = checkUsername(usernameElement, usernameFeedbackElement)
         && checkPassword(passwordElement, passwordFeedbackElement)
         && checkPassword2(passwordElement, password2Element, password2FeedbackElement);
+
+    console.log(valid);
 
     if (!valid)
         return;
