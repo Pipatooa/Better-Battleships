@@ -1,4 +1,6 @@
 import * as console from 'console';
+import {IServerEvent} from '../../shared/network/events/i-server-event';
+import {TimeoutManager} from '../../shared/timeout-manager';
 import config from '../config';
 import {Scenario} from './scenario/scenario';
 import {Client} from './sockets/client';
@@ -9,25 +11,27 @@ import {Client} from './sockets/client';
  * Stores all information about a game in progress
  */
 export class Game {
-    protected timeoutID: NodeJS.Timeout | undefined;
-    protected _clients: Client[] = [];
 
-    protected _started: boolean = false;
+    public timeoutManager = new TimeoutManager({
+        gameJoinTimeout: [() => {}, 0, false],
+        startGame: [() => {}, 0, false]
+    });
+
+    public clients: Client[] = [];
+    protected _gamePhase: GamePhase = GamePhase.Lobby;
 
     /**
      * Game constructor
      * @param internalID Internal ID given to game in database
      * @param gameID Published game ID used by clients to connect
      * @param scenario Scenario object used for game logic
-     * @param timeoutFunction Function to call on game timeout
      */
     public constructor(public readonly internalID: number,
                        public readonly gameID: string,
-                       public readonly scenario: Scenario,
-                       protected readonly timeoutFunction: (gameID: string) => void) {
+                       public readonly scenario: Scenario) {
 
-        // Start a timeout for the game
-        this.startTimeout(config.gameJoinTimeout);
+        // Set timeout function for starting game
+        this.timeoutManager.setTimeoutFunction('startGame', () => this.startGame(), config.gameStartWaitDuration, false);
     }
 
     /**
@@ -40,20 +44,20 @@ export class Game {
         console.log(`Client ${client.id} joined game ${this.gameID}`);
 
         // Stop game timeout
-        this.stopTimeout();
+        this.timeoutManager.stopTimeout('gameJoinTimeout');
 
         // Add client to list of clients
-        this._clients.push(client);
+        this.clients.push(client);
 
         // When client disconnects, remove them from list of clients
         client.ws.on('close', () => {
-            this._clients = this._clients.filter(c => c !== client);
+            this.clients = this.clients.filter(c => c !== client);
 
             // Debug
             console.log(`Client ${client.identity} disconnected from game ${this.gameID}`);
 
             // Broadcast disconnect event to existing clients
-            for (let existingClient of this._clients) {
+            for (let existingClient of this.clients) {
                 existingClient.sendEvent({
                     event: 'playerLeave',
                     playerIdentity: client.identity
@@ -61,8 +65,8 @@ export class Game {
             }
 
             // If no clients are connected to this game, start a game timeout
-            if (this._clients.length === 0)
-                this.startTimeout(config.gameJoinTimeout);
+            if (this.clients.length === 0)
+                this.timeoutManager.startTimeout('gameJoinTimeout');
         });
 
         // Send client information about the scenario
@@ -71,8 +75,7 @@ export class Game {
             scenario: this.scenario.makeTransportable()
         });
 
-        // Broadcast player join to all existing clients
-        for (let existingClient of this._clients) {
+        for (let existingClient of this.clients) {
             existingClient.sendEvent({
                 event: 'playerJoin',
                 playerIdentity: client.identity,
@@ -93,14 +96,82 @@ export class Game {
     }
 
     /**
+     * Checks whether the game can be started yet and starts the game if it can
+     */
+    public attemptGameStart() {
+
+        // Set game phase to lobby in-case game is starting
+        this._gamePhase = GamePhase.Lobby;
+        this.timeoutManager.stopTimeout('startGame');
+
+        // Create a counter for the number of players in each team
+        let teamPlayerCounts: { [name: string]: number } = {};
+        for (let name of Object.keys(this.scenario.teams)) {
+            teamPlayerCounts[name] = 0;
+        }
+
+        // Iterate through connected clients
+        for (let client of this.clients) {
+
+            // Check if player is ready
+            if (!client.ready) {
+                this.broadcastEvent({
+                    event: 'gameStartFailure',
+                    reason: 'Waiting for all players to be ready...'
+                });
+                return;
+            }
+
+            // Increment the player count for the team they are on
+            teamPlayerCounts[client.team!.id]++;
+        }
+
+        // Check that every team has a number of players supported by the scenario definition
+        for (let [name, playerCount] of Object.entries(teamPlayerCounts)) {
+            let team = this.scenario.teams[name];
+            let maxPlayers = team.playerPrototypes.length;
+
+            // If there are an invalid number of players for the team
+            if (playerCount === 0 || playerCount > maxPlayers) {
+
+                // Select reason to provide for game start failure
+                let reason = playerCount === 0
+                    ? 'All teams must have at least 1 player'
+                    : `Team '${team.descriptor.name}' supports a maximum of ${maxPlayers} players`;
+
+                // Broadcast game start failure event to all clients
+                this.broadcastEvent({
+                    event: 'gameStartFailure',
+                    reason: reason
+                });
+                return;
+            }
+        }
+
+        // Broadcast game starting
+        this.broadcastEvent({
+            event: 'gameStarting',
+            waitDuration: config.gameStartWaitDuration
+        });
+
+        // Set game phase to starting
+        this._gamePhase = GamePhase.Starting;
+        this.timeoutManager.startTimeout('startGame');
+
+        // Debug
+        console.log(`Starting game ${this.gameID}`);
+    }
+
+    /**
      * Starts the game
      */
     public startGame() {
-        console.log(`Starting game ${this.gameID}`);
-        this._started = true;
+
+        // Set game phase to started
+        this._gamePhase = GamePhase.Started;
 
         // Broadcast game start
-        for (let client of this._clients) {
+        for (let client of this.clients) {
             client.sendEvent({
                 event: 'gameStart'
             });
@@ -108,34 +179,26 @@ export class Game {
     }
 
     /**
-     * Starts, or restarts the game timeout
-     * @param duration
+     * Broadcasts a server event to all connected clients
+     * @param serverEvent Event to broadcast
      */
-    public startTimeout(duration: number) {
-        if (this.timeoutID !== undefined)
-            this.stopTimeout();
-
-        this.timeoutID = setTimeout(() => this.timeoutFunction(this.gameID), duration);
-    }
-
-    /**
-     * Stops the game from timing out
-     */
-    public stopTimeout() {
-        if (this.timeoutID === undefined)
-            return;
-        clearTimeout(this.timeoutID);
+    public broadcastEvent(serverEvent: IServerEvent) {
+        for (let client of this.clients) {
+            client.sendEvent(serverEvent);
+        }
     }
 
     /**
      * Getters and setters
      */
 
-    public get clients(): Client[] {
-        return this._clients;
+    public get gamePhase(): GamePhase {
+        return this._gamePhase;
     }
+}
 
-    public get started(): boolean {
-        return this._started;
-    }
+export enum GamePhase {
+    Lobby,
+    Starting,
+    Started
 }

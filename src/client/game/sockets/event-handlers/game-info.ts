@@ -29,7 +29,7 @@ export function handleGameInfo(gameInfo: IGameInfoEvent) {
         teamElement.append(teamPlayerContainerElement);
 
         // Create a new button to join the team. Add to team element
-        let buttonElement = $(`<button class="btn btn-secondary w-75 mx-auto">Join</button>`);
+        let buttonElement = $(`<button class="btn btn-secondary w-75 mx-auto join-team-button">Join</button>`);
         teamElement.append(buttonElement);
 
         // Register click handler for join team button

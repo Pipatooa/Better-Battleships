@@ -11,6 +11,7 @@ export class Config {
     public readonly gameLimit: number;
     public readonly gameIDLength: number;
     public readonly gameJoinTimeout: number;
+    public readonly gameStartWaitDuration: number;
 
     public readonly sqlHost: string;
     public readonly sqlUser: string;
@@ -37,6 +38,7 @@ export class Config {
         this.gameLimit = this.getFromConfig('number', 'game.limit');
         this.gameIDLength = this.getFromConfig('number', 'game.idLength');
         this.gameJoinTimeout = this.getFromConfig('number', 'game.joinTimeout');
+        this.gameStartWaitDuration = this.getFromConfig('number', 'game.startWaitDuration');
 
         // Sql section
         assert.deepStrictEqual(typeof configRaw.sql, 'object', 'Config: could not find section sql');
@@ -84,6 +86,7 @@ const defaultConfig = `
 limit = 8
 idLength = 6
 joinTimeout = 5000
+startWaitDuration = 5000
 
 [sql]
 host = ""

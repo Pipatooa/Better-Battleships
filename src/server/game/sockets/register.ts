@@ -4,7 +4,7 @@ import WebSocket, {Data} from 'isomorphic-ws';
 import {Socket} from 'net';
 import {IAuthPayload} from '../../auth/i-auth-payload';
 import {checkRequestAuth} from '../../auth/request-handler';
-import {Game} from '../game';
+import {Game, GamePhase} from '../game';
 import {queryGame} from '../game-manager';
 import {Client} from './client';
 import {handleMessage} from './message-handler';
@@ -56,23 +56,30 @@ export default function register(server: http.Server, wss: WebSocket.Server) {
             return;
         }
 
+        // Check if game has already started
+        if (game.gamePhase !== GamePhase.Lobby) {
+            socket.write('HTTP/1.1 503 Service Unavailable\r\n\r\n');
+            socket.destroy();
+            return;
+        }
+
         // Otherwise, continue with upgrade process
         wss.handleUpgrade(req, socket, head, async (ws) => {
 
             // Create client from websocket, assigning them a uuid
             let client = new Client(ws, payload as IAuthPayload, game as Game);
 
-            // Join client to game
-            (game as Game).joinClient(client);
-
-            // Increment connection count
-            currentConnections += 1;
-
             // Send client connection information
             client.sendEvent({
                 event: 'connectionInfo',
                 identity: client.identity
             });
+
+            // Join client to game
+            (game as Game).joinClient(client);
+
+            // Increment connection count
+            currentConnections += 1;
 
             // Broadcast connection event for connection handler
             wss.emit('connection', ws, req, client);

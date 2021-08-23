@@ -51,15 +51,14 @@ export async function createGame(scenario: Scenario): Promise<Game> {
     let gameInternalID = rows[0].id;
 
     // Create game object and save it to list of games
-    let game = new Game(gameInternalID, gameID, scenario, (gameID) => {
-        removeGame(gameID, 'Timed Out');
-    });
+    let game = new Game(gameInternalID, gameID, scenario);
 
     games[gameID] = game;
     numGames += 1;
 
-    // Start timeout
-    game.startTimeout(config.gameJoinTimeout);
+    // Set game timeout function and start timeout
+    game.timeoutManager.setTimeoutFunction('gameJoinTimeout', () => removeGame(gameID, 'Timed out'), config.gameJoinTimeout, false);
+    game.timeoutManager.startTimeout('gameJoinTimeout');
 
     // Debug
     console.log(`Created game with id '${gameID}'. Current games: ${numGames}`);

@@ -1,6 +1,7 @@
 import Joi from 'joi';
 import {baseRequestSchema} from '../../../../shared/network/requests/i-client-request';
 import {IReadyRequest} from '../../../../shared/network/requests/i-ready';
+import {GamePhase} from '../../game';
 import {Client} from '../client';
 
 /**
@@ -11,7 +12,11 @@ import {Client} from '../client';
 export function handleReadyRequest(client: Client, readyRequest: IReadyRequest) {
 
     // If game has already started, ignore request
-    if (client.game.started)
+    if (client.game.gamePhase === GamePhase.Started)
+        return;
+
+    // If player is trying to ready and is not part of a team, ignore request
+    if (client.team === undefined && readyRequest.value)
         return;
 
     // If value did not change, ignore request
@@ -21,9 +26,6 @@ export function handleReadyRequest(client: Client, readyRequest: IReadyRequest) 
     // Update player readiness
     client.ready = readyRequest.value;
 
-    // Flag for checking whether all players are ready
-    let allReady: boolean = true;
-
     // Broadcast ready event to all other clients
     for (let existingClient of client.game.clients) {
         existingClient.sendEvent({
@@ -31,15 +33,10 @@ export function handleReadyRequest(client: Client, readyRequest: IReadyRequest) 
             playerIdentity: client.identity,
             ready: client.ready
         });
-
-        // If client is not ready, set all ready flag to false
-        if (allReady && !existingClient.ready)
-            allReady = false;
     }
 
-    // Start game if all players are ready
-    if (allReady)
-        client.game.startGame();
+    // Attempt to start the game
+    client.game.attemptGameStart();
 }
 
 /**

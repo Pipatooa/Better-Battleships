@@ -32,8 +32,8 @@ export async function submit(errorContainer: JQuery, errorMessageElement: JQuery
     // Otherwise, display problem to user
     else {
         errorContainer.removeClass('d-none');
-        errorMessageElement.html(serverResponse.message);
-        errorContextElement.html(serverResponse.context);
+        errorMessageElement.text(serverResponse.message);
+        errorContextElement.text(serverResponse.context);
     }
 }
 

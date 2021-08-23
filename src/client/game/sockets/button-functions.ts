@@ -9,6 +9,9 @@ export function joinTeam(team: string) {
         request: 'joinTeam',
         team: team
     });
+
+    // Enable ready button
+    $('#ready-button').attr('disabled', false as any);
 }
 
 /**

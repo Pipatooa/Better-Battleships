@@ -1,6 +1,8 @@
 import {IConnectionInfoEvent} from './i-connection-info';
 import {IGameInfoEvent} from './i-game-info';
 import {IGameStartEvent} from './i-game-start';
+import {IGameStartingEvent} from './i-game-starting';
+import {IGameStartFailureEvent} from './i-game-start-failure';
 import {IPlayerJoinEvent} from './i-player-join';
 import {IPlayerLeaveEvent} from './i-player-leave';
 import {IPlayerReadyEvent} from './i-player-ready';
@@ -23,6 +25,8 @@ export type IServerEvent =
     IPlayerLeaveEvent |
     ITeamAssignmentEvent |
     IPlayerReadyEvent |
+    IGameStartFailureEvent |
+    IGameStartingEvent |
     IGameStartEvent;
 
 

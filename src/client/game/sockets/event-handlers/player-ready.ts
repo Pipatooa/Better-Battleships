@@ -17,11 +17,14 @@ export function handlePlayerReady(playerReadyEvent: IPlayerReadyEvent) {
     else
         playerElement.removeClass('player-ready');
 
-    // If player that is ready is us, change the ready button appropriately
+    // If player that is ready is us
     if (playerReadyEvent.playerIdentity === identity) {
 
         // Re-register button event handler and update button text
         $('#ready-button').off('click').on('click', () => ready(!playerReadyEvent.ready))
             .text(playerReadyEvent.ready ? 'Not Ready' : 'Ready');
+
+        // Disable/Enable team join buttons
+        $('.join-team-button').attr('disabled', playerReadyEvent.ready as any);
     }
 }

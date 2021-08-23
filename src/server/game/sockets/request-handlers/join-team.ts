@@ -1,6 +1,7 @@
 import Joi from 'joi';
 import {baseRequestSchema} from '../../../../shared/network/requests/i-client-request';
 import {IJoinTeamRequest} from '../../../../shared/network/requests/i-join-team';
+import {GamePhase} from '../../game';
 import {Team} from '../../scenario/team';
 import {Client} from '../client';
 
@@ -11,8 +12,9 @@ import {Client} from '../client';
  */
 export function handleJoinTeamRequest(client: Client, joinTeamRequest: IJoinTeamRequest) {
 
-    // If game has already started, ignore request
-    if (client.game.started)
+    // If client is ready, do not allow them to switch teams, ignoring request
+    // Ignore request if the game has already started
+    if (client.ready || client.game.gamePhase !== GamePhase.Lobby)
         return;
 
     // Try to get team from game using team ID supplied
@@ -35,6 +37,9 @@ export function handleJoinTeamRequest(client: Client, joinTeamRequest: IJoinTeam
             team: joinTeamRequest.team
         });
     }
+
+    // Attempt to start the game
+    client.game.attemptGameStart();
 }
 
 /**
