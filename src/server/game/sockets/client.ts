@@ -3,6 +3,7 @@ import {v4} from 'uuid';
 import {IServerEvent} from '../../../shared/network/events/i-server-event';
 import {IAuthPayload} from '../../auth/i-auth-payload';
 import {Game} from '../game';
+import {Player} from '../scenario/player';
 import {Team} from '../scenario/team';
 
 /**
@@ -14,6 +15,7 @@ export class Client {
 
     public readonly id: string;
     public team: Team | undefined;
+    public player: Player | undefined;
     public ready: boolean = false;
 
     public readonly identity: string;

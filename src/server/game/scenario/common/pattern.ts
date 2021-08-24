@@ -1,4 +1,5 @@
 import Joi from 'joi';
+import {IPatternInfo} from '../../../../shared/network/scenario/i-pattern-info';
 import {ParsingContext} from '../parsing-context';
 import {checkAgainstSchema} from '../schema-checker';
 import {UnpackingError} from '../unpacker';
@@ -162,6 +163,24 @@ export class Pattern {
 
         // Return new created Pattern object
         return new Pattern(patternEntries, [centerX, centerY]);
+    }
+
+    /**
+     * Returns network transportable form of this object.
+     *
+     * May not include all details of the object. Just those that the client needs to know.
+     */
+    public makeTransportable(): IPatternInfo {
+
+        // Convert pattern entries to list of number entries
+        let tiles: [number, number, number][] = [];
+        for (let patternEntry of this.patternEntries) {
+            tiles.push([patternEntry.x, patternEntry.y, patternEntry.value]);
+        }
+
+        return {
+            tiles: tiles
+        }
     }
 }
 

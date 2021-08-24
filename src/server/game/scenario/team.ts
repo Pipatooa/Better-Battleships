@@ -1,5 +1,6 @@
 import Joi from 'joi';
-import {ITeamInfo} from '../../../shared/network/i-team-info';
+import {ITeamInfo} from '../../../shared/network/scenario/i-team-info';
+import {Client} from '../sockets/client';
 import {Attribute} from './attributes/attribute';
 import {
     attributeHolderSchema,
@@ -27,16 +28,38 @@ export class Team implements IAttributeHolder {
      * Team constructor
      * @param id ID for team
      * @param descriptor Descriptor for team
-     * @param playerPrototypes Array of potential players for the team
+     * @param _playerPrototypes Array of potential players for the team
      * @param color Team color
      * @param attributes Attributes for the team
      */
     public constructor(public readonly id: string,
                        public readonly descriptor: Descriptor,
-                       public readonly playerPrototypes: Player[][],
+                       protected _playerPrototypes: Player[][],
                        public readonly color: string,
                        public readonly attributes: AttributeMap) {
 
+    }
+
+    /**
+     * Initiates list of players from the player prototypes list
+     * @param clients Clients to assign to player objects
+     */
+    public setPlayers(clients: Client[]) {
+
+        // Get player prototypes for this number of players
+        let playerPrototypes = this._playerPrototypes[clients.length];
+
+        // Copy player prototype list into player list
+        for (let i = 0; i < clients.length; i++) {
+            this.players[i] = playerPrototypes[i];
+
+            // Link client and player objects
+            this.players[i].client = clients[i];
+            clients[i].player = this.players[i];
+        }
+
+        // Clear player prototypes list
+        this._playerPrototypes = [];
     }
 
     /**
@@ -106,8 +129,16 @@ export class Team implements IAttributeHolder {
     public makeTransportable(): ITeamInfo {
         return {
             descriptor: this.descriptor.makeTransportable(),
-            maxPlayers: this.playerPrototypes.length
+            maxPlayers: this._playerPrototypes.length
         };
+    }
+
+    /**
+     * Getters and setters
+     */
+
+    public get playerPrototypes(): Player[][] {
+        return this._playerPrototypes;
     }
 }
 

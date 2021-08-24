@@ -1,4 +1,6 @@
 import Joi from 'joi';
+import {IPlayerInfo} from '../../../shared/network/scenario/i-player-info';
+import {Client} from '../sockets/client';
 import {Attribute} from './attributes/attribute';
 import {
     attributeHolderSchema,
@@ -18,7 +20,7 @@ import {getJSONFromEntry, UnpackingError} from './unpacker';
  * Contains game information for a single player
  */
 export class Player implements IAttributeHolder {
-    protected _client: undefined;
+    public client: Client | undefined;
 
     /**
      * Player constructor
@@ -69,6 +71,17 @@ export class Player implements IAttributeHolder {
 
         // Return created Player object
         return new Player(spawnRegion, ships, attributes);
+    }
+
+    /**
+     * Returns network transportable form of this object.
+     *
+     * May not include all details of the object. Just those that the client needs to know.
+     */
+    public makeTransportable(): IPlayerInfo {
+        return {
+            ships: this.ships.map(s => s.makeTransportable())
+        };
     }
 }
 

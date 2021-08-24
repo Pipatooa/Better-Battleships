@@ -1,4 +1,5 @@
 import Joi from 'joi';
+import {IShipInfo} from '../../../shared/network/scenario/i-ship-info';
 import {Ability, IAbilitySource} from './abilities/ability';
 import {Attribute, IAttributeSource} from './attributes/attribute';
 import {attributeHolderSchema, AttributeMap, IAttributeHolder} from './attributes/i-attribute-holder';
@@ -113,6 +114,18 @@ export class Ship implements IAttributeHolder {
 
         // Return created Ship object
         return new Ship(descriptor, pattern, abilities, attributes);
+    }
+
+    /**
+     * Returns network transportable form of this object.
+     *
+     * May not include all details of the object. Just those that the client needs to know.
+     */
+    public makeTransportable(): IShipInfo {
+        return {
+            descriptor: this.descriptor.makeTransportable(),
+            pattern: this._pattern.makeTransportable()
+        };
     }
 }
 

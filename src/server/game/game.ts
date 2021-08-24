@@ -170,10 +170,32 @@ export class Game {
         // Set game phase to started
         this._gamePhase = GamePhase.Started;
 
+        // Group players by their teams
+        let teamGroups: { [name: string]: Client[] } = {};
+        for (let client of this.clients) {
+
+            let teamName = client.team!.id;
+
+            // If player is first on their team
+            if (!(teamName in teamGroups))
+                teamGroups[teamName] = [];
+
+            // Add player to team group
+            teamGroups[teamName].push(client);
+        }
+
+        // Setup teams with sets of players
+        for (let [teamName, clients] of Object.entries(teamGroups)) {
+            let team = this.scenario.teams[teamName];
+            team.setPlayers(clients);
+        }
+
         // Broadcast game start
         for (let client of this.clients) {
             client.sendEvent({
-                event: 'gameStart'
+                event: 'gameStart',
+                boardInfo: this.scenario.board.makeTransportable(),
+                playerInfo: client.player!.makeTransportable()
             });
         }
     }

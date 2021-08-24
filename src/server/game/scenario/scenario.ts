@@ -1,7 +1,7 @@
 import {FileJSON} from 'formidable';
 import Joi from 'joi';
-import {IScenarioInfo} from '../../../shared/network/i-scenario-info';
-import {ITeamInfo} from '../../../shared/network/i-team-info';
+import {IScenarioInfo} from '../../../shared/network/scenario/i-scenario-info';
+import {ITeamInfo} from '../../../shared/network/scenario/i-team-info';
 import {Attribute, IAttributeSource} from './attributes/attribute';
 import {attributeHolderSchema, AttributeMap, IAttributeHolder} from './attributes/i-attribute-holder';
 import {Board, IBoardSource} from './board';

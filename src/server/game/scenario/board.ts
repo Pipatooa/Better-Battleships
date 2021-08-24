@@ -1,4 +1,6 @@
 import Joi from 'joi';
+import {IBoardInfo} from '../../../shared/network/scenario/i-board-info';
+import {ITileTypeInfo} from '../../../shared/network/scenario/i-tiletype-info';
 import {genericNameSchema} from './common/generic-name';
 import {ParsingContext} from './parsing-context';
 import {checkAgainstSchema} from './schema-checker';
@@ -14,6 +16,8 @@ import {UnpackingError} from './unpacker';
  */
 export class Board {
 
+    protected readonly _size: [number, number];
+
     /**
      * Board constructor
      * @param tiles 2d array of tiles
@@ -21,6 +25,8 @@ export class Board {
      */
     public constructor(public readonly tiles: Tile[][],
                        public readonly generators: TileGenerator[]) {
+
+        this._size = [tiles[0].length, tiles.length];
     }
 
     /**
@@ -42,7 +48,7 @@ export class Board {
 
             // Create new TileType objects indexed by single character strings
             let [char, tileTypeSource] = entry;
-            palette[char] = await TileType.fromSource(parsingContext.withExtendedPath(`.palette.${char}`), tileTypeSource, false);
+            palette[char] = await TileType.fromSource(parsingContext.withExtendedPath(`.palette.${char}`), tileTypeSource, false, char);
         }
 
         // Ensure that the number of entries in 'tiles' matches the declared size of the board
@@ -58,6 +64,9 @@ export class Board {
             if (row.length !== boardSource.size[0])
                 throw new UnpackingError(`"${parsingContext.currentPathPrefix}tiles[${y}]" length must be ${boardSource.size[0]} characters long to match "${parsingContext.currentPathPrefix}size[0]"`, parsingContext);
 
+            // Create new tile row
+            tiles[y] = [];
+
             // Iterate through each character, each representing a tile
             for (let x = 0; x < boardSource.size[0]; x++) {
                 let c: string = row.charAt(x);
@@ -67,16 +76,57 @@ export class Board {
                     throw new UnpackingError(`Could not find tile of type '${c}' defined at '${parsingContext.currentPathPrefix}tiles[${y}][${x}]' within the palette defined at '${parsingContext.currentPathPrefix}palette'`, parsingContext);
 
                 // Create and store new tile created from tile type
+                // Tiles are stored in tile[y][x] format
                 let tileType: TileType = palette[c];
-                let tile = new Tile(x, y, tileType);
-                if (y === 0)
-                    tiles[x] = [];
-                tiles[x][y] = tile;
+                tiles[y][x] = new Tile(x, y, tileType);
             }
         }
 
         // Return created Board object
         return new Board(tiles, []);
+    }
+
+    /**
+     * Returns network transportable form of this object.
+     *
+     * May not include all details of the object. Just those that the client needs to know.
+     */
+    public makeTransportable(): IBoardInfo {
+
+        // Convert tiles to compact string representation
+        let tileInfo: string[] = [];
+        let tileTypeInfo: { [char: string]: ITileTypeInfo } = {};
+
+        for (let y = 0; y < this.size[1]; y++) {
+            tileInfo[y] = '';
+            for (let x = 0; x < this.size[0]; x++) {
+
+                // Get tile at position
+                let tile = this.tiles[y][x];
+                let tileTypeChar = tile.tileType.char;
+
+                // Add tile to compact string format
+                tileInfo[y] += tileTypeChar;
+
+                // If character for tile has not been recorded
+                if (!(tileTypeChar in tileTypeInfo))
+                    tileTypeInfo[tileTypeChar] = tile.tileType.makeTransportable();
+            }
+        }
+
+        return {
+            size: this._size,
+            tileTypes: tileTypeInfo,
+            tiles: tileInfo
+        };
+    }
+
+    /**
+     * Getters and setters
+     */
+
+    public get size(): [number, number] {
+        return this._size;
     }
 }
 
