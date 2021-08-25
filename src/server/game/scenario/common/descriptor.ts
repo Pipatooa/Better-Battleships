@@ -14,7 +14,7 @@ export class Descriptor {
     }
 
     /**
-     * Factory function to generate descriptor from JSON scenario data
+     * Factory function to generate Descriptor from JSON scenario data
      * @param parsingContext Context for resolving scenario data
      * @param descriptorSource JSON data for descriptor
      * @param checkSchema When true, validates source JSON data against schema

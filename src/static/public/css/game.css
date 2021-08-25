@@ -22,3 +22,12 @@ canvas {
     background: #FFF;
     transition: 150ms linear;
 }
+
+.boxed-container {
+    border: black 2px solid;
+    border-radius: 5px;
+}
+
+.game-right-pane {
+    border-left: black 2px solid;
+}

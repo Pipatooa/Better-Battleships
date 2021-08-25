@@ -3,7 +3,7 @@
  *
  * Handles timeout functions, allowing for easy starting and stopping of timeouts with default durations
  */
-export class TimeoutManager<T extends { [name: string]: [() => any, number, boolean]}> {
+export class TimeoutManager<T extends { [name: string]: [() => any, number, boolean] }> {
 
     /**
      * Internal timeout dictionary

@@ -57,6 +57,9 @@ router.get('/:gameID', requireAuth, async (req, res) => {
             '/css/style.css',
             '/css/game.css'
         ],
+        externalScripts: [
+            'https://pixijs.download/release/pixi.js'
+        ],
         scripts: [
             '/js/game.js'
         ],

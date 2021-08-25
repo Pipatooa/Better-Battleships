@@ -1,51 +1,58 @@
 {{> banner}}
 
-<div class="container row text-center mx-auto d-none">
-    <div class="col-md">
-        <canvas class="w-100" id="game-canvas" width="300" height="300">
-            Sorry, your browser does not support the canvas element.
-        </canvas>
-    </div>
-    <div class="col-md">
-        <h3>Right Panel</h3>
+<div class="container text-center d-none" id="game-container">
+    <div class="row boxed-container p-0">
+        <div class="col-md-8 p-0">
+            <canvas class="w-100 h-100 d-block" id="game-canvas" width="450" height="300">
+                Sorry, your browser does not support the canvas element.
+            </canvas>
+        </div>
+        <div class="col-md-4 p-0 game-right-pane text-start">
+            <div class="p-3" id="place-ships-pane">
+                <h5><b>Place Ships:</b></h5>
+                <p>Select a ship by clicking on it from this window and place it onto the board on the left half of this page. The direction the ship is facing is shown by an arrow pointing in that direction.<br>If the ship can be rotated, press <kbd>R</kbd> to rotate it.</p>
+                <canvas class="w-100 h-100" width="100" height="100"></canvas>
+            </div>
+        </div>
     </div>
 </div>
 
-<div class="container row text-center mx-auto py-4 px-2" style="border: solid black 2px; border-radius: 5px">
-    <div class="col-md-8" style="border-right: 1px solid;">
-        <div class="h-100 d-flex flex-column">
-            <h3>Teams:</h3>
-            <div class="h-divider py-2"></div>
-            <div class="container row flex-grow-1 px-0" id="team-pane"></div>
-            <div class="h-divider py-2"></div>
-            <h3>Unassigned:</h3>
-            <div class="container row flex-grow-1" id="unassigned-pane"></div>
-            <button class="btn btn-primary w-50 mx-auto" id="ready-button" disabled="disabled">Ready</button>
-        </div>
-    </div>
-    <div class="col-md-4 text-start">
-        <h3>Scenario:</h3>
-        <div class="row">
-            <div class="col-sm-6">
-            <p class="mb-0"><b>Name: </b></p>
-            <p id="scenario-name-field"></p>
-            </div>
-            <div class="col-sm-6">
-                <p class="mb-0"><b>Author: </b></p>
-                <p id="scenario-author-field"></p>
+<div class="container text-center" id="lobby-container">
+    <div class="row py-4 px-2 boxed-container">
+        <div class="col-md-8" style="border-right: 1px solid;">
+            <div class="h-100 d-flex flex-column">
+                <h3>Teams:</h3>
+                <div class="h-divider py-2"></div>
+                <div class="container row flex-grow-1 px-0" id="team-pane"></div>
+                <div class="h-divider py-2"></div>
+                <h3>Unassigned:</h3>
+                <div class="container row flex-grow-1" id="unassigned-pane"></div>
+                <button class="btn btn-primary w-50 mx-auto" id="ready-button" disabled="disabled">Ready</button>
             </div>
         </div>
-        <p class="mb-0"><b>Description:</b></p>
-        <p class="text-wrap" id="scenario-description-field"></p>
+        <div class="col-md-4 text-start">
+            <h3>Scenario:</h3>
+            <div class="row">
+                <div class="col-sm-6">
+                <p class="mb-0"><b>Name: </b></p>
+                <p id="scenario-name-field"></p>
+                </div>
+                <div class="col-sm-6">
+                    <p class="mb-0"><b>Author: </b></p>
+                    <p id="scenario-author-field"></p>
+                </div>
+            </div>
+            <p class="mb-0"><b>Description:</b></p>
+            <p class="text-wrap" id="scenario-description-field"></p>
+        </div>
     </div>
-</div>
-<div class="container text-center pt-4">
-    <p><b id="status-text">Waiting for all players to be ready...</b></p>
-</div>
-
-<div class="container text-center py-3 my-5 w-50 grey-container">
-    <h3>Invite link:</h3>
-    <div>
-        <p class="px-2 mx-auto" style="width: max-content;" id="share-link" data-toggle="tooltip" data-bs-placement="right" title="Copy to clipboard">{{baseUrl}}{{gameUrl}}</p>
+    <div class="pt-4">
+        <p><b id="status-text">Waiting for all players to be ready...</b></p>
+    </div>
+    <div class="py-3 my-5 w-50 mx-auto grey-container">
+        <h3>Invite link:</h3>
+        <div>
+            <p class="px-2 mx-auto" style="width: max-content;" id="share-link" data-toggle="tooltip" data-bs-placement="right" title="Copy to clipboard">{{baseUrl}}{{gameUrl}}</p>
+        </div>
     </div>
 </div>

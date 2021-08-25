@@ -20,7 +20,7 @@ export class Board {
 
     /**
      * Board constructor
-     * @param tiles 2d array of tiles
+     * @param tiles 2d array of tiles indexed [y][x]
      * @param generators List of tile generators
      */
     public constructor(public readonly tiles: Tile[][],
