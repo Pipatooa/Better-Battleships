@@ -1,18 +1,19 @@
-import {ParsingContext} from '../parsing-context';
-import {checkAgainstSchema} from '../schema-checker';
-import {EmptyValueConstraint} from './empty-value-constraint';
-import {ValueAtLeastConstraint} from './value-at-least-constraint';
-import {ValueAtMostConstraint} from './value-at-most-constraint';
-import {IValueConstraintSource, ValueConstraint, valueConstraintSchema} from './value-constaint';
-import {ValueEqualConstraint} from './value-equal-constraint';
-import {ValueInRangeConstraint} from './value-in-range-constraint';
+import { ParsingContext } from '../parsing-context';
+import { checkAgainstSchema } from '../schema-checker';
+import { EmptyValueConstraint } from './empty-value-constraint';
+import { ValueAtLeastConstraint } from './value-at-least-constraint';
+import { ValueAtMostConstraint } from './value-at-most-constraint';
+import { IValueConstraintSource, ValueConstraint, valueConstraintSchema } from './value-constaint';
+import { ValueEqualConstraint } from './value-equal-constraint';
+import { ValueInRangeConstraint } from './value-in-range-constraint';
 
 /**
  * Factory function to generate ValueConstraint from JSON scenario data
- * @param parsingContext Context for resolving scenario data
- * @param valueConstraintSource JSON data for ValueConstraint
- * @param checkSchema When true, validates source JSON data against schema
- * @returns valueConstraint -- Created ValueConstraint object
+ *
+ * @param    parsingContext        Context for resolving scenario data
+ * @param    valueConstraintSource JSON data for ValueConstraint
+ * @param    checkSchema           When true, validates source JSON data against schema
+ * @returns                        Created ValueConstraint object
  */
 export async function buildValueConstraint(parsingContext: ParsingContext, valueConstraintSource: IValueConstraintSource, checkSchema: boolean): Promise<ValueConstraint> {
 

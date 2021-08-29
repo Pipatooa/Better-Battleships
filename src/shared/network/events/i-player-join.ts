@@ -1,4 +1,4 @@
-import {IBaseServerEvent} from './i-server-event';
+import { IBaseServerEvent } from './i-server-event';
 
 /**
  * Player join event sent to client when another client joins the lobby

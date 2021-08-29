@@ -1,11 +1,12 @@
-import {IGameStartFailureEvent} from '../../../../shared/network/events/i-game-start-failure';
-import {gameCountdownManager} from './game-starting';
+import { IGameStartFailureEvent } from '../../../../shared/network/events/i-game-start-failure';
+import { gameCountdownManager } from './game-starting';
 
 /**
  * Handles a game start failure event from the server
- * @param gameStartFailure Event object to handle
+ *
+ * @param  gameStartFailure Event object to handle
  */
-export function handleGameStartFailure(gameStartFailure: IGameStartFailureEvent) {
+export function handleGameStartFailure(gameStartFailure: IGameStartFailureEvent): void {
 
     // Interrupt game start countdown
     gameCountdownManager.stopTimeout('gameCountdownUpdate');

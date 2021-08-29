@@ -1,9 +1,9 @@
-import {IZipEntry} from 'adm-zip';
-import {FileJSON} from 'formidable';
-import {Attribute} from './attributes/attribute';
-import {AttributeReference, AttributeSelector} from './attributes/attribute-reference';
-import {AttributeMap} from './attributes/i-attribute-holder';
-import {UnpackingError, ZipEntryMap} from './unpacker';
+import { IZipEntry } from 'adm-zip';
+import { FileJSON } from 'formidable';
+import { Attribute } from './attributes/attribute';
+import { AttributeReference, AttributeSelector } from './attributes/attribute-reference';
+import { AttributeMap } from './attributes/i-attribute-holder';
+import { UnpackingError, ZipEntryMap } from './unpacker';
 
 /**
  * ParsingContext - Server Version
@@ -14,19 +14,20 @@ export class ParsingContext {
 
     /**
      * ParsingContext constructor
-     * @param scenarioFile           Scenario file to use
-     * @param _currentFile           Path to current file being parsed
-     * @param _currentPath           JSON path to object within current file being evaluated
-     * @param boardEntry             Zip entry for board.json
-     * @param teamEntries            Zip entries for teams/team.json files
-     * @param playerPrototypeEntries Zip entries for player/player.json files
-     * @param shipEntries            Zip entries for ship/ship.json files
-     * @param abilityEntries         Zip entries for abilities/ability.json files
-     * @param scenarioAttributes     Dictionary of attributes belonging to current scenario
-     * @param teamAttributes         Dictionary of attributes belonging to current team,
-     * @param playerAttributes       Dictionary of attributes belonging to current player
-     * @param shipAttributes         Dictionary of attributes belonging to current ship
-     * @param abilityAttributes      Dictionary of attributes belonging to current ability
+     *
+     * @param  scenarioFile           Scenario file to use
+     * @param  _currentFile           Path to current file being parsed
+     * @param  _currentPath           JSON path to object within current file being evaluated
+     * @param  boardEntry             Zip entry for board.json
+     * @param  teamEntries            Zip entries for teams/team.json files
+     * @param  playerPrototypeEntries Zip entries for player/player.json files
+     * @param  shipEntries            Zip entries for ship/ship.json files
+     * @param  abilityEntries         Zip entries for abilities/ability.json files
+     * @param  scenarioAttributes     Dictionary of attributes belonging to current scenario
+     * @param  teamAttributes         Dictionary of attributes belonging to current team,
+     * @param  playerAttributes       Dictionary of attributes belonging to current player
+     * @param  shipAttributes         Dictionary of attributes belonging to current ship
+     * @param  abilityAttributes      Dictionary of attributes belonging to current ability
      */
     public constructor(public readonly scenarioFile: FileJSON,
                        protected _currentFile: string,
@@ -45,19 +46,17 @@ export class ParsingContext {
 
     /**
      * Finds an attribute defined within this current parsing context
-     * @param attributeReference Attribute path to locate attribute
-     * @returns attribute     -- Found attribute
+     *
+     * @param    attributeReference Attribute path to locate attribute
+     * @returns                     Found attribute
      */
     public getAttribute(attributeReference: AttributeReference): Attribute {
 
-        let selectorStr: string;
-        let attributeName: string;
-
         // Split attribute reference into selector part and name part
-        [selectorStr, attributeName] = attributeReference.split('.');
+        const [ selectorStr, attributeName ] = attributeReference.split('.');
 
         // Type declarations
-        let attributeSelector = selectorStr as AttributeSelector;
+        const attributeSelector = selectorStr as AttributeSelector;
         let attributeMap: AttributeMap | undefined;
 
         // Select attribute map depending on attribute selector
@@ -90,7 +89,8 @@ export class ParsingContext {
 
     /**
      * Returns the lowest level of attribute currently known
-     * @returns name -- Friendly name
+     *
+     * @returns  Friendly name
      */
     public getAttributeContextName(): AttributeSelector {
         if (this.abilityAttributes !== undefined)
@@ -110,7 +110,8 @@ export class ParsingContext {
 
     /**
      * Factory function to generate a copy of this object.
-     * @returns parsingContext -- Shallow copy of this parsing context
+     *
+     * @returns  Shallow copy of this parsing context
      */
     public getCopy(): ParsingContext {
         return new ParsingContext(
@@ -133,11 +134,12 @@ export class ParsingContext {
      * Factory function to generate a copy of this object with an updated current file
      *
      * Will also reset the current path
-     * @param newFile             New filename to use in new context
-     * @returns parsingContext -- Created ParsingContext
+     *
+     * @param    newFile New filename to use in new context
+     * @returns          Created ParsingContext
      */
     public withUpdatedFile(newFile: string): ParsingContext {
-        let copy: ParsingContext = this.getCopy();
+        const copy: ParsingContext = this.getCopy();
         copy._currentFile = newFile;
         copy._currentPath = '';
         return copy;
@@ -145,66 +147,72 @@ export class ParsingContext {
 
     /**
      * Factory function to generate a copy of this object with an extended JSON object path
-     * @param pathExtension       Extension to add to current path
-     * @returns parsingContext -- Created ParsingContext
+     *
+     * @param    pathExtension Extension to add to current path
+     * @returns                Created ParsingContext
      */
     public withExtendedPath(pathExtension: string): ParsingContext {
-        let copy: ParsingContext = this.getCopy();
+        const copy: ParsingContext = this.getCopy();
         copy._currentPath += pathExtension;
         return copy;
     }
 
     /**
      * Factory function to generate a copy of this object with a set of scenario attributes
-     * @param scenarioAttributes  Scenario attributes to use
-     * @returns parsingContext -- Created ParsingContext
+     *
+     * @param    scenarioAttributes Scenario attributes to use
+     * @returns                     Created ParsingContext
      */
     public withScenarioAttributes(scenarioAttributes: AttributeMap): ParsingContext {
-        let copy: ParsingContext = this.getCopy();
+        const copy: ParsingContext = this.getCopy();
         copy.scenarioAttributes = scenarioAttributes;
         return copy;
     }
 
     /**
      * Factory function to generate a copy of this object with a set of team attributes
-     * @param teamAttributes      Team attributes to use
-     * @returns parsingContext -- Created ParsingContext
+     *
+     * @param    teamAttributes Team attributes to use
+     * @returns                 Created ParsingContext
      */
     public withTeamAttributes(teamAttributes: AttributeMap): ParsingContext {
-        let copy: ParsingContext = this.getCopy();
+        const copy: ParsingContext = this.getCopy();
         copy.teamAttributes = teamAttributes;
         return copy;
     }
 
     /**
      * Factory function to generate a copy of this object with a set of player attributes
-     * @param playerAttributes    Player attributes to use
-     * @returns parsingContext -- Created ParsingContext
+     *
+     * @param    playerAttributes Player attributes to use
+     * @returns                   Created ParsingContext
      */
     public withPlayerAttributes(playerAttributes: AttributeMap): ParsingContext {
-        let copy: ParsingContext = this.getCopy();
+        const copy: ParsingContext = this.getCopy();
         copy.playerAttributes = playerAttributes;
         return copy;
     }
 
     /**
      * Factory function to generate a copy of this object with a set of ship attributes
-     * @param shipAttributes    Ship attributes to use
-     * @returns parsingContext -- Created ParsingContext
+     *
+     * @param    shipAttributes Ship attributes to use
+     * @returns                 Created ParsingContext
      */
     public withShipAttributes(shipAttributes: AttributeMap): ParsingContext {
-        let copy: ParsingContext = this.getCopy();
+        const copy: ParsingContext = this.getCopy();
         copy.shipAttributes = shipAttributes;
         return copy;
     }
 
     /**
      * Factory function to generate a copy of this object with a set of ability attributes
-     * @param abilityAttributes   Ability attributes to use
-     * @returns parsingContext -- Created ParsingContext
+     *
+     * @param    abilityAttributes Ability attributes to use
+     * @returns                    Created ParsingContext
      */
     public withAbilityAttributes(abilityAttributes: AttributeMap): ParsingContext {
-        let copy: ParsingContext = this.getCopy();
+        const copy: ParsingContext = this.getCopy();
         copy.abilityAttributes = abilityAttributes;
         return copy;
     }

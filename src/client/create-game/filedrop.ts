@@ -10,7 +10,7 @@ export let file: File;
 /**
  * Binds event handlers for file drop
  */
-export function bindFileDrop() {
+export function bindFileDrop(): void {
     fileDrop.on('drop', onDrop);
     fileDrop.on('dragover', onDragOver);
     fileDrop.on('dragenter', onDragEnter);
@@ -19,36 +19,60 @@ export function bindFileDrop() {
     fileSelect.on('change', onChange);
 }
 
-function onDrop(ev: DropEvent) {
+/**
+ * Called on file drop event
+ *
+ * @param  ev File drop event
+ */
+function onDrop(ev: DropEvent): void {
     ev.preventDefault();
 
     // Set file to file dropped into file drop
-    let files = ev.originalEvent?.dataTransfer?.files;
-    if (files?.length) {
+    const files = ev.originalEvent?.dataTransfer?.files;
+    if (files !== undefined && files.length !== 0) {
         file = files[0];
     }
 
     fileDrop.removeClass('file-drop-highlighted');
 }
 
-function onDragOver(ev: DragOverEvent) {
+/**
+ * Called while file is being dragged over file drop
+ *
+ * @param  ev Drag over event
+ */
+function onDragOver(ev: DragOverEvent): void {
     ev.preventDefault();
 }
 
-function onDragEnter() {
+/**
+ * Called when file is first dragged over file drop
+ */
+function onDragEnter(): void {
     fileDrop.addClass('file-drop-highlighted');
 }
 
-function onDragExit() {
+/**
+ * Called when file is dragged away from file drop
+ */
+function onDragExit(): void {
     fileDrop.removeClass('file-drop-highlighted');
 }
 
-function onClick() {
+/**
+ * Called when file drop is clicked on
+ */
+function onClick(): void {
     fileSelect.trigger('click');
 }
 
-function onChange(ev: ChangeEvent) {
-    let files = ev.currentTarget.files;
+/**
+ * Called when file is selected from file select window
+ *
+ * @param  ev Change event
+ */
+function onChange(ev: ChangeEvent): void {
+    const files = ev.currentTarget.files as File[];
     if (files.length) {
         file = files[0];
     }

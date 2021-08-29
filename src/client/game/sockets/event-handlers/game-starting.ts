@@ -1,5 +1,5 @@
-import {IGameStartingEvent} from '../../../../shared/network/events/i-game-starting';
-import {TimeoutManager} from '../../../../shared/timeout-manager';
+import { IGameStartingEvent } from '../../../../shared/network/events/i-game-starting';
+import { TimeoutManager } from '../../../../shared/timeout-manager';
 
 let statusTextElement: JQuery;
 let gameStartTime: number;
@@ -7,16 +7,17 @@ let gameStartTime: number;
 /**
  * Timeout manager for game countdown
  */
-export let gameCountdownManager = new TimeoutManager({
-    gameCountdownUpdate: [updateGameStartCountdown, 50, true]
+export const gameCountdownManager = new TimeoutManager({
+    gameCountdownUpdate: [ updateGameStartCountdown, 50, true ]
 });
 
 
 /**
  * Handles a game starting event from the server
- * @param gameStartingEvent Event object to handle
+ *
+ * @param  gameStartingEvent Event object to handle
  */
-export function handleGameStarting(gameStartingEvent: IGameStartingEvent) {
+export function handleGameStarting(gameStartingEvent: IGameStartingEvent): void {
 
     // Cache status text element
     statusTextElement = $('#status-text');
@@ -31,10 +32,10 @@ export function handleGameStarting(gameStartingEvent: IGameStartingEvent) {
 /**
  * Updates the status text to indicate the number of seconds remaining until the game starts
  */
-function updateGameStartCountdown() {
+function updateGameStartCountdown(): void {
 
     // Calculate time delta in seconds between now and game start
-    let delta = (gameStartTime - Date.now()) / 1000;
+    const delta = (gameStartTime - Date.now()) / 1000;
 
     // If delta time is 0 or negative, stop game countdown update interval timeout
     if (delta <= 0) {

@@ -27,8 +27,10 @@ export class Config {
 
     /**
      * Config constructor
-     * @param configRaw Parsed JSON config
+     *
+     * @param  configRaw Parsed JSON config
      */
+    // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
     public constructor(configRaw: any) {
 
         this.configRaw = configRaw;
@@ -57,16 +59,16 @@ export class Config {
 
     /**
      * Checks that a value matches a type string and returns the value if type check succeeds
-     * @param typeString Type string to check type of value against
-     * @param name Name of config option. Used in error messages
-     * @returns value -- Value returned if type check succeeded
-     * @private
+     *
+     * @param    typeString Type string to check type of value against
+     * @param    name       Name of config option. Used in error messages
+     * @returns             Value returned if type check succeeded
      */
     private getFromConfig(typeString: string, name: string): any {
 
         // Get value from path
         let value: any = this.configRaw;
-        for (let part of name.split('.')) {
+        for (const part of name.split('.')) {
             value = value[part];
         }
 

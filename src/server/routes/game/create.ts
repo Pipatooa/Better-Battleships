@@ -1,11 +1,11 @@
 import express from 'express';
-import formidable, {FileJSON} from 'formidable';
+import formidable, { FileJSON } from 'formidable';
 import fs from 'fs';
-import {Game} from '../../game/game';
-import {capacityReached, createGame} from '../../game/game-manager';
-import {Scenario} from '../../game/scenario/scenario';
-import {unpack, UnpackingError} from '../../game/scenario/unpacker';
-import {preventCSRF, requireAuth} from '../../middleware';
+import { Game } from '../../game/game';
+import { capacityReached, createGame } from '../../game/game-manager';
+import { Scenario } from '../../game/scenario/scenario';
+import { unpack, UnpackingError } from '../../game/scenario/unpacker';
+import { preventCSRF, requireAuth } from '../../middleware';
 
 const router = express.Router();
 
@@ -20,7 +20,7 @@ router.get('/', preventCSRF, requireAuth, (req, res) => {
     res.render('create-game', {
         csrfToken: req.csrfToken(),
         url: req.baseUrl + req.url,
-        pageTitle: `Create Game`,
+        pageTitle: 'Create Game',
         pageDescription: '',
         stylesheets: [
             '/css/style.css',
@@ -50,13 +50,13 @@ router.post('/', preventCSRF, requireAuth, async (req, res) => {
         return;
     }
 
-    let form = formidable({ multiples: true });
+    const form = formidable({ multiples: true });
 
     // Parse form data from request
     form.parse(req, async (err, fields, files) => {
 
         // If error parsing form
-        if (err) {
+        if (err !== undefined) {
             res.status(400);
             res.send({
                 success: false,
@@ -84,7 +84,7 @@ router.post('/', preventCSRF, requireAuth, async (req, res) => {
         // Process uploaded scenario zip file
         try {
             scenario = await unpack(file);
-        } catch (e) {
+        } catch (e: unknown) {
 
             // If there was an unpacking error, return a JSON object with details
             if (e instanceof UnpackingError) {
@@ -101,11 +101,11 @@ router.post('/', preventCSRF, requireAuth, async (req, res) => {
             }
 
             // If uploaded scenario was not a zip file
-            if (e.message.startsWith('Invalid or unsupported zip format')) {
+            if ((e as Error).message.startsWith('Invalid or unsupported zip format')) {
                 res.status(400);
                 res.send({
                     success: false,
-                    message: e.message,
+                    message: (e as Error).message,
                     context: 'An error occurred whilst trying to parse the request'
                 });
                 return;
@@ -123,7 +123,7 @@ router.post('/', preventCSRF, requireAuth, async (req, res) => {
         }
 
         // Create a new game
-        let game: Game = await createGame(scenario);
+        const game: Game = await createGame(scenario);
         res.send({
             success: true,
             gameID: game.gameID,

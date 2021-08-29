@@ -1,7 +1,7 @@
-import {ParsingContext} from '../parsing-context';
-import {checkAgainstSchema} from '../schema-checker';
-import {Condition} from './condition';
-import {ConditionMultiple, conditionMultipleSchema, IConditionMultipleSource} from './condition-multiple';
+import { ParsingContext } from '../parsing-context';
+import { checkAgainstSchema } from '../schema-checker';
+import { Condition } from './condition';
+import { ConditionMultiple, conditionMultipleSchema, IConditionMultipleSource } from './condition-multiple';
 
 /**
  * ConditionAll - Server Version
@@ -14,15 +14,16 @@ export class ConditionAll extends ConditionMultiple {
 
     /**
      * Checks whether or not this condition holds true
-     * @returns boolean -- Whether or not this condition holds true
+     *
+     * @returns  Whether or not this condition holds true
      */
     public check(): boolean {
 
         // Loop through sub conditions
-        for (let i = 0; i < this.subConditions.length; i++) {
+        for (const item of this.subConditions) {
 
             // If any sub condition holds false, return false (unless inverted)
-            if (!this.subConditions[i].check())
+            if (!item.check())
                 return this.inverted;
         }
 
@@ -32,10 +33,11 @@ export class ConditionAll extends ConditionMultiple {
 
     /**
      * Factory function to generate ConditionAll from JSON scenario data
-     * @param parsingContext Context for resolving scenario data
-     * @param conditionAllSource JSON data for ConditionAll
-     * @param checkSchema When true, validates source JSON data against schema
-     * @returns conditionAll -- Created ConditionAll object
+     *
+     * @param    parsingContext     Context for resolving scenario data
+     * @param    conditionAllSource JSON data for ConditionAll
+     * @param    checkSchema        When true, validates source JSON data against schema
+     * @returns                     Created ConditionAll object
      */
     public static async fromSource(parsingContext: ParsingContext, conditionAllSource: IConditionAllSource, checkSchema: boolean): Promise<ConditionAll> {
 
@@ -44,7 +46,7 @@ export class ConditionAll extends ConditionMultiple {
             conditionAllSource = await checkAgainstSchema(conditionAllSource, conditionAllSchema, parsingContext);
 
         // Get sub conditions from source
-        let subConditions: Condition[] = await ConditionMultiple.getSubConditions(parsingContext.withExtendedPath('.subConditions'), conditionAllSource.subConditions);
+        const subConditions: Condition[] = await ConditionMultiple.getSubConditions(parsingContext.withExtendedPath('.subConditions'), conditionAllSource.subConditions);
 
         // Return created ConditionAll object
         return new ConditionAll(subConditions, conditionAllSource.inverted);

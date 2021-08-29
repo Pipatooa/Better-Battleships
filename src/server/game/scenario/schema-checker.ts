@@ -1,20 +1,21 @@
 import Joi from 'joi';
-import {ParsingContext} from './parsing-context';
-import {UnpackingError} from './unpacker';
+import { ParsingContext } from './parsing-context';
+import { UnpackingError } from './unpacker';
 
 /**
  * Validate JSON source data against a schema
- * @param source JSON source data
- * @param schema Schema to validate source against
- * @param parsingContext Context for resolving scenario data
- * @returns sanitisedJSON -- Sanitised JSON data
+ *
+ * @param    source         JSON source data
+ * @param    schema         Schema to validate source against
+ * @param    parsingContext Context for resolving scenario data
+ * @returns                 Sanitised JSON data
  */
 export async function checkAgainstSchema<T>(source: T, schema: Joi.Schema, parsingContext: ParsingContext): Promise<T> {
 
     // Validate JSON data against schema
     try {
         source = await schema.validateAsync(source);
-    } catch (e) {
+    } catch (e: unknown) {
         if (e instanceof Joi.ValidationError)
             throw UnpackingError.fromJoiValidationError(e, parsingContext);
         throw e;
@@ -26,10 +27,11 @@ export async function checkAgainstSchema<T>(source: T, schema: Joi.Schema, parsi
 
 /**
  * Decorator to validate JSON source data against a schema before passing source to function
- * @constructor
+ *
+ * @class
  */
 export function WithSchema() {
-    return function (target: IScenarioObject, key: string, descriptor: PropertyDescriptor) {
+    return function (target: IScenarioObject, key: string, descriptor: PropertyDescriptor): any {
         const original = descriptor.value;
 
         descriptor.value = async function (parsingContext: ParsingContext,
@@ -41,7 +43,7 @@ export function WithSchema() {
                 source = await checkAgainstSchema(source, target.schema, parsingContext);
 
             // Pass validated JSON
-            return original.apply(this, [parsingContext, source, checkSchema]);
+            return original.apply(this, [ parsingContext, source, checkSchema ]);
         };
     };
 }

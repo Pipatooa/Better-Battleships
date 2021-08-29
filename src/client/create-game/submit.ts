@@ -1,21 +1,25 @@
-import {file} from './filedrop';
+import { file } from './filedrop';
 
 /**
  * Submits game create request to the server
+ *
+ * @param  errorContainer      HTML element containing all error information
+ * @param  errorMessageElement HTML element showing error message
+ * @param  errorContextElement HTML element showing error context message
  */
-export async function submit(errorContainer: JQuery, errorMessageElement: JQuery, errorContextElement: JQuery) {
+export async function submit(errorContainer: JQuery, errorMessageElement: JQuery, errorContextElement: JQuery): Promise<void> {
 
     // Create new form for game settings
-    let formData = new FormData();
+    const formData = new FormData();
     formData.append('file', file);
 
     // Get CSRF token and create headers for request
-    let csrfToken = $('meta[name="csrf-token"]').attr('content');
-    let headers = new Headers();
-    headers.set('CSRF-Token', csrfToken as string);
+    const csrfToken = $('meta[name="csrf-token"]').attr('content');
+    const headers = new Headers();
+    headers.set('CSRF-Token', csrfToken!);
 
     // Submit request
-    let res: Response = await fetch('/game/create', {
+    const res: Response = await fetch('/game/create', {
         method: 'POST',
         credentials: 'same-origin',
         headers: headers,
@@ -23,7 +27,7 @@ export async function submit(errorContainer: JQuery, errorMessageElement: JQuery
     });
 
     // Unpack JSON data
-    let serverResponse = await res.json() as IGameCreationResponse;
+    const serverResponse = await res.json() as IGameCreationResponse;
 
     // If successful, redirect user to game joining screen
     if (serverResponse.success)

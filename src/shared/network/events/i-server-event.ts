@@ -1,12 +1,12 @@
-import {IConnectionInfoEvent} from './i-connection-info';
-import {IGameInfoEvent} from './i-game-info';
-import {IGameStartEvent} from './i-game-start';
-import {IGameStartFailureEvent} from './i-game-start-failure';
-import {IGameStartingEvent} from './i-game-starting';
-import {IPlayerJoinEvent} from './i-player-join';
-import {IPlayerLeaveEvent} from './i-player-leave';
-import {IPlayerReadyEvent} from './i-player-ready';
-import {ITeamAssignmentEvent} from './i-team-assignment';
+import { IConnectionInfoEvent } from './i-connection-info';
+import { IGameInfoEvent } from './i-game-info';
+import { IGameStartEvent } from './i-game-start';
+import { IGameStartFailureEvent } from './i-game-start-failure';
+import { IGameStartingEvent } from './i-game-starting';
+import { IPlayerJoinEvent } from './i-player-join';
+import { IPlayerLeaveEvent } from './i-player-leave';
+import { IPlayerReadyEvent } from './i-player-ready';
+import { ITeamAssignmentEvent } from './i-team-assignment';
 
 /**
  * Base server event which all server events extend

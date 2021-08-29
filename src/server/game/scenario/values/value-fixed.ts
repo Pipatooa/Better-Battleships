@@ -1,7 +1,7 @@
 import Joi from 'joi';
-import {ParsingContext} from '../parsing-context';
-import {checkAgainstSchema} from '../schema-checker';
-import {Value} from './value';
+import { ParsingContext } from '../parsing-context';
+import { checkAgainstSchema } from '../schema-checker';
+import { Value } from './value';
 
 /**
  * ValueRandom - Server Version
@@ -12,7 +12,8 @@ export class ValueFixed extends Value {
 
     /**
      * ValueFixed constructor
-     * @param value Number that this value will always be evaluated as
+     *
+     * @param  value Number that this value will always be evaluated as
      * @protected
      */
     protected constructor(public readonly value: number) {
@@ -21,6 +22,8 @@ export class ValueFixed extends Value {
 
     /**
      * Evaluate this dynamic value as a number
+     *
+     * @returns  Static value
      */
     public evaluate(): number {
         return this.value;
@@ -28,10 +31,11 @@ export class ValueFixed extends Value {
 
     /**
      * Factory function to generate ValueFixed from JSON scenario data
-     * @param parsingContext Context for resolving scenario data
-     * @param valueFixedSource JSON data for ValueFixed
-     * @param checkSchema When true, validates source JSON data against schema
-     * @returns valueFixed -- Created ValueFixed object
+     *
+     * @param    parsingContext   Context for resolving scenario data
+     * @param    valueFixedSource JSON data for ValueFixed
+     * @param    checkSchema      When true, validates source JSON data against schema
+     * @returns                   Created ValueFixed object
      */
     public static async fromSource(parsingContext: ParsingContext, valueFixedSource: IValueFixedSource, checkSchema: boolean): Promise<ValueFixed> {
 

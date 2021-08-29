@@ -1,13 +1,14 @@
-import {IPlayerJoinEvent} from '../../../../shared/network/events/i-player-join';
-import {IPlayerReadyEvent} from '../../../../shared/network/events/i-player-ready';
-import {nameFromIdentity} from '../../../../shared/utility';
-import {handlePlayerReady} from './player-ready';
+import { IPlayerJoinEvent } from '../../../../shared/network/events/i-player-join';
+import { IPlayerReadyEvent } from '../../../../shared/network/events/i-player-ready';
+import { nameFromIdentity } from '../../../../shared/utility';
+import { handlePlayerReady } from './player-ready';
 
 /**
  * Handles a player join event from the server
- * @param playerJoin Event object to handle
+ *
+ * @param  playerJoin Event object to handle
  */
-export function handlePlayerJoin(playerJoin: IPlayerJoinEvent) {
+export function handlePlayerJoin(playerJoin: IPlayerJoinEvent): void {
 
     // Get correct team pane for the player's team
     let pane: JQuery;
@@ -17,10 +18,10 @@ export function handlePlayerJoin(playerJoin: IPlayerJoinEvent) {
         pane = $(`#team-${playerJoin.team}`);
 
     // Get display name from client identity string
-    let playerName = nameFromIdentity(playerJoin.playerIdentity);
+    const playerName = nameFromIdentity(playerJoin.playerIdentity);
 
     // Create new element for player using identity and name. Add to pane
-    let playerElement = $(`<div class="" id="player-${playerJoin.playerIdentity}"></div>`);
+    const playerElement = $(`<div class="" id="player-${playerJoin.playerIdentity}"></div>`);
     playerElement.text(playerName);
     pane.append(playerElement);
 

@@ -1,24 +1,31 @@
 import csurf from 'csurf';
-import {Forbidden} from 'http-errors';
-import {checkRequestAuth} from './auth/request-handler';
+import { NextFunction, Request, Response } from 'express';
+import { Forbidden } from 'http-errors';
+import { IAuthPayload } from './auth/i-auth-payload';
+import { checkRequestAuth } from './auth/request-handler';
 
-let csurfProtection = csurf({ cookie: { sameSite: 'lax', secure: true, httpOnly: true } });
+const csurfProtection = csurf({ cookie: { sameSite: 'lax', secure: true, httpOnly: true } });
+
+export interface RequestWithAuth extends Request {
+    auth: IAuthPayload
+}
 
 /**
- * Middleware function to prevent CSRF attacks
+ * Express middleware function to prevent CSRF attacks
  *
  * Wraps csurf middleware function for custom error messages and async/await support
- * @param req
- * @param res
- * @param next
+ *
+ * @param  req  Express request to process
+ * @param  res  Express response object
+ * @param  next Express next function
  */
-export async function preventCSRF(req: any, res: any, next: any) {
+export async function preventCSRF(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
         csurfProtection(req, res, next);
-    } catch (e) {
+    } catch (e: unknown) {
         if (e instanceof Forbidden) {
             res.status(e.status);
-            res.message('Invalid CSRF token');
+            res.send('Invalid CSRF token');
             return;
         }
 
@@ -27,24 +34,25 @@ export async function preventCSRF(req: any, res: any, next: any) {
 }
 
 /**
- * Middleware function to verify login credentials
- * @param req
- * @param res
- * @param next
+ * Express middleware function to verify login credentials
+ *
+ * @param  req  Express request to process
+ * @param  res  Express response object
+ * @param  next Express next function
  */
-export async function requireAuth(req: any, res: any, next: any) {
+export async function requireAuth(req: Request, res: Response, next: NextFunction): Promise<void> {
 
     // Check authorisation of request
-    let payload = await checkRequestAuth(req);
+    const payload = await checkRequestAuth(req);
 
     // If not authorised, redirect user to login page
     if (payload === undefined) {
-        let encodedUri = encodeURI(req.baseUrl + req.url);
+        const encodedUri = encodeURI(req.baseUrl + req.url);
         res.redirect(`/login?r=${encodedUri}`);
         return;
     }
 
     // Otherwise, store payload and continue
-    req.auth = payload;
+    (req as RequestWithAuth).auth = payload;
     next();
 }

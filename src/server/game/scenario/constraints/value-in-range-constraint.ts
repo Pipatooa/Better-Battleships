@@ -1,8 +1,8 @@
 import Joi from 'joi';
-import {clamp} from '../../../../shared/utility';
-import {ParsingContext} from '../parsing-context';
-import {checkAgainstSchema} from '../schema-checker';
-import {ValueConstraint} from './value-constaint';
+import { clamp } from '../../../../shared/utility';
+import { ParsingContext } from '../parsing-context';
+import { checkAgainstSchema } from '../schema-checker';
+import { ValueConstraint } from './value-constaint';
 
 /**
  * ValueInRangeConstraint - Server Version
@@ -16,8 +16,9 @@ export class ValueInRangeConstraint extends ValueConstraint {
 
     /**
      * ValueInRangeConstraint constructor
-     * @param min Minimum value that other values can hold to meet this constraint
-     * @param max Maximum value that other values can hold to meet this constraint
+     *
+     * @param  min Minimum value that other values can hold to meet this constraint
+     * @param  max Maximum value that other values can hold to meet this constraint
      */
     protected constructor(public readonly min: number,
                           public readonly max: number) {
@@ -26,10 +27,11 @@ export class ValueInRangeConstraint extends ValueConstraint {
 
     /**
      * Factory function to generate ValueInRangeConstraint from JSON scenario data
-     * @param parsingContext Context for resolving scenario data
-     * @param valueInRangeConstraintSource JSON data for ValueInRangeConstraint
-     * @param checkSchema When true, validates source JSON data against schema
-     * @returns valueInRangeConstraint -- Created ValueInRangeConstraint object
+     *
+     * @param    parsingContext               Context for resolving scenario data
+     * @param    valueInRangeConstraintSource JSON data for ValueInRangeConstraint
+     * @param    checkSchema                  When true, validates source JSON data against schema
+     * @returns                               Created ValueInRangeConstraint object
      */
     public static async fromSource(parsingContext: ParsingContext, valueInRangeConstraintSource: IValueInRangeConstraintSource, checkSchema: boolean): Promise<ValueInRangeConstraint> {
 
@@ -43,8 +45,9 @@ export class ValueInRangeConstraint extends ValueConstraint {
 
     /**
      * Checks whether or not a value meets this constraint
-     * @param value Value to check
-     * @returns boolean -- Whether value met this constraint
+     *
+     * @param    value Value to check
+     * @returns        Whether value met this constraint
      */
     public check(value: number): boolean {
         return value >= this.min && value <= this.max;
@@ -52,8 +55,9 @@ export class ValueInRangeConstraint extends ValueConstraint {
 
     /**
      * Changes a value to meet this constraint
-     * @param value Value to constrain
-     * @returns newValue -- New value that meets this constraint
+     *
+     * @param    value Value to constrain
+     * @returns        New value that meets this constraint
      */
     public constrain(value: number): number {
         return clamp(value, this.min, this.max);

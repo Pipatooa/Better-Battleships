@@ -3,7 +3,7 @@ let shareLinkElement: JQuery;
 /**
  * Registers tooltip for the share link
  */
-export function registerShareLinkHandlers() {
+export function registerShareLinkHandlers(): void {
 
     // Get share link element using JQuery and enable tooltip
     shareLinkElement = $('#share-link');
@@ -15,16 +15,16 @@ export function registerShareLinkHandlers() {
 }
 
 /**
- * When share link is clicked
+ * Called when share link is clicked
  */
-function onShareLinkClick() {
+function onShareLinkClick(): void {
 
     // Create temporary input element and add it to the document
-    let temp = $('<input>');
+    const temp = $('<input>');
     $('body').append(temp);
 
     // Get share link text
-    let shareLinkText = shareLinkElement.html();
+    const shareLinkText = shareLinkElement.html();
 
     // Set value of temporary input to share link and select it
     temp.val(shareLinkText).select();
@@ -41,9 +41,9 @@ function onShareLinkClick() {
 }
 
 /**
- * When share link tooltip becomes hidden
+ * Called when share link tooltip becomes hidden
  */
-function onShareLinkToolTipHidden() {
+function onShareLinkToolTipHidden(): void {
 
     // Set tooltip text back to 'Copy to clipboard'
     shareLinkElement.attr('data-bs-original-title', 'Copy to clipboard');

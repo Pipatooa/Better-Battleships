@@ -1,6 +1,6 @@
 import Joi from 'joi';
-import {genericNameRegex} from '../common/generic-name';
-import {Attribute, attributeSchema, IAttributeSource} from './attribute';
+import { genericNameRegex } from '../common/generic-name';
+import { Attribute, attributeSchema, IAttributeSource } from './attribute';
 
 /**
  * Type describing a dictionary of string (name) indexed attributes

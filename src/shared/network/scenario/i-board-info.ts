@@ -1,4 +1,4 @@
-import {ITileTypeInfo} from './i-tiletype-info';
+import { ITileTypeInfo } from './i-tiletype-info';
 
 /**
  * Portable network version of Board object

@@ -1,16 +1,16 @@
-import {FileJSON} from 'formidable';
+import { FileJSON } from 'formidable';
 import Joi from 'joi';
-import {IScenarioInfo} from '../../../shared/network/scenario/i-scenario-info';
-import {ITeamInfo} from '../../../shared/network/scenario/i-team-info';
-import {Attribute, IAttributeSource} from './attributes/attribute';
-import {attributeHolderSchema, AttributeMap, IAttributeHolder} from './attributes/i-attribute-holder';
-import {Board, IBoardSource} from './board';
-import {Descriptor, descriptorSchema, IDescriptorSource} from './common/descriptor';
-import {genericNameSchema} from './common/generic-name';
-import {ParsingContext} from './parsing-context';
-import {checkAgainstSchema} from './schema-checker';
-import {ITeamSource, Team} from './team';
-import {getJSONFromEntry, UnpackingError} from './unpacker';
+import { IScenarioInfo } from '../../../shared/network/scenario/i-scenario-info';
+import { ITeamInfo } from '../../../shared/network/scenario/i-team-info';
+import { Attribute, IAttributeSource } from './attributes/attribute';
+import { attributeHolderSchema, AttributeMap, IAttributeHolder } from './attributes/i-attribute-holder';
+import { Board, IBoardSource } from './board';
+import { Descriptor, descriptorSchema, IDescriptorSource } from './common/descriptor';
+import { genericNameSchema } from './common/generic-name';
+import { ParsingContext } from './parsing-context';
+import { checkAgainstSchema } from './schema-checker';
+import { ITeamSource, Team } from './team';
+import { getJSONFromEntry, UnpackingError } from './unpacker';
 
 /**
  * Scenario - Server Version
@@ -29,10 +29,11 @@ export class Scenario implements IAttributeHolder {
 
     /**
      * Factory function to generate Scenario from JSON scenario data
-     * @param parsingContext Context for resolving scenario data
-     * @param scenarioSource JSON data from 'scenario.json'
-     * @param checkSchema When true, validates source JSON data against schema
-     * @returns scenario -- Created Scenario object
+     *
+     * @param    parsingContext Context for resolving scenario data
+     * @param    scenarioSource JSON data from 'scenario.json'
+     * @param    checkSchema    When true, validates source JSON data against schema
+     * @returns                 Created Scenario object
      */
     public static async fromSource(parsingContext: ParsingContext, scenarioSource: IScenarioSource, checkSchema: boolean): Promise<Scenario> {
 
@@ -41,8 +42,8 @@ export class Scenario implements IAttributeHolder {
             scenarioSource = await checkAgainstSchema(scenarioSource, scenarioSchema, parsingContext);
 
         // Get attributes
-        let attributes: AttributeMap = {};
-        for (let [name, attributeSource] of Object.entries(scenarioSource.attributes)) {
+        const attributes: AttributeMap = {};
+        for (const [ name, attributeSource ] of Object.entries(scenarioSource.attributes)) {
             attributes[name] = await Attribute.fromSource(parsingContext.withExtendedPath(`.attributes.${name}`), attributeSource, false);
         }
 
@@ -50,22 +51,22 @@ export class Scenario implements IAttributeHolder {
         parsingContext = parsingContext.withScenarioAttributes(attributes);
 
         // Get descriptor
-        let descriptor = await Descriptor.fromSource(parsingContext.withExtendedPath('.descriptor'), scenarioSource.descriptor, false);
+        const descriptor = await Descriptor.fromSource(parsingContext.withExtendedPath('.descriptor'), scenarioSource.descriptor, false);
 
         // Get board
-        let boardSource: IBoardSource = await getJSONFromEntry(parsingContext.boardEntry) as unknown as IBoardSource;
-        let board = await Board.fromSource(parsingContext.withUpdatedFile('board.json'), boardSource, true);
+        const boardSource: IBoardSource = await getJSONFromEntry(parsingContext.boardEntry) as unknown as IBoardSource;
+        const board = await Board.fromSource(parsingContext.withUpdatedFile('board.json'), boardSource, true);
 
         // Get teams
-        let teams: { [name: string]: Team } = {};
-        for (let teamName of scenarioSource.teams) {
+        const teams: { [name: string]: Team } = {};
+        for (const teamName of scenarioSource.teams) {
 
             // If team does not exist
             if (!(teamName in parsingContext.teamEntries))
                 throw new UnpackingError(`Could not find 'teams/${teamName}.json'`, parsingContext);
 
             // Unpack team data
-            let teamSource: ITeamSource = await getJSONFromEntry(parsingContext.teamEntries[teamName]) as unknown as ITeamSource;
+            const teamSource: ITeamSource = await getJSONFromEntry(parsingContext.teamEntries[teamName]) as unknown as ITeamSource;
             teams[teamName] = await Team.fromSource(parsingContext.withUpdatedFile(`teams/${teamName}.json`), teamSource, teamName, true);
         }
 
@@ -77,12 +78,14 @@ export class Scenario implements IAttributeHolder {
      * Returns network transportable form of this object.
      *
      * May not include all details of the object. Just those that the client needs to know.
+     *
+     * @returns  Created IScenarioInfo object
      */
     public makeTransportable(): IScenarioInfo {
-        let teamInfo: { [name: string]: ITeamInfo } = {};
+        const teamInfo: { [name: string]: ITeamInfo } = {};
 
         // Make all team objects transportable
-        for (let [name, team] of Object.entries(this.teams)) {
+        for (const [ name, team ] of Object.entries(this.teams)) {
             teamInfo[name] = team.makeTransportable();
         }
 

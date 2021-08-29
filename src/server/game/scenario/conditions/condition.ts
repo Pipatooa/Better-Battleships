@@ -1,11 +1,11 @@
 import Joi from 'joi';
-import {attributeSchema} from '../attributes/attribute';
-import {valueConstraintSchema} from '../constraints/value-constaint';
-import {IConditionAllSource} from './condition-all';
-import {IConditionAnySource} from './condition-any';
-import {IConditionAttributeSource} from './condition-attribute';
-import {IConditionSomeSource} from './condition-some';
-import {IConditionTestSource} from './condition-test';
+import { attributeSchema } from '../attributes/attribute';
+import { valueConstraintSchema } from '../constraints/value-constaint';
+import { IConditionAllSource } from './condition-all';
+import { IConditionAnySource } from './condition-any';
+import { IConditionAttributeSource } from './condition-attribute';
+import { IConditionSomeSource } from './condition-some';
+import { IConditionTestSource } from './condition-test';
 
 /**
  * Condition - Server Version
@@ -16,15 +16,17 @@ export abstract class Condition {
 
     /**
      * Base Condition constructor
-     * @param inverted Whether or not the condition result will be inverted before it is returned
+     *
+     * @param  inverted Whether or not the condition result will be inverted before it is returned
      * @protected
      */
     protected constructor(public readonly inverted: boolean) {
-    };
+    }
 
     /**
      * Checks whether or not this condition holds true
-     * @returns boolean -- Whether or not this condition holds true
+     *
+     * @returns  Whether or not this condition holds true
      */
     abstract check(): boolean;
 }
@@ -45,7 +47,7 @@ export type IConditionSource =
     IConditionAllSource |
     IConditionSomeSource |
     IConditionTestSource |
-    IConditionAttributeSource
+    IConditionAttributeSource;
 
 /**
  * Base schema for validating source JSON data

@@ -1,7 +1,7 @@
 import Joi from 'joi';
-import {IDescriptorInfo} from '../../../../shared/network/scenario/i-descriptor-info';
-import {ParsingContext} from '../parsing-context';
-import {checkAgainstSchema} from '../schema-checker';
+import { IDescriptorInfo } from '../../../../shared/network/scenario/i-descriptor-info';
+import { ParsingContext } from '../parsing-context';
+import { checkAgainstSchema } from '../schema-checker';
 
 /**
  * Descriptor - Server Version
@@ -9,16 +9,17 @@ import {checkAgainstSchema} from '../schema-checker';
  * Stores a name and a description for another object
  */
 export class Descriptor {
-    constructor(public readonly name: string,
+    protected constructor(public readonly name: string,
                 public readonly description: string) {
     }
 
     /**
      * Factory function to generate Descriptor from JSON scenario data
-     * @param parsingContext Context for resolving scenario data
-     * @param descriptorSource JSON data for descriptor
-     * @param checkSchema When true, validates source JSON data against schema
-     * @returns descriptor -- Created Descriptor object
+     *
+     * @param    parsingContext   Context for resolving scenario data
+     * @param    descriptorSource JSON data for descriptor
+     * @param    checkSchema      When true, validates source JSON data against schema
+     * @returns                   Created Descriptor object
      */
     public static async fromSource(parsingContext: ParsingContext, descriptorSource: IDescriptorSource, checkSchema: boolean): Promise<Descriptor> {
 
@@ -34,6 +35,8 @@ export class Descriptor {
      * Returns network transportable form of this object.
      *
      * May not include all details of the object. Just those that the client needs to know.
+     *
+     * @returns  Created DescriptorInfo object
      */
     public makeTransportable(): IDescriptorInfo {
         return {

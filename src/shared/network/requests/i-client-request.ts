@@ -1,6 +1,6 @@
 import Joi from 'joi';
-import {IJoinTeamRequest} from './i-join-team';
-import {IReadyRequest} from './i-ready';
+import { IJoinTeamRequest } from './i-join-team';
+import { IReadyRequest } from './i-ready';
 
 /**
  * Base client request which all client requests extend

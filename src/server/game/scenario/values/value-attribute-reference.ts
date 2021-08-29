@@ -1,8 +1,8 @@
-import {Attribute} from '../attributes/attribute';
-import {AttributeReference, attributeReferenceSchema} from '../attributes/attribute-reference';
-import {ParsingContext} from '../parsing-context';
-import {checkAgainstSchema} from '../schema-checker';
-import {baseValueSchema, IBaseValueSource, Value} from './value';
+import { Attribute } from '../attributes/attribute';
+import { AttributeReference, attributeReferenceSchema } from '../attributes/attribute-reference';
+import { ParsingContext } from '../parsing-context';
+import { checkAgainstSchema } from '../schema-checker';
+import { baseValueSchema, IBaseValueSource, Value } from './value';
 
 /**
  * ValueAttributeReference - Server Version
@@ -12,7 +12,8 @@ import {baseValueSchema, IBaseValueSource, Value} from './value';
 export class ValueAttributeReference extends Value {
     /**
      * ValueAttributeReference constructor
-     * @param attribute Attribute to take value from
+     *
+     * @param  attribute Attribute to take value from
      * @protected
      */
     protected constructor(public readonly attribute: Attribute) {
@@ -21,6 +22,8 @@ export class ValueAttributeReference extends Value {
 
     /**
      * Evaluate this dynamic value as a number
+     *
+     * @returns  Static value
      */
     public evaluate(): number {
         return this.attribute.value;
@@ -28,10 +31,11 @@ export class ValueAttributeReference extends Value {
 
     /**
      * Factory function to generate ValueAttributeReference from JSON scenario data
-     * @param parsingContext Context for resolving scenario data
-     * @param valueAttributeReferenceSource JSON data for ValueAttributeReference
-     * @param checkSchema When true, validates source JSON data against schema
-     * @returns valueAttributeReference -- Created ValueAttributeReference object
+     *
+     * @param    parsingContext                Context for resolving scenario data
+     * @param    valueAttributeReferenceSource JSON data for ValueAttributeReference
+     * @param    checkSchema                   When true, validates source JSON data against schema
+     * @returns                                Created ValueAttributeReference object
      */
     public static async fromSource(parsingContext: ParsingContext, valueAttributeReferenceSource: IValueAttributeReferenceSource, checkSchema: boolean): Promise<ValueAttributeReference> {
 
@@ -40,7 +44,7 @@ export class ValueAttributeReference extends Value {
             valueAttributeReferenceSource = await checkAgainstSchema(valueAttributeReferenceSource, valueAttributeReferenceSchema, parsingContext);
 
         // Get attribute from source
-        let attribute: Attribute = parsingContext.withExtendedPath('.attribute').getAttribute(valueAttributeReferenceSource.attribute);
+        const attribute: Attribute = parsingContext.withExtendedPath('.attribute').getAttribute(valueAttributeReferenceSource.attribute);
 
         // Return created ValueAttributeReference object
         return new ValueAttributeReference(attribute);

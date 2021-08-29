@@ -1,6 +1,6 @@
-import {IBoardInfo} from '../../../shared/network/scenario/i-board-info';
-import {Tile} from './tile';
-import {TileType} from './tiletype';
+import { IBoardInfo } from '../../../shared/network/scenario/i-board-info';
+import { Tile } from './tile';
+import { TileType } from './tiletype';
 
 /**
  * Board - Client Version
@@ -11,29 +11,31 @@ export class Board {
 
     /**
      * Board constructor
-     * @param tiles 2d array of tiles indexed [y][x]
+     *
+     * @param  tiles 2d array of tiles indexed [y][x]
      */
     public constructor(public readonly tiles: Tile[][]) {
     }
 
     /**
      * Factory function to generate Board from JSON event data
-     * @param boardSource JSON data from server
-     * @returns board -- Created Board object
+     *
+     * @param    boardSource JSON data from server
+     * @returns              Created Board object
      */
     public static async fromSource(boardSource: IBoardInfo): Promise<Board> {
 
         // Unpack tile types
-        let tileTypes: { [char: string]: TileType } = {};
+        const tileTypes: { [char: string]: TileType } = {};
         for (const entry of Object.entries(boardSource.tileTypes)) {
 
             // Create new TileType objects indexed by single character strings
-            let [char, tileTypeInfo] = entry;
+            const [ char, tileTypeInfo ] = entry;
             tileTypes[char] = await TileType.fromSource(tileTypeInfo);
         }
 
         // Unpack tile data
-        let tiles: Tile[][] = [];
+        const tiles: Tile[][] = [];
         for (let y = 0; y < boardSource.tiles.length; y++) {
             const row: string = boardSource.tiles[y];
 
@@ -42,11 +44,11 @@ export class Board {
 
             // Iterate through each character, each representing a tile
             for (let x = 0; x < boardSource.size[0]; x++) {
-                let c: string = row.charAt(x);
+                const c: string = row.charAt(x);
 
                 // Create and store a new tile created from tile type
                 // Tiles are stored in tile[y][x] format
-                let tileType: TileType = tileTypes[c];
+                const tileType: TileType = tileTypes[c];
                 tiles[y][x] = new Tile(x, y, tileType);
             }
         }
@@ -59,6 +61,6 @@ export class Board {
      */
 
     public get size(): [number, number] {
-        return [this.tiles[0].length, this.tiles.length];
+        return [ this.tiles[0].length, this.tiles.length ];
     }
 }

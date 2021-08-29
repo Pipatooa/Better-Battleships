@@ -1,10 +1,10 @@
-import {Attribute} from '../attributes/attribute';
-import {AttributeReference, attributeReferenceSchema} from '../attributes/attribute-reference';
-import {IValueConstraintSource, ValueConstraint, valueConstraintSchema} from '../constraints/value-constaint';
-import {buildValueConstraint} from '../constraints/value-constraint-builder';
-import {ParsingContext} from '../parsing-context';
-import {checkAgainstSchema} from '../schema-checker';
-import {baseConditionSchema, Condition, IBaseConditionSource} from './condition';
+import { Attribute } from '../attributes/attribute';
+import { AttributeReference, attributeReferenceSchema } from '../attributes/attribute-reference';
+import { IValueConstraintSource, ValueConstraint, valueConstraintSchema } from '../constraints/value-constaint';
+import { buildValueConstraint } from '../constraints/value-constraint-builder';
+import { ParsingContext } from '../parsing-context';
+import { checkAgainstSchema } from '../schema-checker';
+import { baseConditionSchema, Condition, IBaseConditionSource } from './condition';
 
 /**
  * ConditionAttribute - Server Version
@@ -15,9 +15,10 @@ export class ConditionAttribute extends Condition {
 
     /**
      * ConditionTest constructor
-     * @param attribute Attribute to check
-     * @param valueConstraint Constraint to check attribute value against
-     * @param inverted Whether or not the condition result will be inverted before it is returned
+     *
+     * @param  attribute       Attribute to check
+     * @param  valueConstraint Constraint to check attribute value against
+     * @param  inverted        Whether or not the condition result will be inverted before it is returned
      * @protected
      */
     protected constructor(public readonly attribute: Attribute,
@@ -28,11 +29,12 @@ export class ConditionAttribute extends Condition {
 
     /**
      * Checks whether or not this condition holds true
-     * @returns boolean -- Whether or not this condition holds true
+     *
+     * @returns  Whether or not this condition holds true
      */
     public check(): boolean {
         // Check attribute value against value constraint
-        let result: boolean = this.valueConstraint.check(this.attribute.value);
+        const result: boolean = this.valueConstraint.check(this.attribute.value);
 
         // Return result (invert if necessary)
         return this.inverted ? !result : result;
@@ -40,10 +42,11 @@ export class ConditionAttribute extends Condition {
 
     /**
      * Factory function to generate ConditionAttribute from JSON scenario data
-     * @param parsingContext Context for resolving scenario data
-     * @param conditionAttributeSource JSON data for ConditionAttribute
-     * @param checkSchema When true, validates source JSON data against schema
-     * @returns conditionTest -- Created ConditionAttribute object
+     *
+     * @param    parsingContext           Context for resolving scenario data
+     * @param    conditionAttributeSource JSON data for ConditionAttribute
+     * @param    checkSchema              When true, validates source JSON data against schema
+     * @returns                           Created ConditionAttribute object
      */
     public static async fromSource(parsingContext: ParsingContext, conditionAttributeSource: IConditionAttributeSource, checkSchema: boolean): Promise<ConditionAttribute> {
 
@@ -52,8 +55,8 @@ export class ConditionAttribute extends Condition {
             conditionAttributeSource = await checkAgainstSchema(conditionAttributeSource, conditionAttributeSchema, parsingContext);
 
         // Get attribute and value constraint from source
-        let attribute: Attribute = parsingContext.withExtendedPath('.attribute').getAttribute(conditionAttributeSource.attribute);
-        let valueConstraint: ValueConstraint = await buildValueConstraint(parsingContext.withExtendedPath('.valueConstraint'), conditionAttributeSource.valueConstraint, true);
+        const attribute: Attribute = parsingContext.withExtendedPath('.attribute').getAttribute(conditionAttributeSource.attribute);
+        const valueConstraint: ValueConstraint = await buildValueConstraint(parsingContext.withExtendedPath('.valueConstraint'), conditionAttributeSource.valueConstraint, true);
 
         // Return created ConditionAttribute object
         return new ConditionAttribute(attribute, valueConstraint, conditionAttributeSource.inverted);

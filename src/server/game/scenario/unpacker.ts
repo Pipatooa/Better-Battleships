@@ -1,34 +1,35 @@
-import AdmZip, {IZipEntry} from 'adm-zip';
-import {FileJSON} from 'formidable';
+import AdmZip, { IZipEntry } from 'adm-zip';
+import { FileJSON } from 'formidable';
 import Joi from 'joi';
-import {ParsingContext} from './parsing-context';
-import {IScenarioSource, Scenario} from './scenario';
+import { ParsingContext } from './parsing-context';
+import { IScenarioSource, Scenario } from './scenario';
 
 export type ZipEntryMap = { [name: string]: IZipEntry };
 
 /**
  * Unpacks a zip file into a scenario object asynchronously
- * @param fileJSON Scenario file information
- * @returns scenario -- Scenario object
+ *
+ * @param    fileJSON Scenario file information
+ * @returns           Scenario object
  */
 export async function unpack(fileJSON: FileJSON): Promise<Scenario> {
 
     // Read scenario zip file
-    let scenarioZip = new AdmZip(fileJSON.path);
+    const scenarioZip = new AdmZip(fileJSON.path);
 
     // Get a list of all zip entries
-    let zipEntries: AdmZip.IZipEntry[] = scenarioZip.getEntries();
+    const zipEntries: AdmZip.IZipEntry[] = scenarioZip.getEntries();
 
     // Get entries for named objects
-    let abilityEntries: ZipEntryMap = {};
-    let shipEntries: ZipEntryMap = {};
-    let playerPrototypeEntries: ZipEntryMap = {};
-    let teamEntries: ZipEntryMap = {};
+    const abilityEntries: ZipEntryMap = {};
+    const shipEntries: ZipEntryMap = {};
+    const playerPrototypeEntries: ZipEntryMap = {};
+    const teamEntries: ZipEntryMap = {};
 
     for (const entry of zipEntries) {
 
         // Check entry regex
-        let result: RegExpExecArray | null = /^(abilities|ships|players|teams)\/([a-zA-Z\-_\d]+).json$/.exec(entry.entryName);
+        const result: RegExpExecArray | null = /^(abilities|ships|players|teams)\/([a-zA-Z\-_\d]+).json$/.exec(entry.entryName);
         if (result === null)
             continue;
 
@@ -50,26 +51,27 @@ export async function unpack(fileJSON: FileJSON): Promise<Scenario> {
     }
 
     // Board data
-    let boardEntry: IZipEntry = await getEntryFromZip(scenarioZip, 'board.json');
+    const boardEntry: IZipEntry = await getEntryFromZip(scenarioZip, 'board.json');
 
     // Create parsing context
-    let parsingContext = new ParsingContext(fileJSON, 'scenario.json', '', boardEntry, teamEntries, playerPrototypeEntries, shipEntries, abilityEntries);
+    const parsingContext = new ParsingContext(fileJSON, 'scenario.json', '', boardEntry, teamEntries, playerPrototypeEntries, shipEntries, abilityEntries);
 
     // Scenario data
-    let scenarioEntry: IZipEntry = await getEntryFromZip(scenarioZip, 'scenario.json');
-    let scenarioSource: IScenarioSource = await getJSONFromEntry(scenarioEntry) as unknown as IScenarioSource;
+    const scenarioEntry: IZipEntry = await getEntryFromZip(scenarioZip, 'scenario.json');
+    const scenarioSource: IScenarioSource = await getJSONFromEntry(scenarioEntry) as unknown as IScenarioSource;
     return await Scenario.fromSource(parsingContext, scenarioSource, true);
 }
 
 /**
  * Gets file entry from a ZIP file
- * @param zip ZIP file to extract from
- * @param name Name or path to JSON file
- * @returns zipEntry -- Found zip entry
+ *
+ * @param    zip  ZIP file to extract from
+ * @param    name Name or path to JSON file
+ * @returns       Found zip entry
  */
 async function getEntryFromZip(zip: AdmZip, name: string): Promise<IZipEntry> {
     // Find file in zip file
-    let entry: IZipEntry | null = zip.getEntry(name);
+    const entry: IZipEntry | null = zip.getEntry(name);
 
     // If file was not found
     if (entry == null)
@@ -80,8 +82,9 @@ async function getEntryFromZip(zip: AdmZip, name: string): Promise<IZipEntry> {
 
 /**
  * Gets decompressed JSON contents from a ZIP entry
- * @param zipEntry ZIP Entry to decompress and parse JSON data
- * @returns json -- JSOn data returned from ZIP entry
+ *
+ * @param    zipEntry ZIP Entry to decompress and parse JSON data
+ * @returns           JSON data returned from ZIP entry
  */
 export async function getJSONFromEntry(zipEntry: IZipEntry): Promise<JSON> {
     return new Promise<JSON>((resolve, reject) => {
@@ -92,7 +95,7 @@ export async function getJSONFromEntry(zipEntry: IZipEntry): Promise<JSON> {
             let json: JSON;
             try {
                 json = await JSON.parse(data.toString());
-            } catch (e) {
+            } catch (e: unknown) {
                 if (e instanceof SyntaxError) {
                     reject(new UnpackingError(e.message, zipEntry.entryName));
                     return;
@@ -132,9 +135,9 @@ export class UnpackingError extends Error {
      *
      * Useful for Joi validation
      *
-     * @param err Joi validation error
-     * @param parsingContext Parsing context to use for context
-     * @returns UnpackingError -- Created UnpackingError
+     * @param    err            Joi validation error
+     * @param    parsingContext Parsing context to use for context
+     * @returns                 Created UnpackingError
      */
     public static fromJoiValidationError(err: Joi.ValidationError, parsingContext: ParsingContext): UnpackingError {
         return new UnpackingError(err.message.toString(), parsingContext);

@@ -1,19 +1,27 @@
 import console from 'console';
-import {checkPassword, checkPassword2} from './check-password';
-import {checkUsername} from './check-username';
+import { checkPassword, checkPassword2 } from './check-password';
+import { checkUsername } from './check-username';
 
 /**
  * Submits registration form to the server
+ *
+ * @param  formElement              HTML element for form
+ * @param  usernameElement          HTML element for username field
+ * @param  usernameFeedbackElement  HTML element for username feedback
+ * @param  passwordElement          HTML element for password field
+ * @param  passwordFeedbackElement  HTML element for password feedback
+ * @param  password2Element         HTML element for password confirmation field
+ * @param  password2FeedbackElement HTML element for password confirmation feedback
  */
 export async function submitForm(formElement: JQuery,
                                  usernameElement: JQuery, usernameFeedbackElement: JQuery,
                                  passwordElement: JQuery, passwordFeedbackElement: JQuery,
-                                 password2Element: JQuery, password2FeedbackElement: JQuery) {
+                                 password2Element: JQuery, password2FeedbackElement: JQuery): Promise<void> {
 
     console.log('a');
 
     // Check if form data is valid
-    let valid = checkUsername(usernameElement, usernameFeedbackElement)
+    const valid = checkUsername(usernameElement, usernameFeedbackElement)
         && checkPassword(passwordElement, passwordFeedbackElement)
         && checkPassword2(passwordElement, password2Element, password2FeedbackElement);
 
@@ -23,15 +31,15 @@ export async function submitForm(formElement: JQuery,
         return;
 
     // Get CSRF token and create headers for request
-    let csrfToken = $('meta[name="csrf-token"]').attr('content');
-    let headers = new Headers();
-    headers.set('CSRF-Token', csrfToken as string);
+    const csrfToken = $('meta[name="csrf-token"]').attr('content');
+    const headers = new Headers();
+    headers.set('CSRF-Token', csrfToken!);
 
     // Get form data from form
-    let formData = new FormData(formElement.get(0) as HTMLFormElement);
+    const formData = new FormData(formElement.get(0) as HTMLFormElement);
 
     // Submit form data
-    let response = await fetch('', {
+    const response = await fetch('', {
         method: 'POST',
         credentials: 'same-origin',
         headers: headers,
@@ -39,13 +47,13 @@ export async function submitForm(formElement: JQuery,
     });
 
     // Unpack JSON data
-    let registrationResponse = await response.json() as IRegistrationResponse;
+    const registrationResponse = await response.json() as IRegistrationResponse;
 
     // If request was successful, redirect user
     if (registrationResponse.success) {
 
         // Unpack search parameters
-        let params = new URLSearchParams(window.location.search);
+        const params = new URLSearchParams(window.location.search);
 
         // Redirect user to login page
         window.location.href = `/login${params.toString() ? `?${params.toString()}` : ''}`;

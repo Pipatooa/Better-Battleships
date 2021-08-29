@@ -1,9 +1,12 @@
 /**
  * Username field validation for registration form
- * @returns boolean -- Whether field value was valid
+ *
+ * @param    usernameElement         HTML element for username field
+ * @param    usernameFeedbackElement HTML element for username feedback
+ * @returns                          Whether field value was valid
  */
 export function checkUsername(usernameElement: JQuery, usernameFeedbackElement: JQuery): boolean {
-    let username = usernameElement.val() as string;
+    const username = usernameElement.val() as string;
 
     // Username field empty
     if (username === '') {

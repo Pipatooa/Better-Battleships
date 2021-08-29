@@ -1,11 +1,11 @@
 import express from 'express';
 import formidable from 'formidable';
 import Joi from 'joi';
-import {checkPassword} from '../auth/password-hasher';
-import {signNewJwtToken} from '../auth/token-handler';
+import { checkPassword } from '../auth/password-hasher';
+import { signNewJwtToken } from '../auth/token-handler';
 import config from '../config';
-import {queryDatabase} from '../db/query';
-import {preventCSRF} from '../middleware';
+import { queryDatabase } from '../db/query';
+import { preventCSRF } from '../middleware';
 
 const router = express.Router();
 
@@ -18,7 +18,7 @@ router.get('/', preventCSRF, (req, res) => {
     res.render('login', {
         csrfToken: req.csrfToken(),
         url: req.baseUrl + req.url,
-        pageTitle: `Login`,
+        pageTitle: 'Login',
         pageDescription: '',
         stylesheets: [
             '/css/style.css'
@@ -34,13 +34,13 @@ router.get('/', preventCSRF, (req, res) => {
  */
 router.post('/', preventCSRF, async (req, res) => {
 
-    let form = formidable({ multiples: true });
+    const form = formidable({ multiples: true });
 
     // Parse form data from request
-    form.parse(req, async (err, fields, files) => {
+    form.parse(req, async (err, fields) => {
 
         // If error parsing form
-        if (err) {
+        if (err !== undefined) {
             res.status(400);
             res.send({
                 success: false,
@@ -53,7 +53,7 @@ router.post('/', preventCSRF, async (req, res) => {
         let checkedFields: ILoginFields;
         try {
             checkedFields = await loginFieldSchema.validateAsync(fields);
-        } catch (e) {
+        } catch (e: unknown) {
             if (e instanceof Joi.ValidationError) {
                 res.status(400);
                 res.send({
@@ -67,8 +67,8 @@ router.post('/', preventCSRF, async (req, res) => {
         }
 
         // Query the database for user
-        let query = 'SELECT `password_hash` FROM `user` WHERE `username` = ?';
-        let rows = await queryDatabase(query, [checkedFields.username]);
+        const query = 'SELECT `password_hash` FROM `user` WHERE `username` = ?';
+        const rows = await queryDatabase(query, [ checkedFields.username ]);
 
         // If user does not exist
         if (rows.length === 0) {
@@ -81,7 +81,7 @@ router.post('/', preventCSRF, async (req, res) => {
         }
 
         // If password incorrect
-        let hash = rows[0].password_hash;
+        const hash = rows[0].password_hash;
         if (!await checkPassword(checkedFields.password, hash)) {
             res.status(400);
             res.send({
@@ -92,7 +92,7 @@ router.post('/', preventCSRF, async (req, res) => {
         }
 
         // Sign new JWT
-        let token = await signNewJwtToken({
+        const token = await signNewJwtToken({
             username: checkedFields.username
         });
 

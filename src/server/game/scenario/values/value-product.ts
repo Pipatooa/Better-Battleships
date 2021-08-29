@@ -1,7 +1,7 @@
-import {ParsingContext} from '../parsing-context';
-import {checkAgainstSchema} from '../schema-checker';
-import {Value} from './value';
-import {IValueMultipleSource, ValueMultiple, valueMultipleSchema} from './value-multiple';
+import { ParsingContext } from '../parsing-context';
+import { checkAgainstSchema } from '../schema-checker';
+import { Value } from './value';
+import { IValueMultipleSource, ValueMultiple, valueMultipleSchema } from './value-multiple';
 
 /**
  * ValueProduct - Server Version
@@ -14,11 +14,13 @@ export class ValueProduct extends ValueMultiple {
 
     /**
      * Evaluate this dynamic value as a number
+     *
+     * @returns  Static value
      */
     public evaluate(): number {
 
         // Keep track of product of values
-        let product: number = 1;
+        let product = 1;
 
         // Loop through sub values and add to running product
         for (const subValue of this.subValues) {
@@ -31,11 +33,11 @@ export class ValueProduct extends ValueMultiple {
 
     /**
      * Factory function to generate ValueProduct from JSON scenario data
-     * @param parsingContext Context for resolving scenario data
-     * @param parsingContext Context for resolving scenario data
-     * @param valueProductSource JSON data for ValueProduct
-     * @param checkSchema When true, validates source JSON data against schema
-     * @returns valueSum -- Created ValueProduct object
+     *
+     * @param    parsingContext     Context for resolving scenario data
+     * @param    valueProductSource JSON data for ValueProduct
+     * @param    checkSchema        When true, validates source JSON data against schema
+     * @returns                     Created ValueProduct object
      */
     public static async fromSource(parsingContext: ParsingContext, valueProductSource: IValueProductSource, checkSchema: boolean): Promise<ValueProduct> {
 
@@ -44,7 +46,7 @@ export class ValueProduct extends ValueMultiple {
             valueProductSource = await checkAgainstSchema(valueProductSource, valueProductSchema, parsingContext);
 
         // Get sub values from source
-        let subValues: Value[] = await ValueMultiple.getSubValues(parsingContext.withExtendedPath('.values'), valueProductSource.values);
+        const subValues: Value[] = await ValueMultiple.getSubValues(parsingContext.withExtendedPath('.values'), valueProductSource.values);
 
         // Return created ValueRandom object
         return new ValueProduct(subValues);

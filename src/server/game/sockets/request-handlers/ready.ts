@@ -1,15 +1,16 @@
 import Joi from 'joi';
-import {baseRequestSchema} from '../../../../shared/network/requests/i-client-request';
-import {IReadyRequest} from '../../../../shared/network/requests/i-ready';
-import {GamePhase} from '../../game';
-import {Client} from '../client';
+import { baseRequestSchema } from '../../../../shared/network/requests/i-client-request';
+import { IReadyRequest } from '../../../../shared/network/requests/i-ready';
+import { GamePhase } from '../../game';
+import { Client } from '../client';
 
 /**
  * Handles a ready request from the client
- * @param client Client that made the request
- * @param readyRequest Request object to handle
+ *
+ * @param  client       Client that made the request
+ * @param  readyRequest Request object to handle
  */
-export function handleReadyRequest(client: Client, readyRequest: IReadyRequest) {
+export function handleReadyRequest(client: Client, readyRequest: IReadyRequest): void {
 
     // If game has already started, ignore request
     if (client.game.gamePhase === GamePhase.Started)
@@ -27,7 +28,7 @@ export function handleReadyRequest(client: Client, readyRequest: IReadyRequest) 
     client.ready = readyRequest.value;
 
     // Broadcast ready event to all other clients
-    for (let existingClient of client.game.clients) {
+    for (const existingClient of client.game.clients) {
         existingClient.sendEvent({
             event: 'playerReady',
             playerIdentity: client.identity,

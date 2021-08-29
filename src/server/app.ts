@@ -5,7 +5,7 @@ import http from 'http';
 import WebSocket from 'isomorphic-ws';
 import path from 'path';
 import * as process from 'process';
-import {executeDBStartupScript} from './db/startup';
+import { executeDBStartupScript } from './db/startup';
 
 import socketRegister from './game/sockets/register';
 
@@ -15,7 +15,7 @@ import loginRouter from './routes/login';
 import registerRouter from './routes/register';
 
 const app = express();
-const port: number = 8080;
+const port = 8080;
 
 // Set current working directory to be where this file is located
 process.chdir(__dirname);

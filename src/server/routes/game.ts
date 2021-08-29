@@ -1,9 +1,9 @@
 import * as console from 'console';
 import express from 'express';
-import {queryDatabase} from '../db/query';
-import {Game} from '../game/game';
-import {queryGame} from '../game/game-manager';
-import {requireAuth} from '../middleware';
+import { queryDatabase } from '../db/query';
+import { Game } from '../game/game';
+import { queryGame } from '../game/game-manager';
+import { RequestWithAuth, requireAuth } from '../middleware';
 
 const router = express.Router();
 
@@ -15,8 +15,8 @@ const router = express.Router();
 router.get('/:gameID', requireAuth, async (req, res) => {
 
     // Check game ID
-    let gameID: string = req.params.gameID;
-    let game: Game | undefined = queryGame(gameID);
+    const gameID: string = req.params.gameID;
+    const game: Game | undefined = queryGame(gameID);
 
     // If game does not exist
     if (game === undefined) {
@@ -24,7 +24,7 @@ router.get('/:gameID', requireAuth, async (req, res) => {
         // Deliver page content
         res.render('game-not-found', {
             url: req.baseUrl + req.url,
-            pageTitle: `Game does not exist!`,
+            pageTitle: 'Game does not exist!',
             pageDescription: '',
             stylesheets: [
                 '/css/style.css',
@@ -37,11 +37,11 @@ router.get('/:gameID', requireAuth, async (req, res) => {
     }
 
     // Get username for user
-    let username = (req as any).auth.username;
+    const username = (req as RequestWithAuth).auth.username;
 
     // Check for existing game session for user
-    let query = 'SELECT `current_session` FROM `user` WHERE `username` = ?';
-    let rows = await queryDatabase(query, [username]);
+    const query = 'SELECT `current_session` FROM `user` WHERE `username` = ?';
+    const rows = await queryDatabase(query, [ username ]);
 
     // If session exists
     if (rows.length !== 0) {

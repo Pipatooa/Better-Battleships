@@ -5,8 +5,8 @@ import {
     AttributeMapSource,
     IAttributeHolder
 } from '../attributes/i-attribute-holder';
-import {descriptorSchema, IDescriptorSource} from '../common/descriptor';
-import {ParsingContext} from '../parsing-context';
+import { descriptorSchema, IDescriptorSource } from '../common/descriptor';
+import { ParsingContext } from '../parsing-context';
 
 /**
  * Ability - Server Version
@@ -16,6 +16,7 @@ import {ParsingContext} from '../parsing-context';
 export class Ability implements IAttributeHolder {
     public readonly attributes: AttributeMap = {};
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars,require-jsdoc
     public static async fromSource(parsingContext: ParsingContext, abilitySource: IAbilitySource, checkSchema: boolean): Promise<Ability> {
         return new Ability();
     }

@@ -1,5 +1,5 @@
-import {ITileTypeInfo} from '../../../shared/network/scenario/i-tiletype-info';
-import {Descriptor} from './descriptor';
+import { ITileTypeInfo } from '../../../shared/network/scenario/i-tiletype-info';
+import { Descriptor } from './descriptor';
 
 
 /**
@@ -14,13 +14,14 @@ export class TileType {
 
     /**
      * Factory function to generate tile type from JSON event data
-     * @param tileTypeSource JSON data from server
-     * @returns tileType -- Created TileType object
+     *
+     * @param    tileTypeSource JSON data from server
+     * @returns                 Created TileType object
      */
     public static async fromSource(tileTypeSource: ITileTypeInfo): Promise<TileType> {
 
         // Create sub-objects
-        let descriptor = await Descriptor.fromSource(tileTypeSource.descriptor);
+        const descriptor = await Descriptor.fromSource(tileTypeSource.descriptor);
 
         // Return tile type object
         return new TileType(descriptor, tileTypeSource.color);

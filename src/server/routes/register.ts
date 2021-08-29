@@ -1,9 +1,9 @@
 import express from 'express';
 import formidable from 'formidable';
 import Joi from 'joi';
-import {hashPassword} from '../auth/password-hasher';
-import {queryDatabase} from '../db/query';
-import {preventCSRF} from '../middleware';
+import { hashPassword } from '../auth/password-hasher';
+import { queryDatabase } from '../db/query';
+import { preventCSRF } from '../middleware';
 
 const router = express.Router();
 
@@ -16,7 +16,7 @@ router.get('/', preventCSRF, (req, res) => {
     res.render('register', {
         csrfToken: req.csrfToken(),
         url: req.baseUrl + req.url,
-        pageTitle: `Register`,
+        pageTitle: 'Register',
         pageDescription: '',
         stylesheets: [
             '/css/style.css'
@@ -32,13 +32,13 @@ router.get('/', preventCSRF, (req, res) => {
  */
 router.post('/', preventCSRF, async (req, res) => {
 
-    let form = formidable({ multiples: true });
+    const form = formidable({ multiples: true });
 
     // Parse form data from request
-    form.parse(req, async (err, fields, files) => {
+    form.parse(req, async (err, fields) => {
 
         // If error parsing form
-        if (err) {
+        if (err !== undefined) {
             res.status(400);
             res.send({
                 success: false,
@@ -51,7 +51,7 @@ router.post('/', preventCSRF, async (req, res) => {
         let checkedFields: IRegisterFields;
         try {
             checkedFields = await registerFieldSchema.validateAsync(fields);
-        } catch (e) {
+        } catch (e: unknown) {
             if (e instanceof Joi.ValidationError) {
                 res.status(400);
                 res.send({
@@ -66,7 +66,7 @@ router.post('/', preventCSRF, async (req, res) => {
 
         // Query the database to check if user already exists
         let query = 'SELECT 1 FROM `user` WHERE `username` = ?';
-        let rows = await queryDatabase(query, [checkedFields.username]);
+        const rows = await queryDatabase(query, [ checkedFields.username ]);
 
         // If username is already taken
         if (rows.length !== 0) {
@@ -79,9 +79,9 @@ router.post('/', preventCSRF, async (req, res) => {
         }
 
         // Get password hash for user and store to database
-        let hash = await hashPassword(checkedFields.password);
+        const hash = await hashPassword(checkedFields.password);
         query = 'INSERT INTO `user` (`username`, `password_hash`) VALUES (?, ?)';
-        await queryDatabase(query, [checkedFields.username, hash]);
+        await queryDatabase(query, [ checkedFields.username, hash ]);
 
         res.status(200);
         res.send({
@@ -104,7 +104,7 @@ interface IRegisterFields {
  */
 const registerFieldSchema = Joi.object({
     username: Joi.string().min(3).max(32).regex(/^[a-zA-Z\-_\d.]+$/).required(),
-    password: Joi.string().min(8).regex(/^(?=.*?[a-z])(?=.*?[A-Z])(?=.*?\d)(?=.*?[ -/:-@\[-`{-~]).+$/).required(),
+    password: Joi.string().min(8).regex(/^(?=.*?[a-z])(?=.*?[A-Z])(?=.*?\d)(?=.*?[ -/:-@[-`{-~]).+$/).required(),
     password2: Joi.valid(Joi.ref('password')).required()
 });
 

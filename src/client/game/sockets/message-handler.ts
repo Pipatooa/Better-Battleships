@@ -1,26 +1,27 @@
-import {MessageEvent} from 'isomorphic-ws';
-import {IServerEvent, ServerEventID} from '../../../shared/network/events/i-server-event';
-import {handleConnectionInfo} from './event-handlers/connection-info';
-import {handleGameInfo} from './event-handlers/game-info';
-import {handleGameStart} from './event-handlers/game-start';
-import {handleGameStartFailure} from './event-handlers/game-start-failure';
-import {handleGameStarting} from './event-handlers/game-starting';
-import {handlePlayerJoin} from './event-handlers/player-join';
-import {handlePlayerLeave} from './event-handlers/player-leave';
-import {handlePlayerReady} from './event-handlers/player-ready';
-import {handleTeamAssignment} from './event-handlers/team-assignment';
+import { MessageEvent } from 'isomorphic-ws';
+import { IServerEvent, ServerEventID } from '../../../shared/network/events/i-server-event';
+import { handleConnectionInfo } from './event-handlers/connection-info';
+import { handleGameInfo } from './event-handlers/game-info';
+import { handleGameStart } from './event-handlers/game-start';
+import { handleGameStartFailure } from './event-handlers/game-start-failure';
+import { handleGameStarting } from './event-handlers/game-starting';
+import { handlePlayerJoin } from './event-handlers/player-join';
+import { handlePlayerLeave } from './event-handlers/player-leave';
+import { handlePlayerReady } from './event-handlers/player-ready';
+import { handleTeamAssignment } from './event-handlers/team-assignment';
 
 /**
  * Handles an event from the server
- * @param e Message event
+ *
+ * @param  e Message event
  */
-export function handleMessage(e: MessageEvent) {
+export function handleMessage(e: MessageEvent): void {
 
     // Unpack JSON request data
-    let serverEvent = JSON.parse(e.data.toString()) as IServerEvent;
+    const serverEvent = JSON.parse(e.data.toString()) as IServerEvent;
 
     // Fetch handler based on event type
-    let handlerFunction = handlers[serverEvent.event];
+    const handlerFunction = handlers[serverEvent.event];
 
     // If server sent an unknown event
     if (handlerFunction === undefined) {

@@ -1,7 +1,7 @@
-import {IGameStartEvent} from '../../../../shared/network/events/i-game-start';
-import {BaseRenderer} from '../../canvas/base-renderer';
-import {BoardRenderer} from '../../canvas/board-renderer';
-import {Board} from '../../scenario/board';
+import { IGameStartEvent } from '../../../../shared/network/events/i-game-start';
+import { BaseRenderer } from '../../canvas/base-renderer';
+import { BoardRenderer } from '../../canvas/board-renderer';
+import { Board } from '../../scenario/board';
 
 /**
  * Game testing data
@@ -10,7 +10,7 @@ $(document).ready(async () => {
     await handleGameStart({
         'event': 'gameStart',
         'boardInfo': {
-            'size': [15, 15],
+            'size': [ 15, 15 ],
             'tileTypes': {
                 '.': {
                     'descriptor': {
@@ -54,11 +54,11 @@ $(document).ready(async () => {
                     },
                     'pattern': {
                         'tiles': [
-                            [0, 0, 1],
-                            [0, 1, 1],
-                            [0, 2, 1],
-                            [0, 3, 1],
-                            [0, 4, 1]
+                            [ 0, 0, 1 ],
+                            [ 0, 1, 1 ],
+                            [ 0, 2, 1 ],
+                            [ 0, 3, 1 ],
+                            [ 0, 4, 1 ]
                         ]
                     }
                 },
@@ -69,10 +69,10 @@ $(document).ready(async () => {
                     },
                     'pattern': {
                         'tiles': [
-                            [0, 0, 1],
-                            [0, 1, 1],
-                            [0, 2, 1],
-                            [0, 3, 1]
+                            [ 0, 0, 1 ],
+                            [ 0, 1, 1 ],
+                            [ 0, 2, 1 ],
+                            [ 0, 3, 1 ]
                         ]
                     }
                 }
@@ -83,9 +83,10 @@ $(document).ready(async () => {
 
 /**
  * Handles a game start event from the server
- * @param gameStartEvent Event object to handle
+ *
+ * @param  gameStartEvent Event object to handle
  */
-export async function handleGameStart(gameStartEvent: IGameStartEvent) {
+export async function handleGameStart(gameStartEvent: IGameStartEvent): Promise<void> {
 
     // Remove lobby from the screen
     $('#lobby-container').remove();
@@ -94,9 +95,9 @@ export async function handleGameStart(gameStartEvent: IGameStartEvent) {
     $('#game-container').removeClass('d-none');
 
     // Unpack board data
-    let board = await Board.fromSource(gameStartEvent.boardInfo);
+    const board = await Board.fromSource(gameStartEvent.boardInfo);
 
     // Create new renderer for board
-    let gameRenderer = new BaseRenderer($('#game-canvas'));
+    const gameRenderer = new BaseRenderer($('#game-canvas'));
     new BoardRenderer(gameRenderer, board);
 }

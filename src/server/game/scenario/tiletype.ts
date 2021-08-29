@@ -1,8 +1,8 @@
 import Joi from 'joi';
-import {ITileTypeInfo} from '../../../shared/network/scenario/i-tiletype-info';
-import {Descriptor, descriptorSchema, IDescriptorSource} from './common/descriptor';
-import {ParsingContext} from './parsing-context';
-import {checkAgainstSchema} from './schema-checker';
+import { ITileTypeInfo } from '../../../shared/network/scenario/i-tiletype-info';
+import { Descriptor, descriptorSchema, IDescriptorSource } from './common/descriptor';
+import { ParsingContext } from './parsing-context';
+import { checkAgainstSchema } from './schema-checker';
 
 /**
  * TileType - Server Version
@@ -17,11 +17,12 @@ export class TileType {
 
     /**
      * Factory function to generate tile type from JSON scenario data
-     * @param parsingContext Context for resolving scenario data
-     * @param tileTypeSource JSON data for tile type
-     * @param checkSchema When true, validates source JSON data against schema
-     * @param char Character used to represent this tile
-     * @returns tileType -- Created TileType object
+     *
+     * @param    parsingContext Context for resolving scenario data
+     * @param    tileTypeSource JSON data for tile type
+     * @param    checkSchema    When true, validates source JSON data against schema
+     * @param    char           Character used to represent this tile
+     * @returns                 Created TileType object
      */
     public static async fromSource(parsingContext: ParsingContext, tileTypeSource: ITileTypeSource, checkSchema: boolean, char: string): Promise<TileType> {
 
@@ -30,7 +31,7 @@ export class TileType {
             tileTypeSource = await checkAgainstSchema(tileTypeSource, tileTypeSchema, parsingContext);
 
         // Create sub-objects
-        let descriptor = await Descriptor.fromSource(parsingContext.withExtendedPath('.descriptor'), tileTypeSource.descriptor, false);
+        const descriptor = await Descriptor.fromSource(parsingContext.withExtendedPath('.descriptor'), tileTypeSource.descriptor, false);
 
         // Return tile type object
         return new TileType(char, descriptor, tileTypeSource.color);
@@ -40,6 +41,8 @@ export class TileType {
      * Returns network transportable form of this object.
      *
      * May not include all details of the object. Just those that the client needs to know.
+     *
+     * @returns  Created ITileTypeInfo object
      */
     public makeTransportable(): ITileTypeInfo {
         return {

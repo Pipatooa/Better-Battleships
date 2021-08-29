@@ -1,4 +1,4 @@
-import {IBaseServerEvent} from './i-server-event';
+import { IBaseServerEvent } from './i-server-event';
 
 /**
  * Connection info event sent to the client when a socket connection is successfully made

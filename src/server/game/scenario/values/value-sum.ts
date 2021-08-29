@@ -1,7 +1,7 @@
-import {ParsingContext} from '../parsing-context';
-import {checkAgainstSchema} from '../schema-checker';
-import {Value} from './value';
-import {IValueMultipleSource, ValueMultiple, valueMultipleSchema} from './value-multiple';
+import { ParsingContext } from '../parsing-context';
+import { checkAgainstSchema } from '../schema-checker';
+import { Value } from './value';
+import { IValueMultipleSource, ValueMultiple, valueMultipleSchema } from './value-multiple';
 
 /**
  * ValueSum - Server Version
@@ -14,11 +14,13 @@ export class ValueSum extends ValueMultiple {
 
     /**
      * Evaluate this dynamic value as a number
+     *
+     * @returns  Static value
      */
     public evaluate(): number {
 
         // Keep track of sum of values
-        let sum: number = 0;
+        let sum = 0;
 
         // Loop through sub values and add to running sum
         for (const subValue of this.subValues) {
@@ -31,10 +33,11 @@ export class ValueSum extends ValueMultiple {
 
     /**
      * Factory function to generate ValueSum from JSON scenario data
-     * @param parsingContext Context for resolving scenario data
-     * @param valueSumSource JSON data for ValueSum
-     * @param checkSchema When true, validates source JSON data against schema
-     * @returns valueSum -- Created ValueSum object
+     *
+     * @param    parsingContext Context for resolving scenario data
+     * @param    valueSumSource JSON data for ValueSum
+     * @param    checkSchema    When true, validates source JSON data against schema
+     * @returns                 Created ValueSum object
      */
     public static async fromSource(parsingContext: ParsingContext, valueSumSource: IValueSumSource, checkSchema: boolean): Promise<ValueSum> {
 
@@ -43,7 +46,7 @@ export class ValueSum extends ValueMultiple {
             valueSumSource = await checkAgainstSchema(valueSumSource, valueSumSchema, parsingContext);
 
         // Get sub values from source
-        let subValues: Value[] = await ValueMultiple.getSubValues(parsingContext.withExtendedPath('.values'), valueSumSource.values);
+        const subValues: Value[] = await ValueMultiple.getSubValues(parsingContext.withExtendedPath('.values'), valueSumSource.values);
 
         // Return created ValueRandom object
         return new ValueSum(subValues);

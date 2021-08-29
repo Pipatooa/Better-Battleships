@@ -1,15 +1,16 @@
 import * as console from 'console';
 import config from '../config';
-import {queryDatabase} from '../db/query';
-import {Game} from './game';
-import {Scenario} from './scenario/scenario';
+import { queryDatabase } from '../db/query';
+import { Game } from './game';
+import { Scenario } from './scenario/scenario';
 
 const games: { [id: string]: Game } = {};
-let numGames: number = 0;
+let numGames = 0;
 
 /**
  * Checks whether the number of concurrent games matches or exceeds the game limit
- * @returns boolean -- Whether the limit is matched or exceeded
+ *
+ * @returns  Whether the limit is matched or exceeded
  */
 export function capacityReached(): boolean {
     return numGames >= config.gameLimit;
@@ -17,6 +18,8 @@ export function capacityReached(): boolean {
 
 /**
  * Generates a new unique game ID that does not match an existing game ID
+ *
+ * @returns  Generated unique ID
  */
 function generateGameID(): string {
     let gameID: string;
@@ -32,26 +35,27 @@ function generateGameID(): string {
 
 /**
  * Creates a new game using a scenario
- * @param scenario  Scenario to use for game
- * @returns game -- Created Game object
+ *
+ * @param    scenario Scenario to use for game
+ * @returns           Created Game object
  */
 export async function createGame(scenario: Scenario): Promise<Game> {
 
     // Create a random ID for the game
-    let gameID: string = generateGameID();
+    const gameID: string = generateGameID();
 
     // Create database entry for uploaded scenario
     let query = 'INSERT INTO `scenario` (`builtin`, `name`, `description`) VALUES (FALSE, ?, ?) RETURNING `id`;';
-    let rows = await queryDatabase(query, [scenario.descriptor.name, scenario.descriptor.description]);
-    let scenarioID = rows[0].id;
+    let rows = await queryDatabase(query, [ scenario.descriptor.name, scenario.descriptor.description ]);
+    const scenarioID = rows[0].id;
 
     // Create database entry for game
     query = 'INSERT INTO `game` (`game_id`, `scenario`) VALUES (?, ?) RETURNING `id`;';
-    rows = await queryDatabase(query, [gameID, scenarioID]);
-    let gameInternalID = rows[0].id;
+    rows = await queryDatabase(query, [ gameID, scenarioID ]);
+    const gameInternalID = rows[0].id;
 
     // Create game object and save it to list of games
-    let game = new Game(gameInternalID, gameID, scenario);
+    const game = new Game(gameInternalID, gameID, scenario);
 
     games[gameID] = game;
     numGames += 1;
@@ -69,10 +73,11 @@ export async function createGame(scenario: Scenario): Promise<Game> {
 
 /**
  * Removes a game from the list of concurrent games
- * @param gameID ID of game to remove
- * @param reason Reason for game removal
+ *
+ * @param  gameID ID of game to remove
+ * @param  reason Reason for game removal
  */
-export function removeGame(gameID: string, reason: string) {
+export function removeGame(gameID: string, reason: string): void {
 
     // Remove the game and decrement number of concurrent games
     delete games[gameID];
@@ -82,6 +87,12 @@ export function removeGame(gameID: string, reason: string) {
     console.log(`Removed game with id '${gameID}' (${reason}). Current games: ${numGames}`);
 }
 
+/**
+ * Fetches a game from list of games using a game ID
+ *
+ * @param    gameID ID of game to find
+ * @returns         Found game | undefined
+ */
 export function queryGame(gameID: string): Game | undefined {
     return games[gameID];
 }

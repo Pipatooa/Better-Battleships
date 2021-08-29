@@ -1,10 +1,11 @@
-import {sendRequest} from './opener';
+import { sendRequest } from './opener';
 
 /**
  * Sends a request to the server to join a particular team
- * @param team Team ID
+ *
+ * @param  team Team ID
  */
-export function joinTeam(team: string) {
+export function joinTeam(team: string): void {
     sendRequest({
         request: 'joinTeam',
         team: team
@@ -16,9 +17,10 @@ export function joinTeam(team: string) {
 
 /**
  * Sends a request to the server to indicate new ready status
- * @param ready Whether the player is ready or not
+ *
+ * @param  ready Whether the player is ready or not
  */
-export function ready(ready: boolean) {
+export function ready(ready: boolean): void {
     sendRequest({
         request: 'ready',
         value: ready

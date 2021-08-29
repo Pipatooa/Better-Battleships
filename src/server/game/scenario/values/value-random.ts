@@ -1,8 +1,8 @@
 import Joi from 'joi';
-import {ParsingContext} from '../parsing-context';
-import {checkAgainstSchema} from '../schema-checker';
-import {baseValueSchema, IBaseValueSource, IValueSource, Value, valueSchema} from './value';
-import {buildValue} from './value-builder';
+import { ParsingContext } from '../parsing-context';
+import { checkAgainstSchema } from '../schema-checker';
+import { baseValueSchema, IBaseValueSource, IValueSource, Value, valueSchema } from './value';
+import { buildValue } from './value-builder';
 
 /**
  * ValueRandom - Server Version
@@ -18,10 +18,11 @@ export class ValueRandom extends Value {
 
     /**
      * ValueRandom constructor
-     * @param min Minimum value that the generated random value can take
-     * @param max Maximum value that the generated random value can take
-     * @param step Optional value that the generation random value will be a multiple of
-     * @param generateOnce If true, random value will be generated once and returned for all new evaluation calls
+     *
+     * @param  min          Minimum value that the generated random value can take
+     * @param  max          Maximum value that the generated random value can take
+     * @param  step         Optional value that the generation random value will be a multiple of
+     * @param  generateOnce If true, random value will be generated once and returned for all new evaluation calls
      * @protected
      */
     protected constructor(public readonly min: Value,
@@ -35,15 +36,16 @@ export class ValueRandom extends Value {
      * Gets a random value between a minimum and maximum value
      *
      * If step is not undefined, returned value will be a multiple of the step value
-     * @returns number Randomly generated value
+     *
+     * @returns  Randomly generated value
      * @protected
      */
     protected getRandom(): number {
 
         // Evaluate sub-values to numbers
-        let min: number = this.min.evaluate();
-        let max: number = this.max.evaluate();
-        let step: number | undefined = this.step?.evaluate();
+        const min: number = this.min.evaluate();
+        const max: number = this.max.evaluate();
+        const step: number | undefined = this.step?.evaluate();
 
         // Returns free-floating random value between min and max
         if (step === undefined) {
@@ -56,6 +58,8 @@ export class ValueRandom extends Value {
 
     /**
      * Evaluate this dynamic value as a number
+     *
+     * @returns  Static value
      */
     public evaluate(): number {
         if (this.generateOnce) {
@@ -70,10 +74,11 @@ export class ValueRandom extends Value {
 
     /**
      * Factory function to generate ValueRandom from JSON scenario data
-     * @param parsingContext Context for resolving scenario data
-     * @param valueRandomSource JSON data for ValueRandom
-     * @param checkSchema When true, validates source JSON data against schema
-     * @returns valueRandom -- Created ValueRandom object
+     *
+     * @param    parsingContext    Context for resolving scenario data
+     * @param    valueRandomSource JSON data for ValueRandom
+     * @param    checkSchema       When true, validates source JSON data against schema
+     * @returns                    Created ValueRandom object
      */
     public static async fromSource(parsingContext: ParsingContext, valueRandomSource: IValueRandomSource, checkSchema: boolean): Promise<ValueRandom> {
 
@@ -82,9 +87,9 @@ export class ValueRandom extends Value {
             valueRandomSource = await checkAgainstSchema(valueRandomSource, valueRandomSchema, parsingContext);
 
         // Get min, max and step from source
-        let min: Value = await buildValue(parsingContext.withExtendedPath('.min'), valueRandomSource.min, true);
-        let max: Value = await buildValue(parsingContext.withExtendedPath('.max'), valueRandomSource.max, true);
-        let step: Value | undefined = valueRandomSource.step === undefined ?
+        const min: Value = await buildValue(parsingContext.withExtendedPath('.min'), valueRandomSource.min, true);
+        const max: Value = await buildValue(parsingContext.withExtendedPath('.max'), valueRandomSource.max, true);
+        const step: Value | undefined = valueRandomSource.step === undefined ?
             undefined :
             await buildValue(parsingContext.withExtendedPath('.step'), valueRandomSource.step, true);
 

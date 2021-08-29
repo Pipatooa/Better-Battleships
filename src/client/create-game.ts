@@ -1,5 +1,5 @@
-import {bindFileDrop} from './create-game/filedrop';
-import {submit} from './create-game/submit';
+import { bindFileDrop } from './create-game/filedrop';
+import { submit } from './create-game/submit';
 
 let submitButton: JQuery;
 
@@ -20,5 +20,5 @@ $(document).ready(() => {
     errorContextElement = $('#error-context');
 
     // Register submit button handler
-    submitButton.on('click', () => submit(errorContainer, errorMessageElement, errorContextElement));
+    submitButton.on('click', async () => submit(errorContainer, errorMessageElement, errorContextElement));
 });

@@ -1,21 +1,29 @@
 import cookie from 'cookie';
-import {IAuthPayload} from './i-auth-payload';
-import {verifyToken} from './token-handler';
+import { Request } from 'express';
+import { IAuthPayload } from './i-auth-payload';
+import { verifyToken } from './token-handler';
+import http from 'http';
 
 /**
  * Checks the authorisation of a request
- * @param req
- * @returns payload -- Payload | Undefined if error
+ *
+ * @param    req Express request or raw http request to check
+ * @returns      Payload | Undefined if error
  */
-export async function checkRequestAuth(req: any): Promise<IAuthPayload | undefined> {
+export async function checkRequestAuth(req: Request | http.IncomingMessage): Promise<IAuthPayload | undefined> {
 
     let token: string;
 
     // Extract auth token from cookies
     if ('cookies' in req)
         token = req.cookies['user-token'];
-    else
-        token = cookie.parse(req.headers.cookie)['user-token'];
+    else {
+        const cookieString = req.headers.cookie;
+        if (cookieString === undefined)
+            return undefined;
+
+        token = cookie.parse(cookieString)['user-token'];
+    }
 
     // If no authorisation token was provided
     if (token === undefined)

@@ -1,23 +1,23 @@
 import * as console from 'console';
-import http, {IncomingMessage} from 'http';
-import WebSocket, {Data} from 'isomorphic-ws';
-import {Socket} from 'net';
-import {IAuthPayload} from '../../auth/i-auth-payload';
-import {checkRequestAuth} from '../../auth/request-handler';
-import {Game, GamePhase} from '../game';
-import {queryGame} from '../game-manager';
-import {Client} from './client';
-import {handleMessage} from './message-handler';
+import http, { IncomingMessage } from 'http';
+import WebSocket, { Data } from 'isomorphic-ws';
+import { Socket } from 'net';
+import { checkRequestAuth } from '../../auth/request-handler';
+import { GamePhase } from '../game';
+import { queryGame } from '../game-manager';
+import { Client } from './client';
+import { handleMessage } from './message-handler';
 
-const connectionLimit: number = 64;
-let currentConnections: number = 0;
+const connectionLimit = 64;
+let currentConnections = 0;
 
 /**
  * Registers handlers for a websocket server
- * @param server HTTP server for upgrade handling
- * @param wss WebSocket server to register handlers for
+ *
+ * @param  server HTTP server for upgrade handling
+ * @param  wss    WebSocket server to register handlers for
  */
-export default function register(server: http.Server, wss: WebSocket.Server) {
+export default function register(server: http.Server, wss: WebSocket.Server): void {
 
     // Register upgrade handler
     server.on('upgrade', async (req: http.IncomingMessage, socket: Socket, head: Buffer) => {
@@ -30,7 +30,7 @@ export default function register(server: http.Server, wss: WebSocket.Server) {
         }
 
         // Get game ID from request
-        let match = /^\/game\/(.*)/.exec(req.url as string);
+        const match = /^\/game\/(.*)/.exec(req.url!);
         if (match === null) {
             socket.write('HTTP/1.1 400 Bad Request\r\n\r\n');
             socket.destroy();
@@ -38,8 +38,8 @@ export default function register(server: http.Server, wss: WebSocket.Server) {
         }
 
         // Check if game exists
-        let gameID = match[1];
-        let game = queryGame(gameID);
+        const gameID = match[1];
+        const game = queryGame(gameID);
         if (game === undefined) {
             socket.write('HTTP/1.1 400 Bad Request\r\n\r\n');
             socket.destroy();
@@ -47,7 +47,7 @@ export default function register(server: http.Server, wss: WebSocket.Server) {
         }
 
         // Check authorisation
-        let payload = await checkRequestAuth(req);
+        const payload = await checkRequestAuth(req);
 
         // If client is not authorised to initiate websocket connection
         if (payload === undefined) {
@@ -67,7 +67,7 @@ export default function register(server: http.Server, wss: WebSocket.Server) {
         wss.handleUpgrade(req, socket, head, async (ws) => {
 
             // Create client from websocket, assigning them a uuid
-            let client = new Client(ws, payload as IAuthPayload, game as Game);
+            const client = new Client(ws, payload, game);
 
             // Send client connection information
             client.sendEvent({
@@ -76,7 +76,7 @@ export default function register(server: http.Server, wss: WebSocket.Server) {
             });
 
             // Join client to game
-            (game as Game).joinClient(client);
+            game.joinClient(client);
 
             // Increment connection count
             currentConnections += 1;

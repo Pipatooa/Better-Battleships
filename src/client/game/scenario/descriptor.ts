@@ -1,4 +1,4 @@
-import {IDescriptorInfo} from '../../../shared/network/scenario/i-descriptor-info';
+import { IDescriptorInfo } from '../../../shared/network/scenario/i-descriptor-info';
 
 
 /**
@@ -7,14 +7,15 @@ import {IDescriptorInfo} from '../../../shared/network/scenario/i-descriptor-inf
  * Stores a name and a description for another object
  */
 export class Descriptor {
-    constructor(public readonly name: string,
+    protected constructor(public readonly name: string,
                 public readonly description: string) {
     }
 
     /**
      * Factory function to generate Descriptor from JSON event data
-     * @param descriptorSource JSON data from server
-     * @returns descriptor -- Created Descriptor object
+     *
+     * @param    descriptorSource JSON data from server
+     * @returns                   Created Descriptor object
      */
     public static async fromSource(descriptorSource: IDescriptorInfo): Promise<Descriptor> {
 

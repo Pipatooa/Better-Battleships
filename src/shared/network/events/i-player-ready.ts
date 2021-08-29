@@ -1,4 +1,4 @@
-import {IBaseServerEvent} from './i-server-event';
+import { IBaseServerEvent } from './i-server-event';
 
 /**
  * Player ready event sent when a client changes their ready status

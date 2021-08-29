@@ -1,15 +1,16 @@
-import {IPlayerReadyEvent} from '../../../../shared/network/events/i-player-ready';
-import {ready} from '../button-functions';
-import {identity} from './connection-info';
+import { IPlayerReadyEvent } from '../../../../shared/network/events/i-player-ready';
+import { ready } from '../button-functions';
+import { identity } from './connection-info';
 
 /**
  * Handles a player ready event from the server
- * @param playerReadyEvent Event object to handle
+ *
+ * @param  playerReadyEvent Event object to handle
  */
-export function handlePlayerReady(playerReadyEvent: IPlayerReadyEvent) {
+export function handlePlayerReady(playerReadyEvent: IPlayerReadyEvent): void {
 
     // Get player element using identity provided
-    let playerElement = $(`#player-${playerReadyEvent.playerIdentity.replace(':', '\\:')}`);
+    const playerElement = $(`#player-${playerReadyEvent.playerIdentity.replace(':', '\\:')}`);
 
     // Depending on new ready status, add or remove ready class
     if (playerReadyEvent.ready)

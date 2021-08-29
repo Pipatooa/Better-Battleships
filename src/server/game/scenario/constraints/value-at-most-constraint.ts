@@ -1,7 +1,7 @@
 import Joi from 'joi';
-import {ParsingContext} from '../parsing-context';
-import {checkAgainstSchema} from '../schema-checker';
-import {ValueConstraint} from './value-constaint';
+import { ParsingContext } from '../parsing-context';
+import { checkAgainstSchema } from '../schema-checker';
+import { ValueConstraint } from './value-constaint';
 
 /**
  * ValueAtMostConstraint - Server Version
@@ -14,7 +14,8 @@ export class ValueAtMostConstraint extends ValueConstraint {
 
     /**
      * ValueAtMostConstraint constructor
-     * @param max Maximum value that other values can hold to meet this constraint
+     *
+     * @param  max Maximum value that other values can hold to meet this constraint
      */
     protected constructor(public readonly max: number) {
         super();
@@ -22,10 +23,11 @@ export class ValueAtMostConstraint extends ValueConstraint {
 
     /**
      * Factory function to generate ValueAtMostConstraint from JSON scenario data
-     * @param parsingContext Context for resolving scenario data
-     * @param valueAtMostConstraintSource JSON data for ValueAtMostConstraint
-     * @param checkSchema When true, validates source JSON data against schema
-     * @returns valueAtMostConstraint -- Created ValueAtMostConstraint object
+     *
+     * @param    parsingContext              Context for resolving scenario data
+     * @param    valueAtMostConstraintSource JSON data for ValueAtMostConstraint
+     * @param    checkSchema                 When true, validates source JSON data against schema
+     * @returns                              Created ValueAtMostConstraint object
      */
     public static async fromSource(parsingContext: ParsingContext, valueAtMostConstraintSource: IValueAtMostConstraintSource, checkSchema: boolean): Promise<ValueAtMostConstraint> {
 
@@ -39,8 +41,9 @@ export class ValueAtMostConstraint extends ValueConstraint {
 
     /**
      * Checks whether or not a value meets this constraint
-     * @param value Value to check
-     * @returns boolean -- Whether value met this constraint
+     *
+     * @param    value Value to check
+     * @returns        Whether value met this constraint
      */
     public check(value: number): boolean {
         return value <= this.max;
@@ -48,8 +51,9 @@ export class ValueAtMostConstraint extends ValueConstraint {
 
     /**
      * Changes a value to meet this constraint
-     * @param value Value to constrain
-     * @returns newValue -- New value that meets this constraint
+     *
+     * @param    value Value to constrain
+     * @returns        New value that meets this constraint
      */
     public constrain(value: number): number {
         return Math.min(this.max, value);

@@ -1,9 +1,9 @@
 import * as console from 'console';
-import {IServerEvent} from '../../shared/network/events/i-server-event';
-import {TimeoutManager} from '../../shared/timeout-manager';
+import { IServerEvent } from '../../shared/network/events/i-server-event';
+import { TimeoutManager } from '../../shared/timeout-manager';
 import config from '../config';
-import {Scenario} from './scenario/scenario';
-import {Client} from './sockets/client';
+import { Scenario } from './scenario/scenario';
+import { Client } from './sockets/client';
 
 /**
  * Game - Server Version
@@ -13,18 +13,20 @@ import {Client} from './sockets/client';
 export class Game {
 
     public timeoutManager = new TimeoutManager({
-        gameJoinTimeout: [() => {}, 0, false],
-        startGame: [() => {}, 0, false]
+        gameJoinTimeout: [ () => {}, 0, false ],
+        startGame: [ () => {}, 0, false ]
     });
 
     public clients: Client[] = [];
+
     protected _gamePhase: GamePhase = GamePhase.Lobby;
 
     /**
      * Game constructor
-     * @param internalID Internal ID given to game in database
-     * @param gameID Published game ID used by clients to connect
-     * @param scenario Scenario object used for game logic
+     *
+     * @param  internalID Internal ID given to game in database
+     * @param  gameID     Published game ID used by clients to connect
+     * @param  scenario   Scenario object used for game logic
      */
     public constructor(public readonly internalID: number,
                        public readonly gameID: string,
@@ -36,9 +38,10 @@ export class Game {
 
     /**
      * Joins a client to the game
-     * @param client Client to join to the game
+     *
+     * @param  client Client to join to the game
      */
-    public joinClient(client: Client) {
+    public joinClient(client: Client): void {
 
         // Debug
         console.log(`Client ${client.id} joined game ${this.gameID}`);
@@ -57,7 +60,7 @@ export class Game {
             console.log(`Client ${client.identity} disconnected from game ${this.gameID}`);
 
             // Broadcast disconnect event to existing clients
-            for (let existingClient of this.clients) {
+            for (const existingClient of this.clients) {
                 existingClient.sendEvent({
                     event: 'playerLeave',
                     playerIdentity: client.identity
@@ -75,7 +78,7 @@ export class Game {
             scenario: this.scenario.makeTransportable()
         });
 
-        for (let existingClient of this.clients) {
+        for (const existingClient of this.clients) {
             existingClient.sendEvent({
                 event: 'playerJoin',
                 playerIdentity: client.identity,
@@ -98,20 +101,20 @@ export class Game {
     /**
      * Checks whether the game can be started yet and starts the game if it can
      */
-    public attemptGameStart() {
+    public attemptGameStart(): void {
 
         // Set game phase to lobby in-case game is starting
         this._gamePhase = GamePhase.Lobby;
         this.timeoutManager.stopTimeout('startGame');
 
         // Create a counter for the number of players in each team
-        let teamPlayerCounts: { [name: string]: number } = {};
-        for (let name of Object.keys(this.scenario.teams)) {
+        const teamPlayerCounts: { [name: string]: number } = {};
+        for (const name of Object.keys(this.scenario.teams)) {
             teamPlayerCounts[name] = 0;
         }
 
         // Iterate through connected clients
-        for (let client of this.clients) {
+        for (const client of this.clients) {
 
             // Check if player is ready
             if (!client.ready) {
@@ -127,15 +130,15 @@ export class Game {
         }
 
         // Check that every team has a number of players supported by the scenario definition
-        for (let [name, playerCount] of Object.entries(teamPlayerCounts)) {
-            let team = this.scenario.teams[name];
-            let maxPlayers = team.playerPrototypes.length;
+        for (const [ name, playerCount ] of Object.entries(teamPlayerCounts)) {
+            const team = this.scenario.teams[name];
+            const maxPlayers = team.playerPrototypes.length;
 
             // If there are an invalid number of players for the team
             if (playerCount === 0 || playerCount > maxPlayers) {
 
                 // Select reason to provide for game start failure
-                let reason = playerCount === 0
+                const reason = playerCount === 0
                     ? 'All teams must have at least 1 player'
                     : `Team '${team.descriptor.name}' supports a maximum of ${maxPlayers} players`;
 
@@ -165,16 +168,16 @@ export class Game {
     /**
      * Starts the game
      */
-    public startGame() {
+    public startGame(): void {
 
         // Set game phase to started
         this._gamePhase = GamePhase.Started;
 
         // Group players by their teams
-        let teamGroups: { [name: string]: Client[] } = {};
-        for (let client of this.clients) {
+        const teamGroups: { [name: string]: Client[] } = {};
+        for (const client of this.clients) {
 
-            let teamName = client.team!.id;
+            const teamName = client.team!.id;
 
             // If player is first on their team
             if (!(teamName in teamGroups))
@@ -185,13 +188,13 @@ export class Game {
         }
 
         // Setup teams with sets of players
-        for (let [teamName, clients] of Object.entries(teamGroups)) {
-            let team = this.scenario.teams[teamName];
+        for (const [ teamName, clients ] of Object.entries(teamGroups)) {
+            const team = this.scenario.teams[teamName];
             team.setPlayers(clients);
         }
 
         // Broadcast game start
-        for (let client of this.clients) {
+        for (const client of this.clients) {
             client.sendEvent({
                 event: 'gameStart',
                 boardInfo: this.scenario.board.makeTransportable(),
@@ -202,10 +205,11 @@ export class Game {
 
     /**
      * Broadcasts a server event to all connected clients
-     * @param serverEvent Event to broadcast
+     *
+     * @param  serverEvent Event to broadcast
      */
-    public broadcastEvent(serverEvent: IServerEvent) {
-        for (let client of this.clients) {
+    public broadcastEvent(serverEvent: IServerEvent): void {
+        for (const client of this.clients) {
             client.sendEvent(serverEvent);
         }
     }

@@ -1,4 +1,4 @@
-import {IDescriptorInfo} from './i-descriptor-info';
+import { IDescriptorInfo } from './i-descriptor-info';
 
 /**
  * Portable network version of Team object

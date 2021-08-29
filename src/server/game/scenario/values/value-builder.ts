@@ -1,19 +1,20 @@
-import {ParsingContext} from '../parsing-context';
-import {checkAgainstSchema} from '../schema-checker';
-import {IValueSource, Value, valueSchema} from './value';
-import {ValueAttributeReference} from './value-attribute-reference';
-import {ValueFixed} from './value-fixed';
-import {ValueProduct} from './value-product';
-import {ValueRandom} from './value-random';
-import {ValueRounded} from './value-rounded';
-import {ValueSum} from './value-sum';
+import { ParsingContext } from '../parsing-context';
+import { checkAgainstSchema } from '../schema-checker';
+import { IValueSource, Value, valueSchema } from './value';
+import { ValueAttributeReference } from './value-attribute-reference';
+import { ValueFixed } from './value-fixed';
+import { ValueProduct } from './value-product';
+import { ValueRandom } from './value-random';
+import { ValueRounded } from './value-rounded';
+import { ValueSum } from './value-sum';
 
 /**
  * Factory function to generate Value from JSON scenario data
- * @param parsingContext Context for resolving scenario data
- * @param valueSource JSON data for Value
- * @param checkSchema When true, validates source JSON data against schema
- * @returns condition -- Created Condition object
+ *
+ * @param    parsingContext Context for resolving scenario data
+ * @param    valueSource    JSON data for Value
+ * @param    checkSchema    When true, validates source JSON data against schema
+ * @returns                 Created Condition object
  */
 export async function buildValue(parsingContext: ParsingContext, valueSource: IValueSource, checkSchema: boolean): Promise<Value> {
 

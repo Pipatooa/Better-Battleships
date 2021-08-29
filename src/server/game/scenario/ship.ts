@@ -1,15 +1,15 @@
 import Joi from 'joi';
-import {IShipInfo} from '../../../shared/network/scenario/i-ship-info';
-import {Ability, IAbilitySource} from './abilities/ability';
-import {Attribute, IAttributeSource} from './attributes/attribute';
-import {attributeHolderSchema, AttributeMap, IAttributeHolder} from './attributes/i-attribute-holder';
-import {Descriptor, descriptorSchema, IDescriptorSource} from './common/descriptor';
-import {genericNameSchema} from './common/generic-name';
-import {IPatternSource, Pattern, patternSchema} from './common/pattern';
-import {Rotation} from './common/rotation';
-import {ParsingContext} from './parsing-context';
-import {checkAgainstSchema} from './schema-checker';
-import {getJSONFromEntry, UnpackingError} from './unpacker';
+import { IShipInfo } from '../../../shared/network/scenario/i-ship-info';
+import { Ability, IAbilitySource } from './abilities/ability';
+import { Attribute, IAttributeSource } from './attributes/attribute';
+import { attributeHolderSchema, AttributeMap, IAttributeHolder } from './attributes/i-attribute-holder';
+import { Descriptor, descriptorSchema, IDescriptorSource } from './common/descriptor';
+import { genericNameSchema } from './common/generic-name';
+import { IPatternSource, Pattern, patternSchema } from './common/pattern';
+import { Rotation } from './common/rotation';
+import { ParsingContext } from './parsing-context';
+import { checkAgainstSchema } from './schema-checker';
+import { getJSONFromEntry, UnpackingError } from './unpacker';
 
 /**
  * Ship - Server Version
@@ -18,15 +18,17 @@ import {getJSONFromEntry, UnpackingError} from './unpacker';
  */
 export class Ship implements IAttributeHolder {
 
-    public x: number = 0;
-    public y: number = 0;
+    public x = 0;
+
+    public y = 0;
 
     /**
      * Ship constructor
-     * @param descriptor Descriptor for ship
-     * @param _pattern Pattern describing shape of ship
-     * @param abilities Dictionary of abilities available to the ship
-     * @param attributes Attributes for the ship
+     *
+     * @param  descriptor Descriptor for ship
+     * @param  _pattern   Pattern describing shape of ship
+     * @param  abilities  Dictionary of abilities available to the ship
+     * @param  attributes Attributes for the ship
      */
     public constructor(public readonly descriptor: Descriptor,
                        protected _pattern: Pattern,
@@ -36,7 +38,8 @@ export class Ship implements IAttributeHolder {
 
     /**
      * Rotates the ship in place
-     * @param rotation Amount to rotate ship by
+     *
+     * @param  rotation Amount to rotate ship by
      */
     public rotate(rotation: Rotation): void {
         this._pattern = this._pattern.rotated(rotation);
@@ -45,20 +48,21 @@ export class Ship implements IAttributeHolder {
     /**
      * Returns a list of the coordinates of every cell that this ship occupies.
      *
-     * @param offset Optional offset to apply to cell coordinates
+     * @param    offset Optional offset to apply to cell coordinates
+     * @returns         List of coordinates of every cell that this ship occupies
      */
-    public getCells(offset: [number, number] = [0, 0]): [number, number][] {
-        let cells: [number, number][] = [];
+    public getCells(offset: [number, number] = [ 0, 0 ]): [number, number][] {
+        const cells: [number, number][] = [];
 
         // Iterate through entries in pattern
-        this._pattern.forEachEntry((dx: number, dy: number, value: number) => {
+        this._pattern.forEachEntry((dx: number, dy: number) => {
 
             // Offset pattern entries by the position of the ship and offset provided
-            let x: number = dx + this.x + offset[0];
-            let y: number = dy + this.y + offset[1];
+            const x: number = dx + this.x + offset[0];
+            const y: number = dy + this.y + offset[1];
 
             // Add cell coordinate to list of cells
-            cells.push([x, y]);
+            cells.push([ x, y ]);
         });
 
         // Return list of cell coordinates
@@ -67,10 +71,11 @@ export class Ship implements IAttributeHolder {
 
     /**
      * Factory function to generate Ship from JSON scenario data
-     * @param parsingContext Context for resolving scenario data
-     * @param shipSource JSON data for Ship
-     * @param checkSchema When true, validates source JSON data against schema
-     * @returns ship -- Created Ship object
+     *
+     * @param    parsingContext Context for resolving scenario data
+     * @param    shipSource     JSON data for Ship
+     * @param    checkSchema    When true, validates source JSON data against schema
+     * @returns                 Created Ship object
      */
     public static async fromSource(parsingContext: ParsingContext, shipSource: IShipSource, checkSchema: boolean): Promise<Ship> {
 
@@ -79,8 +84,8 @@ export class Ship implements IAttributeHolder {
             shipSource = await checkAgainstSchema(shipSource, shipSchema, parsingContext);
 
         // Get attributes
-        let attributes: AttributeMap = {};
-        for (let [name, attributeSource] of Object.entries(shipSource.attributes)) {
+        const attributes: AttributeMap = {};
+        for (const [ name, attributeSource ] of Object.entries(shipSource.attributes)) {
             attributes[name] = await Attribute.fromSource(parsingContext.withExtendedPath(`.attributes.${name}`), attributeSource, false);
         }
 
@@ -88,15 +93,15 @@ export class Ship implements IAttributeHolder {
         parsingContext = parsingContext.withShipAttributes(attributes);
 
         // Get descriptor
-        let descriptor = await Descriptor.fromSource(parsingContext.withExtendedPath('.descriptor'), shipSource.descriptor, false);
+        const descriptor = await Descriptor.fromSource(parsingContext.withExtendedPath('.descriptor'), shipSource.descriptor, false);
 
         // Get pattern
-        let pattern = await Pattern.fromSource(parsingContext.withExtendedPath('.pattern'), shipSource.pattern, false);
+        const pattern = await Pattern.fromSource(parsingContext.withExtendedPath('.pattern'), shipSource.pattern, false);
 
         // Get abilities
-        let abilities: { [name: string]: Ability } = {};
+        const abilities: { [name: string]: Ability } = {};
         for (let i = 0; i < shipSource.abilities.length; i++) {
-            let abilityName = shipSource.abilities[i];
+            const abilityName = shipSource.abilities[i];
 
             // If ship does not exist
             if (!(abilityName in parsingContext.abilityEntries))
@@ -107,7 +112,7 @@ export class Ship implements IAttributeHolder {
                 throw new UnpackingError(`Ship cannot define the same ability twice '${abilityName}' at '${parsingContext.currentPath}.abilities[${i}]'`, parsingContext);
 
             // Unpack ability data
-            let abilitySource: IAbilitySource = await getJSONFromEntry(parsingContext.abilityEntries[abilityName]) as unknown as IAbilitySource;
+            const abilitySource: IAbilitySource = await getJSONFromEntry(parsingContext.abilityEntries[abilityName]) as unknown as IAbilitySource;
             abilities[abilityName] = await Ability.fromSource(parsingContext.withUpdatedFile(`abilities/${abilityName}.json`), abilitySource, true);
 
         }
@@ -120,6 +125,8 @@ export class Ship implements IAttributeHolder {
      * Returns network transportable form of this object.
      *
      * May not include all details of the object. Just those that the client needs to know.
+     *
+     * @returns  Created IShipInfo object
      */
     public makeTransportable(): IShipInfo {
         return {

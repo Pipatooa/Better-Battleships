@@ -1,10 +1,10 @@
 import Joi from 'joi';
-import {IValueConstraintSource, ValueConstraint, valueConstraintSchema} from '../constraints/value-constaint';
-import {buildValueConstraint} from '../constraints/value-constraint-builder';
-import {ParsingContext} from '../parsing-context';
-import {checkAgainstSchema} from '../schema-checker';
-import {IValueSource, Value, valueSchema} from '../values/value';
-import {buildValue} from '../values/value-builder';
+import { IValueConstraintSource, ValueConstraint, valueConstraintSchema } from '../constraints/value-constaint';
+import { buildValueConstraint } from '../constraints/value-constraint-builder';
+import { ParsingContext } from '../parsing-context';
+import { checkAgainstSchema } from '../schema-checker';
+import { IValueSource, Value, valueSchema } from '../values/value';
+import { buildValue } from '../values/value-builder';
 
 /**
  * Attribute - Server Version
@@ -14,6 +14,13 @@ import {buildValue} from '../values/value-builder';
 export class Attribute {
     protected _value: number;
 
+    /**
+     * Attribute constructor
+     *
+     * @param  initialValue Initial value for attribute to hold. May be dynamic value
+     * @param  constraints  Constraints to apply to held value. Will be applies in order
+     * @param  readonly     Whether this value should be readonly
+     */
     public constructor(initialValue: Value,
                        protected readonly constraints: ValueConstraint[],
                        public readonly readonly: boolean) {
@@ -22,6 +29,8 @@ export class Attribute {
 
     /**
      * Get the value of this attribute
+     *
+     * @returns  Value of this attribute
      */
     public get value(): number {
         return this._value;
@@ -32,7 +41,8 @@ export class Attribute {
      *
      * Will constrain given value to meet all held value constraints.
      * If attribute is readonly, new value will be ignored
-     * @param value New value
+     *
+     * @param  value New value
      */
     public set value(value: number | Value) {
         // If value is readonly, ignore new value
@@ -44,8 +54,8 @@ export class Attribute {
             value = value.evaluate();
 
         // Iterate through constraints and constrain value accordingly
-        for (let constraint of this.constraints) {
-            value = constraint.constrain(value as number);
+        for (const constraint of this.constraints) {
+            value = constraint.constrain(value);
         }
 
         // Set value as new constrained value
@@ -54,10 +64,11 @@ export class Attribute {
 
     /**
      * Factory function to generate Attribute from JSON scenario data
-     * @param parsingContext Context for resolving scenario data
-     * @param attributeSource JSON data for Attribute
-     * @param checkSchema When true, validates source JSON data against schema
-     * @returns attribute -- Created Attribute object
+     *
+     * @param    parsingContext  Context for resolving scenario data
+     * @param    attributeSource JSON data for Attribute
+     * @param    checkSchema     When true, validates source JSON data against schema
+     * @returns                  Created Attribute object
      */
     public static async fromSource(parsingContext: ParsingContext, attributeSource: IAttributeSource, checkSchema: boolean): Promise<Attribute> {
 
@@ -66,12 +77,12 @@ export class Attribute {
             attributeSource = await checkAgainstSchema(attributeSource, attributeSchema, parsingContext);
 
         // Get initial value
-        let initialValue: Value = await buildValue(parsingContext.withExtendedPath('.initialValue'), attributeSource.initialValue, false);
+        const initialValue: Value = await buildValue(parsingContext.withExtendedPath('.initialValue'), attributeSource.initialValue, false);
 
         // Get constraints
-        let constraints: ValueConstraint[] = [];
+        const constraints: ValueConstraint[] = [];
         for (let i = 0; i < attributeSource.constraints.length; i++) {
-            let constraintSource = attributeSource.constraints[i];
+            const constraintSource = attributeSource.constraints[i];
             constraints.push(await buildValueConstraint(parsingContext.withExtendedPath(`.constraints[${i}]`), constraintSource, false));
         }
 
