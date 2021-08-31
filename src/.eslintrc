@@ -17,6 +17,8 @@
     "eslint:recommended"
   ],
   "rules": {
+    "indent": ["error", 4],
+    "max-len": "off",
     "brace-style": "off",
     "comma-dangle": "off",
     "comma-spacing": "off",

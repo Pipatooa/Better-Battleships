@@ -1,11 +1,20 @@
+:root {
+    --filled-box-background: #8ba9c4;
+}
+
 .h-divider {
     border-top: 1px solid black;
     width: 100%;
 }
 
-.grey-container {
+.boxed-container {
+    border: 2px solid black;
+    border-radius: 5px;
+}
+
+.filled-boxed-container {
     border: 2px solid black;
     border-radius: 5px;
 
-    background: #C1C1C1;
+    background: var(--filled-box-background);
 }

@@ -1,41 +1,39 @@
 /**
- * BaseRenderer - Client Version
+ * CanvasInfo - Client Version
  *
- * Base class for rendering objects to the canvas
+ * Class containing all information about a canvas element
  */
-export class BaseRenderer {
-    public readonly canvas: HTMLCanvasElement;
-
+export class CanvasInfo {
     public readonly context: CanvasRenderingContext2D;
 
-    protected _pixelScale = 1;
-
+    protected canvasParent: HTMLDivElement;
     protected _canvasScale: number;
 
     /**
-     * BaseRenderer constructor
+     * CanvasInfo constructor
      *
-     * @param  canvas JQuery element for canvas
+     * @param  canvas      HTML canvas element
+     * @param  _pixelScale Number of pixels to draw compared to number of actual pixels composing canvas 
      */
-    public constructor(canvas: JQuery) {
+    public constructor(public readonly canvas: HTMLCanvasElement,
+                       protected _pixelScale: number) {
 
-        // Fetch canvas
-        this.canvas = canvas.get(0) as HTMLCanvasElement;
-        this.context = this.canvas.getContext('2d')!;
+        // Get 2D rendering context for this canvas
+        this.context = canvas.getContext('2d')!;
 
         // Set height and width of canvas for the first time
         this.canvas.width = this.canvas.clientWidth * this._pixelScale;
         this.canvas.height = this.canvas.clientHeight * this._pixelScale;
         this._canvasScale = 1000 / Math.min(this.canvas.width, this.canvas.height);
 
-        // Register event listeners
-        $(window).on('resize', () => this.onResize());
+        // Cache container for this canvas
+        this.canvasParent = this.canvas.offsetParent as HTMLDivElement;
     }
 
     /**
      * Resizes canvas when window is resized
      */
-    private onResize(): void {
+    public onResize(): void {
         this.canvas.width = this.canvas.clientWidth * this._pixelScale;
         this.canvas.height = this.canvas.clientHeight * this._pixelScale;
         this._canvasScale = 1000 / Math.min(this.canvas.width, this.canvas.height);
@@ -49,8 +47,8 @@ export class BaseRenderer {
      * @returns    UV coordinates between 0 and 1 corresponding to mouse coordinates
      */
     public translateMouseCoordinateUV(x: number, y: number): [number, number] {
-        const transX = (x - this.canvas.offsetLeft) / this.canvas.clientWidth;
-        const transY = (y - this.canvas.offsetTop) / this.canvas.clientHeight;
+        const transX = (x - this.canvasParent.offsetLeft) / this.canvas.clientWidth;
+        const transY = (y - this.canvasParent.offsetTop) / this.canvas.clientHeight;
         return [ transX, transY ];
     }
 
@@ -62,9 +60,9 @@ export class BaseRenderer {
      * @returns    Canvas pixel coordinates corresponding to mouse coordinates
      */
     public translateMouseCoordinatePixel(x: number, y: number): [number, number] {
-        const transX = (x - this.canvas.offsetLeft) * this._pixelScale;
-        const transY = (y - this.canvas.offsetTop) * this._pixelScale;
 
+        const transX = (x - this.canvasParent.offsetLeft) * this._pixelScale;
+        const transY = (y - this.canvasParent.offsetTop) * this._pixelScale;
         return [ transX, transY ];
     }
 
@@ -72,11 +70,11 @@ export class BaseRenderer {
      * Getters and setters
      */
 
-    public get canvasScale(): number {
-        return this._canvasScale;
+    public get pixelScale(): number {
+        return this._pixelScale;
     }
 
-    public get pixelScale(): number {
+    public get canvasScale(): number {
         return this._pixelScale;
     }
 }

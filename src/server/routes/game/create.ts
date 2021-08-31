@@ -24,7 +24,7 @@ router.get('/', preventCSRF, requireAuth, (req, res) => {
         pageDescription: '',
         stylesheets: [
             '/css/style.css',
-            '/css/game.css'
+            '/css/create-game.css'
         ],
         scripts: [
             '/js/create-game.js'
@@ -56,7 +56,7 @@ router.post('/', preventCSRF, requireAuth, async (req, res) => {
     form.parse(req, async (err, fields, files) => {
 
         // If error parsing form
-        if (err !== undefined) {
+        if (err !== null) {
             res.status(400);
             res.send({
                 success: false,

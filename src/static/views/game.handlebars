@@ -3,15 +3,20 @@
 <div class="container text-center d-none" id="game-container">
     <div class="row boxed-container p-0">
         <div class="col-md-8 p-0">
-            <canvas class="w-100 h-100 d-block" id="game-canvas" width="450" height="300">
-                Sorry, your browser does not support the canvas element.
-            </canvas>
+            <div class="canvas-wrapper">
+                <canvas id="board-canvas" width="450" height="300">
+                    Sorry, your browser does not support the canvas element.
+                </canvas>
+                <canvas id="ship-canvas" width="450" height="300"></canvas>
+            </div>
         </div>
         <div class="col-md-4 p-0 game-right-pane text-start">
             <div class="p-3" id="place-ships-pane">
                 <h5><b>Place Ships:</b></h5>
                 <p>Select a ship by clicking on it from this window and place it onto the board on the left half of this page. The direction the ship is facing is shown by an arrow pointing in that direction.<br>If the ship can be rotated, press <kbd>R</kbd> to rotate it.</p>
-                <canvas class="w-100 h-100" width="100" height="100"></canvas>
+                <div class="canvas-wrapper">
+                    <canvas id="ship-selection-canvas" width="100" height="100"></canvas>
+                </div>
             </div>
         </div>
     </div>

@@ -1,6 +1,5 @@
 import { IGameStartEvent } from '../../../../shared/network/events/i-game-start';
-import { BaseRenderer } from '../../canvas/base-renderer';
-import { BoardRenderer } from '../../canvas/board-renderer';
+import { initGameRenderer } from '../../canvas/game-renderer';
 import { Board } from '../../scenario/board';
 
 /**
@@ -96,8 +95,5 @@ export async function handleGameStart(gameStartEvent: IGameStartEvent): Promise<
 
     // Unpack board data
     const board = await Board.fromSource(gameStartEvent.boardInfo);
-
-    // Create new renderer for board
-    const gameRenderer = new BaseRenderer($('#game-canvas'));
-    new BoardRenderer(gameRenderer, board);
+    initGameRenderer(board);
 }
