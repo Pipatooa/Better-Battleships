@@ -40,7 +40,7 @@ router.post('/', preventCSRF, async (req, res) => {
     form.parse(req, async (err, fields) => {
 
         // If error parsing form
-        if (err !== undefined) {
+        if (err !== null) {
             res.status(400);
             res.send({
                 success: false,

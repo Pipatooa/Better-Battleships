@@ -17,7 +17,7 @@
     "eslint:recommended"
   ],
   "rules": {
-    "indent": ["error", 4],
+    "indent": ["error", 4, { "SwitchCase": 1, "FunctionDeclaration": { "parameters":  "first" }, "FunctionExpression": { "parameters": "first" } }],
     "max-len": "off",
     "brace-style": "off",
     "comma-dangle": "off",

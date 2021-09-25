@@ -13,7 +13,7 @@ import { Client } from '../client';
 export function handleReadyRequest(client: Client, readyRequest: IReadyRequest): void {
 
     // If game has already started, ignore request
-    if (client.game.gamePhase === GamePhase.Started)
+    if (client.game.gamePhase === GamePhase.Setup)
         return;
 
     // If player is trying to ready and is not part of a team, ignore request

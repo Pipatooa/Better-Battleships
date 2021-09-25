@@ -9,7 +9,7 @@ import { GameRenderer } from './game-renderer';
  */
 export class BoardRenderer {
 
-    protected gridCellSize: number;
+    protected _gridCellSize: number;
     protected gridOffsetX: number;
     protected gridOffsetY: number;
 
@@ -19,9 +19,6 @@ export class BoardRenderer {
     protected readonly gridCellSizeLowerBound: number;
     protected readonly gridCellSizeUpperBound: number;
     protected gridSep = 2;
-
-    protected moving = false;
-    protected lastMousePosition: [number, number] = [ 0, 0 ];
     
     /**
      * BoardRenderer constructor
@@ -47,19 +44,17 @@ export class BoardRenderer {
         this.renderer.boardCanvas.canvas.addEventListener('wheel', (ev: WheelEvent) => this.onScroll(ev));
 
         // Set default view
-        this.gridCellSize = (this.gridCellSizeLowerBound + this.gridCellSizeUpperBound) / 2;
-        this.gridOffsetX = (this.renderer.boardCanvas.canvas.width - this.board.size[0] * this.gridCellSize) / 2;
-        this.gridOffsetY = (this.renderer.boardCanvas.canvas.height - this.board.size[1] * this.gridCellSize) / 2;
-        this.gridSizePixelsX = this.gridCellSize * this.board.size[0];
-        this.gridSizePixelsY = this.gridCellSize * this.board.size[1];
+        this._gridCellSize = (this.gridCellSizeLowerBound + this.gridCellSizeUpperBound) / 2;
+        this.gridOffsetX = (this.renderer.boardCanvas.canvas.width - this.board.size[0] * this._gridCellSize) / 2;
+        this.gridOffsetY = (this.renderer.boardCanvas.canvas.height - this.board.size[1] * this._gridCellSize) / 2;
+        this.gridSizePixelsX = this._gridCellSize * this.board.size[0];
+        this.gridSizePixelsY = this._gridCellSize * this.board.size[1];
 
         // Draw grid for first time
         this.redrawAll();
 
         // Register event listeners
         this.renderer.shipCanvas.canvas.addEventListener('wheel', (ev: WheelEvent) => this.onScroll(ev));
-        $(document).on('pointermove', (ev) => this.onPointerMove(ev.originalEvent as PointerEvent));
-        $(document).on('resize', () => this.redrawAll());
     }
 
     /**
@@ -77,64 +72,41 @@ export class BoardRenderer {
         // Prevent scrolling of page
         ev.preventDefault();
 
-        const oldGridCellSize = this.gridCellSize;
-        this.gridCellSize *= 1 - ev.deltaY * 0.001;
+        const oldGridCellSize = this._gridCellSize;
+        this._gridCellSize *= 1 - ev.deltaY * 0.001;
         this.constrainZoom();
-        this.gridSizePixelsX = this.gridCellSize * this.board.size[0];
-        this.gridSizePixelsY = this.gridCellSize * this.board.size[1];
+        this.gridSizePixelsX = this._gridCellSize * this.board.size[0];
+        this.gridSizePixelsY = this._gridCellSize * this.board.size[1];
 
-        const deltaScaleFactor = this.gridCellSize / oldGridCellSize - 1;
+        const deltaScaleFactor = this._gridCellSize / oldGridCellSize - 1;
         const [ pixelX, pixelY ] = this.renderer.boardCanvas.translateMouseCoordinatePixel(ev.x, ev.y);
 
         this.gridOffsetX -= (pixelX - this.gridOffsetX) * deltaScaleFactor;
         this.gridOffsetY -= (pixelY - this.gridOffsetY) * deltaScaleFactor;
 
         this.constrainOffsetXY();
+
+        // Call redraw functions
         this.redrawAll();
+        this.renderer.shipRenderer.redrawAll();
     }
 
     /**
-     * Activated when the pointer is moved across the canvas
+     * Applies a movement delta dx and dy to the board from a pointer drag
      *
-     * @param  ev Pointer event
+     * Does not affect the rendered version of the board. Only internal representation
+     *
+     * @param    dx Horizontal pointer delta
+     * @param    dy Vertical pointer delta
+     * @returns     [dx, dy] Pointer delta after constraints have been applied
      */
-    private onPointerMove(ev: PointerEvent): void {
-
-        // Mouse drag stop
-        if (this.moving && ev.buttons === 0) {
-            this.moving = false;
-            return;
-        }
-
-        // Mouse drag start - Pointer must be targeting board or ship canvas
-        if (!this.moving && (ev.target as unknown === this.renderer.boardCanvas.canvas 
-                         || ev.target as unknown === this.renderer.shipCanvas.canvas)
-        ) {
-            this.moving = true;
-            this.lastMousePosition = [ ev.clientX, ev.clientY ];
-            ev.preventDefault();
-            return;
-        }
-
-        // If mouse is not being dragged, do not execute rest of this code
-        if (!this.moving)
-            return;
-
-        // Prevents unwanted highlighting etc
-        ev.preventDefault();
-
-        // Calculate movement delta - ev.movement is inconsistent between browsers
-        let dx = (ev.clientX - this.lastMousePosition[0]) * this.renderer.pixelScale;
-        let dy = (ev.clientY - this.lastMousePosition[1]) * this.renderer.pixelScale;
+    public applyMovementDelta(dx: number, dy: number): [number, number] {
 
         // Offset current grid position by delta, recording old offsets
         const oldGridOffsetX = this.gridOffsetX;
         const oldGridOffsetY = this.gridOffsetY;
         this.gridOffsetX += dx;
         this.gridOffsetY += dy;
-
-        // Record new last mouse position
-        this.lastMousePosition = [ ev.clientX, ev.clientY ];
 
         // Make sure new board position is valid
         this.constrainOffsetXY();
@@ -143,15 +115,14 @@ export class BoardRenderer {
         dx = this.gridOffsetX - oldGridOffsetX;
         dy = this.gridOffsetY - oldGridOffsetY;
 
-        // Redraw the board
-        this.redrawBoardMovement(dx, dy);
+        return [dx, dy];
     }
 
     /**
      * Constrain zoom to lower and upper bound
      */
     private constrainZoom(): void {
-        this.gridCellSize = clamp(this.gridCellSize, this.gridCellSizeLowerBound, this.gridCellSizeUpperBound);
+        this._gridCellSize = clamp(this._gridCellSize, this.gridCellSizeLowerBound, this.gridCellSizeUpperBound);
     }
 
     /**
@@ -159,59 +130,39 @@ export class BoardRenderer {
      */
     private constrainOffsetXY(): void {
         this.gridOffsetX = clamp(this.gridOffsetX,
-            -this.gridCellSize * (this.board.size[0] - 1),
-            this.renderer.boardCanvas.canvas.width - this.gridCellSize);
+            -this._gridCellSize * (this.board.size[0] - 1),
+            this.renderer.boardCanvas.canvas.width - this._gridCellSize);
 
         this.gridOffsetY = clamp(this.gridOffsetY,
-            -this.gridCellSize * (this.board.size[1] - 1),
-            this.renderer.boardCanvas.canvas.height - this.gridCellSize);
+            -this._gridCellSize * (this.board.size[1] - 1),
+            this.renderer.boardCanvas.canvas.height - this._gridCellSize);
     }
 
     /**
-     * Redraws the board after it has been moved
+     * Converts coordinates on the board to pixel coordinates on the canvas
      *
-     * @param  dx Delta X board has been moved by
-     * @param  dy Delta Y board has been moved by
+     * @param    x X coordinate of board position
+     * @param    y Y coordinate of board position
+     * @returns    Corresponding pixel coordinates on the canvas
      */
-    private redrawBoardMovement(dx: number, dy: number): void {
+    public translateBoardCoordinatePixel(x: number, y: number): [number, number] {
+        const transX = x * this._gridCellSize + this.gridOffsetX;
+        const transY = y * this._gridCellSize + this.gridOffsetY;
+        return [ transX, transY ];
+    }
 
-        // If no delta, ignore
-        // This may be caused by board drags resulting in no actual movement of the board due to movement constraints
-        if (dx === 0 && dy === 0)
-            return;
-
-        // Move all canvas elements by delta
-        let boardData = this.renderer.boardCanvas.context.getImageData(0, 0, this.renderer.boardCanvas.canvas.width, this.renderer.boardCanvas.canvas.height);
-        this.renderer.boardCanvas.context.putImageData(boardData, dx, dy);
-
-        // Buffer amount - Number of pixels to expand redraw region by in all directions
-        const bufferPixels = 10;
-        const singleBufferedDx = Math.abs(dx) + bufferPixels;
-        const singleBufferedDy = Math.abs(dy) + bufferPixels;
-        const doubleBufferedDx = singleBufferedDx + bufferPixels;
-        const doubleBufferedDy = singleBufferedDy + bufferPixels;
-
-        // xStart, yStart - Left or Top of canvas | Top or Left of board
-        // Whichever is closer to the center of the canvas
-        let xStart = Math.max(0, this.gridOffsetX - singleBufferedDx);
-        let yStart = Math.max(0, this.gridOffsetY - singleBufferedDy);
-
-        // xEnd, yEnd - Right or Bottom of canvas | Right or Bottom of board
-        // Whichever is closer to the center of the canvas
-        let xEnd = Math.min(this.renderer.boardCanvas.canvas.width - singleBufferedDx, this.gridOffsetX + this.gridSizePixelsX - bufferPixels);
-        let yEnd = Math.min(this.renderer.boardCanvas.canvas.height - singleBufferedDy, this.gridOffsetY + this.gridSizePixelsY - bufferPixels);
-
-        // Region to left or right of board being moved
-        if (dx !== 0)
-            this.redrawRegion(dx > 0 ? xStart : xEnd, this.gridOffsetY - singleBufferedDy, doubleBufferedDx, this.gridSizePixelsY + doubleBufferedDy);
-
-        // Region on top or bottom of board being moved
-        if (dy !== 0)
-            this.redrawRegion(this.gridOffsetX - singleBufferedDx, dy > 0 ? yStart : yEnd, this.gridSizePixelsX + doubleBufferedDx, doubleBufferedDy);
-
-        // Corner region
-        if (dx !== 0 && dy !== 0)
-            this.redrawRegion(dx > 0 ? xStart : xEnd, dy > 0 ? yStart : yEnd, doubleBufferedDx, doubleBufferedDy);
+    /**
+     * Converts pixel coordinates on the canvas to coordinates on the board
+     *
+     * @param    x                X coordinate on the canvas
+     * @param    y                Y coordinate on the canvas
+     * @param    roundingFunction Rounding function to apply to grid sub-coordinate
+     * @returns                   Corresponding coordinates on the board
+     */
+    public translatePixelCoordinateBoard(x: number, y: number, roundingFunction: (x: number) => number = Math.floor): [number, number] {
+        const transX = roundingFunction((x - this.gridOffsetX) / this._gridCellSize);
+        const transY = roundingFunction((y - this.gridOffsetY) / this._gridCellSize);
+        return [ transX, transY ];
     }
     
     /**
@@ -228,10 +179,10 @@ export class BoardRenderer {
         this.renderer.boardCanvas.context.clearRect(x, y, w, h);
 
         // Determine which tiles are within redraw bounds
-        const gridXStart = clamp(Math.floor((x - this.gridOffsetX) / this.gridCellSize), 0, this.board.size[0] - 1);
-        const gridYStart = clamp(Math.floor((y - this.gridOffsetY) / this.gridCellSize), 0, this.board.size[1] - 1);
-        const gridXEnd = clamp(Math.floor((x + w - this.gridOffsetX) / this.gridCellSize), 0, this.board.size[0] - 1);
-        const gridYEnd = clamp(Math.floor((y + h - this.gridOffsetY) / this.gridCellSize), 0, this.board.size[1] - 1);
+        const gridXStart = clamp(Math.floor((x - this.gridOffsetX) / this._gridCellSize), 0, this.board.size[0] - 1);
+        const gridYStart = clamp(Math.floor((y - this.gridOffsetY) / this._gridCellSize), 0, this.board.size[1] - 1);
+        const gridXEnd = clamp(Math.floor((x + w - this.gridOffsetX) / this._gridCellSize), 0, this.board.size[0] - 1);
+        const gridYEnd = clamp(Math.floor((y + h - this.gridOffsetY) / this._gridCellSize), 0, this.board.size[1] - 1);
 
         // Debug - Shows only redrawn regions
         // this.renderer.boardCanvas.context.clearRect(0, 0, this.renderer.boardCanvas.canvas.width, this.renderer.boardCanvas.canvas.height);
@@ -239,10 +190,10 @@ export class BoardRenderer {
         // this.renderer.boardCanvas.context.fillRect(x, y, w, h);
 
         // Redraw border for tiles
-        let borderX = this.gridOffsetX + gridXStart * this.gridCellSize - this.gridSep;
-        let borderY = this.gridOffsetY + gridYStart * this.gridCellSize - this.gridSep;
-        let borderW = (gridXEnd - gridXStart + 1) * this.gridCellSize + this.gridSep;
-        let borderH = (gridYEnd - gridYStart + 1) * this.gridCellSize + this.gridSep;
+        let borderX = this.gridOffsetX + gridXStart * this._gridCellSize - this.gridSep;
+        let borderY = this.gridOffsetY + gridYStart * this._gridCellSize - this.gridSep;
+        let borderW = (gridXEnd - gridXStart + 1) * this._gridCellSize + this.gridSep;
+        let borderH = (gridYEnd - gridYStart + 1) * this._gridCellSize + this.gridSep;
         this.renderer.boardCanvas.context.fillStyle = '#16246b';
         this.renderer.boardCanvas.context.fillRect(borderX, borderY, borderW, borderH);
 
@@ -254,10 +205,10 @@ export class BoardRenderer {
 
                 this.renderer.boardCanvas.context.fillStyle = tile.tileType.color;
                 this.renderer.boardCanvas.context.fillRect(
-                    this.gridOffsetX + tile.x * this.gridCellSize,
-                    this.gridOffsetY + tile.y * this.gridCellSize,
-                    this.gridCellSize - this.gridSep,
-                    this.gridCellSize - this.gridSep
+                    this.gridOffsetX + tile.x * this._gridCellSize,
+                    this.gridOffsetY + tile.y * this._gridCellSize,
+                    this._gridCellSize - this.gridSep,
+                    this._gridCellSize - this.gridSep
                 );
             }
         }
@@ -268,5 +219,13 @@ export class BoardRenderer {
      */
     public redrawAll(): void {
         this.redrawRegion(0, 0, this.renderer.boardCanvas.canvas.width, this.renderer.boardCanvas.canvas.height);
+    }
+
+    /**
+     * Getters and setters
+     */
+
+    public get gridCellSize(): number {
+        return this._gridCellSize;
     }
 }

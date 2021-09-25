@@ -5,5 +5,6 @@ import { IBaseServerEvent } from './i-server-event';
 export interface IGameStartEvent extends IBaseServerEvent {
     event: 'gameStart',
     boardInfo: IBoardInfo,
-    playerInfo: IPlayerInfo
+    playerInfo: IPlayerInfo,
+    playerColors: { [id: string]: string }
 }

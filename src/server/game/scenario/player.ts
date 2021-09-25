@@ -1,5 +1,6 @@
 import Joi from 'joi';
 import { IPlayerInfo } from '../../../shared/network/scenario/i-player-info';
+import { randomHex } from '../../../shared/utility';
 import { Client } from '../sockets/client';
 import { Attribute } from './attributes/attribute';
 import {
@@ -21,6 +22,7 @@ import { getJSONFromEntry, UnpackingError } from './unpacker';
  */
 export class Player implements IAttributeHolder {
     public client: Client | undefined;
+    public readonly color: string;
 
     /**
      * Player constructor
@@ -32,6 +34,9 @@ export class Player implements IAttributeHolder {
     public constructor(public readonly spawnRegion: string,
                        public readonly ships: Ship[],
                        public readonly attributes: AttributeMap) {
+
+        // Generate a random color for the player
+        this.color = randomHex();
     }
 
     /**

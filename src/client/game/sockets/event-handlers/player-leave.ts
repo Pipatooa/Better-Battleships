@@ -1,4 +1,5 @@
 import { IPlayerLeaveEvent } from '../../../../shared/network/events/i-player-leave';
+import { allPlayers } from '../../player';
 
 /**
  * Handles a player leave event from the server
@@ -7,6 +8,7 @@ import { IPlayerLeaveEvent } from '../../../../shared/network/events/i-player-le
  */
 export function handlePlayerLeave(playerLeave: IPlayerLeaveEvent): void {
 
-    // Select and remove player element
-    $(`#player-${playerLeave.playerIdentity.replace(':', '\\:')}`).remove();
+    // Deconstruct player
+    const player = allPlayers[playerLeave.playerIdentity];
+    player.deconstruct();
 }

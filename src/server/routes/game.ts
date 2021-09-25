@@ -46,6 +46,7 @@ router.get('/:gameID', requireAuth, async (req, res) => {
     // If session exists
     if (rows.length !== 0) {
         console.log(rows);
+        // TODO: Session reconnection
     }
 
     // Deliver page content

@@ -19,7 +19,6 @@ import { getJSONFromEntry, UnpackingError } from './unpacker';
 export class Ship implements IAttributeHolder {
 
     public x = 0;
-
     public y = 0;
 
     /**
@@ -55,15 +54,15 @@ export class Ship implements IAttributeHolder {
         const cells: [number, number][] = [];
 
         // Iterate through entries in pattern
-        this._pattern.forEachEntry((dx: number, dy: number) => {
+        for (const patternEntry of this._pattern.patternEntries) {
 
             // Offset pattern entries by the position of the ship and offset provided
-            const x: number = dx + this.x + offset[0];
-            const y: number = dy + this.y + offset[1];
+            const x: number = patternEntry.x + this.x + offset[0];
+            const y: number = patternEntry.y + this.y + offset[1];
 
             // Add cell coordinate to list of cells
             cells.push([ x, y ]);
-        });
+        }
 
         // Return list of cell coordinates
         return cells;
@@ -131,7 +130,7 @@ export class Ship implements IAttributeHolder {
     public makeTransportable(): IShipInfo {
         return {
             descriptor: this.descriptor.makeTransportable(),
-            pattern: this._pattern.makeTransportable()
+            pattern: this._pattern.makeTransportable(false)
         };
     }
 }

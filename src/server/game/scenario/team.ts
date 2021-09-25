@@ -22,7 +22,7 @@ import { getJSONFromEntry, UnpackingError } from './unpacker';
  * Contains information about a collection of players
  */
 export class Team implements IAttributeHolder {
-    public readonly players: Player[] = [];
+    protected players: Player[] = [];
 
     /**
      * Team constructor
@@ -38,7 +38,6 @@ export class Team implements IAttributeHolder {
                        protected _playerPrototypes: Player[][],
                        public readonly color: string,
                        public readonly attributes: AttributeMap) {
-
     }
 
     /**
@@ -134,7 +133,8 @@ export class Team implements IAttributeHolder {
     public makeTransportable(): ITeamInfo {
         return {
             descriptor: this.descriptor.makeTransportable(),
-            maxPlayers: this._playerPrototypes.length
+            maxPlayers: this._playerPrototypes.length,
+            color: this.color
         };
     }
 

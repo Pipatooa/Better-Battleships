@@ -14,8 +14,8 @@ import { Team } from '../scenario/team';
 export class Client {
 
     public readonly id: string;
-    public team: Team | undefined;
     public player: Player | undefined;
+    public team: Team | undefined;
     public ready = false;
 
     public readonly identity: string;

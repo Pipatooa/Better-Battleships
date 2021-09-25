@@ -89,6 +89,8 @@ export class Scenario implements IAttributeHolder {
             teamInfo[name] = team.makeTransportable();
         }
 
+        //
+
         // Return scenario info
         return {
             author: this.author,

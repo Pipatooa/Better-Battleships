@@ -72,29 +72,31 @@ export class Game {
                 this.timeoutManager.startTimeout('gameJoinTimeout');
         });
 
+        // Create dictionary of team assignments for each client
+        let teamAssignments: { [id: string]: string | null } = {};
+        for (const client of this.clients) {
+            teamAssignments[client.identity] = client.team ? client.team.id : null;
+        }
+
         // Send client information about the scenario
         client.sendEvent({
             event: 'gameInfo',
-            scenario: this.scenario.makeTransportable()
+            scenario: this.scenario.makeTransportable(),
+            teamAssignments: teamAssignments
         });
 
+        // Broadcast player join to all existing clients
         for (const existingClient of this.clients) {
+
+            if (existingClient === client)
+                continue;
+
             existingClient.sendEvent({
                 event: 'playerJoin',
                 playerIdentity: client.identity,
                 team: client.team?.id,
                 ready: client.ready
             });
-
-            // Broadcast existing client information to new client
-            if (existingClient !== client) {
-                client.sendEvent({
-                    event: 'playerJoin',
-                    playerIdentity: existingClient.identity,
-                    team: existingClient.team?.id,
-                    ready: client.ready
-                });
-            }
         }
     }
 
@@ -171,7 +173,7 @@ export class Game {
     public startGame(): void {
 
         // Set game phase to started
-        this._gamePhase = GamePhase.Started;
+        this._gamePhase = GamePhase.Setup;
 
         // Group players by their teams
         const teamGroups: { [name: string]: Client[] } = {};
@@ -193,12 +195,19 @@ export class Game {
             team.setPlayers(clients);
         }
 
+        // Generate dictionary of player colors
+        const playerColors: { [id: string]: string } = {};
+        for (const client of this.clients) {
+            playerColors[client.identity] = client.player!.color;
+        }
+
         // Broadcast game start
         for (const client of this.clients) {
             client.sendEvent({
                 event: 'gameStart',
                 boardInfo: this.scenario.board.makeTransportable(),
-                playerInfo: client.player!.makeTransportable()
+                playerInfo: client.player!.makeTransportable(),
+                playerColors: playerColors
             });
         }
     }
@@ -226,5 +235,7 @@ export class Game {
 export enum GamePhase {
     Lobby,
     Starting,
-    Started
+    Setup,
+    InProgress,
+    Finished
 }

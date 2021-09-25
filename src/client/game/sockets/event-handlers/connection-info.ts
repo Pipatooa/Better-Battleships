@@ -1,6 +1,6 @@
 import { IConnectionInfoEvent } from '../../../../shared/network/events/i-connection-info';
 
-export let identity: string;
+export let selfIdentity: string;
 
 /**
  * Handles a connection info event from the server
@@ -10,5 +10,5 @@ export let identity: string;
 export function handleConnectionInfo(connectionInfo: IConnectionInfoEvent): void {
 
     // Store identity for later use
-    identity = connectionInfo.identity;
+    selfIdentity = connectionInfo.identity;
 }

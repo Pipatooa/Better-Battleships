@@ -21,10 +21,9 @@ export class CanvasInfo {
         // Get 2D rendering context for this canvas
         this.context = canvas.getContext('2d')!;
 
-        // Set height and width of canvas for the first time
-        this.canvas.width = this.canvas.clientWidth * this._pixelScale;
-        this.canvas.height = this.canvas.clientHeight * this._pixelScale;
-        this._canvasScale = 1000 / Math.min(this.canvas.width, this.canvas.height);
+        // Set canvas size for the first time
+        this._canvasScale = 0;
+        this.onResize();
 
         // Cache container for this canvas
         this.canvasParent = this.canvas.offsetParent as HTMLDivElement;
@@ -34,8 +33,14 @@ export class CanvasInfo {
      * Resizes canvas when window is resized
      */
     public onResize(): void {
-        this.canvas.width = this.canvas.clientWidth * this._pixelScale;
-        this.canvas.height = this.canvas.clientHeight * this._pixelScale;
+
+        // Split declaration to ensure that canvas height does not change between assignments
+        const newWidth: number = this.canvas.clientWidth * this._pixelScale;
+        const newHeight: number = this.canvas.clientHeight * this._pixelScale;
+        this.canvas.width = newWidth;
+        this.canvas.height = newHeight;
+
+        // Relative canvas size compared to a 1000x1000 canvas
         this._canvasScale = 1000 / Math.min(this.canvas.width, this.canvas.height);
     }
 
@@ -60,10 +65,20 @@ export class CanvasInfo {
      * @returns    Canvas pixel coordinates corresponding to mouse coordinates
      */
     public translateMouseCoordinatePixel(x: number, y: number): [number, number] {
-
         const transX = (x - this.canvasParent.offsetLeft) * this._pixelScale;
         const transY = (y - this.canvasParent.offsetTop) * this._pixelScale;
         return [ transX, transY ];
+    }
+
+    /**
+     * Moves all pixel data on this canvas by specified delta
+     *
+     * @param  dx Horizontal distance to move pixel data
+     * @param  dy Vertical distance to move pixel data
+     */
+    public movePixelData(dx: number, dy: number): void {
+        const pixelData = this.context.getImageData(0, 0, this.canvas.width, this.canvas.height);
+        this.context.putImageData(pixelData, dx, dy);
     }
 
     /**
@@ -75,6 +90,6 @@ export class CanvasInfo {
     }
 
     public get canvasScale(): number {
-        return this._pixelScale;
+        return this._canvasScale;
     }
 }

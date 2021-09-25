@@ -1,15 +1,20 @@
 import { IGameStartEvent } from '../../../../shared/network/events/i-game-start';
-import { initGameRenderer } from '../../canvas/game-renderer';
+import { gameRenderer, initGameRenderer } from '../../canvas/game-renderer';
+import { PatternRenderer } from '../../canvas/pattern-renderer';
+import { game } from '../../game';
+import { allPlayers, selfPlayer } from '../../player';
 import { Board } from '../../scenario/board';
+import { Pattern } from '../../scenario/pattern';
+import { Ship } from '../../scenario/ship';
 
 /**
  * Game testing data
  */
-$(document).ready(async () => {
+/*$(document).ready(async () => {
     await handleGameStart({
         'event': 'gameStart',
         'boardInfo': {
-            'size': [ 15, 15 ],
+            'size': [15, 15],
             'tileTypes': {
                 '.': {
                     'descriptor': {
@@ -53,11 +58,11 @@ $(document).ready(async () => {
                     },
                     'pattern': {
                         'tiles': [
-                            [ 0, 0, 1 ],
-                            [ 0, 1, 1 ],
-                            [ 0, 2, 1 ],
-                            [ 0, 3, 1 ],
-                            [ 0, 4, 1 ]
+                            [0, 0, null],
+                            [0, 1, null],
+                            [0, 2, null],
+                            [0, 3, null],
+                            [0, 4, null]
                         ]
                     }
                 },
@@ -68,17 +73,41 @@ $(document).ready(async () => {
                     },
                     'pattern': {
                         'tiles': [
-                            [ 0, 0, 1 ],
-                            [ 0, 1, 1 ],
-                            [ 0, 2, 1 ],
-                            [ 0, 3, 1 ]
+                            [0, 0, null],
+                            [0, 1, null],
+                            [0, 2, null],
+                            [0, 3, null]
                         ]
                     }
                 }
             ]
+        },
+        'teamInfo': {
+            'blue': {
+                'descriptor': {
+                    'name': 'Blue Team',
+                    'description': 'This is the blue team'
+                },
+                'maxPlayers': 0,
+                'color': '#0000FF',
+                'players': [
+                    'user:Test'
+                ]
+            },
+            'red': {
+                'descriptor': {
+                    'name': 'Red Team',
+                    'description': 'This is the red team'
+                },
+                'maxPlayers': 0,
+                'color': '#FF0000',
+                'players': [
+                    'user:Timmy'
+                ]
+            }
         }
     });
-});
+});*/
 
 /**
  * Handles a game start event from the server
@@ -94,6 +123,20 @@ export async function handleGameStart(gameStartEvent: IGameStartEvent): Promise<
     $('#game-container').removeClass('d-none');
 
     // Unpack board data
-    const board = await Board.fromSource(gameStartEvent.boardInfo);
-    initGameRenderer(board);
+    game.board = await Board.fromSource(gameStartEvent.boardInfo);
+
+    // Unpack player colors
+    for (const [playerIdentity, color] of Object.entries(gameStartEvent.playerColors)) {
+        allPlayers[playerIdentity].color = color;
+    }
+
+    // Unpack player info
+    game.availableShips = [];
+    for (const shipInfo of gameStartEvent.playerInfo.ships) {
+        const pattern = Pattern.fromSource(shipInfo.pattern);
+        const ship = new Ship(-1, -1, shipInfo.descriptor, pattern, selfPlayer);
+        game.availableShips.push(ship);
+    }
+
+    initGameRenderer();
 }

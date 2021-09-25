@@ -26,3 +26,11 @@
 .game-right-pane {
     border-left: black 2px solid;
 }
+
+.button-previous-container, .button-next-container {
+    width: 49%;
+}
+
+.button-next-container {
+    margin-left: auto;
+}

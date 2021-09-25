@@ -20,3 +20,13 @@ export function nameFromIdentity(identity: string): string {
     const match = /.+?:(.+)/.exec(identity);
     return (match as RegExpMatchArray)[1];
 }
+
+
+/**
+ * Returns a random color hex code
+ *
+ * @returns  Randomly generated hex code
+ */
+export function randomHex(): string {
+    return '#' + ('000000' + Math.floor(Math.random() * Math.pow(256, 3)).toString(16)).slice(-6);
+}

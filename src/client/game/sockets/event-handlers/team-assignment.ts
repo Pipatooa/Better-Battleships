@@ -1,4 +1,6 @@
 import { ITeamAssignmentEvent } from '../../../../shared/network/events/i-team-assignment';
+import { game } from '../../game';
+import { allPlayers } from '../../player';
 
 /**
  * Handles a team assignment event from the server
@@ -7,8 +9,8 @@ import { ITeamAssignmentEvent } from '../../../../shared/network/events/i-team-a
  */
 export function handleTeamAssignment(teamAssignment: ITeamAssignmentEvent): void {
 
-    // Select player element using identity and reassign parent element to new team pane
-    const playerElement = $(`#player-${teamAssignment.playerIdentity.replace(':', '\\:')}`);
-    const teamPane = $(`#team-${teamAssignment.team}`);
-    playerElement.appendTo(teamPane);
+    // Fetch player and team and reassign player to team
+    const player = allPlayers[teamAssignment.playerIdentity];
+    const team = game.teams[teamAssignment.team];
+    player.assignTeam(team);
 }

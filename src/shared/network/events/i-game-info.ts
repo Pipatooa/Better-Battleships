@@ -6,5 +6,6 @@ import { IBaseServerEvent } from './i-server-event';
  */
 export interface IGameInfoEvent extends IBaseServerEvent {
     event: 'gameInfo',
-    scenario: IScenarioInfo
+    scenario: IScenarioInfo,
+    teamAssignments: { [id: string]: string | null }
 }

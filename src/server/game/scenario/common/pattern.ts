@@ -17,15 +17,15 @@ export class Pattern {
     /**
      * Pattern constructor
      *
-     * @param  patternEntries List of pattern entries for pattern
-     * @param  center         Center of the pattern about which rotations happen
+     * @param  _patternEntries List of pattern entries for pattern
+     * @param  center          Center of the pattern about which rotations happen
      */
-    public constructor(protected readonly patternEntries: PatternEntry[],
+    public constructor(protected readonly _patternEntries: PatternEntry[],
                        protected readonly center: [number, number]) {
 
         this.patternEntryMap = {};
 
-        for (const patternEntry of patternEntries) {
+        for (const patternEntry of _patternEntries) {
             const key = `${patternEntry.x},${patternEntry.y}`;
             this.patternEntryMap[key] = patternEntry.value;
         }
@@ -38,7 +38,7 @@ export class Pattern {
      * @returns           New Pattern object with all entries rotated about the center of the pattern
      */
     public rotated(rotation: Rotation): Pattern {
-        const patternEntries: PatternEntry[] = this.patternEntries.map((patternEntry: PatternEntry) => {
+        const patternEntries: PatternEntry[] = this._patternEntries.map((patternEntry: PatternEntry) => {
 
             // Get dx and dy of pattern entry from pattern center
             const dx: number = patternEntry.x - this.center[0];
@@ -103,7 +103,7 @@ export class Pattern {
      * @param  callback Callback function to run on each entry
      */
     public forEachEntry(callback: (x: number, y: number, value: number) => void): void {
-        for (const patternEntry of this.patternEntries) {
+        for (const patternEntry of this._patternEntries) {
             callback(patternEntry.x, patternEntry.y, patternEntry.value);
         }
     }
@@ -175,19 +175,32 @@ export class Pattern {
      *
      * May not include all details of the object. Just those that the client needs to know.
      *
-     * @returns  Created IPatternInfo object
+     * @param    includeValue Whether or not to include the value for each pattern entry
+     * @returns               Created IPatternInfo object
      */
-    public makeTransportable(): IPatternInfo {
+    public makeTransportable(includeValue: boolean): IPatternInfo {
 
         // Convert pattern entries to list of number entries
-        const tiles: [number, number, number][] = [];
-        for (const patternEntry of this.patternEntries) {
-            tiles.push([ patternEntry.x, patternEntry.y, patternEntry.value ]);
+        const tiles: [number, number, number][] | [number, number][] = [];
+        for (const patternEntry of this._patternEntries) {
+            if (includeValue)
+                (tiles as [number, number, number][]).push([ patternEntry.x, patternEntry.y, patternEntry.value ]);
+            else
+                (tiles as [number, number][]).push([ patternEntry.x, patternEntry.y ]);
         }
 
         return {
+            center: this.center,
             tiles: tiles
         };
+    }
+
+    /**
+     * Getters and setters
+     */
+
+    public get patternEntries(): PatternEntry[] {
+        return this._patternEntries;
     }
 }
 
@@ -207,7 +220,7 @@ export class PatternEntry {
  * JSON source interface reflecting schema
  */
 export interface IPatternSource {
-    size: number[],
+    size: [number, number],
     values: { [char: string]: number },
     pattern: string[]
 }
