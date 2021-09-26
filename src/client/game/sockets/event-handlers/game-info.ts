@@ -1,7 +1,9 @@
 import { IGameInfoEvent } from '../../../../shared/network/events/i-game-info';
+import { searchParams } from '../../../game';
 import { initGame } from '../../game';
 import { Player } from '../../player';
 import { Team } from '../../team';
+import { joinTeam, ready } from '../button-functions';
 
 /**
  * Handles a game info event from the server
@@ -34,4 +36,10 @@ export function handleGameInfo(gameInfo: IGameInfoEvent): void {
 
     // Initialise main game object
     initGame(teams);
+
+    // If team flag set, automatically assign this player to a team
+    if (searchParams.has('team')) {
+        joinTeam(searchParams.get('team')!);
+        ready(true);
+    }
 }

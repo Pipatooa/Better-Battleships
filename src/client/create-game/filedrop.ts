@@ -77,3 +77,21 @@ function onChange(ev: ChangeEvent): void {
         file = files[0];
     }
 }
+
+/**
+ * Sets the file from a url download
+ *
+ * @param  url Url to download file from
+ */
+export async function setFileFromDownload(url: string): Promise<void> {
+
+    // Submit request
+    const res: Response = await fetch(url, {
+        method: 'GET',
+        credentials: 'same-origin'
+    });
+
+    const data = await res.blob();
+    file = new File([data], 'scenario.zip');
+    console.log(file);
+}

@@ -1,3 +1,6 @@
+import { flags } from '../game';
+import { copyToClipboard } from '../utils/utils';
+
 let shareLinkElement: JQuery;
 
 /**
@@ -19,21 +22,11 @@ export function registerShareLinkHandlers(): void {
  */
 function onShareLinkClick(): void {
 
-    // Create temporary input element and add it to the document
-    const temp = $('<input>');
-    $('body').append(temp);
-
     // Get share link text
     const shareLinkText = shareLinkElement.html();
 
-    // Set value of temporary input to share link and select it
-    temp.val(shareLinkText).select();
-
-    // Copy currently selected text
-    document.execCommand('copy');
-
-    // Remove temporary element
-    temp.remove();
+    // Copy link to clipboard
+    copyToClipboard(shareLinkText);
 
     // Update tooltip to show 'Copied to clipboard!'
     shareLinkElement.attr('data-bs-original-title', 'Copied to clipboard!');

@@ -14,7 +14,7 @@ export class Team {
     public readonly color: string;
     public readonly maxPlayers: number;
 
-    protected players: Player[] = [];
+    protected _players: Player[] = [];
     public readonly lobbyPlayerContainerElement: JQuery;
 
     /**
@@ -73,7 +73,7 @@ export class Team {
      * @param  player Player to add to the team
      */
     public addPlayer(player: Player): void {
-        this.players.push(player);
+        this._players.push(player);
         player.team = this;
     }
 
@@ -83,7 +83,15 @@ export class Team {
      * @param  player Player to remove from the team
      */
     public removePlayer(player: Player): void {
-        this.players = this.players.filter(p => p !== player);
+        this._players = this._players.filter(p => p !== player);
         player.team = undefined;
+    }
+
+    /**
+     * Getters and setters
+     */
+
+    public get players(): Player[] {
+        return this._players;
     }
 }

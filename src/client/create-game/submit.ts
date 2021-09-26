@@ -31,7 +31,7 @@ export async function submit(errorContainer: JQuery, errorMessageElement: JQuery
 
     // If successful, redirect user to game joining screen
     if (serverResponse.success)
-        window.location.href = `/game/${serverResponse.gameID}`;
+        window.location.href = `/game/${serverResponse.gameID}${window.location.search}`;
 
     // Otherwise, display problem to user
     else {

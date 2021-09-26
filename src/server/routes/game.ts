@@ -64,7 +64,7 @@ router.get('/:gameID', requireAuth, async (req, res) => {
         scripts: [
             '/js/game.js'
         ],
-        gameUrl: req.baseUrl + req.url
+        gameUrl: req.baseUrl + req.path
     });
 });
 
