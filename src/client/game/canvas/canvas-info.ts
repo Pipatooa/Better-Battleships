@@ -9,6 +9,9 @@ export class CanvasInfo {
     protected canvasParent: HTMLDivElement;
     protected _canvasScale: number;
 
+    private onMoveListeners: [number, (dx: number, dy: number) => void][] = [];
+    private onMoveListenerNextID = 0;
+
     /**
      * CanvasInfo constructor
      *
@@ -79,6 +82,31 @@ export class CanvasInfo {
     public movePixelData(dx: number, dy: number): void {
         const pixelData = this.context.getImageData(0, 0, this.canvas.width, this.canvas.height);
         this.context.putImageData(pixelData, dx, dy);
+
+        // Call movement listeners
+        for (const listenerInfo of this.onMoveListeners) {
+            listenerInfo[1](dx, dy);
+        }
+    }
+
+    /**
+     * Registers a new listener that will be called when the canvas is moved
+     *
+     * @param    listener Listener to call
+     * @returns           ID that was assigned to the listener
+     */
+    public registerOnMoveListener(listener: (dx: number, dy: number) => void): number {
+        this.onMoveListeners.push([this.onMoveListenerNextID, listener]);
+        return this.onMoveListenerNextID++;
+    }
+
+    /**
+     * Removes a canvas movement listener with a given ID
+     *
+     * @param  listenerID ID of the listener to remove
+     */
+    public removeOnMoveListener(listenerID: number): void {
+        this.onMoveListeners = this.onMoveListeners.filter(l => l[0] !== listenerID);
     }
 
     /**

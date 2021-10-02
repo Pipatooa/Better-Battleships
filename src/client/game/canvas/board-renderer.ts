@@ -54,7 +54,7 @@ export class BoardRenderer {
         this.redrawAll();
 
         // Register event listeners
-        this.renderer.shipCanvas.canvas.addEventListener('wheel', (ev: WheelEvent) => this.onScroll(ev));
+        this.renderer.topCanvas.canvas.addEventListener('wheel', (ev: WheelEvent) => this.onScroll(ev));
     }
 
     /**
@@ -63,11 +63,6 @@ export class BoardRenderer {
      * @param  ev Mouse wheel event
      */
     private onScroll(ev: WheelEvent): void {
-
-        // Check that scroll is targeting board or ship canvas
-        if (! (ev.target as unknown === this.renderer.boardCanvas.canvas
-            || ev.target as unknown === this.renderer.shipCanvas.canvas))
-            return;
 
         // Prevent scrolling of page
         ev.preventDefault();
@@ -87,8 +82,7 @@ export class BoardRenderer {
         this.constrainOffsetXY();
 
         // Call redraw functions
-        this.redrawAll();
-        this.renderer.shipRenderer.redrawAll();
+        this.renderer.redrawAll();
     }
 
     /**

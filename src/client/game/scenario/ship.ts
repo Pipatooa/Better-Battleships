@@ -1,4 +1,3 @@
-import { gameRenderer } from '../canvas/game-renderer';
 import { PatternRenderer } from '../canvas/pattern-renderer';
 import { Player } from '../player';
 import { Descriptor } from './descriptor';
@@ -34,4 +33,34 @@ export class Ship {
         // Add ship to list of all ships
         allShips.push(this);
     }
+}
+
+/**
+ * Finds a ship at a given location
+ *
+ * @param    x X coordinate to look for ship
+ * @param    y Y coordinate to look for 
+ * @returns    Found ship or null if no ship is found
+ */
+export function findShip(x: number, y: number): Ship | null {
+    
+    // Iterate through all ships
+    for (const ship of allShips) {
+        
+        // Iterate through all cells of each ship
+        for (const patternEntry of ship.pattern.patternEntries) {
+            
+            // Calculate position of cell relative to board
+            const shipX = ship.x + patternEntry.x;
+            const shipY = ship.y + patternEntry.y;
+            
+            // If tile is at location, return ship
+            if (x == shipX && y == shipY) {
+                return ship;
+            }
+        }
+    }
+    
+    // Otherwise return no ship
+    return null;
 }

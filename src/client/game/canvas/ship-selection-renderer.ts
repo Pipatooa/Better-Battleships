@@ -44,16 +44,14 @@ export class ShipSelectionRenderer {
         // Register button handlers
         $('#button-previous-ship').on('click', () => this.previousShip());
         $('#button-next-ship').on('click', () => this.nextShip());
-        
-        // Set rendering flag for first ship
-        this.ships[0].doRender = true;
-        this.renderer.shipRenderer.redrawAll();
+        this.renderer.shipSelectionCanvas.canvas.addEventListener('click', () => this.selectCurrent());
+
+        /*// Set rendering flag for first ship
+        this.ships[0].doRender = false;
+        this.renderer.shipRenderer.redrawAll();*/
         
         // Draw ship selection for the first time
-        this.render();
-        
-        // Register event handlers
-        this.renderer.shipCanvas.canvas.addEventListener('pointermove', (ev) => this.onPointerMove(ev));
+        this.redrawAll();
     }
 
     /**
@@ -76,11 +74,15 @@ export class ShipSelectionRenderer {
     /**
      * Renders ships to the ship selection screen
      */
-    public render(): void {
+    public redrawAll(): void {
         let canvasInfo = this.renderer.shipSelectionCanvas;
 
         // Clear the canvas
         canvasInfo.context.clearRect(0, 0, canvasInfo.canvas.width, canvasInfo.canvas.height);
+
+        // Check if ship is still available to draw
+        if (this.ships.length === 0)
+            return;
 
         // Calculate where ship should appear within window
         const ratio = 0.75;
@@ -98,6 +100,9 @@ export class ShipSelectionRenderer {
      */
     private previousShip(): void {
 
+        if (this.ships.length === 0)
+            return;
+
         // De-render old ship
         this.ships[this.selectedIndex].doRender = false;
         this.ships[this.selectedIndex].patternRenderer!.deRender();
@@ -107,13 +112,16 @@ export class ShipSelectionRenderer {
 
         // Render new ship
         this.ships[this.selectedIndex].doRender = true;
-        this.render();
+        this.redrawAll();
     }
 
     /**
      * Called when the next ship button is hit
      */
     private nextShip(): void {
+
+        if (this.ships.length === 0)
+            return;
 
         // De-render old ship
         this.ships[this.selectedIndex].doRender = false;
@@ -124,6 +132,22 @@ export class ShipSelectionRenderer {
 
         // Render new ship
         this.ships[this.selectedIndex].doRender = true;
-        this.render();
+        this.redrawAll();
+    }
+    
+    /**
+     * Called when the user clicks on the current ship
+     */
+    public selectCurrent(): void {
+
+        // Pop ship and pattern renderer at selected index
+        const ship = this.ships.splice(this.selectedIndex, 1)[0];
+        this.patternRenderers.splice(this.selectedIndex, 1);
+
+        // Set selected ship to popped ship
+        this.renderer.selectedShipRenderer.setSelected(ship);
+
+        // Rerender available ships
+        this.redrawAll();
     }
 }

@@ -1,7 +1,6 @@
 import { registerShareLinkHandlers } from './game/share-link-tooltip';
 import { ready } from './game/sockets/button-functions';
 import { openSocketConnection } from './game/sockets/opener';
-import { copyToClipboard } from './utils/utils';
 
 openSocketConnection();
 

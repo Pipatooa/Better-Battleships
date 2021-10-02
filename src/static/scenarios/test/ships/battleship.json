@@ -25,7 +25,10 @@
         "type": "attributeReference",
         "attribute": "player.shipCount"
       },
-      "constraints": [],
+      "constraints": [{
+        "min": 5,
+        "max": 7
+      }],
       "readonly": false
     }
   }

@@ -1,6 +1,7 @@
 import { game } from '../game';
 import { BoardRenderer } from './board-renderer';
 import { CanvasInfo } from './canvas-info';
+import { SelectedShipRenderer } from './selected-ship-renderer';
 import { ShipRenderer } from './ship-renderer';
 import { ShipSelectionRenderer } from './ship-selection-renderer';
 
@@ -15,10 +16,13 @@ export class GameRenderer {
     
     public readonly boardCanvas: CanvasInfo;
     public readonly shipCanvas: CanvasInfo;
+    public readonly selectedShipCanvas: CanvasInfo;
     public readonly shipSelectionCanvas: CanvasInfo;
+    public readonly topCanvas: CanvasInfo;
     
     public readonly boardRenderer: BoardRenderer;
     public readonly shipRenderer: ShipRenderer;
+    public readonly selectedShipRenderer: SelectedShipRenderer;
     public readonly shipSelectionRenderer: ShipSelectionRenderer;
 
     protected _pixelScale = 1;
@@ -33,17 +37,23 @@ export class GameRenderer {
      */
     public constructor() {
 
-        let boardCanvasElement = $('#board-canvas').get(0) as HTMLCanvasElement;
-        let shipCanvasElement = $('#ship-canvas').get(0) as HTMLCanvasElement;
-        let shipSelectionCanvasElement = $('#ship-selection-canvas').get(0) as HTMLCanvasElement;
+        // Fetch HTML canvas elements
+        const boardCanvasElement = $('#board-canvas').get(0) as HTMLCanvasElement;
+        const shipCanvasElement = $('#ship-canvas').get(0) as HTMLCanvasElement;
+        const selectedShipCanvasElement = $('#selected-ship-canvas').get(0) as HTMLCanvasElement;
+        const shipSelectionCanvasElement = $('#ship-selection-canvas').get(0) as HTMLCanvasElement;
 
+        // Create CanvasInfo objects from canvas elements
         this.boardCanvas = new CanvasInfo(boardCanvasElement, this._pixelScale);
         this.shipCanvas = new CanvasInfo(shipCanvasElement, this._pixelScale);
+        this.selectedShipCanvas = new CanvasInfo(selectedShipCanvasElement, this._pixelScale);
         this.shipSelectionCanvas = new CanvasInfo(shipSelectionCanvasElement, this._pixelScale);
+        this.topCanvas = this.selectedShipCanvas;
         
         // Create renderers
         this.boardRenderer = new BoardRenderer(this, game.board!);
         this.shipRenderer = new ShipRenderer(this);
+        this.selectedShipRenderer = new SelectedShipRenderer(this);
         this.shipSelectionRenderer = new ShipSelectionRenderer(this, game.availableShips!);
 
         // Register event listeners
@@ -59,9 +69,7 @@ export class GameRenderer {
         this.shipCanvas.onResize();
         this.shipSelectionCanvas.onResize();
 
-        this.boardRenderer.redrawAll();
-        this.shipRenderer.redrawAll();
-        this.shipSelectionRenderer.render();
+        this.redrawAll();
     }
 
     /**
@@ -71,19 +79,18 @@ export class GameRenderer {
      */
     private onPointerMove(ev: PointerEvent): void {
 
-        // Mouse drag stop
-        if (this.moving && ev.buttons === 0) {
-            this.moving = false;
-            return;
-        }
-
         // Mouse drag start - Pointer must be targeting board or ship canvas
-        if (!this.moving && (ev.target as unknown === this.boardCanvas.canvas
-                         || ev.target as unknown === this.shipCanvas.canvas)
-        ) {
+        if (!this.moving && ev.target as unknown === this.topCanvas.canvas) {
             this.moving = true;
             this.lastMousePosition = [ ev.clientX, ev.clientY ];
             ev.preventDefault();
+
+            return;
+        }
+
+        // Mouse drag stop
+        if (this.moving && ev.buttons === 0) {
+            this.moving = false;
             return;
         }
 
@@ -112,6 +119,7 @@ export class GameRenderer {
         // Move canvas pixel data by delta
         this.boardCanvas.movePixelData(dx, dy);
         this.shipCanvas.movePixelData(dx, dy);
+        // this.selectedShipCanvas.movePixelData(dx, dy);
 
         // Calculate regions which need to be redrawn after movement
         const regions = this.calculateViewportMovementRedrawRegions(dx, dy);
@@ -121,6 +129,8 @@ export class GameRenderer {
             this.boardRenderer.redrawRegion(x, y, w, h);
             this.shipRenderer.redrawRegion(x, y, w, h);
         }
+
+        this.selectedShipRenderer.redrawAll();
     }
 
     /**
@@ -149,10 +159,17 @@ export class GameRenderer {
         else if (dy < 0)
             regions.push([0, this.boardCanvas.canvas.height - bufferPixels + dy, this.boardCanvas.canvas.width, bufferPixels - dy]);
 
-        // Corner region
-        // ....
-
         return regions;
+    }
+
+    /**
+     * Calls redraw function on all sub-renderers
+     */
+    public redrawAll(): void {
+        this.boardRenderer.redrawAll();
+        this.shipRenderer.redrawAll();
+        this.selectedShipRenderer.redrawAll();
+        this.shipSelectionRenderer.redrawAll();
     }
 
     /**
