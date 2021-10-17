@@ -4,6 +4,7 @@ import { baseRequestSchema, ClientRequestID, IClientRequest } from '../../../sha
 import { Client } from './client';
 import { handleJoinTeamRequest, joinTeamRequestSchema } from './request-handlers/join-team';
 import { handleReadyRequest, readyRequestSchema } from './request-handlers/ready';
+import { handleShipPlacementRequest, shipPlacementRequestSchema } from './request-handlers/ship-placement';
 
 /**
  * Handles a request from the client
@@ -63,5 +64,6 @@ export async function handleMessage(client: Client, msg: Data): Promise<void> {
  */
 const requestSchemaAndHandlers: Record<ClientRequestID, [Joi.Schema, (client: Client, request: any) => void]> = {
     joinTeam: [ joinTeamRequestSchema, handleJoinTeamRequest ],
-    ready: [ readyRequestSchema, handleReadyRequest ]
+    ready: [ readyRequestSchema, handleReadyRequest ],
+    shipPlacement: [ shipPlacementRequestSchema, handleShipPlacementRequest ]
 };

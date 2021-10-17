@@ -1,4 +1,4 @@
-import { IGameStartingEvent } from '../../../../shared/network/events/i-game-starting';
+import { IEnteringSetupEvent } from '../../../../shared/network/events/i-entering-setup';
 import { TimeoutManager } from '../../../../shared/timeout-manager';
 
 let statusTextElement: JQuery;
@@ -13,17 +13,17 @@ export const gameCountdownManager = new TimeoutManager({
 
 
 /**
- * Handles a game starting event from the server
+ * Handles an entering setup event from the server
  *
- * @param  gameStartingEvent Event object to handle
+ * @param  enteringSetupEvent Event object to handle
  */
-export function handleGameStarting(gameStartingEvent: IGameStartingEvent): void {
+export function handleEnteringSetup(enteringSetupEvent: IEnteringSetupEvent): void {
 
     // Cache status text element
     statusTextElement = $('#status-text');
 
     // Calculate game end time from wait duration provided
-    gameStartTime = Date.now() + gameStartingEvent.waitDuration;
+    gameStartTime = Date.now() + enteringSetupEvent.waitDuration;
 
     // Start interval timer
     gameCountdownManager.startTimeout('gameCountdownUpdate');

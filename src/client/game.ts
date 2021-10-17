@@ -1,5 +1,5 @@
 import { registerShareLinkHandlers } from './game/share-link-tooltip';
-import { ready } from './game/sockets/button-functions';
+import { placementDone, ready } from './game/sockets/button-functions';
 import { openSocketConnection } from './game/sockets/opener';
 
 openSocketConnection();
@@ -16,6 +16,7 @@ $(document).ready(() => {
     // Prepare share link
     registerShareLinkHandlers();
 
-    // Register ready button
+    // Register buttons
     $('#ready-button').on('click', () => ready(true));
+    $('#button-placement-done').on('click', () => placementDone());
 });

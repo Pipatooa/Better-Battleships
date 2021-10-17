@@ -147,6 +147,12 @@ export class ShipSelectionRenderer {
         // Set selected ship to popped ship
         this.renderer.selectedShipRenderer.setSelected(ship);
 
+        // If no ships are remaining, reveal done button
+        if (this.ships.length === 0) {
+            $('#button-previous-container, #button-next-container').addClass('d-none');
+            $('#button-placement-done').removeClass('d-none');
+        }
+
         // Rerender available ships
         this.redrawAll();
     }

@@ -14,7 +14,7 @@ export class Game {
 
     public timeoutManager = new TimeoutManager({
         gameJoinTimeout: [ () => {}, 0, false ],
-        startGame: [ () => {}, 0, false ]
+        startSetup: [ () => {}, 0, false ]
     });
 
     public clients: Client[] = [];
@@ -32,8 +32,8 @@ export class Game {
                        public readonly gameID: string,
                        public readonly scenario: Scenario) {
 
-        // Set timeout function for starting game
-        this.timeoutManager.setTimeoutFunction('startGame', () => this.startGame(), config.gameStartWaitDuration, false);
+        // Set timeout function for entering the setup phase of the game
+        this.timeoutManager.setTimeoutFunction('startSetup', () => this.startSetup(), config.gameStartWaitDuration, false);
     }
 
     /**
@@ -101,13 +101,13 @@ export class Game {
     }
 
     /**
-     * Checks whether the game can be started yet and starts the game if it can
+     * Checks whether the game can enter the setup phase yet and enters it if it can
      */
-    public attemptGameStart(): void {
+    public attemptGameSetup(): void {
 
         // Set game phase to lobby in-case game is starting
         this._gamePhase = GamePhase.Lobby;
-        this.timeoutManager.stopTimeout('startGame');
+        this.timeoutManager.stopTimeout('startSetup');
 
         // Create a counter for the number of players in each team
         const teamPlayerCounts: { [name: string]: number } = {};
@@ -121,7 +121,7 @@ export class Game {
             // Check if player is ready
             if (!client.ready) {
                 this.broadcastEvent({
-                    event: 'gameStartFailure',
+                    event: 'enterSetupFailure',
                     reason: 'Waiting for all players to be ready...'
                 });
                 return;
@@ -144,35 +144,35 @@ export class Game {
                     ? 'All teams must have at least 1 player'
                     : `Team '${team.descriptor.name}' supports a maximum of ${maxPlayers} players`;
 
-                // Broadcast game start failure event to all clients
+                // Broadcast game setup failure event to all clients
                 this.broadcastEvent({
-                    event: 'gameStartFailure',
+                    event: 'enterSetupFailure',
                     reason: reason
                 });
                 return;
             }
         }
 
-        // Broadcast game starting
+        // Broadcast game entering setup
         this.broadcastEvent({
-            event: 'gameStarting',
+            event: 'enteringSetup',
             waitDuration: config.gameStartWaitDuration
         });
 
         // Set game phase to starting
-        this._gamePhase = GamePhase.Starting;
-        this.timeoutManager.startTimeout('startGame');
+        this._gamePhase = GamePhase.EnteringSetup;
+        this.timeoutManager.startTimeout('startSetup');
 
         // Debug
-        console.log(`Starting game ${this.gameID}`);
+        console.log(`${this.gameID} is entering setup`);
     }
 
     /**
-     * Starts the game
+     * Enters the setup phase of the game
      */
-    public startGame(): void {
+    public startSetup(): void {
 
-        // Set game phase to started
+        // Set game phase to setup
         this._gamePhase = GamePhase.Setup;
 
         // Group players by their teams
@@ -201,13 +201,41 @@ export class Game {
             playerColors[client.identity] = client.player!.color;
         }
 
-        // Broadcast game start
+        // Broadcast game setup info
         for (const client of this.clients) {
             client.sendEvent({
-                event: 'gameStart',
+                event: 'setupInfo',
                 boardInfo: this.scenario.board.makeTransportable(),
                 playerInfo: client.player!.makeTransportable(),
                 playerColors: playerColors
+            });
+        }
+    }
+
+    /**
+     * Checks whether the game can start and starts the game if it can
+     */
+    public attemptGameStart(): void {
+
+        // Check if all players have placed their ships
+        for (const client of this.clients) {
+            if (!client.shipsPlaced)
+                return;
+        }
+
+        this.startGame();
+    }
+
+    /**
+     * Starts the game
+     */
+    public startGame(): void {
+        this._gamePhase = GamePhase.InProgress;
+
+        // Broadcast game start to all clients
+        for (const client of this.clients) {
+            client.sendEvent({
+                event: 'gameStart'
             });
         }
     }
@@ -234,7 +262,7 @@ export class Game {
 
 export enum GamePhase {
     Lobby,
-    Starting,
+    EnteringSetup,
     Setup,
     InProgress,
     Finished

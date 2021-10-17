@@ -1,7 +1,7 @@
 import { IBaseServerEvent } from './i-server-event';
 
 /**
- * Player ready event sent when a client changes their ready status
+ * Event sent when a client changes their ready status
  */
 export interface IPlayerReadyEvent extends IBaseServerEvent {
     event: 'playerReady',

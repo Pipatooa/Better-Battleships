@@ -1,8 +1,9 @@
 import { IConnectionInfoEvent } from './i-connection-info';
 import { IGameInfoEvent } from './i-game-info';
 import { IGameStartEvent } from './i-game-start';
-import { IGameStartFailureEvent } from './i-game-start-failure';
-import { IGameStartingEvent } from './i-game-starting';
+import { ISetupInfoEvent } from './i-setup-info';
+import { IEnterSetupFailureEvent } from './i-enter-setup-failure';
+import { IEnteringSetupEvent } from './i-entering-setup';
 import { IPlayerJoinEvent } from './i-player-join';
 import { IPlayerLeaveEvent } from './i-player-leave';
 import { IPlayerReadyEvent } from './i-player-ready';
@@ -25,8 +26,9 @@ export type IServerEvent =
     IPlayerLeaveEvent |
     ITeamAssignmentEvent |
     IPlayerReadyEvent |
-    IGameStartFailureEvent |
-    IGameStartingEvent |
+    IEnterSetupFailureEvent |
+    IEnteringSetupEvent |
+    ISetupInfoEvent |
     IGameStartEvent;
 
 

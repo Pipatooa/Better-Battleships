@@ -1,3 +1,5 @@
+import { gameRenderer } from '../canvas/game-renderer';
+import { allShips } from '../scenario/ship';
 import { sendRequest } from './opener';
 
 /**
@@ -25,4 +27,28 @@ export function ready(ready: boolean): void {
         request: 'ready',
         value: ready
     });
+}
+
+/**
+ * Sends a request to the server with placement info
+ */
+export function placementDone(): void {
+
+    // Create a list of ship coordinates
+    let shipPlacements: [number, number][] = [];
+    for (const ship of allShips)
+        shipPlacements.push([ship.x, ship.y]);
+
+    // Prevent player from moving their ships once placement is done
+    gameRenderer.selectedShipRenderer.placementMode = false;
+
+    sendRequest({
+        request: 'shipPlacement',
+        shipPlacements: shipPlacements
+    });
+
+    // Update done button to indicate that we are waiting for the other player
+    const doneButton: JQuery = $('#button-placement-done');
+    doneButton.text('Waiting for other players...');
+    doneButton.attr('disabled', true as any);
 }

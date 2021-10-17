@@ -17,6 +17,7 @@ export class Client {
     public player: Player | undefined;
     public team: Team | undefined;
     public ready = false;
+    public shipsPlaced = false;
 
     public readonly identity: string;
 

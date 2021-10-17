@@ -39,8 +39,8 @@ export function handleJoinTeamRequest(client: Client, joinTeamRequest: IJoinTeam
         });
     }
 
-    // Attempt to start the game
-    client.game.attemptGameStart();
+    // Attempt to enter the setup phase of the game
+    client.game.attemptGameSetup();
 }
 
 /**

@@ -3,8 +3,9 @@ import { IServerEvent, ServerEventID } from '../../../shared/network/events/i-se
 import { handleConnectionInfo } from './event-handlers/connection-info';
 import { handleGameInfo } from './event-handlers/game-info';
 import { handleGameStart } from './event-handlers/game-start';
-import { handleGameStartFailure } from './event-handlers/game-start-failure';
-import { handleGameStarting } from './event-handlers/game-starting';
+import { handleSetupInfo } from './event-handlers/setup-info';
+import { handleEnterSetupFailure } from './event-handlers/enter-setup-failure';
+import { handleEnteringSetup } from './event-handlers/entering-setup';
 import { handlePlayerJoin } from './event-handlers/player-join';
 import { handlePlayerLeave } from './event-handlers/player-leave';
 import { handlePlayerReady } from './event-handlers/player-ready';
@@ -45,7 +46,8 @@ const handlers: Record<ServerEventID, (event: any) => void> = {
     playerLeave: handlePlayerLeave,
     teamAssignment: handleTeamAssignment,
     playerReady: handlePlayerReady,
-    gameStartFailure: handleGameStartFailure,
-    gameStarting: handleGameStarting,
+    enterSetupFailure: handleEnterSetupFailure,
+    enteringSetup: handleEnteringSetup,
+    setupInfo: handleSetupInfo,
     gameStart: handleGameStart
 };
