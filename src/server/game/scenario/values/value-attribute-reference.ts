@@ -1,5 +1,6 @@
-import { Attribute } from '../attributes/attribute';
-import { AttributeReference, attributeReferenceSchema } from '../attributes/attribute-reference';
+import { AttributeReference, attributeReferenceSchema } from '../attributes/references/attribute-reference';
+import { buildAttributeReference } from '../attributes/references/attribute-reference-builder';
+import { EvaluationContext } from '../evaluation-context';
 import { ParsingContext } from '../parsing-context';
 import { checkAgainstSchema } from '../schema-checker';
 import { baseValueSchema, IBaseValueSource, Value } from './value';
@@ -10,23 +11,24 @@ import { baseValueSchema, IBaseValueSource, Value } from './value';
  * When evaluated, returns the value that an attribute currently holds
  */
 export class ValueAttributeReference extends Value {
+    
     /**
      * ValueAttributeReference constructor
      *
-     * @param  attribute Attribute to take value from
-     * @protected
+     * @param  attributeReference Reference to an attribute to take value from
      */
-    protected constructor(public readonly attribute: Attribute) {
+    protected constructor(public readonly attributeReference: AttributeReference) {
         super();
     }
 
     /**
      * Evaluate this dynamic value as a number
      *
-     * @returns  Static value
+     * @param    evaluationContext Context for resolving objects and values during evaluation
+     * @returns                    Value of referenced attribute
      */
-    public evaluate(): number {
-        return this.attribute.value;
+    public evaluate(evaluationContext: EvaluationContext): number {
+        return this.attributeReference.getValue(evaluationContext);
     }
 
     /**
@@ -44,7 +46,7 @@ export class ValueAttributeReference extends Value {
             valueAttributeReferenceSource = await checkAgainstSchema(valueAttributeReferenceSource, valueAttributeReferenceSchema, parsingContext);
 
         // Get attribute from source
-        const attribute: Attribute = parsingContext.withExtendedPath('.attribute').getAttribute(valueAttributeReferenceSource.attribute);
+        const attribute: AttributeReference = await buildAttributeReference(parsingContext.withExtendedPath('.attribute'), valueAttributeReferenceSource.attribute, false);
 
         // Return created ValueAttributeReference object
         return new ValueAttributeReference(attribute);
@@ -56,7 +58,7 @@ export class ValueAttributeReference extends Value {
  */
 export interface IValueAttributeReferenceSource extends IBaseValueSource {
     type: 'attributeReference',
-    attribute: AttributeReference
+    attribute: string
 }
 
 /**

@@ -1,5 +1,6 @@
 import { IValueConstraintSource, ValueConstraint, valueConstraintSchema } from '../constraints/value-constaint';
 import { buildValueConstraint } from '../constraints/value-constraint-builder';
+import { EvaluationContext } from '../evaluation-context';
 import { ParsingContext } from '../parsing-context';
 import { checkAgainstSchema } from '../schema-checker';
 import { Condition } from './condition';
@@ -31,16 +32,17 @@ export class ConditionSome extends ConditionMultiple {
     /**
      * Checks whether or not this condition holds true
      *
-     * @returns  Whether or not this condition holds true
+     * @param    evaluationContext Context for resolving objects and values during evaluation
+     * @returns                    Whether or not this condition holds true
      */
-    public check(): boolean {
+    public check(evaluationContext: EvaluationContext): boolean {
 
         // Keep count of number of sub conditions which hold true
         let count = 0;
 
         // Loop through sub conditions and increment count for each condition that holds true
         for (const item of this.subConditions) {
-            if (item.check())
+            if (item.check(evaluationContext))
                 count++;
         }
 
@@ -70,7 +72,7 @@ export class ConditionSome extends ConditionMultiple {
         const valueConstraint: ValueConstraint = await buildValueConstraint(parsingContext.withExtendedPath('.valueConstraint'), conditionSomeSource.valueConstraint, true);
 
         // Return created ConditionSome object
-        return new ConditionSome(subConditions, valueConstraint, conditionSomeSource.inverted);
+        return new ConditionSome(subConditions, valueConstraint, conditionSomeSource.inverted !== undefined ? conditionSomeSource.inverted : false);
     }
 }
 

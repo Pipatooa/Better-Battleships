@@ -14,7 +14,7 @@ import { ValueSum } from './value-sum';
  * @param    parsingContext Context for resolving scenario data
  * @param    valueSource    JSON data for Value
  * @param    checkSchema    When true, validates source JSON data against schema
- * @returns                 Created Condition object
+ * @returns                 Created Value object
  */
 export async function buildValue(parsingContext: ParsingContext, valueSource: IValueSource, checkSchema: boolean): Promise<Value> {
 

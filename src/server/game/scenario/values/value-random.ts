@@ -1,4 +1,5 @@
 import Joi from 'joi';
+import { EvaluationContext } from '../evaluation-context';
 import { ParsingContext } from '../parsing-context';
 import { checkAgainstSchema } from '../schema-checker';
 import { baseValueSchema, IBaseValueSource, IValueSource, Value, valueSchema } from './value';
@@ -37,15 +38,16 @@ export class ValueRandom extends Value {
      *
      * If step is not undefined, returned value will be a multiple of the step value
      *
-     * @returns  Randomly generated value
+     * @param    evaluationContext Context for resolving objects and values during evaluation
+     * @returns                    Randomly generated value
      * @protected
      */
-    protected getRandom(): number {
+    protected getRandom(evaluationContext: EvaluationContext): number {
 
         // Evaluate sub-values to numbers
-        const min: number = this.min.evaluate();
-        const max: number = this.max.evaluate();
-        const step: number | undefined = this.step?.evaluate();
+        const min: number = this.min.evaluate(evaluationContext);
+        const max: number = this.max.evaluate(evaluationContext);
+        const step: number | undefined = this.step?.evaluate(evaluationContext);
 
         // Returns free-floating random value between min and max
         if (step === undefined) {
@@ -59,17 +61,18 @@ export class ValueRandom extends Value {
     /**
      * Evaluate this dynamic value as a number
      *
-     * @returns  Static value
+     * @param    evaluationContext Context for resolving objects and values during evaluation
+     * @returns                    Static value
      */
-    public evaluate(): number {
+    public evaluate(evaluationContext: EvaluationContext): number {
         if (this.generateOnce) {
             if (this.generatedValue === undefined)
-                this.generatedValue = this.getRandom();
+                this.generatedValue = this.getRandom(evaluationContext);
 
             return this.generatedValue;
         }
 
-        return this.getRandom();
+        return this.getRandom(evaluationContext);
     }
 
     /**
@@ -114,8 +117,8 @@ export interface IValueRandomSource extends IBaseValueSource {
  */
 export const valueRandomSchema = baseValueSchema.keys({
     type: 'random',
-    min: valueSchema.id().required(),
-    max: valueSchema.id().required(),
-    step: valueSchema.id(),
+    min: valueSchema.required(),
+    max: valueSchema.required(),
+    step: valueSchema,
     generateOnce: Joi.boolean().required()
 });

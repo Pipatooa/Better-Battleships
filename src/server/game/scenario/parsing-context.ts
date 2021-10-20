@@ -1,8 +1,11 @@
 import { IZipEntry } from 'adm-zip';
 import { FileJSON } from 'formidable';
-import { Attribute } from './attributes/attribute';
-import { AttributeReference, AttributeSelector } from './attributes/attribute-reference';
 import { AttributeMap } from './attributes/i-attribute-holder';
+import { AttributeReferenceObjectSelector } from './attributes/references/attribute-reference';
+import { AttributeReferenceForeign } from './attributes/references/attribute-reference-foreign';
+import { AttributeReferenceLocal } from './attributes/references/attribute-reference-local';
+import { ForeignAttributeRegistry } from './attributes/references/foreign-attribute-registry';
+import { Ship } from './ship';
 import { UnpackingError, ZipEntryMap } from './unpacker';
 
 /**
@@ -15,24 +18,29 @@ export class ParsingContext {
     /**
      * ParsingContext constructor
      *
-     * @param  scenarioFile           Scenario file to use
-     * @param  _currentFile           Path to current file being parsed
-     * @param  _currentPath           JSON path to object within current file being evaluated
-     * @param  boardEntry             Zip entry for board.json
-     * @param  teamEntries            Zip entries for teams/team.json files
-     * @param  playerPrototypeEntries Zip entries for player/player.json files
-     * @param  shipEntries            Zip entries for ship/ship.json files
-     * @param  abilityEntries         Zip entries for abilities/ability.json files
-     * @param  scenarioAttributes     Dictionary of attributes belonging to current scenario
-     * @param  teamAttributes         Dictionary of attributes belonging to current team,
-     * @param  playerAttributes       Dictionary of attributes belonging to current player
-     * @param  shipAttributes         Dictionary of attributes belonging to current ship
-     * @param  abilityAttributes      Dictionary of attributes belonging to current ability
+     * @param  scenarioFile                  Scenario file to use
+     * @param  _currentFile                  Path to current file being parsed
+     * @param  _currentPath                  JSON path to object within current file being evaluated
+     * @param  boardEntry                    Zip entry for board.json
+     * @param  foreignAttributeRegistryEntry Zip entry for foreign-attributes.json
+     * @param  teamEntries                   Zip entries for teams/team.json files
+     * @param  playerPrototypeEntries        Zip entries for player/player.json files
+     * @param  shipEntries                   Zip entries for ship/ship.json files
+     * @param  abilityEntries                Zip entries for abilities/ability.json files
+     * @param  scenarioAttributes            Dictionary of attributes belonging to current scenario
+     * @param  teamAttributes                Dictionary of attributes belonging to current team,
+     * @param  playerAttributes              Dictionary of attributes belonging to current player
+     * @param  shipAttributes                Dictionary of attributes belonging to current ship
+     * @param  abilityAttributes             Dictionary of attributes belonging to current ability
+     * @param  _foreignAttributeRegistry     Registry of registered foreign attribute names
+     * @param  _shipPartial                  Empty ship object which is yet to be constructed
+     * @param  _foreignAttributeFlag         Whether or not to treat attribute references as foreign references
      */
     public constructor(public readonly scenarioFile: FileJSON,
                        protected _currentFile: string,
                        protected _currentPath: string,
                        public readonly boardEntry: IZipEntry,
+                       public readonly foreignAttributeRegistryEntry: IZipEntry,               
                        public readonly teamEntries: ZipEntryMap,
                        public readonly playerPrototypeEntries: ZipEntryMap,
                        public readonly shipEntries: ZipEntryMap,
@@ -41,26 +49,25 @@ export class ParsingContext {
                        protected teamAttributes?: AttributeMap,
                        protected playerAttributes?: AttributeMap,
                        protected shipAttributes?: AttributeMap,
-                       protected abilityAttributes?: AttributeMap) {
+                       protected abilityAttributes?: AttributeMap,
+                       protected _foreignAttributeRegistry?: ForeignAttributeRegistry,               
+                       protected _shipPartial?: Partial<Ship>,
+                       protected _foreignAttributeFlag: boolean = false) {
     }
 
     /**
-     * Finds an attribute defined within this current parsing context
+     * Returns a reference to an attribute defined within this current parsing context
      *
-     * @param    attributeReference Attribute path to locate attribute
-     * @returns                     Found attribute
+     * @param    objectSelector Object selector part of attribute reference string
+     * @param    attributeName  Name of attribute
+     * @returns                 Found attribute
      */
-    public getAttribute(attributeReference: AttributeReference): Attribute {
+    public getLocalAttributeReference(objectSelector: AttributeReferenceObjectSelector, attributeName: string): AttributeReferenceLocal {
 
-        // Split attribute reference into selector part and name part
-        const [ selectorStr, attributeName ] = attributeReference.split('.');
-
-        // Type declarations
-        const attributeSelector = selectorStr as AttributeSelector;
         let attributeMap: AttributeMap | undefined;
 
         // Select attribute map depending on attribute selector
-        switch (attributeSelector) {
+        switch (objectSelector) {
             case 'scenario':
                 attributeMap = this.scenarioAttributes;
                 break;
@@ -80,19 +87,39 @@ export class ParsingContext {
 
         // If attribute map could not be found with selector, or attribute could not be found within the attribute map
         if (attributeMap === undefined || !(attributeName in attributeMap))
-            throw new UnpackingError(`Could not find attribute '${attributeReference}' defined at '${this.currentPath}' in current context '${this.getAttributeContextName()}'`,
+            throw new UnpackingError(`Could not find attribute 'local:${objectSelector}.${attributeName}' defined at '${this.currentPath}' in current context '${this.getAttributeContextName()}'`,
                 this.currentFile);
 
-        // Return found attribute
-        return attributeMap[attributeName];
+        // Return reference to found attribute
+        return new AttributeReferenceLocal(attributeMap[attributeName]);
+    }
+
+    /**
+     * Returns a reference to an attribute which exists on other objects depending on evaluation context
+     *
+     * @param    objectSelector Object selector part of attribute reference string
+     * @param    attributeName  Name of attribute
+     * @returns                 Whether or not the foreign attribute exists
+     */
+    public getForeignAttributeReference(objectSelector: 'team' | 'player' | 'ship', attributeName: string): AttributeReferenceForeign {
+
+        if (!this._foreignAttributeFlag)
+            throw new UnpackingError(`Cannot reference foreign attribute 'foreign:${objectSelector}.${attributeName}' defined at '${this.currentPath}' in a context where no foreign object to address exists`,
+                this.currentFile);
+        
+        if (!this.foreignAttributeRegistry!.getRegisteredAttributeNames(objectSelector).includes(attributeName))
+            throw new UnpackingError(`Cannot find attribute 'foreign:${objectSelector}.${attributeName}' defined at '${this.currentPath}' since it is not declared as a foreign attribute in 'foreign-attributes.json'`,
+                this.currentFile);
+
+        return new AttributeReferenceForeign(objectSelector, attributeName);
     }
 
     /**
      * Returns the lowest level of attribute currently known
      *
-     * @returns  Friendly name
+     * @returns  Object selector
      */
-    public getAttributeContextName(): AttributeSelector {
+    public getAttributeContextName(): AttributeReferenceObjectSelector {
         if (this.abilityAttributes !== undefined)
             return 'ability';
 
@@ -119,6 +146,7 @@ export class ParsingContext {
             this._currentFile,
             this._currentPath,
             this.boardEntry,
+            this.foreignAttributeRegistryEntry,
             this.teamEntries,
             this.playerPrototypeEntries,
             this.shipEntries,
@@ -127,7 +155,10 @@ export class ParsingContext {
             this.teamAttributes,
             this.playerAttributes,
             this.shipAttributes,
-            this.abilityAttributes);
+            this.abilityAttributes,
+            this._foreignAttributeRegistry,
+            this._shipPartial,
+            this._foreignAttributeFlag);
     }
 
     /**
@@ -218,6 +249,41 @@ export class ParsingContext {
     }
 
     /**
+     * Factory function to generate a copy of this object with foreign attribute registry
+     *
+     * @param    foreignAttributeRegistry Foreign attribute registry to include
+     * @returns                           Created ParsingContext
+     */
+    public withForeignAttributeRegistry(foreignAttributeRegistry: ForeignAttributeRegistry): ParsingContext {
+        const copy: ParsingContext = this.getCopy();
+        copy._foreignAttributeRegistry = foreignAttributeRegistry;
+        return copy;
+    }
+    
+    /**
+     * Factory function to generate a copy of this object with a reference to a ship
+     *
+     * @param    ship Empty ship object which is yet to be constructed
+     * @returns       Created ParsingContext
+     */
+    public withShipReference(ship: Partial<Ship>): ParsingContext {
+        const copy: ParsingContext = this.getCopy();
+        copy._shipPartial = ship;
+        return copy;
+    }
+
+    /**
+     * Factory function to generate a copy of this object with foreign attribute flag set to true
+     *
+     * @returns  Created ParsingContext
+     */
+    public withForeignAttributeFlag(): ParsingContext {
+        const copy: ParsingContext = this.getCopy();
+        copy._foreignAttributeFlag = true;
+        return copy;
+    }
+
+    /**
      * Getters and setters
      */
 
@@ -233,5 +299,17 @@ export class ParsingContext {
         if (this._currentPath === '')
             return '';
         return this.currentPath + '.';
+    }
+    
+    public get foreignAttributeRegistry(): ForeignAttributeRegistry | undefined {
+        return this._foreignAttributeRegistry;
+    }
+
+    public get shipPartial(): Partial<Ship> | undefined {
+        return this._shipPartial;
+    }
+
+    public get foreignAttributeFlag(): boolean {
+        return this._foreignAttributeFlag;
     }
 }

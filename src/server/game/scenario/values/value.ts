@@ -1,5 +1,6 @@
 import Joi from 'joi';
-import { attributeReferenceSchema } from '../attributes/attribute-reference';
+import { attributeReferenceSchema } from '../attributes/references/attribute-reference';
+import { EvaluationContext } from '../evaluation-context';
 import { IValueAttributeReferenceSource } from './value-attribute-reference';
 import { IValueFixedSource } from './value-fixed';
 import { IValueProductSource } from './value-product';
@@ -18,8 +19,10 @@ export abstract class Value {
 
     /**
      * Evaluate this dynamic value as a number
+     *
+     * @param  evaluationContext Context for resolving objects and values during evaluation
      */
-    abstract evaluate(): number;
+    public abstract evaluate(evaluationContext: EvaluationContext): number;
 }
 
 /**
@@ -53,14 +56,14 @@ export const baseValueSchema = Joi.object({
  * Able to verify all values
  */
 export const valueSchema = Joi.alternatives(
-    Joi.number().required(),
+    Joi.number(),
     Joi.object({
         type: Joi.valid('random', 'sum', 'product', 'round', 'attributeReference').required(),
-        min: Joi.link('#valueSchema').when('type',
+        min: Joi.alternatives(Joi.number(), Joi.link('...')).when('type',
             { is: 'random', then: Joi.required(), otherwise: Joi.forbidden() }),
-        max: Joi.link('#valueSchema').when('type',
+        max: Joi.alternatives(Joi.number(), Joi.link('...')).when('type',
             { is: 'random', then: Joi.required(), otherwise: Joi.forbidden() }),
-        step: Joi.link('#valueSchema').when('type', {
+        step: Joi.alternatives(Joi.number(), Joi.link('...')).when('type', {
             switch: [
                 { is: 'random', then: Joi.optional() },
                 { is: 'round', then: Joi.required() }
@@ -69,11 +72,11 @@ export const valueSchema = Joi.alternatives(
         }),
         generateOnce: Joi.boolean().when('type',
             { is: 'random', then: Joi.required(), otherwise: Joi.forbidden() }),
-        values: Joi.array().items(Joi.link('#valueSchema')).min(2).when('type',
+        values: Joi.array().items(Joi.alternatives(Joi.number(), Joi.link('....'))).min(2).when('type',
             { is: Joi.valid('sum', 'product'), then: Joi.required(), otherwise: Joi.forbidden() }),
-        value: Joi.link('#valueSchema').when('type',
+        value: Joi.alternatives(Joi.number(), Joi.link('...')).when('type',
             { is: 'round', then: Joi.required(), otherwise: Joi.forbidden() }),
         attribute: attributeReferenceSchema.when('type',
             { is: 'attributeReference', then: Joi.required(), otherwise: Joi.forbidden() })
-    }).required()
-).id('valueSchema');
+    })
+);

@@ -21,8 +21,7 @@ export function handleShipPlacementRequest(client: Client, shipPlacementRequest:
     for (let i = 0; i < shipPlacementRequest.shipPlacements.length; i++) {
         const [x, y] = shipPlacementRequest.shipPlacements[i];
         const ship = client.player!.ships[i];
-        ship.x = x;
-        ship.y = y;
+        ship.moveTo(x, y);
     }
 
     client.shipsPlaced = true;

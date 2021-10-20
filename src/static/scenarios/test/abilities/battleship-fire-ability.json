@@ -1,0 +1,104 @@
+{
+  "type": "fire",
+  "descriptor": {
+    "name": "Broadside Fire",
+    "description": "The Battleship's broadside fire deals 5 damage across multiple cells. Cooldown of 3 turns. On hit, cooldown of 5 turns."
+  },
+  "selectionPattern": {
+    "size": [9, 5],
+    "values": {
+      ".": 0,
+      "#": 1
+    },
+    "pattern": [
+      "###...###",
+      "###...###",
+      "###...###",
+      "###...###",
+      "###...###"
+    ]
+  },
+  "effectPattern": {
+    "size": [3, 3],
+    "values": {
+      ".": 0,
+      "#": 1
+    },
+    "pattern": [
+      ".#.",
+      "###",
+      ".#."
+    ]
+  },
+  "condition": {
+    "type": "valueMeetsConstraint",
+    "value": {
+      "type": "attributeReference",
+      "attribute": "local:ability.cooldown"
+    },
+    "constraint": {
+      "exactly": 0
+    }
+  },
+  "actions": {
+    "onTurnStart": [
+      {
+        "type": "setAttribute",
+        "attribute": "local:ability.cooldown",
+        "value": {
+          "type": "sum",
+          "values": [
+            {
+              "type": "attributeReference",
+              "attribute": "local:ship.health"
+            },
+            -1
+          ]
+        },
+        "condition": {}
+      }
+    ],
+    "onUse": [
+      {
+        "type": "setAttribute",
+        "attribute": "local:ability.cooldown",
+        "value": 3,
+        "condition": {}
+      }
+    ],
+    "onHit": [
+      {
+        "type": "setAttribute",
+        "attribute": "local:ability.cooldown",
+        "value": 5,
+        "condition": {}
+      },
+      {
+        "type": "setAttribute",
+        "attribute": "foreign:ship.health",
+        "value": {
+          "type": "sum",
+          "values": [
+            {
+              "type": "attributeReference",
+              "attribute": "foreign:ship.health"
+            },
+            -5
+          ]
+        },
+        "condition": {}
+      }
+    ]
+  },
+  "attributes": {
+    "cooldown": {
+      "initialValue": 0,
+      "constraints": [
+        {
+          "min": 0
+        }
+      ],
+      "readonly": false
+    }
+  }
+}

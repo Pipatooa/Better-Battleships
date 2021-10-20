@@ -383,6 +383,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/json-stringify-safe@npm:^5.0.0":
+  version: 5.0.0
+  resolution: "@types/json-stringify-safe@npm:5.0.0"
+  checksum: 2822c9341119f53ded3b98b9686199bf13f9ff25ebeeab409ceb02167c2d5872455bdad2a2fcc0d88bd71b35696bf63d3378c7b9ab0e3f09ebbf9775e46cefdd
+  languageName: node
+  linkType: hard
+
 "@types/jsonwebtoken@npm:^8.5.5":
   version: 8.5.5
   resolution: "@types/jsonwebtoken@npm:8.5.5"
@@ -1226,6 +1233,7 @@ __metadata:
     "@types/handlebars": ^4.1.0
     "@types/http-errors": ^1.8.1
     "@types/jquery": ^3.5.6
+    "@types/json-stringify-safe": ^5.0.0
     "@types/jsonwebtoken": ^8.5.5
     "@types/ms": ^0.7.31
     "@types/mysql": ^2.15.19
@@ -1254,6 +1262,7 @@ __metadata:
     isomorphic-ws: ^4.0.1
     joi: ^17.4.2
     jquery: ^3.6.0
+    json-stringify-safe: ^5.0.1
     jsonwebtoken: ^8.5.1
     mini-css-extract-plugin: ^2.1.0
     morgan: ^1.10.0
@@ -4014,6 +4023,13 @@ fsevents@~2.3.2:
   version: 1.0.1
   resolution: "json-stable-stringify-without-jsonify@npm:1.0.1"
   checksum: cff44156ddce9c67c44386ad5cddf91925fe06b1d217f2da9c4910d01f358c6e3989c4d5a02683c7a5667f9727ff05831f7aa8ae66c8ff691c556f0884d49215
+  languageName: node
+  linkType: hard
+
+"json-stringify-safe@npm:^5.0.1":
+  version: 5.0.1
+  resolution: "json-stringify-safe@npm:5.0.1"
+  checksum: 48ec0adad5280b8a96bb93f4563aa1667fd7a36334f79149abd42446d0989f2ddc58274b479f4819f1f00617957e6344c886c55d05a4e15ebb4ab931e4a6a8ee
   languageName: node
   linkType: hard
 

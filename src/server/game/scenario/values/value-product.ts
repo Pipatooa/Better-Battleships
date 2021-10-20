@@ -1,3 +1,4 @@
+import { EvaluationContext } from '../evaluation-context';
 import { ParsingContext } from '../parsing-context';
 import { checkAgainstSchema } from '../schema-checker';
 import { Value } from './value';
@@ -15,16 +16,17 @@ export class ValueProduct extends ValueMultiple {
     /**
      * Evaluate this dynamic value as a number
      *
-     * @returns  Static value
+     * @param    evaluationContext Context for resolving objects and values during evaluation
+     * @returns                    Static value
      */
-    public evaluate(): number {
+    public evaluate(evaluationContext: EvaluationContext): number {
 
         // Keep track of product of values
         let product = 1;
 
         // Loop through sub values and add to running product
         for (const subValue of this.subValues) {
-            product *= subValue.evaluate();
+            product *= subValue.evaluate(evaluationContext);
         }
 
         // Return product

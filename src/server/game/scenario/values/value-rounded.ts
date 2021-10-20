@@ -1,3 +1,4 @@
+import { EvaluationContext } from '../evaluation-context';
 import { ParsingContext } from '../parsing-context';
 import { checkAgainstSchema } from '../schema-checker';
 import { baseValueSchema, IBaseValueSource, IValueSource, Value, valueSchema } from './value';
@@ -25,15 +26,16 @@ export class ValueRounded extends Value {
     /**
      * Evaluate this dynamic value as a number
      *
-     * @returns  Static value
+     * @param    evaluationContext Context for resolving objects and values during evaluation
+     * @returns                    Static value
      */
-    public evaluate(): number {
+    public evaluate(evaluationContext: EvaluationContext): number {
 
         // Evaluate step value once in-case it is changing
-        const step: number = this.step.evaluate();
+        const step: number = this.step.evaluate(evaluationContext);
 
         // Round evaluated sub-value and round to nearest multiple of step
-        return Math.round(this.value.evaluate() / step) * step;
+        return Math.round(this.value.evaluate(evaluationContext) / step) * step;
     }
 
     /**
@@ -74,6 +76,6 @@ export interface IValueRoundedSource extends IBaseValueSource {
  */
 export const valueRoundedSchema = baseValueSchema.keys({
     type: 'round',
-    value: valueSchema.id().required(),
-    step: valueSchema.id().required()
+    value: valueSchema.required(),
+    step: valueSchema.required()
 });

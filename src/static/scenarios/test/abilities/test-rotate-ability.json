@@ -1,11 +1,12 @@
 {
   "type": "rotate",
+  "description": {
+    "name": "90 Degree Rotation",
+    "description": "Allows the ship to rotate 90 degrees clockwise or anticlockwise"
+  },
   "rot90": true,
   "rot180": false,
   "rot270": true,
-  "actions": {
-    "onUse": {
-      
-    }
-  }
+  "actions": {},
+  "attributes": {}
 }

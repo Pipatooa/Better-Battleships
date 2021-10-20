@@ -3,9 +3,9 @@ import { checkAgainstSchema } from '../schema-checker';
 import { Condition, conditionSchema, IConditionSource } from './condition';
 import { ConditionAll } from './condition-all';
 import { ConditionAny } from './condition-any';
-import { ConditionAttribute } from './condition-attribute';
+import { ConditionValueMeetsConstraint } from './condition-value-meets-constraint';
 import { ConditionSome } from './condition-some';
-import { ConditionTest } from './condition-test';
+import { ConditionFixed } from './condition-fixed';
 
 /**
  * Factory function to generate Condition from JSON scenario data
@@ -16,6 +16,10 @@ import { ConditionTest } from './condition-test';
  * @returns                  Created Condition object
  */
 export async function buildCondition(parsingContext: ParsingContext, conditionSource: IConditionSource, checkSchema: boolean): Promise<Condition> {
+
+    // Empty condition
+    if (conditionSource === {})
+        return await ConditionFixed.fromSource(parsingContext, conditionSource, false);
 
     // Validate JSON data against schema
     if (checkSchema)
@@ -34,11 +38,11 @@ export async function buildCondition(parsingContext: ParsingContext, conditionSo
         case 'some':
             condition = await ConditionSome.fromSource(parsingContext, conditionSource, false);
             break;
-        case 'test':
-            condition = await ConditionTest.fromSource(parsingContext, conditionSource, false);
+        case 'fixed':
+            condition = await ConditionFixed.fromSource(parsingContext, conditionSource, false);
             break;
-        case 'attribute':
-            condition = await ConditionAttribute.fromSource(parsingContext, conditionSource, false);
+        case 'valueMeetsConstraint':
+            condition = await ConditionValueMeetsConstraint.fromSource(parsingContext, conditionSource, false);
             break;
     }
 

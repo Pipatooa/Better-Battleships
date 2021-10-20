@@ -50,11 +50,12 @@ export async function unpack(fileJSON: FileJSON): Promise<Scenario> {
         }
     }
 
-    // Board data
+    // Fixed filename zip entries
     const boardEntry: IZipEntry = await getEntryFromZip(scenarioZip, 'board.json');
+    const foreignAttributesRegistryEntry: IZipEntry = await getEntryFromZip(scenarioZip, 'foreign-attributes.json');
 
     // Create parsing context
-    const parsingContext = new ParsingContext(fileJSON, 'scenario.json', '', boardEntry, teamEntries, playerPrototypeEntries, shipEntries, abilityEntries);
+    const parsingContext = new ParsingContext(fileJSON, 'scenario.json', '', boardEntry, foreignAttributesRegistryEntry, teamEntries, playerPrototypeEntries, shipEntries, abilityEntries);
 
     // Scenario data
     const scenarioEntry: IZipEntry = await getEntryFromZip(scenarioZip, 'scenario.json');

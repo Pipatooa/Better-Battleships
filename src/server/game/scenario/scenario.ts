@@ -2,8 +2,17 @@ import { FileJSON } from 'formidable';
 import Joi from 'joi';
 import { IScenarioInfo } from '../../../shared/network/scenario/i-scenario-info';
 import { ITeamInfo } from '../../../shared/network/scenario/i-team-info';
-import { Attribute, IAttributeSource } from './attributes/attribute';
-import { attributeHolderSchema, AttributeMap, IAttributeHolder } from './attributes/i-attribute-holder';
+import { getAttributes } from './attributes/attribute-getter';
+import {
+    attributeHolderSchema,
+    AttributeMap,
+    AttributeMapSource,
+    IAttributeHolder
+} from './attributes/i-attribute-holder';
+import {
+    ForeignAttributeRegistry,
+    IForeignAttributeRegistrySource
+} from './attributes/references/foreign-attribute-registry';
 import { Board, IBoardSource } from './board';
 import { Descriptor, descriptorSchema, IDescriptorSource } from './common/descriptor';
 import { genericNameSchema } from './common/generic-name';
@@ -41,13 +50,8 @@ export class Scenario implements IAttributeHolder {
         if (checkSchema)
             scenarioSource = await checkAgainstSchema(scenarioSource, scenarioSchema, parsingContext);
 
-        // Get attributes
-        const attributes: AttributeMap = {};
-        for (const [ name, attributeSource ] of Object.entries(scenarioSource.attributes)) {
-            attributes[name] = await Attribute.fromSource(parsingContext.withExtendedPath(`.attributes.${name}`), attributeSource, false);
-        }
-
-        // Update parsing context
+        // Get attributes and update parsing context
+        const attributes: AttributeMap = await getAttributes(parsingContext.withExtendedPath('.attributes'), scenarioSource.attributes, 'scenario');
         parsingContext = parsingContext.withScenarioAttributes(attributes);
 
         // Get descriptor
@@ -56,6 +60,11 @@ export class Scenario implements IAttributeHolder {
         // Get board
         const boardSource: IBoardSource = await getJSONFromEntry(parsingContext.boardEntry) as unknown as IBoardSource;
         const board = await Board.fromSource(parsingContext.withUpdatedFile('board.json'), boardSource, true);
+
+        // Get foreign attribute registry and update parsing context
+        const foreignAttributeRegistrySource = await getJSONFromEntry(parsingContext.foreignAttributeRegistryEntry) as unknown as IForeignAttributeRegistrySource;
+        const foreignAttributeRegistry = await ForeignAttributeRegistry.fromSource(parsingContext.withUpdatedFile('foreign-attributes.json'), foreignAttributeRegistrySource, true);
+        parsingContext = parsingContext.withForeignAttributeRegistry(foreignAttributeRegistry);
 
         // Get teams
         const teams: { [name: string]: Team } = {};
@@ -89,8 +98,6 @@ export class Scenario implements IAttributeHolder {
             teamInfo[name] = team.makeTransportable();
         }
 
-        //
-
         // Return scenario info
         return {
             author: this.author,
@@ -104,10 +111,10 @@ export class Scenario implements IAttributeHolder {
  * JSON source interface reflecting schema
  */
 export interface IScenarioSource {
-    author: string;
-    descriptor: IDescriptorSource;
-    teams: string[];
-    attributes: IAttributeSource[];
+    author: string,
+    descriptor: IDescriptorSource,
+    teams: string[],
+    attributes: AttributeMapSource
 }
 
 /**

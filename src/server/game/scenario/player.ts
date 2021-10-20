@@ -2,7 +2,7 @@ import Joi from 'joi';
 import { IPlayerInfo } from '../../../shared/network/scenario/i-player-info';
 import { randomHex } from '../../../shared/utility';
 import { Client } from '../sockets/client';
-import { Attribute } from './attributes/attribute';
+import { getAttributes } from './attributes/attribute-getter';
 import {
     attributeHolderSchema,
     AttributeMap,
@@ -54,13 +54,8 @@ export class Player implements IAttributeHolder {
         if (checkSchema)
             playerSource = await checkAgainstSchema(playerSource, playerSchema, parsingContext);
 
-        // Get attributes
-        const attributes: AttributeMap = {};
-        for (const [ name, attributeSource ] of Object.entries(playerSource.attributes)) {
-            attributes[name] = await Attribute.fromSource(parsingContext.withExtendedPath(`.attributes.${name}`), attributeSource, false);
-        }
-
-        // Update parsing context
+        // Get attributes and update parsing context
+        const attributes: AttributeMap = await getAttributes(parsingContext.withExtendedPath('.attributes'), playerSource.attributes, 'player');
         parsingContext = parsingContext.withPlayerAttributes(attributes);
 
         // Get ships

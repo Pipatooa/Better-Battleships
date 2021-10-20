@@ -1,6 +1,7 @@
 import express from 'express';
 import formidable, { FileJSON } from 'formidable';
 import fs from 'fs';
+import stringify from 'json-stringify-safe';
 import { Game } from '../../game/game';
 import { capacityReached, createGame } from '../../game/game-manager';
 import { Scenario } from '../../game/scenario/scenario';
@@ -127,7 +128,7 @@ router.post('/', preventCSRF, requireAuth, async (req, res) => {
         res.send({
             success: true,
             gameID: game.gameID,
-            debug: JSON.parse(JSON.stringify(scenario))
+            debug: JSON.parse(stringify(scenario))
         });
     });
 });

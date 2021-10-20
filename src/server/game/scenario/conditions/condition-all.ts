@@ -1,3 +1,4 @@
+import { EvaluationContext } from '../evaluation-context';
 import { ParsingContext } from '../parsing-context';
 import { checkAgainstSchema } from '../schema-checker';
 import { Condition } from './condition';
@@ -15,15 +16,16 @@ export class ConditionAll extends ConditionMultiple {
     /**
      * Checks whether or not this condition holds true
      *
-     * @returns  Whether or not this condition holds true
+     * @param    evaluationContext Context for resolving objects and values during evaluation
+     * @returns                    Whether or not this condition holds true
      */
-    public check(): boolean {
+    public check(evaluationContext: EvaluationContext): boolean {
 
         // Loop through sub conditions
         for (const item of this.subConditions) {
 
             // If any sub condition holds false, return false (unless inverted)
-            if (!item.check())
+            if (!item.check(evaluationContext))
                 return this.inverted;
         }
 
@@ -49,7 +51,7 @@ export class ConditionAll extends ConditionMultiple {
         const subConditions: Condition[] = await ConditionMultiple.getSubConditions(parsingContext.withExtendedPath('.subConditions'), conditionAllSource.subConditions);
 
         // Return created ConditionAll object
-        return new ConditionAll(subConditions, conditionAllSource.inverted);
+        return new ConditionAll(subConditions, conditionAllSource.inverted !== undefined ? conditionAllSource.inverted : false);
     }
 }
 

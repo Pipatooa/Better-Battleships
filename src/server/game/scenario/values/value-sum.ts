@@ -1,3 +1,4 @@
+import { EvaluationContext } from '../evaluation-context';
 import { ParsingContext } from '../parsing-context';
 import { checkAgainstSchema } from '../schema-checker';
 import { Value } from './value';
@@ -15,16 +16,17 @@ export class ValueSum extends ValueMultiple {
     /**
      * Evaluate this dynamic value as a number
      *
-     * @returns  Static value
+     * @param    evaluationContext Context for resolving objects and values during evaluation
+     * @returns                    Static value
      */
-    public evaluate(): number {
+    public evaluate(evaluationContext: EvaluationContext): number {
 
         // Keep track of sum of values
         let sum = 0;
 
         // Loop through sub values and add to running sum
         for (const subValue of this.subValues) {
-            sum += subValue.evaluate();
+            sum += subValue.evaluate(evaluationContext);
         }
 
         // Return sum

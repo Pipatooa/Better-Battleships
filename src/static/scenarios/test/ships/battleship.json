@@ -17,19 +17,27 @@
     ]
   },
   "abilities": [
-    "test-move-ability"
+    "test-move-ability",
+    "battleship-fire-ability"
   ],
   "attributes": {
     "testAttribute": {
       "initialValue": {
         "type": "attributeReference",
-        "attribute": "player.shipCount"
+        "attribute": "local:player.shipCount"
       },
       "constraints": [{
         "min": 5,
         "max": 7
       }],
       "readonly": false
+    },
+    "health": {
+      "initialValue": 5,
+      "constraints": [{
+        "min": 0
+      }],
+      "readonly": true
     }
   }
 }

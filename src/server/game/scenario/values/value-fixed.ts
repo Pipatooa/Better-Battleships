@@ -54,6 +54,6 @@ export class ValueFixed extends Value {
 export type IValueFixedSource = number;
 
 /**
- * Schema for validation source JSON data
+ * Schema for validating source JSON data
  */
 export const valueFixedSchema = Joi.number().required();

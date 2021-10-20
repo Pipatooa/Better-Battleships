@@ -1,7 +1,7 @@
 import Joi from 'joi';
 import { ITeamInfo } from '../../../shared/network/scenario/i-team-info';
 import { Client } from '../sockets/client';
-import { Attribute } from './attributes/attribute';
+import { getAttributes } from './attributes/attribute-getter';
 import {
     attributeHolderSchema,
     AttributeMap,
@@ -78,13 +78,8 @@ export class Team implements IAttributeHolder {
         if (checkSchema)
             teamSource = await checkAgainstSchema(teamSource, teamSchema, parsingContext);
 
-        // Get attributes
-        const attributes: AttributeMap = {};
-        for (const [ name, attributeSource ] of Object.entries(teamSource.attributes)) {
-            attributes[name] = await Attribute.fromSource(parsingContext.withExtendedPath(`.attributes.${name}`), attributeSource, false);
-        }
-
-        // Update parsing context
+        // Get attributes and update parsing context
+        const attributes: AttributeMap = await getAttributes(parsingContext.withExtendedPath('.attributes'), teamSource.attributes, 'team');
         parsingContext = parsingContext.withTeamAttributes(attributes);
 
         // Get descriptor
@@ -103,7 +98,6 @@ export class Team implements IAttributeHolder {
             // Get players from player configs
             const players: Player[] = [];
             for (const playerConfig of playerConfigs) {
-
                 const playerName = playerConfig.playerPrototype;
 
                 // If player does not exist

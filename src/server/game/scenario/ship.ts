@@ -1,7 +1,9 @@
 import Joi from 'joi';
 import { IShipInfo } from '../../../shared/network/scenario/i-ship-info';
 import { Ability, IAbilitySource } from './abilities/ability';
-import { Attribute, IAttributeSource } from './attributes/attribute';
+import { buildAbility } from './abilities/ability-builder';
+import { IAttributeSource } from './attributes/attribute';
+import { getAttributes } from './attributes/attribute-getter';
 import { attributeHolderSchema, AttributeMap, IAttributeHolder } from './attributes/i-attribute-holder';
 import { Descriptor, descriptorSchema, IDescriptorSource } from './common/descriptor';
 import { genericNameSchema } from './common/generic-name';
@@ -18,8 +20,8 @@ import { getJSONFromEntry, UnpackingError } from './unpacker';
  */
 export class Ship implements IAttributeHolder {
 
-    public x = 0;
-    public y = 0;
+    protected _x = 0;
+    protected _y = 0;
 
     /**
      * Ship constructor
@@ -33,6 +35,28 @@ export class Ship implements IAttributeHolder {
                        protected _pattern: Pattern,
                        public readonly abilities: { [name: string]: Ability },
                        public readonly attributes: AttributeMap) {
+    }
+
+    /**
+     * Moves the ship to a destination coordinate on the board
+     *
+     * @param  x Destination x coordinate
+     * @param  y Destination y coordinate
+     */
+    public moveTo(x: number, y: number): void {
+        this._x = x;
+        this._y = y;
+    }
+
+    /**
+     * Moves the ship by an offset
+     *
+     * @param  x Horizontal distance to move ship by
+     * @param  y Vertical distance to move ship by
+     */
+    public moveBy(x: number, y: number): void {
+        this._x += x;
+        this._y += y;
     }
 
     /**
@@ -82,19 +106,14 @@ export class Ship implements IAttributeHolder {
         if (checkSchema)
             shipSource = await checkAgainstSchema(shipSource, shipSchema, parsingContext);
 
-        // Get attributes
-        const attributes: AttributeMap = {};
-        for (const [ name, attributeSource ] of Object.entries(shipSource.attributes)) {
-            attributes[name] = await Attribute.fromSource(parsingContext.withExtendedPath(`.attributes.${name}`), attributeSource, false);
-        }
+        // Get attributes and update parsing context
+        // Ship partial refers to future ship object
+        const attributes: AttributeMap = await getAttributes(parsingContext.withExtendedPath('.attributes'), shipSource.attributes, 'ship');
+        const shipPartial: Partial<Ship> = {};
+        parsingContext = parsingContext.withShipAttributes(attributes).withShipReference(shipPartial);
 
-        // Update parsing context
-        parsingContext = parsingContext.withShipAttributes(attributes);
-
-        // Get descriptor
+        // Get component elements from source
         const descriptor = await Descriptor.fromSource(parsingContext.withExtendedPath('.descriptor'), shipSource.descriptor, false);
-
-        // Get pattern
         const pattern = await Pattern.fromSource(parsingContext.withExtendedPath('.pattern'), shipSource.pattern, false);
 
         // Get abilities
@@ -112,12 +131,12 @@ export class Ship implements IAttributeHolder {
 
             // Unpack ability data
             const abilitySource: IAbilitySource = await getJSONFromEntry(parsingContext.abilityEntries[abilityName]) as unknown as IAbilitySource;
-            abilities[abilityName] = await Ability.fromSource(parsingContext.withUpdatedFile(`abilities/${abilityName}.json`), abilitySource, true);
-
+            abilities[abilityName] = await buildAbility(parsingContext.withUpdatedFile(`abilities/${abilityName}.json`), abilitySource, true);
         }
 
         // Return created Ship object
-        return new Ship(descriptor, pattern, abilities, attributes);
+        Ship.apply(shipPartial, [descriptor, pattern, abilities, attributes]);
+        return shipPartial as Ship;
     }
 
     /**
@@ -132,6 +151,18 @@ export class Ship implements IAttributeHolder {
             descriptor: this.descriptor.makeTransportable(),
             pattern: this._pattern.makeTransportable(false)
         };
+    }
+
+    /**
+     * Getters and setters
+     */
+    
+    public get x(): number {
+        return this._x;
+    }
+    
+    public get y(): number {
+        return this._y;
     }
 }
 

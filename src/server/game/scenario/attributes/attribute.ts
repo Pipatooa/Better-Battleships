@@ -1,6 +1,7 @@
 import Joi from 'joi';
 import { IValueConstraintSource, ValueConstraint, valueConstraintSchema } from '../constraints/value-constaint';
 import { buildValueConstraint } from '../constraints/value-constraint-builder';
+import { EvaluationContext } from '../evaluation-context';
 import { ParsingContext } from '../parsing-context';
 import { checkAgainstSchema } from '../schema-checker';
 import { IValueSource, Value, valueSchema } from '../values/value';
@@ -24,7 +25,7 @@ export class Attribute {
     public constructor(initialValue: Value,
                        protected readonly constraints: ValueConstraint[],
                        public readonly readonly: boolean) {
-        this._value = initialValue.evaluate();
+        this._value = initialValue.evaluate(new EvaluationContext());
     }
 
     /**
@@ -44,14 +45,10 @@ export class Attribute {
      *
      * @param  value New value
      */
-    public set value(value: number | Value) {
+    public set value(value: number) {
         // If value is readonly, ignore new value
         if (this.readonly)
             return;
-
-        // If value is a dynamic value, convert it to a static number
-        if (value instanceof Value)
-            value = value.evaluate();
 
         // Iterate through constraints and constrain value accordingly
         for (const constraint of this.constraints) {

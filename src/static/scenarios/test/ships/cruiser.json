@@ -16,5 +16,11 @@
     ]
   },
   "abilities": [],
-  "attributes": {}
+  "attributes": {
+    "health": {
+      "initialValue": 4,
+      "constraints": [],
+      "readonly": false
+    }
+  }
 }
