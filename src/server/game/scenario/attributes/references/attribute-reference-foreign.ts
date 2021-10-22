@@ -59,7 +59,7 @@ export class AttributeReferenceForeign extends AttributeReference {
      * @returns                    Value of the referenced attribute
      */
     public getValue(evaluationContext: EvaluationContext): number {
-        return this.getAttribute(evaluationContext).value;
+        return this.getAttribute(evaluationContext).getValue();
     }
 
     /**
@@ -69,6 +69,6 @@ export class AttributeReferenceForeign extends AttributeReference {
      * @param  value             New value to assign to referenced attribute
      */
     public setValue(evaluationContext: EvaluationContext, value: number): void {
-        this.getAttribute(evaluationContext).value = value;
+        this.getAttribute(evaluationContext).setValue(evaluationContext, value);
     }
 }

@@ -47,7 +47,7 @@ export class ConditionSome extends ConditionMultiple {
         }
 
         // Check whether the count meets the held value constraint
-        const meetsConstraint: boolean = this.valueConstraint.check(count);
+        const meetsConstraint: boolean = this.valueConstraint.check(evaluationContext, count);
 
         // Return result (invert result if necessary)
         return this.inverted ? !meetsConstraint : meetsConstraint;

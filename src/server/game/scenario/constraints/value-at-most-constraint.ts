@@ -1,6 +1,9 @@
 import Joi from 'joi';
+import { EvaluationContext } from '../evaluation-context';
 import { ParsingContext } from '../parsing-context';
 import { checkAgainstSchema } from '../schema-checker';
+import { IValueSource, Value, valueSchema } from '../values/value';
+import { buildValue } from '../values/value-builder';
 import { ValueConstraint } from './value-constaint';
 
 /**
@@ -17,7 +20,7 @@ export class ValueAtMostConstraint extends ValueConstraint {
      *
      * @param  max Maximum value that other values can hold to meet this constraint
      */
-    protected constructor(public readonly max: number) {
+    protected constructor(public readonly max: Value) {
         super();
     }
 
@@ -34,29 +37,33 @@ export class ValueAtMostConstraint extends ValueConstraint {
         // Validate JSON data against schema
         if (checkSchema)
             valueAtMostConstraintSource = await checkAgainstSchema(valueAtMostConstraintSource, valueAtMostConstraintSchema, parsingContext);
-
+        
+        const max: Value = await buildValue(parsingContext.withExtendedPath('.max'), valueAtMostConstraintSource.max, false);
+        
         // Return created ValueAtMostConstraint object
-        return new ValueAtMostConstraint(valueAtMostConstraintSource.max);
+        return new ValueAtMostConstraint(max);
     }
 
     /**
      * Checks whether or not a value meets this constraint
      *
-     * @param    value Value to check
-     * @returns        Whether value met this constraint
+     * @param    evaluationContext Context for resolving objects and values during evaluation
+     * @param    value             Value to check
+     * @returns                    Whether value met this constraint
      */
-    public check(value: number): boolean {
-        return value <= this.max;
+    public check(evaluationContext: EvaluationContext, value: number): boolean {
+        return value <= this.max.evaluate(evaluationContext);
     }
 
     /**
      * Changes a value to meet this constraint
      *
-     * @param    value Value to constrain
-     * @returns        New value that meets this constraint
+     * @param    evaluationContext Context for resolving objects and values during evaluation
+     * @param    value             Value to constrain
+     * @returns                    New value that meets this constraint
      */
-    public constrain(value: number): number {
-        return Math.min(this.max, value);
+    public constrain(evaluationContext: EvaluationContext, value: number): number {
+        return Math.min(this.max.evaluate(evaluationContext), value);
     }
 }
 
@@ -64,12 +71,12 @@ export class ValueAtMostConstraint extends ValueConstraint {
  * JSON source interface reflecting schema
  */
 export interface IValueAtMostConstraintSource {
-    max: number;
+    max: IValueSource;
 }
 
 /**
  * Schema for validating source JSON data
  */
 export const valueAtMostConstraintSchema = Joi.object({
-    max: Joi.number().required()
+    max: valueSchema.required()
 });

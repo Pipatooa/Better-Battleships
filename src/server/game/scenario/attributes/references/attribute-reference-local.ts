@@ -24,7 +24,7 @@ export class AttributeReferenceLocal extends AttributeReference {
      * @returns  Value of the referenced attribute
      */
     public getValue(): number {
-        return this.attribute.value;
+        return this.attribute.getValue();
     }
 
     /**
@@ -34,6 +34,6 @@ export class AttributeReferenceLocal extends AttributeReference {
      * @param  value             New value to assign to referenced attribute
      */
     public setValue(evaluationContext: EvaluationContext, value: number): void {
-        this.attribute.value = value;
+        this.attribute.setValue(evaluationContext, value);
     }
 }

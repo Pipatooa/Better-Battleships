@@ -46,4 +46,3 @@ export async function buildValueConstraint(parsingContext: ParsingContext, value
     // Return created ValueConstraint object
     return valueConstraint;
 }
-

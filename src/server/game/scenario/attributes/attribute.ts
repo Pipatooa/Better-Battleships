@@ -33,7 +33,7 @@ export class Attribute {
      *
      * @returns  Value of this attribute
      */
-    public get value(): number {
+    public getValue(): number {
         return this._value;
     }
 
@@ -43,16 +43,17 @@ export class Attribute {
      * Will constrain given value to meet all held value constraints.
      * If attribute is readonly, new value will be ignored
      *
-     * @param  value New value
+     * @param  evaluationContext Context for resolving objects and values during evaluation
+     * @param  value             New value
      */
-    public set value(value: number) {
+    public setValue(evaluationContext: EvaluationContext, value: number): void {
         // If value is readonly, ignore new value
         if (this.readonly)
             return;
 
         // Iterate through constraints and constrain value accordingly
         for (const constraint of this.constraints) {
-            value = constraint.constrain(value);
+            value = constraint.constrain(evaluationContext, value);
         }
 
         // Set value as new constrained value

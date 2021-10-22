@@ -1,3 +1,4 @@
+import { EvaluationContext } from '../evaluation-context';
 import { ValueConstraint } from './value-constaint';
 
 /**
@@ -21,10 +22,11 @@ export class EmptyValueConstraint extends ValueConstraint {
     /**
      * Changes a value to meet this constraint
      *
-     * @param    value Value to constrain
-     * @returns        Unrestrained original value
+     * @param    evaluationContext Context for resolving objects and values during evaluation
+     * @param    value             Value to constrain
+     * @returns                    Unrestrained original value
      */
-    public constrain(value: number): number {
+    public constrain(evaluationContext: EvaluationContext, value: number): number {
         return value;
     }
 }

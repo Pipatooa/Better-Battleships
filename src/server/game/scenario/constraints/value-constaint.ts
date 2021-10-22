@@ -1,4 +1,6 @@
 import Joi from 'joi';
+import { EvaluationContext } from '../evaluation-context';
+import { valueSchema } from '../values/value';
 import { IValueAtLeastConstraintSource } from './value-at-least-constraint';
 import { IValueAtMostConstraintSource } from './value-at-most-constraint';
 import { IValueEqualConstraintSource } from './value-equal-constraint';
@@ -11,21 +13,24 @@ import { IValueInRangeConstraintSource } from './value-in-range-constraint';
  * or for a value to be changed to meet the constrain
  */
 export abstract class ValueConstraint {
+    
     /**
      * Checks whether or not a value meets this constraint
      *
-     * @param    value Value to check
-     * @returns        Whether value met this constraint
+     * @param    evaluationContext Context for resolving objects and values during evaluation
+     * @param    value             Value to check
+     * @returns                    Whether value met this constraint
      */
-    abstract check(value: number): boolean;
+    abstract check(evaluationContext: EvaluationContext, value: number): boolean;
 
     /**
      * Changes a value to meet this constraint
      *
-     * @param    value Value to constrain
-     * @returns        New value that meets this constraint
+     * @param    evaluationContext Context for resolving objects and values during evaluation
+     * @param    value             Value to constrain
+     * @returns                    New value that meets this constraint
      */
-    abstract constrain(value: number): number;
+    abstract constrain(evaluationContext: EvaluationContext, value: number): number;
 }
 
 /**
@@ -41,7 +46,7 @@ export type IValueConstraintSource =
  * Schema for validating source JSON data
  */
 export const valueConstraintSchema = Joi.object({
-    exactly: Joi.number(),
-    min: Joi.number(),
-    max: Joi.number().min(Joi.ref('min'))
+    exactly: valueSchema,
+    min: valueSchema,
+    max: valueSchema
 }).without('exactly', [ 'min', 'max' ]);

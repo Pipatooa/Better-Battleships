@@ -1,6 +1,9 @@
 import Joi from 'joi';
+import { EvaluationContext } from '../evaluation-context';
 import { ParsingContext } from '../parsing-context';
 import { checkAgainstSchema } from '../schema-checker';
+import { IValueSource, Value, valueSchema } from '../values/value';
+import { buildValue } from '../values/value-builder';
 import { ValueConstraint } from './value-constaint';
 
 /**
@@ -17,7 +20,7 @@ export class ValueEqualConstraint extends ValueConstraint {
      *
      * @param  target Value to check against
      */
-    protected constructor(public readonly target: number) {
+    protected constructor(public readonly target: Value) {
         super();
     }
 
@@ -34,28 +37,32 @@ export class ValueEqualConstraint extends ValueConstraint {
         // Validate JSON data against schema
         if (checkSchema)
             valueEqualConstraintSource = await checkAgainstSchema(valueEqualConstraintSource, valueEqualConstraintSchema, parsingContext);
-
+        
+        const target: Value = await buildValue(parsingContext.withExtendedPath('.exactly'), valueEqualConstraintSource.exactly, false);
+        
         // Return created ValueEqualConstraint object
-        return new ValueEqualConstraint(valueEqualConstraintSource.exactly);
+        return new ValueEqualConstraint(target);
     }
 
     /**
      * Checks whether or not a value meets this constraint
      *
-     * @param    value Value to check
-     * @returns        Whether value met this constraint
+     * @param    evaluationContext Context for resolving objects and values during evaluation
+     * @param    value             Value to check
+     * @returns                    Whether value met this constraint
      */
-    public check(value: number): boolean {
-        return value === this.target;
+    public check(evaluationContext: EvaluationContext, value: number): boolean {
+        return value === this.target.evaluate(evaluationContext);
     }
 
     /**
      * Changes a value to meet this constraint
      *
-     * @returns  New value that meets this constraint
+     * @param    evaluationContext Context for resolving objects and values during evaluation
+     * @returns                    New value that meets this constraint
      */
-    public constrain(): number {
-        return this.target;
+    public constrain(evaluationContext: EvaluationContext): number {
+        return this.target.evaluate(evaluationContext);
     }
 }
 
@@ -63,12 +70,12 @@ export class ValueEqualConstraint extends ValueConstraint {
  * JSON source interface reflecting schema
  */
 export interface IValueEqualConstraintSource {
-    exactly: number;
+    exactly: IValueSource;
 }
 
 /**
  * Schema for validating source JSON data
  */
 export const valueEqualConstraintSchema = Joi.object({
-    exactly: Joi.number().required()
+    exactly: valueSchema.required()
 });

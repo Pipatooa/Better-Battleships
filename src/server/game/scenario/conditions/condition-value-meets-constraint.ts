@@ -36,7 +36,8 @@ export class ConditionValueMeetsConstraint extends Condition {
      */
     public check(evaluationContext: EvaluationContext): boolean {
         // Check value against value constraint
-        const result: boolean = this.valueConstraint.check(this.value.evaluate(evaluationContext));
+        const value: number = this.value.evaluate(evaluationContext);
+        const result: boolean = this.valueConstraint.check(evaluationContext, value);
 
         // Return result (invert if necessary)
         return this.inverted ? !result : result;
