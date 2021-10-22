@@ -4,3 +4,4 @@
 # Exclude from linguist statistics
 src/static/public/bootstrap/** linguist-vendored
 .yarn/releases/*
+docs/
