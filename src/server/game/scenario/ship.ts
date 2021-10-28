@@ -135,7 +135,8 @@ export class Ship implements IAttributeHolder {
         }
 
         // Return created Ship object
-        Ship.apply(shipPartial, [descriptor, pattern, abilities, attributes]);
+        Ship.call(shipPartial, descriptor, pattern, abilities, attributes);
+        (shipPartial as any).__proto__ = Ship.prototype;
         return shipPartial as Ship;
     }
 
