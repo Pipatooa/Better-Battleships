@@ -55,14 +55,19 @@ const nodeConfig = {
         }
     ],
     plugins: [
-        new TerserPlugin({
-            parallel: true
-        }),
         new NodemonPlugin({
             watch: path.resolve(__dirname, './dist/app.js'),
             nodeArgs: ['--unhandled-rejections=strict']
         })
-    ]
+    ],
+    optimization: {
+        minimizer: [new TerserPlugin({
+            parallel: true,
+            terserOptions: {
+                mangle: false
+            }
+        })]
+    }
 };
 
 
@@ -99,6 +104,7 @@ const scenarioPluginEntries = Array.from({ length: scenarioDirs.length }, (_, i)
 const webConfig = {
     name: 'web',
     entry: {
+        'index': './src/client/index.ts',
         'game': './src/client/game.ts',
         'create-game': './src/client/create-game.ts',
         'register': './src/client/register.ts',
