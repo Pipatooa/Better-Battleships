@@ -1,20 +1,76 @@
 :root {
-    --filled-box-background: #8ba9c4;
+    --main-container-background: #f0f0f0;
+    --secondary-container-background: var(--bs-light);
+    --brand-color: #eee;
+    --navigation-color: #1056a6;
+    --navigation-secondary: #0f3874;
+    --navigation-link-color: #eee;
+    --navigation-divider-color: #bbb;
 }
 
-.h-divider {
-    border-top: 1px solid black;
-    width: 100%;
+.main-container {
+    background: var(--main-container-background);
 }
 
-.boxed-container {
-    border: 2px solid black;
-    border-radius: 5px;
+.secondary-container {
+    background: var(--secondary-container-background);
 }
 
-.filled-boxed-container {
-    border: 2px solid black;
-    border-radius: 5px;
+.navbar {
+    background: var(--navigation-color);
+}
 
-    background: var(--filled-box-background);
+.navbar .navbar-brand {
+    background: var(--navigation-secondary);
+    color: var(--brand-color);
+}
+
+.navbar .nav-link {
+    color: var(--navigation-link-color);
+}
+
+.nav.nav-tabs .nav-link.active {
+    border-left-color: var(--navigation-divider-color);
+    border-top-color: var(--navigation-divider-color);
+    border-right-color: var(--navigation-divider-color);
+    border-bottom: var(--secondary-container-background);
+    background: var(--secondary-container-background);
+}
+
+.nav.nav-tabs {
+    border-bottom-color: var(--navigation-divider-color);
+}
+
+input, select {
+    background: var(--secondary-container-background);
+}
+
+.vertical-scroll {
+    overflow: auto;
+    overflow-y: scroll;
+    -ms-overflow-y: scroll;
+}
+
+.file-drop {
+    border: var(--bs-dark) 1px dashed;
+
+    background: #DDD;
+    transition: 150ms linear;
+
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.file-drop.file-drop-highlighted {
+    border-color: var(--bs-blue);
+    background: var(--secondary-container-background);
+    transition: 150ms linear;
+}
+
+.file-drop p {
+    color: var(--bs-gray-dark);
 }

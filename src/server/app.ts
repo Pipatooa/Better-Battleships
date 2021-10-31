@@ -9,8 +9,10 @@ import { executeDBStartupScript } from './db/startup';
 
 import socketRegister from './game/sockets/register';
 
+import indexRouter from './routes/index';
 import gameRouter from './routes/game';
 import gameCreateRouter from './routes/game/create';
+import gameNotFoundRouter from './routes/game/notfound';
 import loginRouter from './routes/login';
 import registerRouter from './routes/register';
 
@@ -41,7 +43,9 @@ executeDBStartupScript().then(() => {
     app.use(cookieParser());
 
     // Register route handlers for express
+    app.use('/', indexRouter);
     app.use('/game/create', gameCreateRouter);
+    app.use('/game/notfound', gameNotFoundRouter);
     app.use('/game', gameRouter);
     app.use('/login', loginRouter);
     app.use('/register', registerRouter);

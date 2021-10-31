@@ -1,5 +1,56 @@
 :root {
     --canvas-background-color: #32628c;
+    --player-ready-color: var(--bs-success);
+    --player-not-ready-color: var(--bs-danger);
+    --turn-indicator-color: var(--bs-gray);
+    --turn-indicator-this-player-color: var(--bs-gray-dark);
+    --turn-indicator-active-color: var(--bs-success);
+    --turn-indicator-this-player-active-color: var(--bs-yellow);
+}
+
+.player:not(.player-ready) {
+    background: var(--player-not-ready-color);
+}
+
+.player.player-ready {
+    background: var(--player-ready-color);
+}
+
+.turn-indicator {
+    background: var(--turn-indicator-color);
+    white-space: nowrap;
+    transition: 150ms linear;
+}
+
+.turn-indicator.turn-indicator-active {
+    background: var(--turn-indicator-active-color);
+    transition: 150ms linear;
+}
+
+#game-link {
+    width: min-content;
+    white-space: nowrap;
+}
+
+#game-tooltip {
+    position: absolute;
+    z-index: 1000;
+
+    pointer-events: none;
+
+    font-size: 0.75rem;
+}
+
+#game-tooltip-ship-attribute-list {
+    list-style-type: none;
+}
+
+#game-tooltip-ship-attribute-list > li {
+    text-indent: -1.5rem;
+}
+
+#game-tooltip-ship-attribute-list > li:before {
+    content: "- ";
 }
 
 .canvas-wrapper {
@@ -21,10 +72,6 @@
 
 .canvas-wrapper > canvas:first-child {
     background: var(--canvas-background-color);
-}
-
-.game-right-pane {
-    border-left: black 2px solid;
 }
 
 #button-previous-container, #button-next-container {

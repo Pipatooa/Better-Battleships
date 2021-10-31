@@ -1,91 +1,125 @@
 {{> banner}}
 
-<div class="container text-center d-none" id="game-container">
-    <div class="row boxed-container p-0">
-        <div class="col-md-8 p-0">
-            <div class="canvas-wrapper">
-                <canvas id="board-canvas" width="450" height="300">
-                    Sorry, your browser does not support the canvas element.
-                </canvas>
-                <canvas id="ship-canvas" width="450" height="300"></canvas>
-                <canvas id="selected-ship-canvas" width="450" height="300"></canvas>
+<div class="container-fluid py-5 main-container">
+    <div class="container text-center secondary-container d-none" id="game-container">
+        <div class="px-3 pt-3 text-start border border-dark bg-body" id="game-tooltip">
+            <div class="mb-2" id="game-tooltip-tile-section">
+                <p class="mb-0">
+                    <b>(<span id="game-tooltip-tile-x">X</span>, <span id="game-tooltip-tile-y">Y</span>): <span id="game-tooltip-tile-name">Tile Name</span></b>
+                    <br>Traversable: <span id="game-tooltip-tile-traversable">True</span>
+                </p>
+            </div>
+            <div class="mb-2" id="game-tooltip-ship-section">
+                <p class="mb-0">
+                    <b><span id="game-tooltip-ship-name">Ship Name</span></b>
+                    <br>Owner: <span id="game-tooltip-ship-owner">Player Name</span>
+                    <br>Attributes:
+                </p>
+                <ul id="game-tooltip-ship-attribute-list">
+                    <li><span>Health</span>: <span>5</span></li>
+                </ul>
             </div>
         </div>
-        <div class="col-md-4 p-0 game-right-pane text-start">
-            <div class="p-3" id="ship-selection-pane">
-                <h5><b>Place Ships:</b></h5>
-                <p>Select a ship by clicking on it from this window and place it onto the board on the left half of this page. The direction the ship is facing is shown by an arrow pointing in that direction.<br>If the ship can be rotated, press <kbd>R</kbd> to rotate it.</p>
+        <div class="row p-0 border border-dark rounded-3">
+            <div class="col-8 p-0 border-end border-dark">
                 <div class="canvas-wrapper">
-                    <canvas id="ship-selection-canvas" width="100" height="100"></canvas>
+                    <canvas id="board-canvas" width="450" height="300">
+                        Sorry, your browser does not support the canvas element.
+                    </canvas>
+                    <canvas id="ship-canvas" width="450" height="300"></canvas>
+                    <canvas id="selected-ship-canvas" width="450" height="300"></canvas>
                 </div>
-                <div class="row w-100 mx-auto mt-2">
-                    <div class="px-0" id="button-previous-container">
-                        <button class="btn btn-dark w-100" id="button-previous-ship">< Previous</button>
+            </div>
+            <div class="col-4 p-3 text-start">
+                <div class="d-none" id="ship-selection-pane">
+                    <h5><b>Place Ships:</b></h5>
+                    <p>Select a ship by clicking on it from this window and place it onto the board on the left half of this page. The direction the ship is facing is shown by an arrow pointing in that direction.<br>If the ship can be rotated, press <kbd>R</kbd> to rotate it.</p>
+                    <div class="canvas-wrapper">
+                        <canvas id="ship-selection-canvas" width="100" height="100"></canvas>
                     </div>
-                    <div class="px-0" id="button-next-container">
-                        <button class="btn btn-dark w-100" id="button-next-ship">Next ></button>
+                    <div class="row w-100 mx-auto mt-2">
+                        <div class="px-0" id="button-previous-container">
+                            <button class="btn btn-dark w-100" id="button-previous-ship">< Previous</button>
+                        </div>
+                        <div class="px-0" id="button-next-container">
+                            <button class="btn btn-dark w-100" id="button-next-ship">Next ></button>
+                        </div>
+                        <button class="btn btn-dark w-100 d-none" id="button-placement-done">Done</button>
                     </div>
-                    <button class="btn btn-dark w-100 d-none" id="button-placement-done">Done</button>
                 </div>
-            </div>
-            <div class="p-3 d-none" id="info-pane">
-                <div class="d-none" id="info-pane-tile-section">
-                    <h5><b><u>Tile:</u></b></h5>
-                    <p class="mb-0"><b>Name:</b> <span id="info-pane-tile-name"></span></p>
-                    <p><b>Description:</b> <span id="info-pane-tile-description"></span></p>
-                </div>
-                <div class="d-none" id="info-pane-ship-section">
-                    <h5><b><u>Ship:</u></b></h5>
-                    <p class="mb-0"><b>Name:</b> <span id="info-pane-ship-name"></span></p>
-                    <p><b>Description:</b> <span id="info-pane-ship-description"></span></p>
-                    <h6><b>Stats:</b></h6>
-                    <p class="mb-0">...</p>
-                    <p>...</p>
-                    <h6><b>Actions:</b></h6>
-                    <p class="mb-0">...</p>
-                    <p>...</p>
+                <div class="d-flex flex-column h-100" id="info-pane">
+                    <div class="mt-auto">
+                        <h5><b>Turn:</b></h5>
+                        <div class="row g-2 mb-2 text-center">
+                            <div class="col">
+                                <div class="turn-indicator py-1 px-2 rounded-3">Player 1</div>
+                            </div>
+                            <div class="col">
+                                <div class="turn-indicator py-1 px-2 rounded-3 turn-indicator-active">Player 2</div>
+                            </div>
+                            <div class="col">
+                                <div class="turn-indicator py-1 px-2 rounded-3">Player 3</div>
+                            </div>
+                            <div class="col">
+                                <div class="turn-indicator py-1 px-2 rounded-3">Player 4</div>
+                            </div>
+                            <div class="col">
+                                <div class="turn-indicator py-1 px-2 rounded-3">Player 5</div>
+                            </div>
+                            <div class="col">
+                                <div class="turn-indicator py-1 px-2 rounded-3">Player 6</div>
+                            </div>
+                            <div class="col">
+                                <div class="turn-indicator py-1 px-2 rounded-3">Player 7</div>
+                            </div>
+                        </div>
+                        <button class="btn w-100 btn-dark" id="button-end-turn">End Turn</button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
-
-<div class="container text-center" id="lobby-container">
-    <div class="row py-4 px-2 boxed-container">
-        <div class="col-md-8" style="border-right: 1px solid;">
-            <div class="h-100 d-flex flex-column">
-                <h3>Teams:</h3>
-                <div class="h-divider py-2"></div>
-                <div class="container row flex-grow-1 px-0" id="team-pane"></div>
-                <div class="h-divider py-2"></div>
-                <h3>Unassigned:</h3>
-                <div class="container row flex-grow-1" id="unassigned-pane"></div>
-                <button class="btn btn-primary w-50 mx-auto" id="ready-button" disabled="disabled">Ready</button>
-            </div>
-        </div>
-        <div class="col-md-4 text-start">
-            <h3>Scenario:</h3>
-            <div class="row">
-                <div class="col-sm-6">
-                <p class="mb-0"><b>Name: </b></p>
-                <p id="scenario-name-field"></p>
-                </div>
-                <div class="col-sm-6">
-                    <p class="mb-0"><b>Author: </b></p>
-                    <p id="scenario-author-field"></p>
+    <div class="container p-0" id="lobby-container">
+        <div class="row mx-0 border border-dark rounded-3 secondary-container">
+            <div class="col-8 p-0 border-end border-dark">
+                <div class="d-flex flex-column h-100 p-0">
+                    <div class="p-3 border-bottom border-dark">
+                        <h3>Teams:</h3>
+                        <p>Select a team to join.</p>
+                    </div>
+                    <div id="teams-list"></div>
+                    <div class="p-3">
+                        <h5 class="mb-0"><b>Unassigned</b></h5>
+                        <p>Players who are not current assigned to any team.</p>
+                        <div id="unassigned-players"></div>
+                    </div>
+                    <div class="mt-auto p-3">
+                        <p class="mb-0"><b id="lobby-status-text">Waiting for all players to be ready...</b></p>
+                    </div>
                 </div>
             </div>
-            <p class="mb-0"><b>Description:</b></p>
-            <p class="text-wrap" id="scenario-description-field"></p>
+            <div class="col-4 px-0">
+                <div class="d-flex flex-column h-100 p-3">
+                    <h3>Scenario Information:</h3>
+                    <div class="row">
+                        <div class="col-6">
+                            <p class="mb-0"><b>Name: </b></p>
+                            <p id="scenario-name-field"></p>
+                        </div>
+                        <div class="col-6">
+                            <p class="mb-0"><b>Author: </b></p>
+                            <p id="scenario-author-field"></p>
+                        </div>
+                    </div>
+                    <p class="mb-0"><b>Description:</b></p>
+                    <p class="text-wrap" id="scenario-description-field"></p>
+                    <button class="btn mt-auto text-center btn-dark" id="ready-button">Ready</button>
+                </div>
+            </div>
         </div>
-    </div>
-    <div class="pt-4">
-        <p><b id="status-text">Waiting for all players to be ready...</b></p>
-    </div>
-    <div class="py-3 my-5 w-50 mx-auto grey-container">
-        <h3>Invite link:</h3>
-        <div>
-            <p class="px-2 mx-auto" style="width: max-content;" id="share-link" data-toggle="tooltip" data-bs-placement="right" title="Copy to clipboard">{{baseUrl}}{{gameUrl}}</p>
+        <div class="w-50 mx-auto mt-4 p-3 text-center border border-dark rounded-3 secondary-container">
+            <h3>Game Link:</h3>
+            <p class="mx-auto mb-2" id="game-link" data-bs-toggle="tooltip" data-bs-placement="right" title="Copy to Clipboard">{{baseUrl}}{{gameUrl}}</p>
         </div>
     </div>
 </div>

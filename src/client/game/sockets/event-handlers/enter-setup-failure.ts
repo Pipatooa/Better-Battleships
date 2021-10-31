@@ -12,5 +12,5 @@ export function handleEnterSetupFailure(enterSetupFailureEvent: IEnterSetupFailu
     gameCountdownManager.stopTimeout('gameCountdownUpdate');
 
     // Set status from reason provided
-    $('#status-text').text(enterSetupFailureEvent.reason);
+    $('#lobby-status-text').text(enterSetupFailureEvent.reason);
 }

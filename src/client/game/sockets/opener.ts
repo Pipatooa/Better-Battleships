@@ -10,7 +10,7 @@ let ws: WebSocket;
 export function openSocketConnection(): void {
 
     // Open a new websocket connection
-    ws = new WebSocket(`ws://${location.host}${location.pathname}`);
+    ws = new WebSocket(`ws://${window.location.host}${window.location.pathname}`);
 
     // Register open handler for websocket
     ws.onopen = (e: OpenEvent) => {
@@ -26,6 +26,10 @@ export function openSocketConnection(): void {
     // Register close handler for websocket
     ws.onclose = (e: CloseEvent) => {
         console.log(`Closed websocket connection to '${e.target.url}' due to '${e.reason}' (${e.code})`);
+
+        // If connection did not close due to them leaving the page
+        if (e.code !== 1001)
+            window.location.href = `/game/notfound${window.location.search}`;
     };
 }
 

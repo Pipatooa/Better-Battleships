@@ -12,12 +12,7 @@ export function handlePlayerReady(playerReadyEvent: IPlayerReadyEvent): void {
 
     // Get player element using identity provided
     const player = allPlayers[playerReadyEvent.playerIdentity];
-
-    // Depending on new ready status, add or remove ready class
-    if (playerReadyEvent.ready)
-        player.lobbyElement.addClass('player-ready');
-    else
-        player.lobbyElement.removeClass('player-ready');
+    player.ready(playerReadyEvent.ready);
 
     // If player that is ready is us
     if (playerReadyEvent.playerIdentity === selfIdentity) {

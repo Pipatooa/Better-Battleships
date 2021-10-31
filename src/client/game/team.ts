@@ -42,21 +42,24 @@ export class Team {
     private createTeamElements(): JQuery {
 
         // Get teams pane to add sub-elements to
-        const teamPaneElement = $('#team-pane');
+        const teamPaneElement = $('#teams-list');
 
         // Create a new team element with name and description. Add to team pane
-        const teamElement = $('<div class="col-md h-100 d-flex flex-column pb-2 px-2"></div>');
-        teamElement.append($('<h3></h3>').text(this.descriptor.name));
-        teamElement.append($('<p></p>').text(this.descriptor.description));
+        const teamElement = $('<div class="p-3 border-bottom border-dark"><div class="d-flex"></div></div>');
+        const teamInfoElement = $('<div class="flex-grow-1"></div>');
+        teamInfoElement.append($('<h5 class="mb-0"></h5>').append($('<b></b>').text(this.descriptor.name)));
+        teamInfoElement.append($('<p></p>').text(this.descriptor.description));
+        teamElement.children().first().append(teamInfoElement);
+
+        // Container for player elements
+        const teamPlayerContainerElement = $('<div></div>');
+        teamInfoElement.append(teamPlayerContainerElement);
+
+        // Add team to list of teams
         teamPaneElement.append(teamElement);
 
-        // Create a new player container element for team's players. Add to team element
-        const teamPlayerContainerElement = $('<div class="container flex-grow-1"></div>');
-        teamElement.append(teamPlayerContainerElement);
-
-        // Create a new button to join the team. Add to team element
-        const buttonElement = $('<button class="btn btn-secondary w-75 mx-auto join-team-button">Join</button>');
-        teamElement.append(buttonElement);
+        const buttonElement = $('<button class="btn join-team-button text-center btn-dark">Join</button>');
+        teamElement.children().first().append($('<div></div>').append(buttonElement));
 
         // Register click handler for join team button
         buttonElement.on('click', () => {

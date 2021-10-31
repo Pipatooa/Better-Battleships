@@ -10,7 +10,7 @@ import { handlePlayerReady } from './player-ready';
 export function handlePlayerJoin(playerJoin: IPlayerJoinEvent): void {
 
     // Create a new player using the player's identity
-    new Player(playerJoin.playerIdentity);
+    new Player(playerJoin.playerIdentity, false);
 
     // Pass player readiness onto player ready handler
     handlePlayerReady({

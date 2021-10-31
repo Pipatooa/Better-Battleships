@@ -24,8 +24,9 @@ export function handleGameInfo(gameInfo: IGameInfoEvent): void {
     }
 
     // Unpack player assignments for lobby
-    for (const [playerIdentity, teamID] of Object.entries(gameInfo.teamAssignments)) {
-        const player = new Player(playerIdentity);
+    for (const [playerIdentity, playerInfo] of Object.entries(gameInfo.playerInfo)) {
+        const [teamID, ready] = playerInfo;
+        const player = new Player(playerIdentity, ready);
 
         // Assign player to team if necessary
         if (teamID !== null) {

@@ -13,14 +13,19 @@ import { PatternRenderer } from './pattern-renderer';
  */
 export class SelectedShipRenderer {
 
+    private highlightedX = -Infinity;
+    private highlightedY = -Infinity;
+    private readonly highlightedShip: Ship | undefined;
     private readonly highlightedCellRenderer: PatternRenderer;
+    
+    private readonly selectedX = -Infinity;
+    private readonly selectedY = -Infinity;
     private selectedShip: Ship | undefined;
     private selectedShipRenderer: PatternRenderer | undefined;
 
-    private highlightedX = -Infinity;
-    private highlightedY = -Infinity;
-
     public placementMode = true;
+
+    private readonly tooltipElement: JQuery = $('#game-tooltip');
 
     private readonly infoPaneElement: JQuery = $('#info-pane');
     private readonly shipSelectionPaneElement: JQuery = $('#ship-selection-pane');
@@ -49,6 +54,7 @@ export class SelectedShipRenderer {
 
         // Register event listeners
         this.renderer.topCanvas.canvas.addEventListener('pointermove', (ev) => this.onPointerMove(ev));
+        this.renderer.topCanvas.canvas.addEventListener('pointerenter', () => this.onPointerEnter());
         this.renderer.topCanvas.canvas.addEventListener('pointerleave', () => this.onPointerLeave());
         this.renderer.topCanvas.canvas.addEventListener('pointerdown', () => this.onPointerDown());
     }
@@ -59,6 +65,10 @@ export class SelectedShipRenderer {
      * @param  ev Pointer movement event
      */
     public onPointerMove(ev: PointerEvent): void {
+
+        // Move tooltip
+        this.tooltipElement.get(0).style.left = `${ev.x + 5}px`;
+        this.tooltipElement.get(0).style.top = `${ev.y + 5}px`;
 
         // If mouse is being held, do not recalculate selected cell
         if (ev.buttons !== 0)
@@ -86,9 +96,18 @@ export class SelectedShipRenderer {
     }
 
     /**
+     * Called when the pointer is moved inside of the canvas
+     */
+    public onPointerEnter(): void {
+        this.tooltipElement.removeClass('d-none');
+    }
+
+    /**
      * Called when the pointer is moved outside of the canvas
      */
     public onPointerLeave(): void {
+        this.tooltipElement.addClass('d-none');
+
         this.highlightedX = -Infinity;
         this.highlightedY = -Infinity;
 

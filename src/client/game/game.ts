@@ -34,7 +34,6 @@ export class Game {
 /**
  * Creates singleton Game
  *
- * @param  board Board to pass to Game constructor
  * @param  teams Teams to pass to Game constructor
  */
 export function initGame(teams: { [id: string]: Team }): void {

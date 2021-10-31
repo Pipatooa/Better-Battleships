@@ -11,29 +11,6 @@ import { preventCSRF, requireAuth } from '../../middleware';
 const router = express.Router();
 
 /**
- * GET Route handler for /game/create
- *
- * Requires auth
- */
-router.get('/', preventCSRF, requireAuth, (req, res) => {
-
-    // Deliver page content
-    res.render('create-game', {
-        csrfToken: req.csrfToken(),
-        url: req.baseUrl + req.url,
-        pageTitle: 'Create Game',
-        pageDescription: '',
-        stylesheets: [
-            '/css/style.css',
-            '/css/create-game.css'
-        ],
-        scripts: [
-            '/js/create-game.js'
-        ]
-    });
-});
-
-/**
  * POST Route handler for /game/create
  *
  * Requires auth

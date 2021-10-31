@@ -7,7 +7,7 @@ import { file } from './filedrop';
  * @param  errorMessageElement HTML element showing error message
  * @param  errorContextElement HTML element showing error context message
  */
-export async function submit(errorContainer: JQuery, errorMessageElement: JQuery, errorContextElement: JQuery): Promise<void> {
+export async function createCustomGame(errorContainer: JQuery, errorMessageElement: JQuery, errorContextElement: JQuery): Promise<void> {
 
     // Create new form for game settings
     const formData = new FormData();

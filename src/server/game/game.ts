@@ -72,17 +72,20 @@ export class Game {
                 this.timeoutManager.startTimeout('gameJoinTimeout');
         });
 
-        // Create dictionary of team assignments for each client
-        let teamAssignments: { [id: string]: string | null } = {};
+        // Create dictionary of team assignments and readiness info for each client
+        let playerInfo: { [id: string]: [string, boolean] | [null, false] } = {};
         for (const client of this.clients) {
-            teamAssignments[client.identity] = client.team ? client.team.id : null;
+            if (client.team)
+                playerInfo[client.identity] = [client.team.id, client.ready];
+            else
+                playerInfo[client.identity] = [null, false];
         }
 
         // Send client information about the scenario
         client.sendEvent({
             event: 'gameInfo',
             scenario: this.scenario.makeTransportable(),
-            teamAssignments: teamAssignments
+            playerInfo: playerInfo
         });
 
         // Broadcast player join to all existing clients

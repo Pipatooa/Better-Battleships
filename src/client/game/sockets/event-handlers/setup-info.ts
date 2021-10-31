@@ -13,10 +13,8 @@ import { Ship } from '../../scenario/ship';
  */
 export async function handleSetupInfo(setupInfoEvent: ISetupInfoEvent): Promise<void> {
 
-    // Remove lobby from the screen
+    // Alter which screens are visible
     $('#lobby-container').remove();
-
-    // Show main game screen
     $('#game-container').removeClass('d-none');
 
     // Unpack board data

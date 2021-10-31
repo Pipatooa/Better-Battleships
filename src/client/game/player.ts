@@ -22,8 +22,10 @@ export class Player {
      * Also adds new player to dictionary of all players
      *
      * @param  identity Identity string for the player
+     * @param  ready    Whether or not the player is ready
      */
-    public constructor(public readonly identity: string) {
+    public constructor(public readonly identity: string,
+                       ready: boolean) {
 
         // Add self to list of all players
         allPlayers[this.identity] = this;
@@ -33,7 +35,10 @@ export class Player {
             selfPlayer = this;
 
         // Create representation of player in lobby
-        this.lobbyElement = createPlayerElements(this, $('#unassigned-pane'));
+        this.lobbyElement = this.createPlayerElements($('#unassigned-players'));
+
+        if (ready)
+            this.ready(true);
     }
 
     /**
@@ -45,6 +50,25 @@ export class Player {
         this.team?.removePlayer(this);
         delete allPlayers[this.identity];
         this.lobbyElement.remove();
+    }
+
+    /**
+     * Creates set of elements representing the player during the lobby stage of the game
+     *
+     * @param    pane Pane to place player elements under
+     * @returns       Created parent element
+     */
+    private createPlayerElements(pane: JQuery): JQuery {
+
+        // Get display name from client identity string
+        const playerName = nameFromIdentity(this.identity);
+
+        // Create new element for player using identity and name. Add to pane
+        const playerElement = $('<span class="player me-2 py-1 px-2 rounded-3"></span>');
+        playerElement.text(playerName);
+        pane.append(playerElement);
+
+        return playerElement;
     }
 
     /**
@@ -61,24 +85,16 @@ export class Player {
         // Set new parent element for player elements in lobby
         this.lobbyElement.appendTo(this.team!.lobbyPlayerContainerElement);
     }
-}
 
-/**
- * Creates set of elements representing a player during the lobby stage of the game
- *
- * @param    player Player to create elements for
- * @param    pane   Pane to place player elements under
- * @returns         Created parent element
- */
-export function createPlayerElements(player: Player, pane: JQuery): JQuery {
-
-    // Get display name from client identity string
-    const playerName = nameFromIdentity(player.identity);
-
-    // Create new element for player using identity and name. Add to pane
-    const playerElement = $('<div class=""/>');
-    playerElement.text(playerName);
-    pane.append(playerElement);
-
-    return playerElement;
+    /**
+     * Alters the shown readiness state of the player
+     *
+     * @param  readyState New readiness state
+     */
+    public ready(readyState: boolean): void {
+        if (readyState)
+            this.lobbyElement.addClass('player-ready');
+        else
+            this.lobbyElement.removeClass('player-ready');
+    }
 }

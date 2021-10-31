@@ -6,6 +6,7 @@ import { queryDatabase } from '../db/query';
 import { preventCSRF } from '../middleware';
 
 const router = express.Router();
+export default router;
 
 /**
  * GET Route handler for /register
@@ -107,5 +108,3 @@ const registerFieldSchema = Joi.object({
     password: Joi.string().min(8).regex(/^(?=.*?[a-z])(?=.*?[A-Z])(?=.*?\d)(?=.*?[ -/:-@[-`{-~]).+$/).required(),
     password2: Joi.valid(Joi.ref('password')).required()
 });
-
-export default router;

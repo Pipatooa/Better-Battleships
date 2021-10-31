@@ -1,26 +1,25 @@
-import { flags } from '../game';
 import { copyToClipboard } from '../utils/utils';
 
 let shareLinkElement: JQuery;
 
 /**
- * Registers tooltip for the share link
+ * Registers tooltip for the game link
  */
-export function registerShareLinkHandlers(): void {
+export function registerGameLinkHandlers(): void {
 
-    // Get share link element using JQuery and enable tooltip
-    shareLinkElement = $('#share-link');
+    // Get game link element using JQuery and enable tooltip
+    shareLinkElement = $('#game-link');
     (shareLinkElement as any).tooltip();
 
-    // Register share link event handlers
-    shareLinkElement.on('click', onShareLinkClick);
-    shareLinkElement.on('hidden.bs.tooltip', onShareLinkToolTipHidden);
+    // Register game link event handlers
+    shareLinkElement.on('click', onGameLinkClick);
+    shareLinkElement.on('hidden.bs.tooltip', onGameLinkToolTipHidden);
 }
 
 /**
- * Called when share link is clicked
+ * Called when game link is clicked
  */
-function onShareLinkClick(): void {
+function onGameLinkClick(): void {
 
     // Get share link text
     const shareLinkText = shareLinkElement.html();
@@ -34,9 +33,9 @@ function onShareLinkClick(): void {
 }
 
 /**
- * Called when share link tooltip becomes hidden
+ * Called when game link tooltip becomes hidden
  */
-function onShareLinkToolTipHidden(): void {
+function onGameLinkToolTipHidden(): void {
 
     // Set tooltip text back to 'Copy to clipboard'
     shareLinkElement.attr('data-bs-original-title', 'Copy to clipboard');

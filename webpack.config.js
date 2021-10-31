@@ -106,7 +106,7 @@ const webConfig = {
     entry: {
         'index': './src/client/index.ts',
         'game': './src/client/game.ts',
-        'create-game': './src/client/create-game.ts',
+        'game-not-found': './src/client/game-not-found.ts',
         'register': './src/client/register.ts',
         'login': './src/client/login.ts'
     },

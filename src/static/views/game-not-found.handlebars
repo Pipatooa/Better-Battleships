@@ -1,11 +1,7 @@
 {{> banner}}
 
-<div class="container text-center filled-boxed-container py-5 w-50">
-    <h3>The game you are looking for does not exist!</h3>
-    <p>Could not find a game with ID {{gameID}}</p>
-
-    <div class="container py-5">
-        <h5 class="py">Try creating a new game:</h5>
-        <a href="/game/create" class="btn btn-primary">Create Game</a>
-    </div>
+<div class="container-fluid py-5 text-center main-container">
+    <h5>The game you are looking for has either already started, or does not exist!</h5>
+    <h5>Try creating a new game, or make sure that the game id you are using is correct.</h5>
+    <a class="mt-5 btn btn-dark" href="/">Return to Home Page</a>
 </div>

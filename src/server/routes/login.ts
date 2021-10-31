@@ -8,11 +8,12 @@ import { queryDatabase } from '../db/query';
 import { preventCSRF } from '../middleware';
 
 const router = express.Router();
+export default router;
 
 /**
  * GET Route handler for /login
  */
-router.get('/', preventCSRF, (req, res) => {
+router.get('/', preventCSRF, async (req, res) => {
 
     // Deliver page content
     res.render('login', {
@@ -125,5 +126,3 @@ const loginFieldSchema = Joi.object({
     username: Joi.string().min(1).max(32).required(),
     password: Joi.string().min(8).required()
 });
-
-export default router;
