@@ -3,6 +3,7 @@ import { Pattern, PatternEntry } from '../scenario/pattern';
 import { findShip, Ship } from '../scenario/ship';
 import { GameRenderer } from './game-renderer';
 import { PatternRenderer } from './pattern-renderer';
+import { VariableVisibilityElement } from './variable-visibility-element';
 
 /**
  * SelectedShipRenderer - Client Version
@@ -15,7 +16,7 @@ export class SelectedShipRenderer {
 
     private highlightedX = -Infinity;
     private highlightedY = -Infinity;
-    private readonly highlightedShip: Ship | undefined;
+    private highlightedShip: Ship | undefined;
     private readonly highlightedCellRenderer: PatternRenderer;
     
     private readonly selectedX = -Infinity;
@@ -25,21 +26,26 @@ export class SelectedShipRenderer {
 
     public placementMode = true;
 
-    private readonly tooltipElement: JQuery = $('#game-tooltip');
+    // Tooltip
+    private readonly tooltipElement = new VariableVisibilityElement($('#game-tooltip'));
 
-    private readonly infoPaneElement: JQuery = $('#info-pane');
-    private readonly shipSelectionPaneElement: JQuery = $('#ship-selection-pane');
-    private infoPaneVisible = false;
+    private readonly tooltipTileSectionElement = new VariableVisibilityElement($('#game-tooltip-tile-section'));
+    private readonly tooltipTileCoordinatesElement = $('#game-tooltip-tile-coordinates');
+    private readonly tooltipTileNameElement = $('#game-tooltip-tile-name');
+    private readonly tooltipTileTraversableElement = $('#game-tooltip-tile-traversable');
 
-    private readonly infoPaneTileSectionElement: JQuery = $('#info-pane-tile-section');
-    private readonly infoPaneTileNameElement: JQuery = $('#info-pane-tile-name');
-    private readonly infoPaneTileDescriptionElement: JQuery = $('#info-pane-tile-description');
-    private infoPaneTileSectionVisible = false;
+    private readonly tooltipShipSectionElement = new VariableVisibilityElement($('#game-tooltip-ship-section'));
+    private readonly tooltipShipNameElement = $('#game-tooltip-ship-name');
+    private readonly tooltipShipOwnerElement = $('#game-tooltip-ship-owner');
 
-    private readonly infoPaneShipSectionElement: JQuery = $('#info-pane-ship-section');
-    private readonly infoPaneShipNameElement: JQuery = $('#info-pane-ship-name');
-    private readonly infoPaneShipDescriptionElement: JQuery = $('#info-pane-ship-description');
-    private infoPaneShipSectionVisible = false;
+    // Info pane
+    private readonly infoPaneElement = new VariableVisibilityElement($('#info-pane'));
+    private readonly shipSelectionPaneElement = new VariableVisibilityElement($('#ship-selection-pane'));
+
+    private readonly infoPaneShipSectionElement = new VariableVisibilityElement($('#info-pane-ship-section'));
+    private readonly infoPaneShipNameElement = $('#info-pane-ship-name');
+    private readonly infoPaneShipOwnerElement = $('#info-pane-ship-owner');
+    private readonly infoPaneShipDescriptionElement = $('#info-pane-ship-description');
 
     /**
      * SelectedShipRenderer constructor
@@ -54,7 +60,6 @@ export class SelectedShipRenderer {
 
         // Register event listeners
         this.renderer.topCanvas.canvas.addEventListener('pointermove', (ev) => this.onPointerMove(ev));
-        this.renderer.topCanvas.canvas.addEventListener('pointerenter', () => this.onPointerEnter());
         this.renderer.topCanvas.canvas.addEventListener('pointerleave', () => this.onPointerLeave());
         this.renderer.topCanvas.canvas.addEventListener('pointerdown', () => this.onPointerDown());
     }
@@ -67,8 +72,8 @@ export class SelectedShipRenderer {
     public onPointerMove(ev: PointerEvent): void {
 
         // Move tooltip
-        this.tooltipElement.get(0).style.left = `${ev.x + 5}px`;
-        this.tooltipElement.get(0).style.top = `${ev.y + 5}px`;
+        this.tooltipElement.element.get(0).style.left = `${ev.x + 5}px`;
+        this.tooltipElement.element.get(0).style.top = `${ev.y + 5}px`;
 
         // If mouse is being held, do not recalculate selected cell
         if (ev.buttons !== 0)
@@ -78,36 +83,29 @@ export class SelectedShipRenderer {
         const [pixelX, pixelY] = this.renderer.selectedShipCanvas.translateMouseCoordinatePixel(ev.x, ev.y);
         const [boardX, boardY] = this.renderer.boardRenderer.translatePixelCoordinateBoard(pixelX, pixelY);
 
-        const oldHighlightedX = this.highlightedX;
-        const oldHighlightedY = this.highlightedY;
+        if (boardX === this.highlightedX && boardY === this.highlightedY)
+            return;
 
         this.highlightedX = boardX;
         this.highlightedY = boardY;
 
+        // If in placement mode, move selected ship
         if (this.placementMode && this.selectedShip !== undefined) {
             this.selectedShip.x = boardX;
             this.selectedShip.y = boardY;
         }
 
-        if (oldHighlightedX !== this.highlightedX || oldHighlightedY !== this.highlightedY) {
-            this.updateInfoPane();
-            this.render();
-        }
-    }
+        // Find ship at location
+        this.highlightedShip = findShip(this.highlightedX, this.highlightedY);
 
-    /**
-     * Called when the pointer is moved inside of the canvas
-     */
-    public onPointerEnter(): void {
-        this.tooltipElement.removeClass('d-none');
+        this.updateTooltip();
+        this.render();
     }
 
     /**
      * Called when the pointer is moved outside of the canvas
      */
     public onPointerLeave(): void {
-        this.tooltipElement.addClass('d-none');
-
         this.highlightedX = -Infinity;
         this.highlightedY = -Infinity;
 
@@ -116,7 +114,7 @@ export class SelectedShipRenderer {
             this.selectedShip.y = -Infinity;
         }
 
-        this.updateInfoPane();
+        this.tooltipElement.setVisibility(false);
         this.render();
     }
 
@@ -129,28 +127,28 @@ export class SelectedShipRenderer {
         if (this.selectedShip !== undefined) {
             this.selectedShip.doRender = true;
             this.selectedShip = undefined;
+            this.selectedShipRenderer!.deRender();
             this.selectedShipRenderer!.deconstruct();
             this.selectedShipRenderer = undefined;
 
             // Redraw ships
+            this.updateInfoPane();
             this.renderer.shipRenderer.redrawAll();
             return;
         }
 
-        // Find ship at location
-        let ship: Ship | null = findShip(this.highlightedX, this.highlightedY);
-
-        // If no ship found
-        if (ship === null)
+        if (this.highlightedShip === undefined)
             return;
 
-        // Select ship if one was found at location
-        this.setSelected(ship);
+        this.setSelected(this.highlightedShip);
+        this.updateInfoPane();
         this.render();
 
         // De-render ship from ship canvas
-        this.selectedShip!.doRender = false;
-        this.selectedShip!.patternRenderer!.deRender();
+        if (this.placementMode) {
+            this.selectedShip!.doRender = false;
+            this.selectedShip!.patternRenderer!.deRender();
+        }
     }
 
     /**
@@ -163,7 +161,9 @@ export class SelectedShipRenderer {
         this.updateInfoPane();
 
         // Create a new renderer for the selected ship
-        this.selectedShipRenderer = new PatternRenderer(this.renderer, this.renderer.selectedShipCanvas, ship.pattern, ship.player.color!, ship.player.team!.color);
+        const fillColor = this.placementMode ? ship.player.color! : '#fff';
+        const borderColor = this.placementMode ? ship.player.team!.color : '#fff';
+        this.selectedShipRenderer = new PatternRenderer(this.renderer, this.renderer.selectedShipCanvas, ship.pattern, fillColor, borderColor);
     }
 
     /**
@@ -171,62 +171,50 @@ export class SelectedShipRenderer {
      */
     public updateInfoPane(): void {
 
-        // Update tile information
+        // Ship section
+        const shipSectionVisible = this.selectedShip !== undefined;
+        this.infoPaneShipSectionElement.setVisibility(shipSectionVisible);
+        if (shipSectionVisible) {
+            this.infoPaneShipNameElement.text(this.selectedShip!.descriptor.name);
+            this.infoPaneShipOwnerElement.text(this.selectedShip!.player.name);
+            this.infoPaneShipDescriptionElement.text(this.selectedShip!.descriptor.description);
+        }
+
+        // Update overall tooltip visibility
+        if (this.placementMode) {
+            const infoPaneVisible = this.selectedShip !== undefined;
+            this.infoPaneElement.setVisibility(infoPaneVisible);
+            this.shipSelectionPaneElement.setVisibility(!infoPaneVisible);
+        }
+    }
+
+    /**
+     * Updates information for the game tooltip
+     */
+    private updateTooltip(): void {
+
+        // Tile section
         const [boardSizeX, boardSizeY] = game.board!.size;
-        if (this.highlightedX >= 0 && this.highlightedX < boardSizeX && this.highlightedY >= 0 && this.highlightedY < boardSizeY) {
-
-            // Make pane visible
-            if (!this.infoPaneTileSectionVisible) {
-                this.infoPaneTileSectionElement.removeClass('d-none');
-                this.infoPaneTileSectionVisible = true;
-            }
-
-            // Get currently selected tile
+        const tileSectionVisible = this.highlightedX >= 0 && this.highlightedX < boardSizeX && this.highlightedY >= 0 && this.highlightedY < boardSizeY;
+        this.tooltipTileSectionElement.setVisibility(tileSectionVisible);
+        if (tileSectionVisible) {
             const tileType = game.board!.tiles[this.highlightedY][this.highlightedX].tileType;
-
-            // Update tile information
-            this.infoPaneTileNameElement.text(tileType.descriptor.name);
-            this.infoPaneTileDescriptionElement.text(tileType.descriptor.description);
-
-        } else {
-            // Make pane invisible
-            if (this.infoPaneTileSectionVisible) {
-                this.infoPaneTileSectionElement.addClass('d-none');
-                this.infoPaneTileSectionVisible = false;
-            }
+            this.tooltipTileCoordinatesElement.text(`${this.highlightedX}, ${this.highlightedY}`);
+            this.tooltipTileNameElement.text(tileType.descriptor.name);
+            this.tooltipTileTraversableElement.text(tileType.traversable ? '✓' : '✗');
         }
 
-        // Update ship information
-        if (this.selectedShip !== undefined) {
-
-            // Make pane visible
-            if (!this.infoPaneShipSectionVisible) {
-                this.infoPaneShipSectionElement.removeClass('d-none');
-                this.infoPaneShipSectionVisible = true;
-            }
-
-            // Update ship information
-            this.infoPaneShipNameElement.text(this.selectedShip.descriptor.name);
-            this.infoPaneShipDescriptionElement.text(this.selectedShip.descriptor.description);
-
-        } else {
-            // Make pane invisible
-            if (this.infoPaneShipSectionVisible) {
-                this.infoPaneShipSectionElement.addClass('d-none');
-                this.infoPaneShipSectionVisible = false;
-            }
+        // Ship section
+        const shipSectionVisible = this.highlightedShip !== undefined;
+        this.tooltipShipSectionElement.setVisibility(shipSectionVisible);
+        if (shipSectionVisible) {
+            this.tooltipShipNameElement.text(this.highlightedShip!.descriptor.name);
+            this.tooltipShipOwnerElement.text(this.highlightedShip!.player.name);
         }
 
-        // If in placement mode, change info pane visibility if necessary
-        if (this.placementMode && this.selectedShip !== undefined && !this.infoPaneVisible) {
-            this.infoPaneElement.removeClass('d-none');
-            this.shipSelectionPaneElement.addClass('d-none');
-            this.infoPaneVisible = true;
-        } else if (this.placementMode && this.selectedShip === undefined && this.infoPaneVisible) {
-            this.infoPaneElement.addClass('d-none');
-            this.shipSelectionPaneElement.removeClass('d-none');
-            this.infoPaneVisible = false;
-        }
+        // Update overall tooltip visibility
+        const tooltipVisible = tileSectionVisible || shipSectionVisible;
+        this.tooltipElement.setVisibility(tooltipVisible);
     }
 
     /**
@@ -253,7 +241,8 @@ export class SelectedShipRenderer {
         // Draw selected ship to canvas
         if (this.selectedShip !== undefined) {
             const [ shipDrawX, shipDrawY ] = this.renderer.boardRenderer.translateBoardCoordinatePixel(this.selectedShip.x, this.selectedShip.y);
-            this.selectedShipRenderer!.render(shipDrawX, shipDrawY, this.renderer.boardRenderer.gridCellSize, 0);
+            const alpha = this.placementMode ? 1 : 0.1;
+            this.selectedShipRenderer!.render(shipDrawX, shipDrawY, this.renderer.boardRenderer.gridCellSize, 0, alpha);
         }
     }
 }

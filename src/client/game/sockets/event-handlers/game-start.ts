@@ -8,7 +8,7 @@ import { IGameStartEvent } from '../../../../shared/network/events/i-game-start'
 export function handleGameStart(gameStartEvent: IGameStartEvent): void {
 
     // Change info pane visibility
+    $('#ship-selection-pane').remove();
     $('#info-pane').removeClass('d-none');
-    $('#ship-selection-pane').addClass('d-none');
-
+    $('#info-pane-turn-section').removeClass('d-none');
 }

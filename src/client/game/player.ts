@@ -11,6 +11,7 @@ export let allPlayers: { [id: string]: Player } = {};
  * Contains game information for a single player
  */
 export class Player {
+    public readonly name: string;
     public team: Team | undefined;
     public readonly lobbyElement: JQuery;
 
@@ -27,6 +28,8 @@ export class Player {
     public constructor(public readonly identity: string,
                        ready: boolean) {
 
+        this.name = nameFromIdentity(this.identity);
+
         // Add self to list of all players
         allPlayers[this.identity] = this;
 
@@ -35,7 +38,7 @@ export class Player {
             selfPlayer = this;
 
         // Create representation of player in lobby
-        this.lobbyElement = this.createPlayerElements($('#unassigned-players'));
+        this.lobbyElement = this.createLobbyElements($('#unassigned-players'));
 
         if (ready)
             this.ready(true);
@@ -58,7 +61,7 @@ export class Player {
      * @param    pane Pane to place player elements under
      * @returns       Created parent element
      */
-    private createPlayerElements(pane: JQuery): JQuery {
+    private createLobbyElements(pane: JQuery): JQuery {
 
         // Get display name from client identity string
         const playerName = nameFromIdentity(this.identity);

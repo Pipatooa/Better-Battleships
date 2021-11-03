@@ -42,7 +42,7 @@ export class Ship {
  * @param    y Y coordinate to look for 
  * @returns    Found ship or null if no ship is found
  */
-export function findShip(x: number, y: number): Ship | null {
+export function findShip(x: number, y: number): Ship | undefined {
     
     // Iterate through all ships
     for (const ship of allShips) {
@@ -62,5 +62,5 @@ export function findShip(x: number, y: number): Ship | null {
     }
     
     // Otherwise return no ship
-    return null;
+    return undefined;
 }

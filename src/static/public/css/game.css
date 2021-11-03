@@ -3,9 +3,10 @@
     --player-ready-color: var(--bs-success);
     --player-not-ready-color: var(--bs-danger);
     --turn-indicator-color: var(--bs-gray);
-    --turn-indicator-this-player-color: var(--bs-gray-dark);
     --turn-indicator-active-color: var(--bs-success);
-    --turn-indicator-this-player-active-color: var(--bs-yellow);
+    --ability-color: #ddd;
+    --selected-ability-color: var(--bs-success);
+    --ability-unavailable-color: var(--bs-gray);
 }
 
 .player:not(.player-ready) {
@@ -17,13 +18,14 @@
 }
 
 .turn-indicator {
-    background: var(--turn-indicator-color);
+    --turn-indicator-team-color: #000;
+    background: linear-gradient(to bottom right, transparent 50%, var(--turn-indicator-team-color) 0) bottom right/1em 1em no-repeat, var(--turn-indicator-color);
     white-space: nowrap;
     transition: 150ms linear;
 }
 
 .turn-indicator.turn-indicator-active {
-    background: var(--turn-indicator-active-color);
+    --turn-indicator-color: var(--turn-indicator-active-color);
     transition: 150ms linear;
 }
 
@@ -41,16 +43,37 @@
     font-size: 0.75rem;
 }
 
-#game-tooltip-ship-attribute-list {
+.attribute-list {
     list-style-type: none;
 }
 
-#game-tooltip-ship-attribute-list > li {
+.attribute-list > li {
     text-indent: -1.5rem;
 }
 
-#game-tooltip-ship-attribute-list > li:before {
+.attribute-list > li:before {
     content: "- ";
+}
+
+#ability-container {
+    grid-gap: 0.5em;
+    grid-template-columns: repeat(auto-fill, minmax(2em, 1fr));
+}
+
+.ability {
+    width: 2em;
+    height: 2em;
+    background-image: url("https://cdn0.iconfinder.com/data/icons/basic-arrows-1/80/Arrow_four_way-512.png");
+    background-size: contain;
+    background-color: var(--ability-color);
+}
+
+.ability.selected-ability {
+    background-color: var(--selected-ability-color);
+}
+
+.ability.ability-unavailable {
+    background-color: var(--ability-unavailable-color);
 }
 
 .canvas-wrapper {

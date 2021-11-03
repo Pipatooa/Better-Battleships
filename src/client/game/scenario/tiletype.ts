@@ -9,7 +9,8 @@ import { Descriptor } from './descriptor';
  */
 export class TileType {
     public constructor(public readonly descriptor: Descriptor,
-                       public readonly color: string) {
+                       public readonly color: string,
+                       public readonly traversable: boolean) {
     }
 
     /**
@@ -24,6 +25,6 @@ export class TileType {
         const descriptor = await Descriptor.fromSource(tileTypeSource.descriptor);
 
         // Return tile type object
-        return new TileType(descriptor, tileTypeSource.color);
+        return new TileType(descriptor, tileTypeSource.color, tileTypeSource.traversable);
     }
 }

@@ -12,7 +12,8 @@ import { checkAgainstSchema } from './schema-checker';
 export class TileType {
     public constructor(public readonly char: string,
                        public readonly descriptor: Descriptor,
-                       public readonly color: string) {
+                       public readonly color: string,
+                       public readonly traversable: boolean) {
     }
 
     /**
@@ -34,7 +35,7 @@ export class TileType {
         const descriptor = await Descriptor.fromSource(parsingContext.withExtendedPath('.descriptor'), tileTypeSource.descriptor, false);
 
         // Return tile type object
-        return new TileType(char, descriptor, tileTypeSource.color);
+        return new TileType(char, descriptor, tileTypeSource.color, tileTypeSource.traversable);
     }
 
     /**
@@ -47,7 +48,8 @@ export class TileType {
     public makeTransportable(): ITileTypeInfo {
         return {
             descriptor: this.descriptor.makeTransportable(),
-            color: this.color
+            color: this.color,
+            traversable: this.traversable
         };
     }
 }
@@ -57,7 +59,8 @@ export class TileType {
  */
 export interface ITileTypeSource {
     descriptor: IDescriptorSource,
-    color: string
+    color: string,
+    traversable: boolean
 }
 
 /**
@@ -65,5 +68,6 @@ export interface ITileTypeSource {
  */
 export const tileTypeSchema = Joi.object({
     descriptor: descriptorSchema.required(),
-    color: Joi.string().regex(/#[0-9a-fA-F]{6}/).required()
+    color: Joi.string().regex(/#[0-9a-fA-F]{6}/).required(),
+    traversable: Joi.boolean().required()
 });

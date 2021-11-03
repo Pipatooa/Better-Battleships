@@ -5,5 +5,6 @@ import { IDescriptorInfo } from './i-descriptor-info';
  */
 export interface ITileTypeInfo {
     descriptor: IDescriptorInfo,
-    color: string
+    color: string,
+    traversable: boolean
 }
