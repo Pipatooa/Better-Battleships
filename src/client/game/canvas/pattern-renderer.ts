@@ -1,6 +1,6 @@
-import { Pattern } from '../scenario/pattern';
-import { CanvasInfo } from './canvas-info';
-import { GameRenderer } from './game-renderer';
+import type { Pattern } from '../scenario/pattern';
+import type { CanvasInfo } from './canvas-info';
+import type { GameRenderer } from './game-renderer';
 
 /**
  * PatternRenderer - Client Version

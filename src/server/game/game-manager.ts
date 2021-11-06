@@ -2,7 +2,7 @@ import * as console from 'console';
 import config from '../config';
 import { queryDatabase } from '../db/query';
 import { Game } from './game';
-import { Scenario } from './scenario/scenario';
+import type { Scenario } from './scenario/objects/scenario';
 
 const games: { [id: string]: Game } = {};
 let numGames = 0;

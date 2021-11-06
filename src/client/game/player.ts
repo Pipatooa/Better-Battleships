@@ -1,6 +1,6 @@
 import { nameFromIdentity } from '../../shared/utility';
 import { selfIdentity } from './sockets/event-handlers/connection-info';
-import { Team } from './team';
+import type { Team } from './team';
 
 export let selfPlayer: Player;
 export let allPlayers: { [id: string]: Player } = {};

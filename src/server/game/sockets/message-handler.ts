@@ -1,10 +1,17 @@
-import { Data } from 'isomorphic-ws';
+import type { Data } from 'isomorphic-ws';
 import Joi from 'joi';
-import { baseRequestSchema, ClientRequestID, IClientRequest } from '../../../shared/network/requests/i-client-request';
-import { Client } from './client';
+import type {
+    ClientRequestID,
+    IClientRequest
+} from '../../../shared/network/requests/i-client-request';
+import {
+    baseRequestSchema
+} from '../../../shared/network/requests/i-client-request';
+import type { Client } from './client';
 import { handleJoinTeamRequest, joinTeamRequestSchema } from './request-handlers/join-team';
 import { handleReadyRequest, readyRequestSchema } from './request-handlers/ready';
 import { handleShipPlacementRequest, shipPlacementRequestSchema } from './request-handlers/ship-placement';
+import { handleUseAbilityRequest, baseUseAbilityRequestSchema } from './request-handlers/use-ability';
 
 /**
  * Handles a request from the client
@@ -52,7 +59,6 @@ export async function handleMessage(client: Client, msg: Data): Promise<void> {
             client.ws.close(1002, e.message);
             return;
         }
-
         throw e;
     }
 }
@@ -62,8 +68,9 @@ export async function handleMessage(client: Client, msg: Data): Promise<void> {
  *
  * Typescript record type enforces an entry for each request id
  */
-const requestSchemaAndHandlers: Record<ClientRequestID, [Joi.Schema, (client: Client, request: any) => void]> = {
+const requestSchemaAndHandlers: Record<ClientRequestID, [Joi.Schema, (client: Client, request: any) => Promise<void>]> = {
     joinTeam: [ joinTeamRequestSchema, handleJoinTeamRequest ],
     ready: [ readyRequestSchema, handleReadyRequest ],
-    shipPlacement: [ shipPlacementRequestSchema, handleShipPlacementRequest ]
+    shipPlacement: [ shipPlacementRequestSchema, handleShipPlacementRequest ],
+    useAbility: [ baseUseAbilityRequestSchema, handleUseAbilityRequest ]
 };

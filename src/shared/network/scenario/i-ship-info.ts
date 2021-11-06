@@ -1,5 +1,5 @@
-import { IDescriptorInfo } from './i-descriptor-info';
-import { IPatternInfo } from './i-pattern-info';
+import type { IDescriptorInfo } from './i-descriptor-info';
+import type { IPatternInfo } from './i-pattern-info';
 
 /**
  * Portable network version of Ship object

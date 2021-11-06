@@ -1,7 +1,8 @@
 import Joi from 'joi';
-import { IJoinTeamRequest } from './i-join-team';
-import { IReadyRequest } from './i-ready';
-import { IShipPlacementRequest } from './i-ship-placement-request';
+import type { IJoinTeamRequest } from './i-join-team';
+import type { IReadyRequest } from './i-ready';
+import type { IShipPlacementRequest } from './i-ship-placement-request';
+import type { IUseAbilityRequest } from './i-use-ability';
 
 /**
  * Base client request which all client requests extend
@@ -16,12 +17,14 @@ export interface IBaseClientRequest {
 export type IClientRequest =
     IJoinTeamRequest |
     IReadyRequest |
-    IShipPlacementRequest;
+    IShipPlacementRequest |
+    IUseAbilityRequest;
 
 /**
  * Intermediate variable to trick Typescript
  */
 let x: IClientRequest;
+
 /**
  * Type matching all request name strings
  */

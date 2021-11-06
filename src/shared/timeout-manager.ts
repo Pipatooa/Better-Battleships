@@ -3,14 +3,14 @@
  *
  * Handles timeout functions, allowing for easy starting and stopping of timeouts with default durations
  */
-export class TimeoutManager<T extends { [name: string]: [() => any, number, boolean] }> {
+export class TimeoutManager<K extends string> {
 
     /**
      * Internal timeout dictionary
      *
      * Entries follow format [timeoutFunction, defaultDuration, isInterval, timeoutID]
      */
-    protected readonly timeouts: Record<keyof T, [() => any, number, boolean, NodeJS.Timeout | undefined]>;
+    protected readonly timeouts: Record<K, [() => any, number, boolean, NodeJS.Timeout | undefined]>;
 
     /**
      * TimeoutManager constructor
@@ -18,10 +18,9 @@ export class TimeoutManager<T extends { [name: string]: [() => any, number, bool
      * @param  timeouts Dictionary of string (name) indexed timeout information in the format
      *                  [timeoutFunction, defaultDuration, isInterval]
      */
-    public constructor(timeouts: T) {
+    public constructor(timeouts: Record<K, [() => any, number, boolean]>) {
 
         // Copy timeout information to internal dictionary of timeout information
-        // This copy is done to separate types T and Record<keyof T, [...]>
         this.timeouts = timeouts as any;
     }
 
@@ -31,7 +30,7 @@ export class TimeoutManager<T extends { [name: string]: [() => any, number, bool
      * @param  name     Name of timeout
      * @param  duration Optional duration of timeout to override default
      */
-    public startTimeout(name: keyof T, duration?: number): void {
+    public startTimeout(name: K, duration?: number): void {
 
         // Get internal dictionary entry for timeout
         const [ timeoutFunction, defaultDuration, isInterval, timeoutID ] = this.timeouts[name];
@@ -53,7 +52,7 @@ export class TimeoutManager<T extends { [name: string]: [() => any, number, bool
      *
      * @param  name Name of timeout
      */
-    public stopTimeout(name: keyof T): void {
+    public stopTimeout(name: K): void {
 
         // Get internal dictionary entry for timeout
         const [ , , isInterval, timeoutID ] = this.timeouts[name];
@@ -75,7 +74,7 @@ export class TimeoutManager<T extends { [name: string]: [() => any, number, bool
      * @param    name Name of timeout
      * @returns       Whether the timeout is running
      */
-    public isTimeoutRunning(name: keyof T): boolean {
+    public isTimeoutRunning(name: K): boolean {
         return this.timeouts[name][2] !== undefined;
     }
 
@@ -90,7 +89,7 @@ export class TimeoutManager<T extends { [name: string]: [() => any, number, bool
      * @param  isInterval      Whether this function is an interval function
      * @param  restart         Whether to start timeout again if timeout was already running
      */
-    public setTimeoutFunction(name: keyof T, timeoutFunction: () => any, duration: number, isInterval: boolean, restart?: boolean): void {
+    public setTimeoutFunction(name: K, timeoutFunction: () => any, duration: number, isInterval: boolean, restart?: boolean): void {
 
         // Get existing timeout
         const [ , oldDefaultDuration, , oldTimeoutID ] = this.timeouts[name];

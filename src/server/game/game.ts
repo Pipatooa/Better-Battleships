@@ -1,9 +1,9 @@
 import * as console from 'console';
-import { IServerEvent } from '../../shared/network/events/i-server-event';
+import type { IServerEvent } from '../../shared/network/events/i-server-event';
 import { TimeoutManager } from '../../shared/timeout-manager';
 import config from '../config';
-import { Scenario } from './scenario/scenario';
-import { Client } from './sockets/client';
+import type { Scenario } from './scenario/objects/scenario';
+import type { Client } from './sockets/client';
 
 /**
  * Game - Server Version
@@ -12,10 +12,7 @@ import { Client } from './sockets/client';
  */
 export class Game {
 
-    public timeoutManager = new TimeoutManager({
-        gameJoinTimeout: [ () => {}, 0, false ],
-        startSetup: [ () => {}, 0, false ]
-    });
+    public readonly timeoutManager: TimeoutManager<'gameJoinTimeout' | 'startSetup'>;
 
     public clients: Client[] = [];
 
@@ -33,7 +30,15 @@ export class Game {
                        public readonly scenario: Scenario) {
 
         // Set timeout function for entering the setup phase of the game
-        this.timeoutManager.setTimeoutFunction('startSetup', () => this.startSetup(), config.gameStartWaitDuration, false);
+        this.timeoutManager = new TimeoutManager({
+            gameJoinTimeout: [() => {}, 0, false],
+            startSetup: [() => this.startSetup(), config.gameStartWaitDuration, false]
+        });
+
+        // Set callback for turn advancements to notify clients
+        this.scenario.turnManager.turnAdvancementCallback = () => this.broadcastEvent({
+            event: 'turnAdvancement'
+        });
     }
 
     /**
@@ -235,10 +240,15 @@ export class Game {
     public startGame(): void {
         this._gamePhase = GamePhase.InProgress;
 
+        // Generate a sequence of turns and start turn timer
+        this.scenario.turnManager.start();
+
         // Broadcast game start to all clients
         for (const client of this.clients) {
             client.sendEvent({
-                event: 'gameStart'
+                event: 'gameStart',
+                turnOrder: this.scenario.turnManager.turnOrder,
+                maxTurnTime: this.scenario.turnManager.turnTimeout
             });
         }
     }

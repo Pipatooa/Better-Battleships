@@ -21,7 +21,6 @@ export function nameFromIdentity(identity: string): string {
     return (match as RegExpMatchArray)[1];
 }
 
-
 /**
  * Returns a random color hex code
  *

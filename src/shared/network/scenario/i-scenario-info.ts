@@ -1,5 +1,5 @@
-import { IDescriptorInfo } from './i-descriptor-info';
-import { ITeamInfo } from './i-team-info';
+import type { IDescriptorInfo } from './i-descriptor-info';
+import type { ITeamInfo } from './i-team-info';
 
 /**
  * Portable network version of Scenario object

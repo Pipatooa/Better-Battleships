@@ -1,7 +1,8 @@
 import { game } from '../game';
 import { Pattern, PatternEntry } from '../scenario/pattern';
-import { findShip, Ship } from '../scenario/ship';
-import { GameRenderer } from './game-renderer';
+import type { Ship } from '../scenario/ship';
+import { findShip } from '../scenario/ship';
+import type { GameRenderer } from './game-renderer';
 import { PatternRenderer } from './pattern-renderer';
 import { VariableVisibilityElement } from './variable-visibility-element';
 

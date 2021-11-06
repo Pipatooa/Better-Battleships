@@ -4,7 +4,7 @@
   "private": true,
   "main": "dist/app.js",
   "scripts": {
-    "webpack-dev": "webpack --watch --mode development --stats=minimal --config webpack.config.js",
+    "webpack-dev": "webpack --watch --mode development --config webpack.config.js",
     "webpack": "webpack --mode production --config webpack.config.js",
     "x": "yarn install"
   },

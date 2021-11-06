@@ -1,4 +1,4 @@
-import { QueryOptions } from 'mysql';
+import type { QueryOptions } from 'mysql';
 import { pool } from './connection';
 
 /**

@@ -1,5 +1,6 @@
 import express from 'express';
-import { preventCSRF, RequestWithAuth, requireAuth } from '../middleware';
+import type { RequestWithAuth } from '../middleware';
+import { preventCSRF, requireAuth } from '../middleware';
 
 const router = express.Router();
 export default router;

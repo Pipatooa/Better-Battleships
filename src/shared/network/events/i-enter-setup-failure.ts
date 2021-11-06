@@ -1,4 +1,4 @@
-import { IBaseServerEvent } from './i-server-event';
+import type { IBaseServerEvent } from './i-server-event';
 
 /**
  * Event sent when the game failed to enter the setup phase

@@ -1,8 +1,8 @@
 import Joi from 'joi';
 import { baseRequestSchema } from '../../../../shared/network/requests/i-client-request';
-import { IReadyRequest } from '../../../../shared/network/requests/i-ready';
+import type { IReadyRequest } from '../../../../shared/network/requests/i-ready';
 import { GamePhase } from '../../game';
-import { Client } from '../client';
+import type { Client } from '../client';
 
 /**
  * Handles a ready request from the client
@@ -10,7 +10,7 @@ import { Client } from '../client';
  * @param  client       Client that made the request
  * @param  readyRequest Request object to handle
  */
-export function handleReadyRequest(client: Client, readyRequest: IReadyRequest): void {
+export async function handleReadyRequest(client: Client, readyRequest: IReadyRequest): Promise<void> {
 
     // If game has already started, ignore request
     if (client.game.gamePhase === GamePhase.Setup)

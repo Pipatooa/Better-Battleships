@@ -1,5 +1,5 @@
 import Joi from 'joi';
-import { ParsingContext } from './parsing-context';
+import type { ParsingContext } from './parsing-context';
 import { UnpackingError } from './unpacker';
 
 /**
@@ -23,31 +23,4 @@ export async function checkAgainstSchema<T>(source: T, schema: Joi.Schema, parsi
 
     // Return
     return source;
-}
-
-/**
- * Decorator to validate JSON source data against a schema before passing source to function
- *
- * @class
- */
-export function WithSchema() {
-    return function (target: IScenarioObject, key: string, descriptor: PropertyDescriptor): any {
-        const original = descriptor.value;
-
-        descriptor.value = async function (parsingContext: ParsingContext,
-                                           source: any,
-                                           checkSchema: boolean) {
-
-            // Validate JSON data against schema
-            if (checkSchema)
-                source = await checkAgainstSchema(source, target.schema, parsingContext);
-
-            // Pass validated JSON
-            return original.apply(this, [ parsingContext, source, checkSchema ]);
-        };
-    };
-}
-
-interface IScenarioObject {
-    schema: Joi.Schema;
 }

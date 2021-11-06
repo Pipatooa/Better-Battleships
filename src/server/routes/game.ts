@@ -1,9 +1,10 @@
 import * as console from 'console';
 import express from 'express';
 import { queryDatabase } from '../db/query';
-import { Game } from '../game/game';
+import type { Game } from '../game/game';
 import { queryGame } from '../game/game-manager';
-import { RequestWithAuth, requireAuth } from '../middleware';
+import type { RequestWithAuth } from '../middleware';
+import { requireAuth } from '../middleware';
 
 const router = express.Router();
 export default router;

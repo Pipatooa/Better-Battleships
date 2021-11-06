@@ -1,4 +1,4 @@
-import { IPlayerJoinEvent } from '../../../../shared/network/events/i-player-join';
+import type { IPlayerJoinEvent } from '../../../../shared/network/events/i-player-join';
 import { Player } from '../../player';
 import { handlePlayerReady } from './player-ready';
 

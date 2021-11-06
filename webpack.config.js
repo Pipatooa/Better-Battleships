@@ -15,7 +15,7 @@ const { readdirSync } = require('fs');
 
 const commonConfig = {
     resolve: {
-        extensions: ['.js', '.json', '.ts'],
+        extensions: ['.js', '.json', '.ts', '.d.ts'],
         plugins: [PnpWebpackPlugin]
     },
     resolveLoader: {
@@ -34,7 +34,7 @@ const nodeConfig = {
     module: {
         rules: [
             {
-                test: /\.ts$/,
+                test: /.*\.ts$/,
                 use: 'ts-loader'
             }
         ]

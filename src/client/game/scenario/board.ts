@@ -1,4 +1,4 @@
-import { IBoardInfo } from '../../../shared/network/scenario/i-board-info';
+import type { IBoardInfo } from '../../../shared/network/scenario/i-board-info';
 import { Tile } from './tile';
 import { TileType } from './tiletype';
 

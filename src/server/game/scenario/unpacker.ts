@@ -1,8 +1,10 @@
-import AdmZip, { IZipEntry } from 'adm-zip';
-import { FileJSON } from 'formidable';
-import Joi from 'joi';
+import type { IZipEntry } from 'adm-zip';
+import AdmZip from 'adm-zip';
+import type { FileJSON } from 'formidable';
+import type Joi from 'joi';
+import type { IScenarioSource } from './objects/sources/scenario';
 import { ParsingContext } from './parsing-context';
-import { IScenarioSource, Scenario } from './scenario';
+import { Scenario } from './objects/scenario';
 
 export type ZipEntryMap = { [name: string]: IZipEntry };
 

@@ -1,8 +1,8 @@
 import cookie from 'cookie';
-import { Request } from 'express';
-import { IAuthPayload } from './i-auth-payload';
+import type { Request } from 'express';
+import type { IAuthPayload } from './i-auth-payload';
 import { verifyToken } from './token-handler';
-import http from 'http';
+import type http from 'http';
 
 /**
  * Checks the authorisation of a request

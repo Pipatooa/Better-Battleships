@@ -1,6 +1,6 @@
-import { ITeamInfo } from '../../shared/network/scenario/i-team-info';
-import { Player } from './player';
-import { Descriptor } from './scenario/descriptor';
+import type { ITeamInfo } from '../../shared/network/scenario/i-team-info';
+import type { Player } from './player';
+import type { Descriptor } from './scenario/descriptor';
 import { joinTeam } from './sockets/button-functions';
 
 /**

@@ -8,5 +8,7 @@
     "blue",
     "red"
   ],
+  "turnOrdering": "team",
+  "maxTurnTime": 120,
   "attributes": {}
 }

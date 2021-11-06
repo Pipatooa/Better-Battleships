@@ -1,7 +1,7 @@
 import Joi from 'joi';
 import { baseRequestSchema } from '../../../../shared/network/requests/i-client-request';
-import { IShipPlacementRequest } from '../../../../shared/network/requests/i-ship-placement-request';
-import { Client } from '../client';
+import type { IShipPlacementRequest } from '../../../../shared/network/requests/i-ship-placement-request';
+import type { Client } from '../client';
 
 /**
  * Handles a ship placement request from the client
@@ -9,7 +9,7 @@ import { Client } from '../client';
  * @param  client               Client that made the request
  * @param  shipPlacementRequest Request object to handle
  */
-export function handleShipPlacementRequest(client: Client, shipPlacementRequest: IShipPlacementRequest): void {
+export async function handleShipPlacementRequest(client: Client, shipPlacementRequest: IShipPlacementRequest): Promise<void> {
 
     // Check that ship data provided matches the number of ships for the player
     if (shipPlacementRequest.shipPlacements.length !== client.player!.ships.length) {

@@ -1,4 +1,4 @@
-import { IPlayerLeaveEvent } from '../../../../shared/network/events/i-player-leave';
+import type { IPlayerLeaveEvent } from '../../../../shared/network/events/i-player-leave';
 import { allPlayers } from '../../player';
 
 /**

@@ -1,4 +1,4 @@
-import { IGameInfoEvent } from '../../../../shared/network/events/i-game-info';
+import type { IGameInfoEvent } from '../../../../shared/network/events/i-game-info';
 import { searchParams } from '../../../game';
 import { initGame } from '../../game';
 import { Player } from '../../player';

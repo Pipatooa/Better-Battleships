@@ -1,6 +1,6 @@
 import { clamp } from '../../../shared/utility';
-import { Board } from '../scenario/board';
-import { GameRenderer } from './game-renderer';
+import type { Board } from '../scenario/board';
+import type { GameRenderer } from './game-renderer';
 
 /**
  * BoardRenderer - Client Version

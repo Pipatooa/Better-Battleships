@@ -1,4 +1,4 @@
-import { IEnteringSetupEvent } from '../../../../shared/network/events/i-entering-setup';
+import type { IEnteringSetupEvent } from '../../../../shared/network/events/i-entering-setup';
 import { TimeoutManager } from '../../../../shared/timeout-manager';
 
 let statusTextElement: JQuery;

@@ -1,4 +1,4 @@
-import { IBaseClientRequest } from './i-client-request';
+import type { IBaseClientRequest } from './i-client-request';
 
 /**
  * Ready request sent to server when client wants to change ready status

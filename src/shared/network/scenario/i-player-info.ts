@@ -1,4 +1,4 @@
-import { IShipInfo } from './i-ship-info';
+import type { IShipInfo } from './i-ship-info';
 
 /**
  * Portable network version of Player object

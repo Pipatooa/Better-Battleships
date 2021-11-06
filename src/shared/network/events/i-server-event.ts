@@ -1,13 +1,14 @@
-import { IConnectionInfoEvent } from './i-connection-info';
-import { IGameInfoEvent } from './i-game-info';
-import { IGameStartEvent } from './i-game-start';
-import { ISetupInfoEvent } from './i-setup-info';
-import { IEnterSetupFailureEvent } from './i-enter-setup-failure';
-import { IEnteringSetupEvent } from './i-entering-setup';
-import { IPlayerJoinEvent } from './i-player-join';
-import { IPlayerLeaveEvent } from './i-player-leave';
-import { IPlayerReadyEvent } from './i-player-ready';
-import { ITeamAssignmentEvent } from './i-team-assignment';
+import type { IConnectionInfoEvent } from './i-connection-info';
+import type { IGameInfoEvent } from './i-game-info';
+import type { IGameStartEvent } from './i-game-start';
+import type { ISetupInfoEvent } from './i-setup-info';
+import type { IEnterSetupFailureEvent } from './i-enter-setup-failure';
+import type { IEnteringSetupEvent } from './i-entering-setup';
+import type { IPlayerJoinEvent } from './i-player-join';
+import type { IPlayerLeaveEvent } from './i-player-leave';
+import type { IPlayerReadyEvent } from './i-player-ready';
+import type { ITeamAssignmentEvent } from './i-team-assignment';
+import type { ITurnAdvancement } from './i-turn-advancement';
 
 /**
  * Base server event which all server events extend
@@ -29,13 +30,15 @@ export type IServerEvent =
     IEnterSetupFailureEvent |
     IEnteringSetupEvent |
     ISetupInfoEvent |
-    IGameStartEvent;
+    IGameStartEvent |
+    ITurnAdvancement;
 
 
 /**
  * Intermediate variable to trick Typescript
  */
 let x: IServerEvent;
+
 /**
  * Type matching all event name strings
  */

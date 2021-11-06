@@ -1,5 +1,5 @@
 import { allShips } from '../scenario/ship';
-import { GameRenderer } from './game-renderer';
+import type { GameRenderer } from './game-renderer';
 import { PatternRenderer } from './pattern-renderer';
 
 /**

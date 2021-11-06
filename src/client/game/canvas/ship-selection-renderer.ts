@@ -1,6 +1,6 @@
 import { selfPlayer } from '../player';
-import { Ship } from '../scenario/ship';
-import { GameRenderer } from './game-renderer';
+import type { Ship } from '../scenario/ship';
+import type { GameRenderer } from './game-renderer';
 import { PatternRenderer } from './pattern-renderer';
 
 export let shipSelectionRenderer: ShipSelectionRenderer;

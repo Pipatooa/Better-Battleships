@@ -1,7 +1,9 @@
 import * as console from 'console';
-import http, { IncomingMessage } from 'http';
-import WebSocket, { Data } from 'isomorphic-ws';
-import { Socket } from 'net';
+import type { IncomingMessage } from 'http';
+import type http from 'http';
+import type { Data } from 'isomorphic-ws';
+import type WebSocket from 'isomorphic-ws';
+import type { Socket } from 'net';
 import { checkRequestAuth } from '../../auth/request-handler';
 import { GamePhase } from '../game';
 import { queryGame } from '../game-manager';

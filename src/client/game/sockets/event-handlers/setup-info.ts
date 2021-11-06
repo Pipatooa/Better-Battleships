@@ -1,4 +1,4 @@
-import { ISetupInfoEvent } from '../../../../shared/network/events/i-setup-info';
+import type { ISetupInfoEvent } from '../../../../shared/network/events/i-setup-info';
 import { initGameRenderer } from '../../canvas/game-renderer';
 import { game } from '../../game';
 import { allPlayers, selfPlayer } from '../../player';

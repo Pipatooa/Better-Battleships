@@ -1,5 +1,5 @@
-import { IScenarioInfo } from '../scenario/i-scenario-info';
-import { IBaseServerEvent } from './i-server-event';
+import type { IScenarioInfo } from '../scenario/i-scenario-info';
+import type { IBaseServerEvent } from './i-server-event';
 
 /**
  * Event sent to the client when they join the game lobby

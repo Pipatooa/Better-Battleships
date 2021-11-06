@@ -1,10 +1,11 @@
 import express from 'express';
-import formidable, { FileJSON } from 'formidable';
+import type { FileJSON } from 'formidable';
+import formidable from 'formidable';
 import fs from 'fs';
 import stringify from 'json-stringify-safe';
-import { Game } from '../../game/game';
+import type { Game } from '../../game/game';
 import { capacityReached, createGame } from '../../game/game-manager';
-import { Scenario } from '../../game/scenario/scenario';
+import type { Scenario } from '../../game/scenario/objects/scenario';
 import { unpack, UnpackingError } from '../../game/scenario/unpacker';
 import { preventCSRF, requireAuth } from '../../middleware';
 

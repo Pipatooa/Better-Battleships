@@ -1,4 +1,4 @@
-import { IDescriptorInfo } from './i-descriptor-info';
+import type { IDescriptorInfo } from './i-descriptor-info';
 
 /**
  * Portable network version of TileType object

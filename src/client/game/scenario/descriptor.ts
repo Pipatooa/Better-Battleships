@@ -1,4 +1,4 @@
-import { IDescriptorInfo } from '../../../shared/network/scenario/i-descriptor-info';
+import type { IDescriptorInfo } from '../../../shared/network/scenario/i-descriptor-info';
 
 
 /**

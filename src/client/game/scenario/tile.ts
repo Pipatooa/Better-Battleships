@@ -1,4 +1,4 @@
-import { TileType } from './tiletype';
+import type { TileType } from './tiletype';
 
 /**
  * Tile class - Client Version

@@ -1,4 +1,4 @@
-import { ITeamAssignmentEvent } from '../../../../shared/network/events/i-team-assignment';
+import type { ITeamAssignmentEvent } from '../../../../shared/network/events/i-team-assignment';
 import { game } from '../../game';
 import { allPlayers } from '../../player';
 

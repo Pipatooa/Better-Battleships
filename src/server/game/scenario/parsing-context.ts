@@ -1,12 +1,13 @@
-import { IZipEntry } from 'adm-zip';
-import { FileJSON } from 'formidable';
-import { AttributeMap } from './attributes/i-attribute-holder';
-import { AttributeReferenceObjectSelector } from './attributes/references/attribute-reference';
-import { AttributeReferenceForeign } from './attributes/references/attribute-reference-foreign';
-import { AttributeReferenceLocal } from './attributes/references/attribute-reference-local';
-import { ForeignAttributeRegistry } from './attributes/references/foreign-attribute-registry';
-import { Ship } from './ship';
-import { UnpackingError, ZipEntryMap } from './unpacker';
+import type { IZipEntry } from 'adm-zip';
+import type { FileJSON } from 'formidable';
+import type { AttributeReferenceObjectSelector } from './objects/attribute-references/sources/attribute-reference';
+import type { AttributeMap } from './objects/attributes/i-attribute-holder';
+import { AttributeReferenceForeign } from './objects/attribute-references/attribute-reference-foreign';
+import { AttributeReferenceLocal } from './objects/attribute-references/attribute-reference-local';
+import type { ForeignAttributeRegistry } from './objects/attribute-references/foreign-attribute-registry';
+import type { Ship } from './objects/ship';
+import type { ZipEntryMap } from './unpacker';
+import { UnpackingError } from './unpacker';
 
 /**
  * ParsingContext - Server Version

@@ -1,8 +1,10 @@
-import { IBaseServerEvent } from './i-server-event';
+import type { IBaseServerEvent } from './i-server-event';
 
 /**
  * Event sent when the game starts
  */
 export interface IGameStartEvent extends IBaseServerEvent {
-    event: 'gameStart'
+    event: 'gameStart',
+    turnOrder: string[],
+    maxTurnTime: number
 }

@@ -1,6 +1,7 @@
-import jwt, { JwtPayload } from 'jsonwebtoken';
+import type { JwtPayload } from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 import config from '../config';
-import { IAuthPayload } from './i-auth-payload';
+import type { IAuthPayload } from './i-auth-payload';
 
 /**
  * Signs a new JWT with an authorisation payload

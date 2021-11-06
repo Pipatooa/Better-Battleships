@@ -1,6 +1,6 @@
-import { Board } from './scenario/board';
-import { Ship } from './scenario/ship';
-import { Team } from './team';
+import type { Board } from './scenario/board';
+import type { Ship } from './scenario/ship';
+import type { Team } from './team';
 
 export let game: Game;
 

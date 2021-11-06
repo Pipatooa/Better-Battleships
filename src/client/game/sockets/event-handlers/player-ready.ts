@@ -1,4 +1,4 @@
-import { IPlayerReadyEvent } from '../../../../shared/network/events/i-player-ready';
+import type { IPlayerReadyEvent } from '../../../../shared/network/events/i-player-ready';
 import { allPlayers } from '../../player';
 import { ready } from '../button-functions';
 import { selfIdentity } from './connection-info';

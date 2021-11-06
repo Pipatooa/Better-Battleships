@@ -1,7 +1,7 @@
-import { PatternRenderer } from '../canvas/pattern-renderer';
-import { Player } from '../player';
-import { Descriptor } from './descriptor';
-import { Pattern } from './pattern';
+import type { PatternRenderer } from '../canvas/pattern-renderer';
+import type { Player } from '../player';
+import type { Descriptor } from './descriptor';
+import type { Pattern } from './pattern';
 
 export let allShips: Ship[] = [];
 

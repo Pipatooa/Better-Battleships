@@ -1,10 +1,10 @@
-import WebSocket from 'isomorphic-ws';
+import type WebSocket from 'isomorphic-ws';
 import { v4 } from 'uuid';
-import { IServerEvent } from '../../../shared/network/events/i-server-event';
-import { IAuthPayload } from '../../auth/i-auth-payload';
-import { Game } from '../game';
-import { Player } from '../scenario/player';
-import { Team } from '../scenario/team';
+import type { IServerEvent } from '../../../shared/network/events/i-server-event';
+import type { IAuthPayload } from '../../auth/i-auth-payload';
+import type { Game } from '../game';
+import type { Player } from '../scenario/objects/player';
+import type { Team } from '../scenario/objects/team';
 
 /**
  * Client - Server Version

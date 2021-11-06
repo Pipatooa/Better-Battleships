@@ -1,0 +1,136 @@
+import type { IBoardInfo } from '../../../../shared/network/scenario/i-board-info';
+import type { ITileTypeInfo } from '../../../../shared/network/scenario/i-tiletype-info';
+import type { ParsingContext } from '../parsing-context';
+import { checkAgainstSchema } from '../schema-checker';
+import { UnpackingError } from '../unpacker';
+import type { IBoardSource } from './sources/board';
+import { boardSchema } from './sources/board';
+import { Tile } from './tile';
+import type { TileGenerator } from './tile-generator';
+import { TileType } from './tiletype';
+
+/**
+ * Board - Server Version
+ *
+ * Stores all information about the tiles of the board and objects on the board
+ */
+export class Board {
+
+    protected readonly _size: [number, number];
+
+    /**
+     * Board constructor
+     *
+     * @param  tiles      2d array of tiles indexed [y][x]
+     * @param  generators List of tile generators
+     */
+    public constructor(public readonly tiles: Tile[][],
+                       public readonly generators: TileGenerator[]) {
+
+        this._size = [ tiles[0].length, tiles.length ];
+    }
+
+    /**
+     * Factory function to generate Board from JSON scenario data
+     *
+     * @param    parsingContext Context for resolving scenario data
+     * @param    boardSource    JSON data from 'board.json'
+     * @param    checkSchema    When true, validates source JSON data against schema
+     * @returns                 Created Board object
+     */
+    public static async fromSource(parsingContext: ParsingContext, boardSource: IBoardSource, checkSchema: boolean): Promise<Board> {
+
+        // Validate JSON against schema
+        if (checkSchema)
+            boardSource = await checkAgainstSchema(boardSource, boardSchema, parsingContext);
+
+        // Unpack palette data
+        const palette: { [char: string]: TileType } = {};
+        for (const entry of Object.entries(boardSource.palette)) {
+
+            // Create new TileType objects indexed by single character strings
+            const [ char, tileTypeSource ] = entry;
+            palette[char] = await TileType.fromSource(parsingContext.withExtendedPath(`.palette.${char}`), tileTypeSource, false, char);
+        }
+
+        // Ensure that the number of entries in 'tiles' matches the declared size of the board
+        if (boardSource.tiles.length !== boardSource.size[1])
+            throw new UnpackingError(`"${parsingContext.currentPathPrefix}tiles" must contain ${boardSource.size[1]} items to match "${parsingContext.currentPathPrefix}size[1]"`, parsingContext);
+
+        // Unpack tile data
+        const tiles: Tile[][] = [];
+        for (let y = 0; y < boardSource.tiles.length; y++) {
+            const row: string = boardSource.tiles[y];
+
+            // Ensure that the number of tiles within a row matches the declared size of the board
+            if (row.length !== boardSource.size[0])
+                throw new UnpackingError(`"${parsingContext.currentPathPrefix}tiles[${y}]" length must be ${boardSource.size[0]} characters long to match "${parsingContext.currentPathPrefix}size[0]"`, parsingContext);
+
+            // Create new tile row
+            tiles[y] = [];
+
+            // Iterate through each character, each representing a tile
+            for (let x = 0; x < boardSource.size[0]; x++) {
+                const c: string = row.charAt(x);
+
+                // If character did not match any tile type within the palette
+                if (!(c in palette))
+                    throw new UnpackingError(`Could not find tile of type '${c}' defined at '${parsingContext.currentPathPrefix}tiles[${y}][${x}]' within the palette defined at '${parsingContext.currentPathPrefix}palette'`, parsingContext);
+
+                // Create and store new tile created from tile type
+                // Tiles are stored in tile[y][x] format
+                const tileType: TileType = palette[c];
+                tiles[y][x] = new Tile(x, y, tileType);
+            }
+        }
+
+        // Return created Board object
+        return new Board(tiles, []);
+    }
+
+    /**
+     * Returns network transportable form of this object.
+     *
+     * May not include all details of the object. Just those that the client needs to know.
+     *
+     * @returns  Created IBoardInfo object
+     */
+    public makeTransportable(): IBoardInfo {
+
+        // Convert tiles to compact string representation
+        const tileInfo: string[] = [];
+        const tileTypeInfo: { [char: string]: ITileTypeInfo } = {};
+
+        for (let y = 0; y < this.size[1]; y++) {
+            tileInfo[y] = '';
+            for (let x = 0; x < this.size[0]; x++) {
+
+                // Get tile at position
+                const tile = this.tiles[y][x];
+                const tileTypeChar = tile.tileType.char;
+
+                // Add tile to compact string format
+                tileInfo[y] += tileTypeChar;
+
+                // If character for tile has not been recorded
+                if (!(tileTypeChar in tileTypeInfo))
+                    tileTypeInfo[tileTypeChar] = tile.tileType.makeTransportable();
+            }
+        }
+
+        return {
+            size: this._size,
+            tileTypes: tileTypeInfo,
+            tiles: tileInfo
+        };
+    }
+
+    /**
+     * Getters and setters
+     */
+
+    public get size(): [number, number] {
+        return this._size;
+    }
+}
+
