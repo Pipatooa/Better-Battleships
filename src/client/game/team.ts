@@ -12,6 +12,7 @@ export class Team {
 
     public readonly descriptor: Descriptor;
     public readonly color: string;
+    public readonly highlightColor: string;
     public readonly maxPlayers: number;
 
     protected _players: Player[] = [];
@@ -28,6 +29,7 @@ export class Team {
 
         this.descriptor = teamInfo.descriptor;
         this.color = teamInfo.color;
+        this.highlightColor = teamInfo.color;
         this.maxPlayers = teamInfo.maxPlayers;
 
         // Create pane in lobby for players to join team

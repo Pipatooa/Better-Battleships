@@ -204,9 +204,9 @@ export class Game {
         }
 
         // Generate dictionary of player colors
-        const playerColors: { [id: string]: string } = {};
+        const playerColors: { [id: string]: [string, string] } = {};
         for (const client of this.clients) {
-            playerColors[client.identity] = client.player!.color;
+            playerColors[client.identity] = [client.player!.color, client.player!.highlightColor];
         }
 
         // Broadcast game setup info

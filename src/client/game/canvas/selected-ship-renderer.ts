@@ -2,6 +2,7 @@ import { game } from '../game';
 import { Pattern, PatternEntry } from '../scenario/pattern';
 import type { Ship } from '../scenario/ship';
 import { findShip } from '../scenario/ship';
+import type { TileType } from '../scenario/tiletype';
 import type { GameRenderer } from './game-renderer';
 import { PatternRenderer } from './pattern-renderer';
 import { VariableVisibilityElement } from './variable-visibility-element';
@@ -17,6 +18,7 @@ export class SelectedShipRenderer {
 
     private highlightedX = -Infinity;
     private highlightedY = -Infinity;
+    private highlightedTileType: TileType | undefined;
     private highlightedShip: Ship | undefined;
     private readonly highlightedCellRenderer: PatternRenderer;
     
@@ -47,6 +49,8 @@ export class SelectedShipRenderer {
     private readonly infoPaneShipNameElement = $('#info-pane-ship-name');
     private readonly infoPaneShipOwnerElement = $('#info-pane-ship-owner');
     private readonly infoPaneShipDescriptionElement = $('#info-pane-ship-description');
+
+    private readonly infoPaneShipAbilityContainer = $('#info-pane-ship-ability-container');
 
     /**
      * SelectedShipRenderer constructor
@@ -90,6 +94,12 @@ export class SelectedShipRenderer {
         this.highlightedX = boardX;
         this.highlightedY = boardY;
 
+        const [boardSizeX, boardSizeY] = game.board!.size;
+        if (boardX >= 0 && boardX < boardSizeX && boardY >= 0 && boardY < boardSizeY)
+            this.highlightedTileType = game.board!.tiles[boardY][boardX][0];
+        else
+            this.highlightedTileType = undefined;
+
         // If in placement mode, move selected ship
         if (this.placementMode && this.selectedShip !== undefined) {
             this.selectedShip.x = boardX;
@@ -126,30 +136,37 @@ export class SelectedShipRenderer {
 
         // Deselect / place ship
         if (this.selectedShip !== undefined) {
-            this.selectedShip.doRender = true;
+
+            if (this.placementMode) {
+                this.selectedShipRenderer!.deRender();
+                this.selectedShipRenderer!.deconstruct();
+                this.selectedShip.doRender = true;
+                this.selectedShip.patternRenderer!.reRender();
+
+                this.selectedShipRenderer = undefined;
+            } else {
+                this.selectedShip.patternRenderer!.fillColor = this.selectedShip.player.color!;
+                this.selectedShip.patternRenderer!.borderColor = this.selectedShip.player.team!.color;
+                this.selectedShip.patternRenderer!.reRender();
+            }
+
+            const oldSelectedShip = this.selectedShip;
             this.selectedShip = undefined;
-            this.selectedShipRenderer!.deRender();
-            this.selectedShipRenderer!.deconstruct();
-            this.selectedShipRenderer = undefined;
 
             // Redraw ships
             this.updateInfoPane();
             this.renderer.shipRenderer.redrawAll();
-            return;
+
+            // If we are hovering over the same ship, do not continue to reselect ship
+            if (this.highlightedShip == oldSelectedShip)
+                return;
         }
 
         if (this.highlightedShip === undefined)
             return;
 
-        this.setSelected(this.highlightedShip);
+        this.selectShip(this.highlightedShip);
         this.updateInfoPane();
-        this.render();
-
-        // De-render ship from ship canvas
-        if (this.placementMode) {
-            this.selectedShip!.doRender = false;
-            this.selectedShip!.patternRenderer!.deRender();
-        }
     }
 
     /**
@@ -157,14 +174,21 @@ export class SelectedShipRenderer {
      *
      * @param  ship Ship to select
      */
-    public setSelected(ship: Ship): void {
+    public selectShip(ship: Ship): void {
         this.selectedShip = ship;
         this.updateInfoPane();
 
         // Create a new renderer for the selected ship
-        const fillColor = this.placementMode ? ship.player.color! : '#fff';
-        const borderColor = this.placementMode ? ship.player.team!.color : '#fff';
-        this.selectedShipRenderer = new PatternRenderer(this.renderer, this.renderer.selectedShipCanvas, ship.pattern, fillColor, borderColor);
+        if (this.placementMode) {
+            this.selectedShip.doRender = false;
+            this.selectedShip.patternRenderer!.deRender();
+            this.selectedShipRenderer = new PatternRenderer(this.renderer, this.renderer.selectedShipCanvas, ship.pattern, ship.player.color!, ship.player.team!.color);
+            this.render();
+        } else {
+            this.selectedShip.patternRenderer!.fillColor = ship.player.highlightColor!;
+            this.selectedShip.patternRenderer!.borderColor = ship.player.team!.highlightColor;
+            this.selectedShip.patternRenderer!.reRender();
+        }
     }
 
     /**
@@ -179,9 +203,14 @@ export class SelectedShipRenderer {
             this.infoPaneShipNameElement.text(this.selectedShip!.descriptor.name);
             this.infoPaneShipOwnerElement.text(this.selectedShip!.player.name);
             this.infoPaneShipDescriptionElement.text(this.selectedShip!.descriptor.description);
+
+            this.infoPaneShipAbilityContainer.children().remove();
+            for (const ability of this.selectedShip!.abilities) {
+                ability.createGameElement(this.infoPaneShipAbilityContainer);
+            }
         }
 
-        // Update overall tooltip visibility
+        // Update overall info pane visibility
         if (this.placementMode) {
             const infoPaneVisible = this.selectedShip !== undefined;
             this.infoPaneElement.setVisibility(infoPaneVisible);
@@ -195,14 +224,12 @@ export class SelectedShipRenderer {
     private updateTooltip(): void {
 
         // Tile section
-        const [boardSizeX, boardSizeY] = game.board!.size;
-        const tileSectionVisible = this.highlightedX >= 0 && this.highlightedX < boardSizeX && this.highlightedY >= 0 && this.highlightedY < boardSizeY;
+        const tileSectionVisible = this.highlightedTileType !== undefined;
         this.tooltipTileSectionElement.setVisibility(tileSectionVisible);
         if (tileSectionVisible) {
-            const tileType = game.board!.tiles[this.highlightedY][this.highlightedX].tileType;
             this.tooltipTileCoordinatesElement.text(`${this.highlightedX}, ${this.highlightedY}`);
-            this.tooltipTileNameElement.text(tileType.descriptor.name);
-            this.tooltipTileTraversableElement.text(tileType.traversable ? '✓' : '✗');
+            this.tooltipTileNameElement.text(this.highlightedTileType!.descriptor.name);
+            this.tooltipTileTraversableElement.text(this.highlightedTileType!.traversable ? '✓' : '✗');
         }
 
         // Ship section
@@ -234,16 +261,14 @@ export class SelectedShipRenderer {
      * Renders the highlighted ship or cell to the canvas
      */
     public render(): void {
-
-        // Draw highlighted grid cell to canvas
-        const [drawX, drawY] = this.renderer.boardRenderer.translateBoardCoordinatePixel(this.highlightedX, this.highlightedY);
-        this.highlightedCellRenderer.render(drawX, drawY, this.renderer.boardRenderer.gridCellSize, 0, 0.2);
-
-        // Draw selected ship to canvas
-        if (this.selectedShip !== undefined) {
+        if (this.selectedShip !== undefined && this.placementMode) {
+            // Draw selected ship to canvas
             const [ shipDrawX, shipDrawY ] = this.renderer.boardRenderer.translateBoardCoordinatePixel(this.selectedShip.x, this.selectedShip.y);
-            const alpha = this.placementMode ? 1 : 0.1;
-            this.selectedShipRenderer!.render(shipDrawX, shipDrawY, this.renderer.boardRenderer.gridCellSize, 0, alpha);
+            this.selectedShipRenderer!.render(shipDrawX, shipDrawY, this.renderer.boardRenderer.gridCellSize, 0);
+        } else {
+            // Draw highlighted cell
+            const [drawX, drawY] = this.renderer.boardRenderer.translateBoardCoordinatePixel(this.highlightedX, this.highlightedY);
+            this.highlightedCellRenderer.render(drawX, drawY, this.renderer.boardRenderer.gridCellSize, 0, 0.2);
         }
     }
 }

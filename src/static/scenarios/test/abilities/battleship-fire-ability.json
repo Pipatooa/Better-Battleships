@@ -2,7 +2,7 @@
   "type": "fire",
   "descriptor": {
     "name": "Broadside Fire",
-    "description": "The Battleship's broadside fire deals 5 damage across multiple cells. Cooldown of 3 turns. On hit, cooldown of 5 turns."
+    "description": "The Battleship's broadside fire deals 3-5 damage across multiple cells. Cooldown of 3 turns. On hit, cooldown of 5 turns."
   },
   "selectionPattern": {
     "size": [9, 5],
@@ -22,14 +22,16 @@
     "size": [3, 3],
     "values": {
       ".": 0,
-      "#": 1
+      "#": 3,
+      "=": 5
     },
     "pattern": [
       ".#.",
-      "###",
+      "#=#",
       ".#."
     ]
   },
+  "displayEffectPatternValues": true,
   "condition": {
     "type": "valueMeetsConstraint",
     "value": {

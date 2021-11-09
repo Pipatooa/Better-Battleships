@@ -1,5 +1,6 @@
 import type { PatternRenderer } from '../canvas/pattern-renderer';
 import type { Player } from '../player';
+import type { Ability } from './abilities/ability';
 import type { Descriptor } from './descriptor';
 import type { Pattern } from './pattern';
 
@@ -18,20 +19,32 @@ export class Ship {
     /**
      * Ship constructor
      *
+     * @param  index      Index of this ship in player's ship list
      * @param  x          X coordinate of ship
      * @param  y          Y coordinate of ship
      * @param  descriptor Descriptor for ship
      * @param  pattern    Pattern describing shape of ship
      * @param  player     Player that this ship belongs to
+     * @param  abilities  Dictionary of abilities available for this ship
      */
-    public constructor(public x: number,
+    public constructor(public readonly index: number | undefined,
+                       public x: number,
                        public y: number,
-                       public descriptor: Descriptor,               
+                       public readonly descriptor: Descriptor,
                        public pattern: Pattern,
-                       public player: Player) {
+                       public readonly player: Player,
+                       public readonly abilities: Ability[]) {
 
         // Add ship to list of all ships
         allShips.push(this);
+    }
+
+    /**
+     * Removes this player from list of all ships
+     */
+    public deconstruct(): void {
+        allShips = allShips.filter(s => s !== this);
+        this.patternRenderer?.deRender();
     }
 }
 

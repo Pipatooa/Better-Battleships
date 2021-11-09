@@ -57,8 +57,8 @@ export async function handleUseAbilityRequest(client: Client, useAbilityRequest:
  */
 export const baseUseAbilityRequestSchema = baseRequestSchema.keys({
     request: 'useAbility',
-    ship: Joi.string().required(),
-    ability: Joi.string().required()
+    ship: Joi.number().integer().required(),
+    ability: Joi.number().integer().required()
 });
 
 export const useIndexedAbilityRequestSchema = baseUseAbilityRequestSchema.keys({

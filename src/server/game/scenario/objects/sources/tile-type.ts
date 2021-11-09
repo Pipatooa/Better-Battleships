@@ -1,4 +1,5 @@
 import Joi from 'joi';
+import { colorSchema } from '../common/sources/color';
 import type { IDescriptorSource } from '../common/sources/descriptor';
 import { descriptorSchema } from '../common/sources/descriptor';
 
@@ -16,6 +17,6 @@ export interface ITileTypeSource {
  */
 export const tileTypeSchema = Joi.object({
     descriptor: descriptorSchema.required(),
-    color: Joi.string().regex(/#[0-9a-fA-F]{6}/).required(),
+    color: colorSchema.required(),
     traversable: Joi.boolean().required()
 });

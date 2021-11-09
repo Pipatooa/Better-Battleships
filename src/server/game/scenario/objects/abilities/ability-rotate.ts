@@ -1,3 +1,4 @@
+import type { AbilityInfo } from '../../../../../shared/network/scenario/ability-info';
 import type { EvaluationContext } from '../../evaluation-context';
 import type { ParsingContext } from '../../parsing-context';
 import { checkAgainstSchema } from '../../schema-checker';
@@ -16,14 +17,14 @@ import type { IAbilityRotateSource } from './sources/ability-rotate';
 import { abilityRotateSchema } from './sources/ability-rotate';
 
 /**
- * AbilityRotate - Server Version
+ * AbilityFire - Server Version
  *
  * Ability which rotates a ship upon its use
  */
 export class AbilityRotate extends IndexedAbility {
     
     /**
-     * AbilityRotate constructor
+     * AbilityFire constructor
      *
      * @param  ship          Parent ship which this ability belongs to
      * @param  descriptor    Descriptor for ability
@@ -46,30 +47,30 @@ export class AbilityRotate extends IndexedAbility {
     }
 
     /**
-     * Factory function to generate AbilityRotate from JSON scenario data
+     * Factory function to generate AbilityFire from JSON scenario data
      *
-     * @param    parsingContext        Context for resolving scenario data
-     * @param    rotationAbilitySource JSON data for AbilityRotate
-     * @param    checkSchema           When true, validates source JSON data against schema
-     * @returns                        Created AbilityRotate object
+     * @param    parsingContext      Context for resolving scenario data
+     * @param    abilityRotateSource JSON data for AbilityFire
+     * @param    checkSchema         When true, validates source JSON data against schema
+     * @returns                      Created AbilityFire object
      */
-    public static async fromSource(parsingContext: ParsingContext, rotationAbilitySource: IAbilityRotateSource, checkSchema: boolean): Promise<AbilityRotate> {
+    public static async fromSource(parsingContext: ParsingContext, abilityRotateSource: IAbilityRotateSource, checkSchema: boolean): Promise<AbilityRotate> {
 
         // Validate JSON data against schema
         if (checkSchema)
-            rotationAbilitySource = await checkAgainstSchema(rotationAbilitySource, abilityRotateSchema, parsingContext);
+            abilityRotateSource = await checkAgainstSchema(abilityRotateSource, abilityRotateSchema, parsingContext);
 
         // Get attributes and update parsing context
-        const attributes: AttributeMap = await getAttributes(parsingContext.withExtendedPath('.attributes'), rotationAbilitySource.attributes, 'ability');
+        const attributes: AttributeMap = await getAttributes(parsingContext.withExtendedPath('.attributes'), abilityRotateSource.attributes, 'ability');
         parsingContext = parsingContext.withAbilityAttributes(attributes);
 
         // Get component elements from source
-        const descriptor: Descriptor = await Descriptor.fromSource(parsingContext.withExtendedPath('.descriptor'), rotationAbilitySource.descriptor, false);
-        const condition: Condition = await buildCondition(parsingContext.withExtendedPath('.condition'), rotationAbilitySource.condition, false);
-        const actions: AbilityActions = await getActions(parsingContext.withExtendedPath('.actions'), baseAbilityEvents, [], rotationAbilitySource.actions);
+        const descriptor: Descriptor = await Descriptor.fromSource(parsingContext.withExtendedPath('.descriptor'), abilityRotateSource.descriptor, false);
+        const condition: Condition = await buildCondition(parsingContext.withExtendedPath('.condition'), abilityRotateSource.condition, false);
+        const actions: AbilityActions = await getActions(parsingContext.withExtendedPath('.actions'), baseAbilityEvents, [], abilityRotateSource.actions);
 
-        // Return created AbilityRotate object
-        return new AbilityRotate(parsingContext.shipPartial as Ship, descriptor, rotationAbilitySource.rot90, rotationAbilitySource.rot180, rotationAbilitySource.rot270, condition, actions, attributes);
+        // Return created AbilityFire object
+        return new AbilityRotate(parsingContext.shipPartial as Ship, descriptor, abilityRotateSource.rot90, abilityRotateSource.rot180, abilityRotateSource.rot270, condition, actions, attributes);
     }
 
     /**
@@ -79,12 +80,28 @@ export class AbilityRotate extends IndexedAbility {
      */
     public use(evaluationContext: EvaluationContext): void {
 
-        if (!this.condition.check(evaluationContext))
+        if (!this.usable!)
             return;
 
         if (evaluationContext.index === 0 && this.rot90allowed) this.ship.rotate(Rotation.Clockwise90);
         else if (evaluationContext.index === 1 && this.rot180allowed) this.ship.rotate(Rotation.Clockwise180);
         else if (evaluationContext.index === 2 && this.rot270allowed) this.ship.rotate(Rotation.Clockwise270);
     }
+    
+    /**
+     * Returns network transportable form of this object.
+     *
+     * May not include all details of the object. Just those that the client needs to know.
+     *
+     * @returns  Created AbilityInfo object
+     */
+    public makeTransportable(): AbilityInfo {
+        return {
+            type: 'rotate',
+            descriptor: this.descriptor.makeTransportable(),
+            rot90: this.rot90allowed,
+            rot180: this.rot180allowed,
+            rot270: this.rot270allowed
+        };
+    }
 }
-

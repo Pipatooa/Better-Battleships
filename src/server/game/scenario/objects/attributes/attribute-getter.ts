@@ -5,12 +5,12 @@ import { Attribute } from './attribute';
 import type { AttributeMap, AttributeMapSource } from './i-attribute-holder';
 
 /**
- * Gets a map of attributes for an object
+ * Gets a knownItems of attributes for an object
  *
  * @param    parsingContext Context for resolving scenario data
  * @param    attributeData  JSON data for attributes
  * @param    attributeLevel Type of object that this attribute set belongs to
- * @returns                 Created attribute map
+ * @returns                 Created attribute knownItems
  */
 export async function getAttributes(parsingContext: ParsingContext, attributeData: AttributeMapSource, attributeLevel: AttributeReferenceObjectSelector): Promise<AttributeMap> {
     

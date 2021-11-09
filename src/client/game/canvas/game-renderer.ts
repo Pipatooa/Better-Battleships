@@ -17,6 +17,7 @@ export class GameRenderer {
     public readonly boardCanvas: CanvasInfo;
     public readonly shipCanvas: CanvasInfo;
     public readonly selectedShipCanvas: CanvasInfo;
+    public readonly highlightCanvas: CanvasInfo;
     public readonly shipSelectionCanvas: CanvasInfo;
     public readonly topCanvas: CanvasInfo;
     
@@ -40,12 +41,14 @@ export class GameRenderer {
         // Fetch HTML canvas elements
         const boardCanvasElement = $('#board-canvas').get(0) as HTMLCanvasElement;
         const shipCanvasElement = $('#ship-canvas').get(0) as HTMLCanvasElement;
+        const highlightCanvasElement = $('#highlight-canvas').get(0) as HTMLCanvasElement;
         const selectedShipCanvasElement = $('#selected-ship-canvas').get(0) as HTMLCanvasElement;
         const shipSelectionCanvasElement = $('#ship-selection-canvas').get(0) as HTMLCanvasElement;
 
         // Create CanvasInfo objects from canvas elements
         this.boardCanvas = new CanvasInfo(boardCanvasElement, this._pixelScale);
         this.shipCanvas = new CanvasInfo(shipCanvasElement, this._pixelScale);
+        this.highlightCanvas = new CanvasInfo(highlightCanvasElement, this._pixelScale);
         this.selectedShipCanvas = new CanvasInfo(selectedShipCanvasElement, this._pixelScale);
         this.shipSelectionCanvas = new CanvasInfo(shipSelectionCanvasElement, this._pixelScale);
         this.topCanvas = this.selectedShipCanvas;
@@ -67,6 +70,7 @@ export class GameRenderer {
     private onResize(): void {
         this.boardCanvas.onResize();
         this.shipCanvas.onResize();
+        this.highlightCanvas.onResize();
         this.shipSelectionCanvas.onResize();
 
         this.redrawAll();
@@ -119,6 +123,7 @@ export class GameRenderer {
         // Move canvas pixel data by delta
         this.boardCanvas.movePixelData(dx, dy);
         this.shipCanvas.movePixelData(dx, dy);
+        this.highlightCanvas.movePixelData(dx, dy);
         // this.selectedShipCanvas.movePixelData(dx, dy);
 
         // Calculate regions which need to be redrawn after movement

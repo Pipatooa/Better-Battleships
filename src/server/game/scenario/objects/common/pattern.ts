@@ -26,9 +26,9 @@ export class Pattern {
 
         this.patternEntryMap = {};
 
-        for (const patternEntry of _patternEntries) {
-            const key = `${patternEntry.x},${patternEntry.y}`;
-            this.patternEntryMap[key] = patternEntry.value;
+        for (const [x, y, value] of _patternEntries) {
+            const key = `${x},${y}`;
+            this.patternEntryMap[key] = value;
         }
     }
 
@@ -39,11 +39,11 @@ export class Pattern {
      * @returns           New Pattern object with all entries rotated about the center of the pattern
      */
     public rotated(rotation: Rotation): Pattern {
-        const patternEntries: PatternEntry[] = this._patternEntries.map((patternEntry: PatternEntry) => {
+        const patternEntries: PatternEntry[] = this._patternEntries.map(([x, y, value]) => {
 
             // Get dx and dy of pattern entry from pattern center
-            const dx: number = patternEntry.x - this.center[0];
-            const dy: number = patternEntry.y - this.center[1];
+            const dx: number = x - this.center[0];
+            const dy: number = y - this.center[1];
 
             let newDx: number;
             let newDy: number;
@@ -72,7 +72,7 @@ export class Pattern {
             const newX: number = newDx + this.center[0];
             const newY: number = newDy + this.center[1];
 
-            return new PatternEntry(newX, newY, patternEntry.value);
+            return [newX, newY, value];
         });
 
         return new Pattern(patternEntries, this.center);
@@ -96,17 +96,6 @@ export class Pattern {
 
         // Return value at position
         return this.patternEntryMap[key];
-    }
-
-    /**
-     * Calls a callback function for each entry within the pattern
-     *
-     * @param  callback Callback function to run on each entry
-     */
-    public forEachEntry(callback: (x: number, y: number, value: number) => void): void {
-        for (const patternEntry of this._patternEntries) {
-            callback(patternEntry.x, patternEntry.y, patternEntry.value);
-        }
     }
 
     /**
@@ -151,7 +140,7 @@ export class Pattern {
             for (let x = 0; x < patternSource.size[0]; x++) {
                 const c: string = row.charAt(x);
 
-                // If character did not match any value within the values map
+                // If character did not match any value within the values knownItems
                 if (!(c in values))
                     throw new UnpackingError(`Could not find value for the character '${c}' in value map at '${parsingContext.currentPathPrefix}pattern[${y}][${x}]'`, parsingContext);
 
@@ -163,7 +152,7 @@ export class Pattern {
                     continue;
 
                 // Create new entry and store in pattern entries
-                patternEntries.push(new PatternEntry(x, y, value));
+                patternEntries.push([x, y, value]);
             }
         }
 
@@ -183,11 +172,11 @@ export class Pattern {
 
         // Convert pattern entries to list of number entries
         const tiles: [number, number, number][] | [number, number][] = [];
-        for (const patternEntry of this._patternEntries) {
+        for (const [x, y, value] of this._patternEntries) {
             if (includeValue)
-                (tiles as [number, number, number][]).push([ patternEntry.x, patternEntry.y, patternEntry.value ]);
+                (tiles as [number, number, number][]).push([x, y, value]);
             else
-                (tiles as [number, number][]).push([ patternEntry.x, patternEntry.y ]);
+                (tiles as [number, number][]).push([ x, y ]);
         }
 
         return {
@@ -205,14 +194,4 @@ export class Pattern {
     }
 }
 
-/**
- * PatternEntry - Server Version
- *
- * Single pattern entry with coordinate and value
- */
-export class PatternEntry {
-    public constructor(public readonly x: number,
-                       public readonly y: number,
-                       public readonly value: number) {
-    }
-}
+export type PatternEntry = [x: number, y: number, value: number];

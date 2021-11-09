@@ -14,6 +14,7 @@ export class PatternRenderer {
     private lastDrawX = -Infinity;
     private lastDrawY = -Infinity;
     private lastCellWidth = 0;
+    private lastBorderWidth = 0;
     private rendered = false;
 
     private readonly onMoveListenerID: number;
@@ -30,8 +31,8 @@ export class PatternRenderer {
     public constructor(protected readonly renderer: GameRenderer,
                        protected readonly canvas: CanvasInfo,
                        protected readonly pattern: Pattern,
-                       protected fillColor: string,
-                       protected borderColor: string) {
+                       public fillColor: string,
+                       public borderColor: string) {
 
         // Add a listener to update the last known drawn coordinates when the parent canvas is moved
         this.onMoveListenerID = this.canvas.registerOnMoveListener((dx, dy) => {
@@ -117,7 +118,7 @@ export class PatternRenderer {
             const drawY: number = y + patternEntry.y * cellWidth;
 
             // Draw basic pattern cell to screen
-            this.canvas.context.fillRect(drawX, drawY, cellWidth - 1, cellWidth - 1);
+            this.canvas.context.fillRect(drawX, drawY, cellWidth - 2, cellWidth - 2);
         }
 
         // TODO: Border rendering
@@ -129,6 +130,7 @@ export class PatternRenderer {
         this.lastDrawX = x;
         this.lastDrawY = y;
         this.lastCellWidth = cellWidth;
+        this.lastBorderWidth = borderWidth;
         this.rendered = true;
     }
 
@@ -154,6 +156,14 @@ export class PatternRenderer {
 
         // Mark pattern as already de-rendered
         this.rendered = false;
+    }
+
+    /**
+     * De-renders and then re-renders a pattern from the canvas
+     */
+    public reRender(): void {
+        this.deRender();
+        this.render(this.lastDrawX, this.lastDrawY, this.lastCellWidth, this.lastBorderWidth);
     }
 
     /**

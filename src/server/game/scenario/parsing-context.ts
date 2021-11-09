@@ -67,7 +67,7 @@ export class ParsingContext {
 
         let attributeMap: AttributeMap | undefined;
 
-        // Select attribute map depending on attribute selector
+        // Select attribute knownItems depending on attribute selector
         switch (objectSelector) {
             case 'scenario':
                 attributeMap = this.scenarioAttributes;
@@ -86,7 +86,7 @@ export class ParsingContext {
                 break;
         }
 
-        // If attribute map could not be found with selector, or attribute could not be found within the attribute map
+        // If attribute knownItems could not be found with selector, or attribute could not be found within the attribute knownItems
         if (attributeMap === undefined || !(attributeName in attributeMap))
             throw new UnpackingError(`Could not find attribute 'local:${objectSelector}.${attributeName}' defined at '${this.currentPath}' in current context '${this.getAttributeContextName()}'`,
                 this.currentFile);

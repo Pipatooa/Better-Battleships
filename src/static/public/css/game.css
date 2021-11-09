@@ -55,7 +55,7 @@
     content: "- ";
 }
 
-#ability-container {
+#info-pane-ship-ability-container {
     grid-gap: 0.5em;
     grid-template-columns: repeat(auto-fill, minmax(2em, 1fr));
 }
@@ -95,6 +95,10 @@
 
 .canvas-wrapper > canvas:first-child {
     background: var(--canvas-background-color);
+}
+
+#highlight-canvas {
+    opacity: 0.75;
 }
 
 #button-previous-container, #button-next-container {

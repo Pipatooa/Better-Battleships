@@ -1,3 +1,4 @@
+import type { AbilityInfo } from '../../../../shared/network/scenario/ability-info';
 import type { IShipInfo } from '../../../../shared/network/scenario/i-ship-info';
 import type { ParsingContext } from '../parsing-context';
 import { checkAgainstSchema } from '../schema-checker';
@@ -34,7 +35,7 @@ export class Ship implements IAttributeHolder {
      */
     public constructor(public readonly descriptor: Descriptor,
                        protected _pattern: Pattern,
-                       public readonly abilities: { [name: string]: Ability },
+                       public readonly abilities: Ability[],
                        public readonly attributes: AttributeMap) {
     }
 
@@ -79,14 +80,14 @@ export class Ship implements IAttributeHolder {
         const cells: [number, number][] = [];
 
         // Iterate through entries in pattern
-        for (const patternEntry of this._pattern.patternEntries) {
+        for (const [x, y] of this._pattern.patternEntries) {
 
             // Offset pattern entries by the position of the ship and offset provided
-            const x: number = patternEntry.x + this.x + offset[0];
-            const y: number = patternEntry.y + this.y + offset[1];
+            const shipX: number = x + this.x + offset[0];
+            const shipY: number = y + this.y + offset[1];
 
             // Add cell coordinate to list of cells
-            cells.push([ x, y ]);
+            cells.push([shipX, shipY]);
         }
 
         // Return list of cell coordinates
@@ -118,7 +119,7 @@ export class Ship implements IAttributeHolder {
         const pattern = await Pattern.fromSource(parsingContext.withExtendedPath('.pattern'), shipSource.pattern, false);
 
         // Get abilities
-        const abilities: { [name: string]: Ability } = {};
+        const abilities: Ability[] = [];
         for (let i = 0; i < shipSource.abilities.length; i++) {
             const abilityName = shipSource.abilities[i];
 
@@ -132,7 +133,8 @@ export class Ship implements IAttributeHolder {
 
             // Unpack ability data
             const abilitySource: AbilitySource = await getJSONFromEntry(parsingContext.abilityEntries[abilityName]) as unknown as AbilitySource;
-            abilities[abilityName] = await buildAbility(parsingContext.withUpdatedFile(`abilities/${abilityName}.json`), abilitySource, true);
+            const ability = await buildAbility(parsingContext.withUpdatedFile(`abilities/${abilityName}.json`), abilitySource, true);
+            abilities.push(ability);
         }
 
         // Return created Ship object
@@ -149,9 +151,14 @@ export class Ship implements IAttributeHolder {
      * @returns  Created IShipInfo object
      */
     public makeTransportable(): IShipInfo {
+        const abilityInfo: AbilityInfo[] = [];
+        for (const ability of this.abilities)
+            abilityInfo.push(ability.makeTransportable());
+
         return {
             descriptor: this.descriptor.makeTransportable(),
-            pattern: this._pattern.makeTransportable(false)
+            pattern: this._pattern.makeTransportable(false),
+            abilities: abilityInfo
         };
     }
 
@@ -167,4 +174,3 @@ export class Ship implements IAttributeHolder {
         return this._y;
     }
 }
-

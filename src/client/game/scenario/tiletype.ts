@@ -22,7 +22,7 @@ export class TileType {
     public static async fromSource(tileTypeSource: ITileTypeInfo): Promise<TileType> {
 
         // Create sub-objects
-        const descriptor = await Descriptor.fromSource(tileTypeSource.descriptor);
+        const descriptor = Descriptor.fromSource(tileTypeSource.descriptor);
 
         // Return tile type object
         return new TileType(descriptor, tileTypeSource.color, tileTypeSource.traversable);

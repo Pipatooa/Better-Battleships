@@ -16,6 +16,7 @@ export class Player {
     public readonly lobbyElement: JQuery;
 
     public color: string | undefined;
+    public highlightColor: string | undefined;
 
     /**
      * Player constructor
@@ -47,7 +48,7 @@ export class Player {
     /**
      * Removes this player from dictionary of all players
      *
-     * Removed this player from parent team
+     * Removes this player from parent team
      */
     public deconstruct(): void {
         this.team?.removePlayer(this);

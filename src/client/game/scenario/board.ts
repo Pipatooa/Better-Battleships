@@ -1,5 +1,5 @@
 import type { IBoardInfo } from '../../../shared/network/scenario/i-board-info';
-import { Tile } from './tile';
+import { Region } from './region';
 import { TileType } from './tiletype';
 
 /**
@@ -25,33 +25,42 @@ export class Board {
      */
     public static async fromSource(boardSource: IBoardInfo): Promise<Board> {
 
-        // Unpack tile types
+        // Unpack tile and region palettes
         const tileTypes: { [char: string]: TileType } = {};
-        for (const entry of Object.entries(boardSource.tileTypes)) {
-
-            // Create new TileType objects indexed by single character strings
+        for (const entry of Object.entries(boardSource.tilePalette)) {
             const [ char, tileTypeInfo ] = entry;
             tileTypes[char] = await TileType.fromSource(tileTypeInfo);
+        }
+
+        const regions: { [id: string]: Region } = {};
+        for (const regionIDs of Object.values(boardSource.regionPalette)) {
+            for (const regionID of regionIDs) {
+                if (regions[regionID] === undefined)
+                    regions[regionID] = new Region(regionID);
+            }
         }
 
         // Unpack tile data
         const tiles: Tile[][] = [];
         for (let y = 0; y < boardSource.tiles.length; y++) {
-            const row: string = boardSource.tiles[y];
+            const rowTileTypes: string = boardSource.tiles[y];
+            const rowRegions: string = boardSource.regions[y];
 
             // Create new tile row
             tiles[y] = [];
 
             // Iterate through each character, each representing a tile
             for (let x = 0; x < boardSource.size[0]; x++) {
-                const c: string = row.charAt(x);
+                const tileTypeChar: string = rowTileTypes.charAt(x);
+                const regionChar: string = rowRegions.charAt(x);
 
-                // Create and store a new tile created from tile type
-                // Tiles are stored in tile[y][x] format
-                const tileType: TileType = tileTypes[c];
-                tiles[y][x] = new Tile(x, y, tileType);
+                const tileType: TileType = tileTypes[tileTypeChar];
+                const regionIDs: string[] = boardSource.regionPalette[regionChar];
+                tiles[y][x] = [tileType, regionIDs.map(id => regions[id])];
             }
         }
+
+        console.log(tiles);
 
         return new Board(tiles);
     }
@@ -64,3 +73,8 @@ export class Board {
         return [ this.tiles[0].length, this.tiles.length ];
     }
 }
+
+/**
+ * Type describing an entry for a single tile
+ */
+export type Tile = [TileType, Region[]];

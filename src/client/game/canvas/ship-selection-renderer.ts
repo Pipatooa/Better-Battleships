@@ -46,11 +46,6 @@ export class ShipSelectionRenderer {
         $('#button-next-ship').on('click', () => this.nextShip());
         this.renderer.shipSelectionCanvas.canvas.addEventListener('click', () => this.selectCurrent());
 
-        /*// Set rendering flag for first ship
-        this.ships[0].doRender = false;
-        this.renderer.shipRenderer.redrawAll();*/
-        
-        // Draw ship selection for the first time
         this.redrawAll();
     }
 
@@ -145,7 +140,7 @@ export class ShipSelectionRenderer {
         this.patternRenderers.splice(this.selectedIndex, 1);
 
         // Set selected ship to popped ship
-        this.renderer.selectedShipRenderer.setSelected(ship);
+        this.renderer.selectedShipRenderer.selectShip(ship);
 
         // If no ships are remaining, reveal done button
         if (this.ships.length === 0) {

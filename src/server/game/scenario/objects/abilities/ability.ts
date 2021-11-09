@@ -5,6 +5,7 @@ import type { Condition } from '../conditions/condition';
 import type { EvaluationContext } from '../../evaluation-context';
 import type { Ship } from '../ship';
 import type { AbilityActions } from './events/base-ability-events';
+import type { AbilityInfo } from '../../../../../shared/network/scenario/ability-info';
 
 /**
  * Ability - Server Version
@@ -12,7 +13,9 @@ import type { AbilityActions } from './events/base-ability-events';
  * Base class for abilities of a ship which execute actions upon use
  */
 export abstract class Ability implements IAttributeHolder {
-
+    
+    protected usable: boolean | undefined;
+    
     /**
      * Ability constructor
      *
@@ -30,9 +33,31 @@ export abstract class Ability implements IAttributeHolder {
     }
 
     /**
-     * Execute actions related to this ability if the ability's condition is met
+     * Checks whether or not this ability is usable
+     *
+     * @param    evaluationContext Context for resolving objects and values during evaluation
+     * @returns                    Whether or not this ability is usable
      */
-    public abstract use(usageContext: EvaluationContext): void;
+    public checkUsable(evaluationContext: EvaluationContext): boolean {
+        this.usable = this.condition.check(evaluationContext);
+        return this.usable;
+    }
+
+    /**
+     * Execute actions related to this ability if the ability's condition is met
+     *
+     * @param  evaluationContext Context for resolving objects and values during evaluation
+     */
+    public abstract use(evaluationContext: EvaluationContext): void;
+
+    /**
+     * Returns network transportable form of this object.
+     *
+     * May not include all details of the object. Just those that the client needs to know.
+     *
+     * @returns  Created AbilityInfo object
+     */
+    public abstract makeTransportable(): AbilityInfo;
 }
 
 /**

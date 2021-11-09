@@ -3,19 +3,20 @@
     "name": "Blue Team",
     "description": "This is the blue team"
   },
-  "color": "#0000FF",
+  "color": "#1056a6",
+  "highlightColor": "#3378c6",
   "playerConfigs": [
     [
-      { "playerPrototype": "player", "spawnRegion": "spawn-blue-1" }
+      { "playerPrototype": "player", "spawnRegion": "spawn-blue-1", "color": "#1056a6", "highlightColor": "#3378c6" }
     ],
     [
-      { "playerPrototype": "player", "spawnRegion": "spawn-blue-2" },
-      { "playerPrototype": "player", "spawnRegion": "spawn-blue-3" }
+      { "playerPrototype": "player", "spawnRegion": "spawn-blue-2", "color": "#1056a6", "highlightColor": "#3378c6" },
+      { "playerPrototype": "player", "spawnRegion": "spawn-blue-3", "color": "#1056a6", "highlightColor": "#3378c6" }
     ],
     [
-      { "playerPrototype": "player", "spawnRegion": "spawn-blue-1" },
-      { "playerPrototype": "player", "spawnRegion": "spawn-blue-2" },
-      { "playerPrototype": "player", "spawnRegion": "spawn-blue-3" }
+      { "playerPrototype": "player", "spawnRegion": "spawn-blue-1", "color": "#1056a6", "highlightColor": "#3378c6" },
+      { "playerPrototype": "player", "spawnRegion": "spawn-blue-2", "color": "#1056a6", "highlightColor": "#3378c6" },
+      { "playerPrototype": "player", "spawnRegion": "spawn-blue-3", "color": "#1056a6", "highlightColor": "#3378c6" }
     ]
   ],
   "attributes": {}

@@ -27,12 +27,14 @@ export class Team implements IAttributeHolder {
      * @param  descriptor        Descriptor for team
      * @param  _playerPrototypes Array of potential players for the team
      * @param  color             Team color
+     * @param  highlightColor    Team color when highlighted
      * @param  attributes        Attributes for the team
      */
     public constructor(public readonly id: string,
                        public readonly descriptor: Descriptor,
                        protected _playerPrototypes: Player[][],
                        public readonly color: string,
+                       public readonly highlightColor: string,
                        public readonly attributes: AttributeMap) {
     }
 
@@ -102,7 +104,7 @@ export class Team implements IAttributeHolder {
 
                 // Unpack player
                 const playerSource: IPlayerSource = await getJSONFromEntry(parsingContext.playerPrototypeEntries[playerName]) as unknown as IPlayerSource;
-                players.push(await Player.fromSource(parsingContext.withUpdatedFile(`players/${playerName}.json`), playerConfig.spawnRegion, playerSource, true));
+                players.push(await Player.fromSource(parsingContext.withUpdatedFile(`players/${playerName}.json`), playerSource, playerConfig.spawnRegion, playerConfig.color, playerConfig.highlightColor, true));
             }
 
             // Add list of players to list of possible player configurations
@@ -110,7 +112,7 @@ export class Team implements IAttributeHolder {
         }
 
         // Return created Team object
-        return new Team(id, descriptor, playerPrototypes, teamSource.color, attributes);
+        return new Team(id, descriptor, playerPrototypes, teamSource.color, teamSource.highlightColor, attributes);
     }
 
     /**
@@ -124,7 +126,8 @@ export class Team implements IAttributeHolder {
         return {
             descriptor: this.descriptor.makeTransportable(),
             maxPlayers: this._playerPrototypes.length,
-            color: this.color
+            color: this.color,
+            highlightColor: this.highlightColor
         };
     }
 
@@ -140,4 +143,3 @@ export class Team implements IAttributeHolder {
         return this._players;
     }
 }
-

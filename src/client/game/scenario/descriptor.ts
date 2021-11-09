@@ -8,7 +8,7 @@ import type { IDescriptorInfo } from '../../../shared/network/scenario/i-descrip
  */
 export class Descriptor {
     protected constructor(public readonly name: string,
-                public readonly description: string) {
+                          public readonly description: string) {
     }
 
     /**
@@ -17,9 +17,7 @@ export class Descriptor {
      * @param    descriptorSource JSON data from server
      * @returns                   Created Descriptor object
      */
-    public static async fromSource(descriptorSource: IDescriptorInfo): Promise<Descriptor> {
-
-        // Return created Descriptor object
+    public static fromSource(descriptorSource: IDescriptorInfo): Descriptor {
         return new Descriptor(descriptorSource.name, descriptorSource.description);
     }
 }

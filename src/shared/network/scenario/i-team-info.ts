@@ -6,5 +6,6 @@ import type { IDescriptorInfo } from './i-descriptor-info';
 export interface ITeamInfo {
     descriptor: IDescriptorInfo,
     maxPlayers: number,
-    color: string
+    color: string,
+    highlightColor: string
 }

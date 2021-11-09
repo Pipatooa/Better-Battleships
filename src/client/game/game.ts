@@ -13,6 +13,7 @@ export class Game {
 
     public board: Board | undefined;
     public availableShips: Ship[] | undefined;
+    public startRegionID: string | undefined;
 
     /**
      * Game constructor

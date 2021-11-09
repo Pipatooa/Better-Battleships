@@ -10,8 +10,10 @@ import { tileTypeSchema } from './tile-type';
  */
 export interface IBoardSource {
     size: [ x: number, y: number ];
-    palette: { [char: string]: TileType },
+    tilePalette: { [char: string]: TileType },
+    regionPalette: { [char: string]: string[] },
     tiles: string[],
+    regions: string[],
     generators: TileGenerator[]
 }
 
@@ -22,7 +24,7 @@ export const boardSchema = Joi.object({
     size: Joi.array().items(
         Joi.number().integer().min(5)
     ).length(2).required(),
-    palette: Joi.object().pattern(Joi.string().length(1), tileTypeSchema).required(),
+    tilePalette: Joi.object().pattern(Joi.string().length(1), tileTypeSchema).required(),
     regionPalette: Joi.object().pattern(Joi.string().length(1), Joi.array().items(genericNameSchema)).required(),
     tiles: Joi.array().items(
         Joi.string().min(5)

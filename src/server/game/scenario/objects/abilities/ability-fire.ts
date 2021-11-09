@@ -1,3 +1,4 @@
+import type { AbilityInfo } from '../../../../../shared/network/scenario/ability-info';
 import { getActions } from '../actions/action-getter';
 import { getAttributes } from '../attributes/attribute-getter';
 import type { AttributeMap } from '../attributes/i-attribute-holder';
@@ -25,18 +26,20 @@ export class AbilityFire extends PositionedAbility {
     /**
      * AbilityFire constructor
      *
-     * @param  ship             Parent ship which this ability belongs to
-     * @param  descriptor       Descriptor for ability
-     * @param  selectionPattern Pattern determining which cell can be selected to apply the affect pattern around
-     * @param  effectPattern    Pattern determining which cells around the selected cell are affected
-     * @param  condition        Condition which must hold true to be able to use this action
-     * @param  actions          Actions to execute when events are triggered
-     * @param  attributes       Attributes for the ability
+     * @param  ship                       Parent ship which this ability belongs to
+     * @param  descriptor                 Descriptor for ability
+     * @param  selectionPattern           Pattern determining which cell can be selected to apply the affect pattern around
+     * @param  effectPattern              Pattern determining which cells around the selected cell are affected
+     * @param  displayEffectPatternValues Whether or not effect pattern values should be displayed to the client when using the ability
+     * @param  condition                  Condition which must hold true to be able to use this action
+     * @param  actions                    Actions to execute when events are triggered
+     * @param  attributes                 Attributes for the ability
      */
     public constructor(ship: Ship,
                        descriptor: Descriptor,
                        public readonly selectionPattern: Pattern,
                        public readonly effectPattern: Pattern,
+                       public readonly displayEffectPatternValues: boolean,
                        condition: Condition,
                        actions: FireAbilityActions,
                        attributes: AttributeMap) {
@@ -47,29 +50,29 @@ export class AbilityFire extends PositionedAbility {
      * Factory function to generate AbilityFire from JSON scenario data
      *
      * @param    parsingContext    Context for resolving scenario data
-     * @param    fireAbilitySource JSON data for AbilityFire
+     * @param    abilityFireSource JSON data for AbilityFire
      * @param    checkSchema       When true, validates source JSON data against schema
      * @returns                    Created AbilityFire object
      */
-    public static async fromSource(parsingContext: ParsingContext, fireAbilitySource: IFireAbilitySource, checkSchema: boolean): Promise<AbilityFire> {
+    public static async fromSource(parsingContext: ParsingContext, abilityFireSource: IAbilityFireSource, checkSchema: boolean): Promise<AbilityFire> {
 
         // Validate JSON data against schema
         if (checkSchema)
-            fireAbilitySource = await checkAgainstSchema(fireAbilitySource, fireAbilitySchema, parsingContext);
+            abilityFireSource = await checkAgainstSchema(abilityFireSource, abilityFireSchema, parsingContext);
 
         // Get attributes and update parsing context
-        const attributes: AttributeMap = await getAttributes(parsingContext.withExtendedPath('.attributes'), fireAbilitySource.attributes, 'ability');
+        const attributes: AttributeMap = await getAttributes(parsingContext.withExtendedPath('.attributes'), abilityFireSource.attributes, 'ability');
         parsingContext = parsingContext.withAbilityAttributes(attributes);
 
         // Get component elements from source
-        const descriptor: Descriptor = await Descriptor.fromSource(parsingContext.withExtendedPath('.descriptor'), fireAbilitySource.descriptor, false);
-        const selectionPattern: Pattern = await Pattern.fromSource(parsingContext.withExtendedPath('.selectionPattern'), fireAbilitySource.selectionPattern, false);
-        const effectPattern: Pattern = await Pattern.fromSource(parsingContext.withExtendedPath('.effectPattern'), fireAbilitySource.effectPattern, false);
-        const condition: Condition = await buildCondition(parsingContext.withExtendedPath('.condition'), fireAbilitySource.condition, false);
-        const actions: FireAbilityActions = await getActions(parsingContext.withExtendedPath('.actions'), fireAbilityEvents, ['onHit'], fireAbilitySource.actions);
+        const descriptor: Descriptor = await Descriptor.fromSource(parsingContext.withExtendedPath('.descriptor'), abilityFireSource.descriptor, false);
+        const selectionPattern: Pattern = await Pattern.fromSource(parsingContext.withExtendedPath('.selectionPattern'), abilityFireSource.selectionPattern, false);
+        const effectPattern: Pattern = await Pattern.fromSource(parsingContext.withExtendedPath('.effectPattern'), abilityFireSource.effectPattern, false);
+        const condition: Condition = await buildCondition(parsingContext.withExtendedPath('.condition'), abilityFireSource.condition, false);
+        const actions: FireAbilityActions = await getActions(parsingContext.withExtendedPath('.actions'), fireAbilityEvents, ['onHit'], abilityFireSource.actions);
 
         // Return created AbilityFire object
-        return new AbilityFire(parsingContext.shipPartial as Ship, descriptor, selectionPattern, effectPattern, condition, actions, attributes);
+        return new AbilityFire(parsingContext.shipPartial as Ship, descriptor, selectionPattern, effectPattern, abilityFireSource.displayEffectPatternValues, condition, actions, attributes);
     }
 
     /**
@@ -79,7 +82,7 @@ export class AbilityFire extends PositionedAbility {
      */
     public use(evaluationContext: EvaluationContext): void {
 
-        if (!this.condition.check(evaluationContext))
+        if (!this.usable!)
             return;
 
         // Check that the movement is allowed
@@ -88,5 +91,20 @@ export class AbilityFire extends PositionedAbility {
 
         this.ship.moveBy(evaluationContext.x!, evaluationContext.y!);
     }
-}
 
+    /**
+     * Returns network transportable form of this object.
+     *
+     * May not include all details of the object. Just those that the client needs to know.
+     *
+     * @returns  Created AbilityInfo object
+     */
+    public makeTransportable(): AbilityInfo {
+        return {
+            type: 'fire',
+            descriptor: this.descriptor.makeTransportable(),
+            selectionPattern: this.selectionPattern.makeTransportable(false),
+            effectPattern: this.effectPattern.makeTransportable(this.displayEffectPatternValues)
+        };
+    }
+}

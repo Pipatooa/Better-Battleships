@@ -1,4 +1,5 @@
 import { clamp } from '../../../shared/utility';
+import { game } from '../game';
 import type { Board } from '../scenario/board';
 import type { GameRenderer } from './game-renderer';
 
@@ -19,6 +20,8 @@ export class BoardRenderer {
     protected readonly gridCellSizeLowerBound: number;
     protected readonly gridCellSizeUpperBound: number;
     protected gridSep = 2;
+
+    private _highlightedRegion: string | undefined = game.startRegionID;
     
     /**
      * BoardRenderer constructor
@@ -172,6 +175,9 @@ export class BoardRenderer {
         // Clear region to be redrawn
         this.renderer.boardCanvas.context.clearRect(x, y, w, h);
 
+        if (this._highlightedRegion !== undefined)
+            this.renderer.highlightCanvas.context.fillRect(x, y, w, h);
+
         // Determine which tiles are within redraw bounds
         const gridXStart = clamp(Math.floor((x - this.gridOffsetX) / this._gridCellSize), 0, this.board.size[0] - 1);
         const gridYStart = clamp(Math.floor((y - this.gridOffsetY) / this._gridCellSize), 0, this.board.size[1] - 1);
@@ -197,13 +203,25 @@ export class BoardRenderer {
             for (let x = gridXStart; x <= gridXEnd; x++) {
                 const tile = row[x];
 
-                this.renderer.boardCanvas.context.fillStyle = tile.tileType.color;
+                this.renderer.boardCanvas.context.fillStyle = tile[0].color;
+
+                // Draw cell to tile canvas
                 this.renderer.boardCanvas.context.fillRect(
-                    this.gridOffsetX + tile.x * this._gridCellSize,
-                    this.gridOffsetY + tile.y * this._gridCellSize,
+                    this.gridOffsetX + x * this._gridCellSize,
+                    this.gridOffsetY + y * this._gridCellSize,
                     this._gridCellSize - this.gridSep,
                     this._gridCellSize - this.gridSep
                 );
+
+                // Clear view in highlighted region
+                if (this._highlightedRegion !== undefined && tile[1].map(r => r.id).includes(this._highlightedRegion)) {
+                    this.renderer.highlightCanvas.context.clearRect(
+                        this.gridOffsetX + x * this._gridCellSize,
+                        this.gridOffsetY + y * this._gridCellSize,
+                        this._gridCellSize - this.gridSep,
+                        this._gridCellSize - this.gridSep
+                    );
+                }
             }
         }
     }
@@ -221,5 +239,10 @@ export class BoardRenderer {
 
     public get gridCellSize(): number {
         return this._gridCellSize;
+    }
+
+    public set highlightedRegion(region: string | undefined) {
+        this._highlightedRegion = region;
+        this.redrawAll();
     }
 }

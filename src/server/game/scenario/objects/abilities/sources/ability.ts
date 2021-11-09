@@ -43,5 +43,7 @@ export const abilitySchema = baseAbilitySchema.keys({
     selectionPattern: patternSchema.when('type',
         { is: 'fire', then: Joi.required(), otherwise: Joi.forbidden() }),
     effectPattern: patternSchema.when('type',
+        { is: 'fire', then: Joi.required(), otherwise: Joi.forbidden() }),
+    displayEffectPatternValues: Joi.boolean().when('type',
         { is: 'fire', then: Joi.required(), otherwise: Joi.forbidden() })
 }).concat(attributeHolderSchema);

@@ -17,14 +17,14 @@ import type { IAbilityMoveSource } from './sources/ability-move';
 import { abilityMoveSchema } from './sources/ability-move';
 
 /**
- * AbilityMove - Server Version
+ * AbilityFire - Server Version
  *
  * Ability which moves a ship upon its use
  */
 export class AbilityMove extends PositionedAbility {
 
     /**
-     * AbilityMove constructor
+     * AbilityFire constructor
      *
      * @param  ship       Parent ship which this ability belongs to
      * @param  descriptor Descriptor for ability
@@ -43,30 +43,30 @@ export class AbilityMove extends PositionedAbility {
     }
 
     /**
-     * Factory function to generate AbilityMove from JSON scenario data
+     * Factory function to generate AbilityFire from JSON scenario data
      *
-     * @param    parsingContext        Context for resolving scenario data
-     * @param    movementAbilitySource JSON data for AbilityMove
-     * @param    checkSchema           When true, validates source JSON data against schema
-     * @returns                        Created AbilityMove object
+     * @param    parsingContext    Context for resolving scenario data
+     * @param    abilityMoveSource JSON data for AbilityFire
+     * @param    checkSchema       When true, validates source JSON data against schema
+     * @returns                    Created AbilityFire object
      */
-    public static async fromSource(parsingContext: ParsingContext, movementAbilitySource: IAbilityMoveSource, checkSchema: boolean): Promise<AbilityMove> {
+    public static async fromSource(parsingContext: ParsingContext, abilityMoveSource: IAbilityMoveSource, checkSchema: boolean): Promise<AbilityMove> {
 
         // Validate JSON data against schema
         if (checkSchema)
-            movementAbilitySource = await checkAgainstSchema(movementAbilitySource, abilityMoveSchema, parsingContext);
+            abilityMoveSource = await checkAgainstSchema(abilityMoveSource, abilityMoveSchema, parsingContext);
 
         // Get attributes and update parsing context
-        const attributes: AttributeMap = await getAttributes(parsingContext.withExtendedPath('.attributes'), movementAbilitySource.attributes, 'ability');
+        const attributes: AttributeMap = await getAttributes(parsingContext.withExtendedPath('.attributes'), abilityMoveSource.attributes, 'ability');
         parsingContext = parsingContext.withAbilityAttributes(attributes);
 
         // Get component elements from source
-        const descriptor: Descriptor = await Descriptor.fromSource(parsingContext.withExtendedPath('.descriptor'), movementAbilitySource.descriptor, false);
-        const pattern: Pattern = await Pattern.fromSource(parsingContext.withExtendedPath('.pattern'), movementAbilitySource.pattern, false);
-        const condition: Condition = await buildCondition(parsingContext.withExtendedPath('.condition'), movementAbilitySource.condition, false);
-        const actions: AbilityActions = await getActions(parsingContext.withExtendedPath('.actions'), baseAbilityEvents, [], movementAbilitySource.actions);
+        const descriptor: Descriptor = await Descriptor.fromSource(parsingContext.withExtendedPath('.descriptor'), abilityMoveSource.descriptor, false);
+        const pattern: Pattern = await Pattern.fromSource(parsingContext.withExtendedPath('.pattern'), abilityMoveSource.pattern, false);
+        const condition: Condition = await buildCondition(parsingContext.withExtendedPath('.condition'), abilityMoveSource.condition, false);
+        const actions: AbilityActions = await getActions(parsingContext.withExtendedPath('.actions'), baseAbilityEvents, [], abilityMoveSource.actions);
 
-        // Return created AbilityMove object
+        // Return created AbilityFire object
         return new AbilityMove(parsingContext.shipPartial as Ship, descriptor, pattern, condition, actions, attributes);
     }
 
@@ -77,7 +77,7 @@ export class AbilityMove extends PositionedAbility {
      */
     public use(evaluationContext: EvaluationContext): void {
 
-        if (!this.condition.check(evaluationContext))
+        if (!this.usable!)
             return;
 
         // Check that the movement is allowed
@@ -85,5 +85,20 @@ export class AbilityMove extends PositionedAbility {
             return;
 
         this.ship.moveBy(evaluationContext.x!, evaluationContext.y!);
+    }
+
+    /**
+     * Returns network transportable form of this object.
+     *
+     * May not include all details of the object. Just those that the client needs to know.
+     *
+     * @returns  Created AbilityInfo object
+     */
+    public makeTransportable(): AbilityInfo {
+        return {
+            type: 'move',
+            descriptor: this.descriptor.makeTransportable(),
+            pattern: this.pattern.makeTransportable(false)
+        };
     }
 }

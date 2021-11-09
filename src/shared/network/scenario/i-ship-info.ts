@@ -1,3 +1,4 @@
+import type { AbilityInfo } from './ability-info';
 import type { IDescriptorInfo } from './i-descriptor-info';
 import type { IPatternInfo } from './i-pattern-info';
 
@@ -6,5 +7,6 @@ import type { IPatternInfo } from './i-pattern-info';
  */
 export interface IShipInfo {
     descriptor: IDescriptorInfo,
-    pattern: IPatternInfo
+    pattern: IPatternInfo,
+    abilities: AbilityInfo[]
 }

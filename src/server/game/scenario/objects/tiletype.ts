@@ -11,8 +11,7 @@ import { tileTypeSchema } from './sources/tile-type';
  * Stores a descriptor and a color for a tile
  */
 export class TileType {
-    public constructor(public readonly char: string,
-                       public readonly descriptor: Descriptor,
+    public constructor(public readonly descriptor: Descriptor,
                        public readonly color: string,
                        public readonly traversable: boolean) {
     }
@@ -23,10 +22,9 @@ export class TileType {
      * @param    parsingContext Context for resolving scenario data
      * @param    tileTypeSource JSON data for tile type
      * @param    checkSchema    When true, validates source JSON data against schema
-     * @param    char           Character used to represent this tile
      * @returns                 Created TileType object
      */
-    public static async fromSource(parsingContext: ParsingContext, tileTypeSource: ITileTypeSource, checkSchema: boolean, char: string): Promise<TileType> {
+    public static async fromSource(parsingContext: ParsingContext, tileTypeSource: ITileTypeSource, checkSchema: boolean): Promise<TileType> {
 
         // Validate JSON data against schema
         if (checkSchema)
@@ -36,7 +34,7 @@ export class TileType {
         const descriptor = await Descriptor.fromSource(parsingContext.withExtendedPath('.descriptor'), tileTypeSource.descriptor, false);
 
         // Return tile type object
-        return new TileType(char, descriptor, tileTypeSource.color, tileTypeSource.traversable);
+        return new TileType(descriptor, tileTypeSource.color, tileTypeSource.traversable);
     }
 
     /**
@@ -54,4 +52,3 @@ export class TileType {
         };
     }
 }
-
