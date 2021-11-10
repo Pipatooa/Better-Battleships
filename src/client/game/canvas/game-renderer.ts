@@ -1,6 +1,6 @@
 import { game } from '../game';
 import { BoardRenderer } from './board-renderer';
-import { CanvasInfo } from './canvas-info';
+import { CanvasCollection } from './canvas-collection';
 import { SelectedShipRenderer } from './selected-ship-renderer';
 import { ShipRenderer } from './ship-renderer';
 import { ShipSelectionRenderer } from './ship-selection-renderer';
@@ -13,13 +13,9 @@ export let gameRenderer: GameRenderer;
  * Base class for rendering objects to the canvas
  */
 export class GameRenderer {
-    
-    public readonly boardCanvas: CanvasInfo;
-    public readonly shipCanvas: CanvasInfo;
-    public readonly selectedShipCanvas: CanvasInfo;
-    public readonly highlightCanvas: CanvasInfo;
-    public readonly shipSelectionCanvas: CanvasInfo;
-    public readonly topCanvas: CanvasInfo;
+
+    public readonly mainCanvas: CanvasCollection<'board' | 'ship' | 'highlight' | 'selected'>;
+    public readonly selectionCanvas: CanvasCollection<'ship'>;
     
     public readonly boardRenderer: BoardRenderer;
     public readonly shipRenderer: ShipRenderer;
@@ -38,21 +34,11 @@ export class GameRenderer {
      */
     public constructor() {
 
-        // Fetch HTML canvas elements
-        const boardCanvasElement = $('#board-canvas').get(0) as HTMLCanvasElement;
-        const shipCanvasElement = $('#ship-canvas').get(0) as HTMLCanvasElement;
-        const highlightCanvasElement = $('#highlight-canvas').get(0) as HTMLCanvasElement;
-        const selectedShipCanvasElement = $('#selected-ship-canvas').get(0) as HTMLCanvasElement;
-        const shipSelectionCanvasElement = $('#ship-selection-canvas').get(0) as HTMLCanvasElement;
+        this.mainCanvas = new CanvasCollection($('#main-canvas-wrapper'),
+            ['board', 'ship', 'highlight', 'selected'], 1);
+        this.selectionCanvas = new CanvasCollection($('#ship-selection-canvas-wrapper'),
+            ['ship'], 1);
 
-        // Create CanvasInfo objects from canvas elements
-        this.boardCanvas = new CanvasInfo(boardCanvasElement, this._pixelScale);
-        this.shipCanvas = new CanvasInfo(shipCanvasElement, this._pixelScale);
-        this.highlightCanvas = new CanvasInfo(highlightCanvasElement, this._pixelScale);
-        this.selectedShipCanvas = new CanvasInfo(selectedShipCanvasElement, this._pixelScale);
-        this.shipSelectionCanvas = new CanvasInfo(shipSelectionCanvasElement, this._pixelScale);
-        this.topCanvas = this.selectedShipCanvas;
-        
         // Create renderers
         this.boardRenderer = new BoardRenderer(this, game.board!);
         this.shipRenderer = new ShipRenderer(this);
@@ -68,11 +54,8 @@ export class GameRenderer {
      * Called when window is resized
      */
     private onResize(): void {
-        this.boardCanvas.onResize();
-        this.shipCanvas.onResize();
-        this.highlightCanvas.onResize();
-        this.shipSelectionCanvas.onResize();
-
+        this.selectionCanvas.onResize();
+        this.mainCanvas.onResize();
         this.redrawAll();
     }
 
@@ -84,7 +67,7 @@ export class GameRenderer {
     private onPointerMove(ev: PointerEvent): void {
 
         // Mouse drag start - Pointer must be targeting board or ship canvas
-        if (!this.moving && ev.target as unknown === this.topCanvas.canvas) {
+        if (!this.moving && ev.target as unknown === this.mainCanvas.topElement) {
             this.moving = true;
             this.lastMousePosition = [ ev.clientX, ev.clientY ];
             ev.preventDefault();
@@ -121,10 +104,7 @@ export class GameRenderer {
             return;
 
         // Move canvas pixel data by delta
-        this.boardCanvas.movePixelData(dx, dy);
-        this.shipCanvas.movePixelData(dx, dy);
-        this.highlightCanvas.movePixelData(dx, dy);
-        // this.selectedShipCanvas.movePixelData(dx, dy);
+        this.mainCanvas.movePixelData(dx, dy);
 
         // Calculate regions which need to be redrawn after movement
         const regions = this.calculateViewportMovementRedrawRegions(dx, dy);
@@ -154,15 +134,15 @@ export class GameRenderer {
 
         // Region to left or right of board being moved
         if (dx > 0)
-            regions.push([0, 0, bufferPixels + dx, this.boardCanvas.canvas.height]);
+            regions.push([0, 0, bufferPixels + dx, this.mainCanvas.height]);
         else if (dx < 0)
-            regions.push([this.boardCanvas.canvas.width - bufferPixels + dx, 0, bufferPixels - dx, this.boardCanvas.canvas.height]);
+            regions.push([this.mainCanvas.width - bufferPixels + dx, 0, bufferPixels - dx, this.mainCanvas.height]);
 
         // Region on top or bottom of board being moved
         if (dy > 0)
-            regions.push([0, 0, this.boardCanvas.canvas.width, bufferPixels + dy]);
+            regions.push([0, 0, this.mainCanvas.width, bufferPixels + dy]);
         else if (dy < 0)
-            regions.push([0, this.boardCanvas.canvas.height - bufferPixels + dy, this.boardCanvas.canvas.width, bufferPixels - dy]);
+            regions.push([0, this.mainCanvas.height - bufferPixels + dy, this.mainCanvas.width, bufferPixels - dy]);
 
         return regions;
     }

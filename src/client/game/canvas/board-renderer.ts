@@ -13,13 +13,13 @@ export class BoardRenderer {
     protected _gridCellSize: number;
     protected gridOffsetX: number;
     protected gridOffsetY: number;
+    public readonly gridBorderRatio = 0.05;
 
     protected gridSizePixelsX: number;
     protected gridSizePixelsY: number;
 
     protected readonly gridCellSizeLowerBound: number;
     protected readonly gridCellSizeUpperBound: number;
-    protected gridSep = 2;
 
     private _highlightedRegion: string | undefined = game.startRegionID;
     
@@ -38,26 +38,46 @@ export class BoardRenderer {
 
         // Calculate limits for grid cell rendering
         this.gridCellSizeLowerBound = Math.min(
-            this.renderer.boardCanvas.canvas.width / this.board.size[0] / zoomBoundMultiplier,
-            this.renderer.boardCanvas.canvas.height / this.board.size[1] / zoomBoundMultiplier
+            this.renderer.mainCanvas.width / this.board.size[0] / zoomBoundMultiplier,
+            this.renderer.mainCanvas.height / this.board.size[1] / zoomBoundMultiplier
         );
-        this.gridCellSizeUpperBound = Math.min(this.renderer.boardCanvas.canvas.width, this.renderer.boardCanvas.canvas.height) / zoomBoundMinTiles;
+        this.gridCellSizeUpperBound = Math.min(this.renderer.mainCanvas.width, this.renderer.mainCanvas.height) / zoomBoundMinTiles;
 
-        // Register event listeners
-        this.renderer.boardCanvas.canvas.addEventListener('wheel', (ev: WheelEvent) => this.onScroll(ev));
+        // Calculate center of spawn region to center camera upon
+        let minX = Infinity;
+        let maxX = -Infinity;
+        let minY = Infinity;
+        let maxY = -Infinity;
 
-        // Set default view
-        this._gridCellSize = (this.gridCellSizeLowerBound + this.gridCellSizeUpperBound) / 2;
-        this.gridOffsetX = (this.renderer.boardCanvas.canvas.width - this.board.size[0] * this._gridCellSize) / 2;
-        this.gridOffsetY = (this.renderer.boardCanvas.canvas.height - this.board.size[1] * this._gridCellSize) / 2;
+        for (let y = 0; y < this.board.size[1]; y++) {
+            const row = this.board.tiles[y];
+            for (let x = 0; x < this.board.size[0]; x++) {
+                const regions = row[x][1];
+                if (regions.map(r => r.id).includes(this._highlightedRegion!)) {
+                    minX = Math.min(minX, x);
+                    maxX = Math.max(maxX, x);
+                    minY = Math.min(minY, y);
+                    maxY = Math.max(maxY, y);
+                }
+            }
+        }
+
+        this._gridCellSize = 0.75 * Math.min(
+            this.renderer.mainCanvas.width / (maxX - minX + 1),
+            this.renderer.mainCanvas.height / (maxY - minY + 1));
+        this.constrainZoom();
+        this.gridOffsetX = 0.5 * (this.renderer.mainCanvas.width - (minX + maxX + 1) * this._gridCellSize);
+        this.gridOffsetY = 0.5 * (this.renderer.mainCanvas.height - (minY + maxY + 1) * this._gridCellSize);
         this.gridSizePixelsX = this._gridCellSize * this.board.size[0];
         this.gridSizePixelsY = this._gridCellSize * this.board.size[1];
+        this.constrainOffsetXY();
+        this.redrawAll();
 
         // Draw grid for first time
         this.redrawAll();
 
         // Register event listeners
-        this.renderer.topCanvas.canvas.addEventListener('wheel', (ev: WheelEvent) => this.onScroll(ev));
+        this.renderer.mainCanvas.wrapperHTMLElement.addEventListener('wheel', (ev: WheelEvent) => this.onScroll(ev));
     }
 
     /**
@@ -77,7 +97,7 @@ export class BoardRenderer {
         this.gridSizePixelsY = this._gridCellSize * this.board.size[1];
 
         const deltaScaleFactor = this._gridCellSize / oldGridCellSize - 1;
-        const [ pixelX, pixelY ] = this.renderer.boardCanvas.translateMouseCoordinatePixel(ev.x, ev.y);
+        const [ pixelX, pixelY ] = this.renderer.mainCanvas.translateMouseCoordinatePixel(ev.x, ev.y);
 
         this.gridOffsetX -= (pixelX - this.gridOffsetX) * deltaScaleFactor;
         this.gridOffsetY -= (pixelY - this.gridOffsetY) * deltaScaleFactor;
@@ -128,11 +148,11 @@ export class BoardRenderer {
     private constrainOffsetXY(): void {
         this.gridOffsetX = clamp(this.gridOffsetX,
             -this._gridCellSize * (this.board.size[0] - 1),
-            this.renderer.boardCanvas.canvas.width - this._gridCellSize);
+            this.renderer.mainCanvas.width - this._gridCellSize);
 
         this.gridOffsetY = clamp(this.gridOffsetY,
             -this._gridCellSize * (this.board.size[1] - 1),
-            this.renderer.boardCanvas.canvas.height - this._gridCellSize);
+            this.renderer.mainCanvas.height - this._gridCellSize);
     }
 
     /**
@@ -173,10 +193,10 @@ export class BoardRenderer {
     public redrawRegion(x: number, y: number, w: number, h: number): void {
 
         // Clear region to be redrawn
-        this.renderer.boardCanvas.context.clearRect(x, y, w, h);
+        this.renderer.mainCanvas.contexts.board.clearRect(x, y, w, h);
 
         if (this._highlightedRegion !== undefined)
-            this.renderer.highlightCanvas.context.fillRect(x, y, w, h);
+            this.renderer.mainCanvas.contexts.highlight.fillRect(x, y, w, h);
 
         // Determine which tiles are within redraw bounds
         const gridXStart = clamp(Math.floor((x - this.gridOffsetX) / this._gridCellSize), 0, this.board.size[0] - 1);
@@ -185,17 +205,19 @@ export class BoardRenderer {
         const gridYEnd = clamp(Math.floor((y + h - this.gridOffsetY) / this._gridCellSize), 0, this.board.size[1] - 1);
 
         // Debug - Shows only redrawn regions
-        // this.renderer.boardCanvas.context.clearRect(0, 0, this.renderer.boardCanvas.canvas.width, this.renderer.boardCanvas.canvas.height);
-        // this.renderer.boardCanvas.context.fillStyle = '#ff0000';
-        // this.renderer.boardCanvas.context.fillRect(x, y, w, h);
+        // this.renderer.mainCanvas.contexts.board.clearRect(0, 0, this.renderer.mainCanvas.width, this.renderer.mainCanvas.height);
+        // this.renderer.mainCanvas.contexts.board.fillStyle = '#ff0000';
+        // this.renderer.mainCanvas.contexts.board.fillRect(x, y, w, h);
+
+        const gridSep = this._gridCellSize * this.gridBorderRatio;
 
         // Redraw border for tiles
-        let borderX = this.gridOffsetX + gridXStart * this._gridCellSize - this.gridSep;
-        let borderY = this.gridOffsetY + gridYStart * this._gridCellSize - this.gridSep;
-        let borderW = (gridXEnd - gridXStart + 1) * this._gridCellSize + this.gridSep;
-        let borderH = (gridYEnd - gridYStart + 1) * this._gridCellSize + this.gridSep;
-        this.renderer.boardCanvas.context.fillStyle = '#16246b';
-        this.renderer.boardCanvas.context.fillRect(borderX, borderY, borderW, borderH);
+        let borderX = this.gridOffsetX + gridXStart * this._gridCellSize - gridSep;
+        let borderY = this.gridOffsetY + gridYStart * this._gridCellSize - gridSep;
+        let borderW = (gridXEnd - gridXStart + 1) * this._gridCellSize + gridSep;
+        let borderH = (gridYEnd - gridYStart + 1) * this._gridCellSize + gridSep;
+        this.renderer.mainCanvas.contexts.board.fillStyle = '#16246b';
+        this.renderer.mainCanvas.contexts.board.fillRect(borderX, borderY, borderW, borderH);
 
         // Draw tiles to screen
         for (let y = gridYStart; y <= gridYEnd; y++) {
@@ -203,23 +225,23 @@ export class BoardRenderer {
             for (let x = gridXStart; x <= gridXEnd; x++) {
                 const tile = row[x];
 
-                this.renderer.boardCanvas.context.fillStyle = tile[0].color;
+                this.renderer.mainCanvas.contexts.board.fillStyle = tile[0].color;
 
                 // Draw cell to tile canvas
-                this.renderer.boardCanvas.context.fillRect(
+                this.renderer.mainCanvas.contexts.board.fillRect(
                     this.gridOffsetX + x * this._gridCellSize,
                     this.gridOffsetY + y * this._gridCellSize,
-                    this._gridCellSize - this.gridSep,
-                    this._gridCellSize - this.gridSep
+                    this._gridCellSize - gridSep,
+                    this._gridCellSize - gridSep
                 );
 
                 // Clear view in highlighted region
                 if (this._highlightedRegion !== undefined && tile[1].map(r => r.id).includes(this._highlightedRegion)) {
-                    this.renderer.highlightCanvas.context.clearRect(
+                    this.renderer.mainCanvas.contexts.highlight.clearRect(
                         this.gridOffsetX + x * this._gridCellSize,
                         this.gridOffsetY + y * this._gridCellSize,
-                        this._gridCellSize - this.gridSep,
-                        this._gridCellSize - this.gridSep
+                        this._gridCellSize - gridSep,
+                        this._gridCellSize - gridSep
                     );
                 }
             }
@@ -230,7 +252,7 @@ export class BoardRenderer {
      * Redraws the entire board
      */
     public redrawAll(): void {
-        this.redrawRegion(0, 0, this.renderer.boardCanvas.canvas.width, this.renderer.boardCanvas.canvas.height);
+        this.redrawRegion(0, 0, this.renderer.mainCanvas.width, this.renderer.mainCanvas.height);
     }
 
     /**
@@ -244,5 +266,8 @@ export class BoardRenderer {
     public set highlightedRegion(region: string | undefined) {
         this._highlightedRegion = region;
         this.redrawAll();
+
+        if (this._highlightedRegion === undefined)
+            this.renderer.mainCanvas.contexts.highlight.clearRect(0, 0, this.renderer.mainCanvas.width, this.renderer.mainCanvas.height);
     }
 }

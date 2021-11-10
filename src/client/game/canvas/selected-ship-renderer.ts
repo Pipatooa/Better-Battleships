@@ -61,12 +61,12 @@ export class SelectedShipRenderer {
         
         // Create a single cell pattern renderer for the currently highlighted grid cell
         const singleCellPattern = new Pattern([new PatternEntry(0, 0, 1)], [0, 0]);
-        this.highlightedCellRenderer = new PatternRenderer(this.renderer, this.renderer.selectedShipCanvas, singleCellPattern, '#dddddd', '#dddddd');
+        this.highlightedCellRenderer = new PatternRenderer(this.renderer, this.renderer.mainCanvas, this.renderer.mainCanvas.contexts.selected, singleCellPattern, '#dddddd', '#dddddd');
 
         // Register event listeners
-        this.renderer.topCanvas.canvas.addEventListener('pointermove', (ev) => this.onPointerMove(ev));
-        this.renderer.topCanvas.canvas.addEventListener('pointerleave', () => this.onPointerLeave());
-        this.renderer.topCanvas.canvas.addEventListener('pointerdown', () => this.onPointerDown());
+        this.renderer.mainCanvas.wrapperHTMLElement.addEventListener('pointermove', (ev) => this.onPointerMove(ev));
+        this.renderer.mainCanvas.wrapperHTMLElement.addEventListener('pointerleave', () => this.onPointerLeave());
+        this.renderer.mainCanvas.wrapperHTMLElement.addEventListener('pointerdown', () => this.onPointerDown());
     }
 
     /**
@@ -85,7 +85,7 @@ export class SelectedShipRenderer {
             return;
 
         // Convert mouse coordinates to board coordinates
-        const [pixelX, pixelY] = this.renderer.selectedShipCanvas.translateMouseCoordinatePixel(ev.x, ev.y);
+        const [pixelX, pixelY] = this.renderer.mainCanvas.translateMouseCoordinatePixel(ev.x, ev.y);
         const [boardX, boardY] = this.renderer.boardRenderer.translatePixelCoordinateBoard(pixelX, pixelY);
 
         if (boardX === this.highlightedX && boardY === this.highlightedY)
@@ -182,7 +182,7 @@ export class SelectedShipRenderer {
         if (this.placementMode) {
             this.selectedShip.doRender = false;
             this.selectedShip.patternRenderer!.deRender();
-            this.selectedShipRenderer = new PatternRenderer(this.renderer, this.renderer.selectedShipCanvas, ship.pattern, ship.player.color!, ship.player.team!.color);
+            this.selectedShipRenderer = new PatternRenderer(this.renderer, this.renderer.mainCanvas, this.renderer.mainCanvas.contexts.selected, ship.pattern, ship.player.color!, ship.player.team!.color);
             this.render();
         } else {
             this.selectedShip.patternRenderer!.fillColor = ship.player.highlightColor!;
@@ -251,7 +251,7 @@ export class SelectedShipRenderer {
     public redrawAll(): void {
 
         // Clear canvas
-        this.renderer.selectedShipCanvas.context.clearRect(0, 0, this.renderer.selectedShipCanvas.canvas.width, this.renderer.selectedShipCanvas.canvas.height);
+        this.renderer.mainCanvas.contexts.selected.clearRect(0, 0, this.renderer.mainCanvas.width, this.renderer.mainCanvas.height);
 
         // Call regular renderer
         this.render();

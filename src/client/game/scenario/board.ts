@@ -60,8 +60,6 @@ export class Board {
             }
         }
 
-        console.log(tiles);
-
         return new Board(tiles);
     }
 

@@ -30,7 +30,7 @@ export class ShipSelectionRenderer {
         for (const ship of this.ships) {
 
             // Create renderers to render ship to selection window and main game screen
-            const selectionPatternRenderer = new PatternRenderer(this.renderer, this.renderer.shipSelectionCanvas, ship.pattern,
+            const selectionPatternRenderer = new PatternRenderer(this.renderer, this.renderer.selectionCanvas, this.renderer.selectionCanvas.contexts.ship, ship.pattern,
                 selfPlayer.color!, selfPlayer.team!.color);
 
             // Store renderers to list of renderers
@@ -44,7 +44,7 @@ export class ShipSelectionRenderer {
         // Register button handlers
         $('#button-previous-ship').on('click', () => this.previousShip());
         $('#button-next-ship').on('click', () => this.nextShip());
-        this.renderer.shipSelectionCanvas.canvas.addEventListener('click', () => this.selectCurrent());
+        this.renderer.selectionCanvas.wrapperHTMLElement.addEventListener('click', () => this.selectCurrent());
 
         this.redrawAll();
     }
@@ -57,7 +57,7 @@ export class ShipSelectionRenderer {
     private onPointerMove(ev: PointerEvent): void {
 
         // Convert mouse coordinates to board coordinates
-        const [pixelX, pixelY] = this.renderer.shipCanvas.translateMouseCoordinatePixel(ev.x, ev.y);
+        const [pixelX, pixelY] = this.renderer.mainCanvas.translateMouseCoordinatePixel(ev.x, ev.y);
         const [boardX, boardY] = this.renderer.boardRenderer.translatePixelCoordinateBoard(pixelX, pixelY);
 
         this.ships[this.selectedIndex].x = boardX;
@@ -70,10 +70,9 @@ export class ShipSelectionRenderer {
      * Renders ships to the ship selection screen
      */
     public redrawAll(): void {
-        let canvasInfo = this.renderer.shipSelectionCanvas;
 
         // Clear the canvas
-        canvasInfo.context.clearRect(0, 0, canvasInfo.canvas.width, canvasInfo.canvas.height);
+        this.renderer.selectionCanvas.contexts.ship.clearRect(0, 0, this.renderer.selectionCanvas.width, this.renderer.selectionCanvas.height);
 
         // Check if ship is still available to draw
         if (this.ships.length === 0)
@@ -81,9 +80,9 @@ export class ShipSelectionRenderer {
 
         // Calculate where ship should appear within window
         const ratio = 0.75;
-        const cellWidth = canvasInfo.canvas.width / this.largestShipSize * ratio;
-        const drawX = canvasInfo.canvas.width * (1 - ratio) * 0.5;
-        const drawY = canvasInfo.canvas.height * (1 - ratio) * 0.5;
+        const cellWidth = this.renderer.selectionCanvas.width / this.largestShipSize * ratio;
+        const drawX = this.renderer.selectionCanvas.width * (1 - ratio) * 0.5;
+        const drawY = this.renderer.selectionCanvas.height * (1 - ratio) * 0.5;
 
         // Render ship to the selection canvas
         const patternRendererInfo = this.patternRenderers[this.selectedIndex];

@@ -1,5 +1,5 @@
 import type { Pattern } from '../scenario/pattern';
-import type { CanvasInfo } from './canvas-info';
+import type { CanvasCollection } from './canvas-collection';
 import type { GameRenderer } from './game-renderer';
 
 /**
@@ -22,20 +22,22 @@ export class PatternRenderer {
     /**
      * PatternRenderer constructor
      *
-     * @param  renderer    Base renderer for canvas functions
-     * @param  canvas      Canvas to render patterns to
-     * @param  pattern     Pattern to render
-     * @param  fillColor   Color to draw pattern with
-     * @param  borderColor Color to draw pattern border with
+     * @param  renderer      Base renderer for canvas functions
+     * @param  canvasWrapper Canvas wrapper for canvas to render to
+     * @param  canvasContext 2D rendering context to use to render pattern
+     * @param  pattern       Pattern to render
+     * @param  fillColor     Color to draw pattern with
+     * @param  borderColor   Color to draw pattern border with
      */
     public constructor(protected readonly renderer: GameRenderer,
-                       protected readonly canvas: CanvasInfo,
+                       protected readonly canvasWrapper: CanvasCollection<any>,
+                       protected readonly canvasContext: CanvasRenderingContext2D,
                        protected readonly pattern: Pattern,
                        public fillColor: string,
                        public borderColor: string) {
 
         // Add a listener to update the last known drawn coordinates when the parent canvas is moved
-        this.onMoveListenerID = this.canvas.registerOnMoveListener((dx, dy) => {
+        this.onMoveListenerID = this.canvasWrapper.registerOnMoveListener((dx, dy) => {
             this.lastDrawX += dx;
             this.lastDrawY += dy;
         });
@@ -106,9 +108,9 @@ export class PatternRenderer {
             this.deRender();
 
         // Set pattern fill style
-        const oldAlpha = this.canvas.context.globalAlpha;
-        this.canvas.context.globalAlpha = alpha;
-        this.canvas.context.fillStyle = this.fillColor;
+        const oldAlpha = this.canvasContext.globalAlpha;
+        this.canvasContext.globalAlpha = alpha;
+        this.canvasContext.fillStyle = this.fillColor;
 
         // Iterate through cells in pattern for main rendering
         for (const patternEntry of this.pattern.patternEntries) {
@@ -118,13 +120,14 @@ export class PatternRenderer {
             const drawY: number = y + patternEntry.y * cellWidth;
 
             // Draw basic pattern cell to screen
-            this.canvas.context.fillRect(drawX, drawY, cellWidth - 2, cellWidth - 2);
+            const gridSep = cellWidth * this.renderer.boardRenderer.gridBorderRatio;
+            this.canvasContext.fillRect(drawX, drawY, cellWidth - gridSep, cellWidth - gridSep);
         }
 
         // TODO: Border rendering
         
         // Reset alpha
-        this.canvas.context.globalAlpha = oldAlpha;
+        this.canvasContext.globalAlpha = oldAlpha;
 
         // Record draw parameters for later de-rendering of pattern
         this.lastDrawX = x;
@@ -151,7 +154,7 @@ export class PatternRenderer {
             const drawY: number = this.lastDrawY + patternEntry.y * this.lastCellWidth;
 
             // Remove cell from canvas
-            this.canvas.context.clearRect(drawX - 1, drawY - 1, this.lastCellWidth + 1, this.lastCellWidth + 1);
+            this.canvasContext.clearRect(drawX - 1, drawY - 1, this.lastCellWidth + 1, this.lastCellWidth + 1);
         }
 
         // Mark pattern as already de-rendered
@@ -170,7 +173,7 @@ export class PatternRenderer {
      * Removes canvas movement listener allowing object to be deconstructed properly
      */
     public deconstruct(): void {
-        this.canvas.removeOnMoveListener(this.onMoveListenerID);
+        this.canvasWrapper.removeOnMoveListener(this.onMoveListenerID);
     }
 }
 

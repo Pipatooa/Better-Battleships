@@ -94,7 +94,7 @@ export class Board {
                 if (!(tileChar in palette))
                     throw new UnpackingError(`Could not find tile of type '${tileChar}' defined at '${parsingContext.currentPathPrefix}tiles[${y}][${x}]' within the palette defined at '${parsingContext.currentPathPrefix}palette'`, parsingContext);
                 if (!(regionChar in regionPalette))
-                    throw new UnpackingError(`Could not find regions matching '${tileChar}' defined at '${parsingContext.currentPathPrefix}regions[${y}][${x}]' within the palette defined at '${parsingContext.currentPathPrefix}regionPalette'`, parsingContext);
+                    throw new UnpackingError(`Could not find regions matching '${regionChar}' defined at '${parsingContext.currentPathPrefix}regions[${y}][${x}]' within the palette defined at '${parsingContext.currentPathPrefix}regionPalette'`, parsingContext);
 
                 const tileType: TileType = palette[tileChar];
                 const tileRegions: Region[] = [];

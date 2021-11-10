@@ -32,13 +32,13 @@
         </div>
         <div class="row p-0 border border-dark rounded-3">
             <div class="col-8 p-0 border-end border-dark">
-                <div class="canvas-wrapper">
-                    <canvas id="board-canvas" width="450" height="300">
+                <div class="canvas-wrapper" id="main-canvas-wrapper">
+                    <canvas width="450" height="300">
                         Sorry, your browser does not support the canvas element.
                     </canvas>
-                    <canvas id="ship-canvas" width="450" height="300"></canvas>
-                    <canvas id="highlight-canvas" width="450" height="300"></canvas>
-                    <canvas id="selected-ship-canvas" width="450" height="300"></canvas>
+                    <canvas width="450" height="300"></canvas>
+                    <canvas width="450" height="300"></canvas>
+                    <canvas width="450" height="300"></canvas>
                 </div>
             </div>
             <div class="col-4 p-3 text-start">
@@ -48,8 +48,10 @@
                         Select a ship by clicking on it from this window and place it onto the board on the left half of this page. The direction the ship is facing is shown by an arrow pointing in that direction.
                         <br>If the ship can be rotated, press <kbd>R</kbd> to rotate it.
                     </p>
-                    <div class="canvas-wrapper">
-                        <canvas id="ship-selection-canvas" width="100" height="100"></canvas>
+                    <div class="canvas-wrapper" id="ship-selection-canvas-wrapper">
+                        <canvas width="100" height="100">
+                            Sorry, your browser does not support the canvas element.
+                        </canvas>
                     </div>
                     <div class="row w-100 mx-auto mt-2">
                         <div class="px-0" id="button-previous-container">

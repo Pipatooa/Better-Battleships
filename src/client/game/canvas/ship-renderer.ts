@@ -18,7 +18,7 @@ export class ShipRenderer {
 
         // Create pattern renderers for all ships
         for (const ship of allShips) {
-            ship.patternRenderer = new PatternRenderer(this.renderer, this.renderer.shipCanvas, ship.pattern, ship.player.color!, ship.player.team!.color);
+            ship.patternRenderer = new PatternRenderer(this.renderer, this.renderer.mainCanvas, this.renderer.mainCanvas.contexts.ship, ship.pattern, ship.player.color!, ship.player.team!.color);
         }
 
     }
@@ -34,7 +34,7 @@ export class ShipRenderer {
     public redrawRegion(x: number, y: number, w: number, h: number): void {
 
         // Clear region to be redrawn
-        this.renderer.shipCanvas.context.clearRect(x, y, w, h);
+        this.renderer.mainCanvas.contexts.ship.clearRect(x, y, w, h);
 
         // Translate redraw region bounds to board coordinates
         const [boardXMin, boardYMin] = this.renderer.boardRenderer.translatePixelCoordinateBoard(x, y);
@@ -66,6 +66,6 @@ export class ShipRenderer {
      * Redraws all ships
      */
     public redrawAll(): void {
-        this.redrawRegion(0, 0, this.renderer.shipCanvas.canvas.width, this.renderer.shipCanvas.canvas.height);
+        this.redrawRegion(0, 0, this.renderer.mainCanvas.width, this.renderer.mainCanvas.height);
     }
 }
