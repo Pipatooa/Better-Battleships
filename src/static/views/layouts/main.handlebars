@@ -1,57 +1,57 @@
 <!doctype html>
 <html>
-<head>
-    <link rel="apple-touch-icon" sizes="180x180" href="/favicons/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicons/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicons/favicon-16x16.png">
-    <link rel="manifest" href="/favicons/site.webmanifest">
-    <link rel="shortcut icon" href="/favicons/favicon.ico">
-    <meta name="msapplication-TileColor" content="#2b5797">
-    <meta name="msapplication-config" content="/favicons/browserconfig.xml">
+    <head>
+        <link rel="apple-touch-icon" sizes="180x180" href="/favicons/apple-touch-icon.png">
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicons/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicons/favicon-16x16.png">
+        <link rel="manifest" href="/favicons/site.webmanifest">
+        <link rel="shortcut icon" href="/favicons/favicon.ico">
+        <meta name="msapplication-TileColor" content="#2b5797">
+        <meta name="msapplication-config" content="/favicons/browserconfig.xml">
 
-    {{#if csrfToken}}
-        <meta name="csrf-token" content="{{csrfToken}}">
-    {{/if}}
+        {{#if csrfToken}}
+            <meta name="csrf-token" content="{{csrfToken}}">
+        {{/if}}
 
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <script src="https://unpkg.com/@popperjs/core@2"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script src="https://unpkg.com/@popperjs/core@2"></script>
 
-    <link rel="stylesheet" type="text/css" href="/bootstrap/css/bootstrap.min.css">
-    <script src="/bootstrap/js/bootstrap.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="/bootstrap/css/bootstrap.min.css">
+        <script src="/bootstrap/js/bootstrap.min.js"></script>
 
-    {{#each externalScripts as |script|}}
-        <script src="{{script}}"></script>
-    {{/each}}
+        {{#each externalScripts as |script|}}
+            <script src="{{script}}"></script>
+        {{/each}}
 
-    {{#each stylesheets as |stylesheet|}}
-        <link rel="stylesheet" type="text/css" href="{{stylesheet}}">
-    {{/each}}
+        {{#each stylesheets as |stylesheet|}}
+            <link rel="stylesheet" type="text/css" href="{{stylesheet}}">
+        {{/each}}
 
-    {{#each scripts as |script|}}
-        <script src="{{script}}" type="module"></script>
-    {{/each}}
+        {{#each scripts as |script|}}
+            <script src="{{script}}" type="module"></script>
+        {{/each}}
 
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#222">
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="theme-color" content="#222">
 
-    <meta name="language" content="English">
-    <meta property="og:site_name" content="{{siteName}}">
-    <meta property="og:image" content="https://drive.google.com/uc?id=1pj0IZwF1nOc9uNizFBdVW7k9__7vXWqt">
-    <meta property="og:url" content="{{baseUrl}}{{{url}}}">
-    <meta name="twitter:card" content="summary_large_image">
+        <meta name="language" content="English">
+        <meta property="og:site_name" content="{{siteName}}">
+        <meta property="og:image" content="https://drive.google.com/uc?id=1pj0IZwF1nOc9uNizFBdVW7k9__7vXWqt">
+        <meta property="og:url" content="{{baseUrl}}{{{url}}}">
+        <meta name="twitter:card" content="summary_large_image">
 
-    <title>Better Battleships - {{pageTitle}}</title>
+        <title>Better Battleships - {{pageTitle}}</title>
 
-    <meta property="og:title" content="Better Battleships - {{pageTitle}}">
-    <meta property="og:description" content="{{pageDescription}}">
-</head>
-<body>
-<header>
-    {{> navigation}}
-</header>
-<main>
-    {{{body}}}
-</main>
-</body>
+        <meta property="og:title" content="Better Battleships - {{pageTitle}}">
+        <meta property="og:description" content="{{pageDescription}}">
+    </head>
+    <body class="d-flex flex-column">
+        <header class="flex-grow-0">
+            {{> navigation}}
+        </header>
+        <main class="flex-grow-1">
+            {{{body}}}
+        </main>
+    </body>
 </html>

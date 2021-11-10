@@ -8,6 +8,10 @@
     --navigation-divider-color: #bbb;
 }
 
+html, body {
+    height: 100%;
+}
+
 .main-container {
     background: var(--main-container-background);
 }
