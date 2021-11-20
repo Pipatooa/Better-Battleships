@@ -4,16 +4,17 @@
     "description": "This is a battleship"
   },
   "pattern": {
-    "size": [1, 5],
+    "size": [3, 5],
     "values": {
+      ".": 0,
       "#": 1
     },
     "pattern": [
-      "#",
-      "#",
-      "#",
-      "#",
-      "#"
+      ".#.",
+      ".##",
+      "##.",
+      ".#.",
+      ".#."
     ]
   },
   "abilities": [

@@ -18,6 +18,8 @@ export class Player {
     public color: string | undefined;
     public highlightColor: string | undefined;
 
+    public colorPaletteIndex: number | undefined;
+
     /**
      * Player constructor
      *
@@ -46,9 +48,7 @@ export class Player {
     }
 
     /**
-     * Removes this player from dictionary of all players
-     *
-     * Removes this player from parent team
+     * Allows this object to be discarded
      */
     public deconstruct(): void {
         this.team?.removePlayer(this);

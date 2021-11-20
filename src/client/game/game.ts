@@ -1,5 +1,6 @@
+import type { GameRenderer } from './canvas/game-renderer';
+import type { ShipSelectionRenderer } from './canvas/ship-selection-renderer';
 import type { Board } from './scenario/board';
-import type { Ship } from './scenario/ship';
 import type { Team } from './team';
 
 export let game: Game;
@@ -12,8 +13,9 @@ export let game: Game;
 export class Game {
 
     public board: Board | undefined;
-    public availableShips: Ship[] | undefined;
-    public startRegionID: string | undefined;
+
+    public gameRenderer: GameRenderer | undefined;
+    public shipSelectionRenderer: ShipSelectionRenderer | undefined;
 
     /**
      * Game constructor
@@ -21,6 +23,7 @@ export class Game {
      * @param  _teams Teams in the game
      */
     public constructor(protected readonly _teams: { [id: string]: Team }) {
+        game = this;
     }
 
     /**
@@ -30,13 +33,4 @@ export class Game {
     public get teams(): { [id: string]: Team } {
         return this._teams;
     }
-}
-
-/**
- * Creates singleton Game
- *
- * @param  teams Teams to pass to Game constructor
- */
-export function initGame(teams: { [id: string]: Team }): void {
-    game = new Game(teams);
 }

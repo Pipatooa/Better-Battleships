@@ -8,6 +8,9 @@ import { Descriptor } from './descriptor';
  * Stores a descriptor and a color for a tile
  */
 export class TileType {
+
+    public colorPaletteIndex: number | undefined;
+
     public constructor(public readonly descriptor: Descriptor,
                        public readonly color: string,
                        public readonly traversable: boolean) {

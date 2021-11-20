@@ -5,6 +5,5 @@
  */
 export class Region {
     public constructor(public readonly id: string) {
-
     }
 }

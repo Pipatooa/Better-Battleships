@@ -1,5 +1,7 @@
 import type { ISetupInfoEvent } from '../../../../shared/network/events/i-setup-info';
-import { gameRenderer, initGameRenderer } from '../../canvas/game-renderer';
+import { ColorAtlas } from '../../canvas/color-atlas';
+import { GameRenderer } from '../../canvas/game-renderer';
+import { ShipSelectionRenderer } from '../../canvas/ship-selection-renderer';
 import { game } from '../../game';
 import { allPlayers, selfPlayer } from '../../player';
 import type { Ability } from '../../scenario/abilities/ability';
@@ -9,6 +11,8 @@ import { AbilityRotate } from '../../scenario/abilities/ability-rotate';
 import { Board } from '../../scenario/board';
 import { Pattern } from '../../scenario/pattern';
 import { Ship } from '../../scenario/ship';
+import { ShipPlacer } from '../../ui/ship-placer';
+import { TooltipManager } from '../../ui/tooltip-manager';
 
 /**
  * Handles a setup info event from the server
@@ -23,7 +27,6 @@ export async function handleSetupInfo(setupInfoEvent: ISetupInfoEvent): Promise<
 
     // Unpack board data
     game.board = await Board.fromSource(setupInfoEvent.boardInfo);
-    game.startRegionID = setupInfoEvent.playerInfo.spawnRegion;
 
     // Unpack player colors
     for (const [playerIdentity, color] of Object.entries(setupInfoEvent.playerColors)) {
@@ -32,7 +35,7 @@ export async function handleSetupInfo(setupInfoEvent: ISetupInfoEvent): Promise<
     }
 
     // Unpack player info
-    game.availableShips = [];
+    const ships: Ship[] = [];
     for (let shipIndex = 0; shipIndex < setupInfoEvent.playerInfo.ships.length; shipIndex++){
         const shipInfo = setupInfoEvent.playerInfo.ships[shipIndex];
         const pattern = Pattern.fromSource(shipInfo.pattern);
@@ -54,9 +57,17 @@ export async function handleSetupInfo(setupInfoEvent: ISetupInfoEvent): Promise<
             abilities.push(ability);
         }
 
-        const ship = new Ship(shipIndex, -Infinity, -Infinity, shipInfo.descriptor, pattern, selfPlayer, abilities);
-        game.availableShips.push(ship);
+        const ship = new Ship(shipIndex, undefined, undefined, shipInfo.descriptor, pattern, selfPlayer, abilities);
+        ships.push(ship);
     }
 
-    initGameRenderer();
+    const colorAtlas = new ColorAtlas();
+    colorAtlas.registerTeamColors();
+    colorAtlas.registerPlayerColors();
+    colorAtlas.registerTileColors(game.board.tileTypes);
+    new GameRenderer(colorAtlas, setupInfoEvent.playerInfo.spawnRegion);
+    new ShipSelectionRenderer(colorAtlas, ships);
+
+    new ShipPlacer();
+    new TooltipManager();
 }

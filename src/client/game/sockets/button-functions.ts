@@ -1,5 +1,4 @@
-import { gameRenderer } from '../canvas/game-renderer';
-import { allShips } from '../scenario/ship';
+import { game } from '../game';
 import { sendRequest } from './opener';
 
 /**
@@ -36,11 +35,11 @@ export function placementDone(): void {
 
     // Create a list of ship coordinates
     let shipPlacements: [number, number][] = [];
-    for (const ship of allShips)
-        shipPlacements.push([ship.x, ship.y]);
+    for (const ship of game.board!.ships)
+        shipPlacements.push([ship.x!, ship.y!]);
 
     // Prevent player from moving their ships once placement is done
-    gameRenderer.selectedShipRenderer.placementMode = false;
+    /*gameRenderer.selectedShipRenderer.placementMode = false;*/
 
     sendRequest({
         request: 'shipPlacement',

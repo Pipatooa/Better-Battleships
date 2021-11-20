@@ -25,7 +25,6 @@ export class Pattern {
                        protected readonly center: [number, number]) {
 
         this.patternEntryMap = {};
-
         for (const [x, y, value] of _patternEntries) {
             const key = `${x},${y}`;
             this.patternEntryMap[key] = value;
@@ -89,13 +88,7 @@ export class Pattern {
      */
     public query(x: number, y: number): number {
         const key = `${x},${y}`;
-
-        // If query position is not within the pattern
-        if (!(key in this.patternEntryMap))
-            return 0;
-
-        // Return value at position
-        return this.patternEntryMap[key];
+        return this.patternEntryMap[key] ?? 0;
     }
 
     /**

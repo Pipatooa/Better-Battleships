@@ -15,7 +15,7 @@ const { readdirSync } = require('fs');
 
 const commonConfig = {
     resolve: {
-        extensions: ['.js', '.json', '.ts', '.d.ts'],
+        extensions: ['.js', '.json', '.ts', '.d.ts', '.glsl', '.vert', '.frag'],
         plugins: [PnpWebpackPlugin]
     },
     resolveLoader: {
@@ -116,6 +116,10 @@ const webConfig = {
             {
                 test: /\.ts$/,
                 use: 'ts-loader'
+            },
+            {
+                test: /\.(glsl|vert|frag)$/,
+                use: 'ts-shader-loader'
             },
             {
                 test: /\.css$/,

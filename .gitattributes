@@ -1,6 +1,10 @@
 # Auto detect text files and perform LF normalization
 * text=auto
 
+# Specify filetype languages
+*.vert linguist-language=GLSL
+*.frag linguist-language=GLSL
+
 # Exclude from linguist statistics
 src/static/public/bootstrap/** linguist-vendored
 .yarn/releases/*

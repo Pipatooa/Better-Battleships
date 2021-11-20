@@ -78,27 +78,20 @@
 
 .canvas-wrapper {
     position: relative;
+    overflow-y: hidden;
 }
 
 .canvas-wrapper > canvas {
     display: block;
     width: 100%;
-}
-
-.canvas-wrapper > canvas:not(:first-child) {
-    position: absolute;
-    top: 0;
-    left: 0;
-}
-
-.canvas-wrapper > canvas:first-child {
+    height: 100%;
     background: var(--canvas-background-color);
 }
 
-#button-previous-container, #button-next-container {
+#previous-ship-button-container, #next-ship-button-container {
     width: 49%;
 }
 
-#button-next-container {
+#next-ship-button-container {
     margin-left: auto;
 }

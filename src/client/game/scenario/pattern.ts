@@ -7,6 +7,8 @@ import type { IPatternInfo } from '../../../shared/network/scenario/i-pattern-in
  */
 export class Pattern {
 
+    protected readonly patternEntryMap: { [key: string]: number };
+
     /**
      * Pattern constructor
      *
@@ -14,7 +16,13 @@ export class Pattern {
      * @param  center          Center of the pattern about which rotations happen
      */
     public constructor(protected readonly _patternEntries: PatternEntry[],
-                       protected readonly center: [number, number]) {
+                       public readonly center: [number, number]) {
+
+        this.patternEntryMap = {};
+        for (const [x, y, value] of _patternEntries) {
+            const key = `${x},${y}`;
+            this.patternEntryMap[key] = value ?? 1;
+        }
     }
 
     /**
@@ -24,15 +32,7 @@ export class Pattern {
      * @returns              Created Pattern object
      */
     public static fromSource(patternInfo: IPatternInfo): Pattern {
-
-        // Unpack pattern entries
-        let patternEntries: PatternEntry[] = [];
-        for (const [x, y, v] of patternInfo.tiles) {
-            patternEntries.push(new PatternEntry(x, y, v));
-        }
-
-        // Return new created Pattern object
-        return new Pattern(patternEntries, patternInfo.center);
+        return new Pattern(patternInfo.tiles as PatternEntry[], patternInfo.center);
     }
 
     /**
@@ -45,12 +45,48 @@ export class Pattern {
         let yMax = 0;
 
         // Iterate through pattern entries and update bounds
-        for (const pattenEntry of this.patternEntries) {
-            xMax = Math.max(xMax, pattenEntry.x);
-            yMax = Math.max(yMax, pattenEntry.y);
+        for (const [x, y] of this.patternEntries) {
+            xMax = Math.max(xMax, x);
+            yMax = Math.max(yMax, y);
         }
         
         return [xMax, yMax];
+    }
+
+    /**
+     * Queries the pattern to get a value at a location
+     *
+     * Queries outside the pattern will return 0 as a default value
+     *
+     * @param    x X coordinate of query position
+     * @param    y Y coordinate of query position
+     * @returns    Value at position
+     */
+    public query(x: number, y: number): number {
+        const key = `${x},${y}`;
+        return this.patternEntryMap[key] ?? 0;
+    }
+
+    /**
+     * Generates a number composing border flags describing which neighbours of the pattern are present.
+     *
+     * Neighbour results are inverted. Border flag present if neighbour is not present.
+     *
+     * @param    x X coordinate of query position
+     * @param    y Y coordinate of query position
+     * @returns    Number composing border flags
+     */
+    public getBorderFlags(x: number, y: number): number {
+        let flags = 0;
+        if (!this.query(x - 1, y - 1)) flags |= BorderFlag.NXNY;
+        if (!this.query(x, y - 1)) flags |= BorderFlag.NY;
+        if (!this.query(x + 1, y - 1)) flags |= BorderFlag.PXNY;
+        if (!this.query(x - 1, y)) flags |= BorderFlag.NX;
+        if (!this.query(x + 1, y)) flags |= BorderFlag.PX;
+        if (!this.query(x - 1, y + 1)) flags |= BorderFlag.NXPY;
+        if (!this.query(x, y + 1)) flags |= BorderFlag.PY;
+        if (!this.query(x + 1, y + 1)) flags |= BorderFlag.PXPY;
+        return flags;
     }
 
     /**
@@ -62,14 +98,15 @@ export class Pattern {
     }
 }
 
-/**
- * PatternEntry - Client Version
- *
- * Single pattern entry with coordinate and value
- */
-export class PatternEntry {
-    public constructor(public readonly x: number,
-                       public readonly y: number,
-                       public readonly value?: number) {
-    }
+export type PatternEntry = [number, number, number | undefined];
+
+enum BorderFlag {
+    NXNY = 1,
+    NY = 2,
+    PXNY = 4,
+    NX = 8,
+    PX = 16,
+    NXPY = 32,
+    PY = 64,
+    PXPY = 128
 }

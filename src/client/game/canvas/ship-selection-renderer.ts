@@ -1,153 +1,183 @@
-import { selfPlayer } from '../player';
+import { BoardInfoGenerator } from './board-info-generator';
+import type { ColorAtlas } from './color-atlas';
+import { BoardProgram } from './model-programs/board-program';
+import { Renderer } from './renderer';
+import { SelectionInfoGenerator } from './selection-info-generator';
+import { ViewportHandler } from './viewport-handler';
+import { Board } from '../scenario/board';
+import type { Tile } from '../scenario/board';
+import { game } from '../game';
 import type { Ship } from '../scenario/ship';
-import type { GameRenderer } from './game-renderer';
-import { PatternRenderer } from './pattern-renderer';
 
-export let shipSelectionRenderer: ShipSelectionRenderer;
+export class ShipSelectionRenderer extends Renderer {
 
-/**
- * ShipSelectionRenderer - Client Version
- *
- * Responsible for rendering ships to the ship selection canvas
- */
-export class ShipSelectionRenderer {
+    public readonly viewportHandler: ViewportHandler;
+    private readonly boardInfoGenerator: BoardInfoGenerator;
+    public readonly selectionInfoGenerator: SelectionInfoGenerator;
 
-    private selectedIndex = 0;
-    private readonly patternRenderers: [boolean, PatternRenderer][] = [];
+    private readonly ships: Ship[];
+    private selectedIndex: number;
+    private slotOpen: boolean;
 
-    private readonly largestShipSize: number = 0;
+    public readonly selectionBoard: Board;
 
-    /**
-     * ShipSelectionRenderer constructor
-     *
-     * @param  renderer Base renderer for canvas functions
-     * @param  ships    List of ships which are displayed within the ship selection window
-     */
-    public constructor(public readonly renderer: GameRenderer,
-                       public readonly ships: Ship[]) {
+    public constructor(colorAtlas: ColorAtlas,
+                       ships: Ship[]) {
+        const canvas = $('#ship-selection-canvas').get(0) as HTMLCanvasElement;
+        const gl = Renderer.getContext(canvas);
+        super(gl, [new BoardProgram(gl)]);
 
-        // Create pattern renderers for each of the ships
-        for (const ship of this.ships) {
+        game.shipSelectionRenderer = this;
 
-            // Create renderers to render ship to selection window and main game screen
-            const selectionPatternRenderer = new PatternRenderer(this.renderer, this.renderer.selectionCanvas, this.renderer.selectionCanvas.contexts.ship, ship.pattern,
-                selfPlayer.color!, selfPlayer.team!.color);
+        this.ships = ships;
+        this.selectedIndex = 0;
+        this.slotOpen = false;
+        this.selectionBoard = this.generateSelectionBoard();
+        
+        this.viewportHandler = new ViewportHandler(canvas, this.gl, this.modelPrograms[0], false, 1, [-0.5, -0.5], [2, 2]);
+        this.viewportHandler.resizeCallback = () => this.render();
+        this.boardInfoGenerator = new BoardInfoGenerator(this.gl, this.modelPrograms[0], this.selectionBoard, false);
+        this.boardInfoGenerator.push();
+        this.selectionInfoGenerator = new SelectionInfoGenerator(this.gl, this.modelPrograms[0]);
+        this.selectionInfoGenerator.push();
 
-            // Store renderers to list of renderers
-            this.patternRenderers.push([false, selectionPatternRenderer]);
-
-            // Update largest ship size
-            let [xMax, yMax] = ship.pattern.getBounds();
-            this.largestShipSize = Math.max(this.largestShipSize, xMax + 1, yMax + 1);
+        for (const ship of ships) {
+            this.selectionBoard.addShip(ship, true);
         }
 
-        // Register button handlers
-        $('#button-previous-ship').on('click', () => this.previousShip());
-        $('#button-next-ship').on('click', () => this.nextShip());
-        this.renderer.selectionCanvas.wrapperHTMLElement.addEventListener('click', () => this.selectCurrent());
+        colorAtlas.push(this.gl, this.modelPrograms);
+        this.showCurrentShip();
 
-        this.redrawAll();
+        $('#next-ship-button').get(0).addEventListener('click', () => this.cycleNextShip());
+        $('#previous-ship-button').get(0).addEventListener('click', () => this.cyclePreviousShip());
     }
 
     /**
-     * Called when the pointer is moved
+     * Generates a board to display available ships upon
      *
-     * @param  ev Pointer movement event
+     * @returns  Created board
      */
-    private onPointerMove(ev: PointerEvent): void {
+    private generateSelectionBoard(): Board {
+        
+        const tiles: Tile[][] = [];
+        
+        // Find maximum length of ship
+        let maxLength = 0;
+        for (const ship of this.ships) {
+            const [maxX, maxY] = ship.pattern.getBounds();
+            maxLength = Math.max(maxLength, maxX + 1, maxY + 1);
+        }
 
-        // Convert mouse coordinates to board coordinates
-        const [pixelX, pixelY] = this.renderer.mainCanvas.translateMouseCoordinatePixel(ev.x, ev.y);
-        const [boardX, boardY] = this.renderer.boardRenderer.translatePixelCoordinateBoard(pixelX, pixelY);
-
-        this.ships[this.selectedIndex].x = boardX;
-        this.ships[this.selectedIndex].y = boardY;
-
-        this.renderer.shipRenderer.redrawAll();
+        // Populate tile array
+        const tileType = game.board!.primaryTileType;
+        const boardSize = maxLength + 2;
+        for (let y = 0; y < boardSize; y++) {
+            tiles[y] = [];
+            for (let x = 0; x < boardSize; x++) {
+                tiles[y][x] = [tileType, [], undefined];
+            }
+        }
+        
+        return new Board(tiles, game.board!.tileTypes, tileType);
     }
 
     /**
-     * Renders ships to the ship selection screen
+     * Displays the next ship which can be placed
      */
-    public redrawAll(): void {
-
-        // Clear the canvas
-        this.renderer.selectionCanvas.contexts.ship.clearRect(0, 0, this.renderer.selectionCanvas.width, this.renderer.selectionCanvas.height);
-
-        // Check if ship is still available to draw
-        if (this.ships.length === 0)
+    private cycleNextShip(): void {
+        if (this.ships.length === 0 || this.slotOpen)
             return;
 
-        // Calculate where ship should appear within window
-        const ratio = 0.75;
-        const cellWidth = this.renderer.selectionCanvas.width / this.largestShipSize * ratio;
-        const drawX = this.renderer.selectionCanvas.width * (1 - ratio) * 0.5;
-        const drawY = this.renderer.selectionCanvas.height * (1 - ratio) * 0.5;
-
-        // Render ship to the selection canvas
-        const patternRendererInfo = this.patternRenderers[this.selectedIndex];
-        patternRendererInfo[1].render(drawX, drawY, cellWidth, 0);
-    }
-
-    /**
-     * Called when the previous ship button is hit
-     */
-    private previousShip(): void {
-
-        if (this.ships.length === 0)
-            return;
-
-        // De-render old ship
-        this.ships[this.selectedIndex].doRender = false;
-        this.ships[this.selectedIndex].patternRenderer!.deRender();
-
-        // Unusual mod function so that -1 % n returns n - 1 and not -1
-        this.selectedIndex = (this.selectedIndex + this.ships.length - 1) % this.ships.length;
-
-        // Render new ship
-        this.ships[this.selectedIndex].doRender = true;
-        this.redrawAll();
-    }
-
-    /**
-     * Called when the next ship button is hit
-     */
-    private nextShip(): void {
-
-        if (this.ships.length === 0)
-            return;
-
-        // De-render old ship
-        this.ships[this.selectedIndex].doRender = false;
-        this.ships[this.selectedIndex].patternRenderer!.deRender();
+        const oldCurrentShip = this.ships[this.selectedIndex];
+        oldCurrentShip.moveTo(undefined, undefined);
 
         this.selectedIndex++;
         this.selectedIndex %= this.ships.length;
-
-        // Render new ship
-        this.ships[this.selectedIndex].doRender = true;
-        this.redrawAll();
+        this.showCurrentShip();
     }
-    
+
     /**
-     * Called when the user clicks on the current ship
+     * Displays the previous ship which can be placed
      */
-    public selectCurrent(): void {
+    private cyclePreviousShip(): void {
+        if (this.ships.length === 0 || this.slotOpen)
+            return;
 
-        // Pop ship and pattern renderer at selected index
-        const ship = this.ships.splice(this.selectedIndex, 1)[0];
-        this.patternRenderers.splice(this.selectedIndex, 1);
+        const oldCurrentShip = this.ships[this.selectedIndex];
+        oldCurrentShip.moveTo(undefined, undefined);
 
-        // Set selected ship to popped ship
-        this.renderer.selectedShipRenderer.selectShip(ship);
+        this.selectedIndex = this.selectedIndex - 1 + this.ships.length;
+        this.selectedIndex %= this.ships.length;
+        this.showCurrentShip();
+    }
 
-        // If no ships are remaining, reveal done button
-        if (this.ships.length === 0) {
-            $('#button-previous-container, #button-next-container').addClass('d-none');
-            $('#button-placement-done').removeClass('d-none');
+    /**
+     * Displays the currently selected ship in the center of the board
+     */
+    private showCurrentShip(): void {
+        if (this.ships.length === 0 || this.slotOpen)
+            return;
+        
+        const ship = this.ships[this.selectedIndex];
+        const [maxX, maxY] = ship.pattern.getBounds();
+
+        // Center ship
+        const x = Math.floor((this.selectionBoard.size[0] - maxX - 1) / 2);
+        const y = Math.floor((this.selectionBoard.size[1] - maxY - 1) / 2);
+        ship.moveTo(x, y);
+        this.render();
+    }
+
+    /**
+     * Picks up the currently displayed ship
+     *
+     * @returns  Ship which was picked up
+     */
+    public pickup(): Ship | undefined {
+        if (this.ships.length === 0)
+            return undefined;
+
+        const ship = this.ships[this.selectedIndex];
+        this.selectionBoard.removeShip(ship, true);
+        this.ships.splice(this.selectedIndex, 1);
+        this.slotOpen = true;
+        return ship;
+    }
+
+    /**
+     * Opens a free slot to accept a held ship
+     */
+    public openSlot(): void {
+        this.slotOpen = true;
+        const ship = this.ships[this.selectedIndex];
+        ship?.moveTo(undefined, undefined);
+    }
+
+    /**
+     * Closes the open slot
+     *
+     * @param  ship Optional ship to place into free slot
+     */
+    public closeSlot(ship: Ship | undefined): void {
+        if (ship !== undefined) {
+            this.ships.splice(this.selectedIndex, 0, ship);
+            this.selectionBoard.addShip(ship, true);
         }
 
-        // Rerender available ships
-        this.redrawAll();
+        if (this.ships.length > 0)
+            this.selectedIndex %= this.ships.length;
+
+        this.slotOpen = false;
+        this.showCurrentShip();
+    }
+
+    /**
+     * Re-renders the ship selection canvas
+     */
+    public render(): void {
+        this.boardInfoGenerator.push();
+        this.gl.clearColor(0, 0, 0, 1.0);
+        this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
+        this.executePrograms();
     }
 }
