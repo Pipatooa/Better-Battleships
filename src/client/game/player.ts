@@ -1,6 +1,6 @@
-import { nameFromIdentity } from '../../shared/utility';
-import { selfIdentity } from './sockets/event-handlers/connection-info';
-import type { Team } from './team';
+import { nameFromIdentity } from 'shared/utility';
+import { selfIdentity }     from './sockets/event-handlers/connection-info';
+import type { Team }        from 'client/game/team';
 
 export let selfPlayer: Player;
 export let allPlayers: { [id: string]: Player } = {};
@@ -81,7 +81,7 @@ export class Player {
      * @param  team New team to assign this player to
      */
     public assignTeam(team: Team): void {
-        
+
         // Remove player from current team and add player to new team
         this.team?.removePlayer(this);
         team.addPlayer(this);

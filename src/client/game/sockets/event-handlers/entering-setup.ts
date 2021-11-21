@@ -1,5 +1,5 @@
-import type { IEnteringSetupEvent } from '../../../../shared/network/events/i-entering-setup';
-import { TimeoutManager } from '../../../../shared/timeout-manager';
+import { TimeoutManager }           from 'shared/timeout-manager';
+import type { IEnteringSetupEvent } from 'shared/network/events/i-entering-setup';
 
 let statusTextElement: JQuery;
 let gameStartTime: number;

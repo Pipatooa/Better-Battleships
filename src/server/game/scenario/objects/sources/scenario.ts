@@ -1,11 +1,11 @@
-import Joi from 'joi';
-import type { TurnOrdering } from '../../turn-manager';
-import { turnOrderings } from '../../turn-manager';
+import Joi                         from 'joi';
+import { turnOrderings }           from '../../turn-manager';
+import { attributeHolderSchema }   from '../attributes/sources/attribute-holder';
+import { descriptorSchema }        from '../common/sources/descriptor';
+import { genericNameSchema }       from '../common/sources/generic-name';
+import type { TurnOrdering }       from '../../turn-manager';
 import type { AttributeMapSource } from '../attributes/i-attribute-holder';
-import { attributeHolderSchema } from '../attributes/sources/attribute-holder';
-import type { IDescriptorSource } from '../common/sources/descriptor';
-import { descriptorSchema } from '../common/sources/descriptor';
-import { genericNameSchema } from '../common/sources/generic-name';
+import type { IDescriptorSource }  from '../common/sources/descriptor';
 
 /**
  * JSON source interface reflecting schema

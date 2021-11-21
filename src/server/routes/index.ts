@@ -1,6 +1,6 @@
-import express from 'express';
-import type { RequestWithAuth } from '../middleware';
+import express                      from 'express';
 import { preventCSRF, requireAuth } from '../middleware';
+import type { RequestWithAuth }     from '../middleware';
 
 const router = express.Router();
 export default router;
@@ -9,7 +9,7 @@ export default router;
  * GET Route handler for /
  */
 router.get('/', requireAuth, preventCSRF, async (req, res) => {
-    
+
     res.render('index', {
         csrfToken: req.csrfToken(),
         pageTitle: 'Home',

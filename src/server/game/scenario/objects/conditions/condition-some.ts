@@ -1,12 +1,12 @@
-import type { EvaluationContext } from '../../evaluation-context';
-import type { ParsingContext } from '../../parsing-context';
-import { checkAgainstSchema } from '../../schema-checker';
-import type { ValueConstraint } from '../constraints/value-constaint';
-import { buildValueConstraint } from '../constraints/value-constraint-builder';
-import type { Condition } from './condition';
-import { ConditionMultiple } from './condition-multiple';
+import { checkAgainstSchema }        from '../../schema-checker';
+import { buildValueConstraint }      from '../constraints/value-constraint-builder';
+import { ConditionMultiple }         from './condition-multiple';
+import { conditionSomeSchema }       from './sources/condition-some';
+import type { EvaluationContext }    from '../../evaluation-context';
+import type { ParsingContext }       from '../../parsing-context';
+import type { ValueConstraint }      from '../constraints/value-constaint';
+import type { Condition }            from './condition';
 import type { IConditionSomeSource } from './sources/condition-some';
-import { conditionSomeSchema } from './sources/condition-some';
 
 /**
  * ConditionSome - Server Version

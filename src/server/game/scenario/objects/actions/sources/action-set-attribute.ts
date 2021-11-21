@@ -1,13 +1,9 @@
-import type {
-    AttributeReferenceSource
-} from '../../attribute-references/sources/attribute-reference';
-import {
-    attributeReferenceSchema
-} from '../../attribute-references/sources/attribute-reference';
-import type { ValueSource } from '../../values/sources/value';
-import { valueSchema } from '../../values/sources/value';
-import type { IBaseActionSource } from './base-action';
-import { baseActionSchema } from './base-action';
+import { attributeReferenceSchema }      from '../../attribute-references/sources/attribute-reference';
+import { valueSchema }                   from '../../values/sources/value';
+import { baseActionSchema }              from './base-action';
+import type { AttributeReferenceSource } from '../../attribute-references/sources/attribute-reference';
+import type { ValueSource }              from '../../values/sources/value';
+import type { IBaseActionSource }        from './base-action';
 
 /**
  * JSON source interface reflecting schema

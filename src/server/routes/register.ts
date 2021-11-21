@@ -1,9 +1,9 @@
-import express from 'express';
-import formidable from 'formidable';
-import Joi from 'joi';
-import { hashPassword } from '../auth/password-hasher';
+import express           from 'express';
+import formidable        from 'formidable';
+import Joi               from 'joi';
+import { hashPassword }  from '../auth/password-hasher';
 import { queryDatabase } from '../db/query';
-import { preventCSRF } from '../middleware';
+import { preventCSRF }   from '../middleware';
 
 const router = express.Router();
 export default router;

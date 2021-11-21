@@ -1,5 +1,5 @@
+import { pool }              from './connection';
 import type { QueryOptions } from 'mysql';
-import { pool } from './connection';
 
 /**
  * Queries the database asynchronously

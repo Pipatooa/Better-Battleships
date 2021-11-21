@@ -1,4 +1,4 @@
-import type { IConnectionInfoEvent } from '../../../../shared/network/events/i-connection-info';
+import type { IConnectionInfoEvent } from 'shared/network/events/i-connection-info';
 
 export let selfIdentity: string;
 

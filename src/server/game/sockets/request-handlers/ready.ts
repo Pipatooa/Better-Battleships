@@ -1,8 +1,8 @@
-import Joi from 'joi';
-import { baseRequestSchema } from '../../../../shared/network/requests/i-client-request';
-import type { IReadyRequest } from '../../../../shared/network/requests/i-ready';
-import { GamePhase } from '../../game';
-import type { Client } from '../client';
+import Joi                    from 'joi';
+import { baseRequestSchema }  from 'shared/network/requests/i-client-request';
+import { GamePhase }          from '../../game';
+import type { Client }        from '../client';
+import type { IReadyRequest } from 'shared/network/requests/i-ready';
 
 /**
  * Handles a ready request from the client

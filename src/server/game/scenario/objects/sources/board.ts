@@ -1,9 +1,9 @@
-import Joi from 'joi';
-import { genericNameSchema } from '../common/sources/generic-name';
-import type { TileGenerator } from '../tile-generator';
+import Joi                     from 'joi';
+import { genericNameSchema }   from '../common/sources/generic-name';
 import { tileGeneratorSchema } from '../tile-generator';
-import type { TileType } from '../tiletype';
-import { tileTypeSchema } from './tile-type';
+import { tileTypeSchema }      from './tile-type';
+import type { TileGenerator }  from '../tile-generator';
+import type { TileType }       from '../tiletype';
 
 /**
  * JSON source interface reflecting schema

@@ -1,20 +1,20 @@
-import type { AbilityInfo } from '../../../../../shared/network/scenario/ability-info';
-import { getActions } from '../actions/action-getter';
-import { getAttributes } from '../attributes/attribute-getter';
-import type { AttributeMap } from '../attributes/i-attribute-holder';
-import { Descriptor } from '../common/descriptor';
-import { Pattern } from '../common/pattern';
-import type { Condition } from '../conditions/condition';
-import { buildCondition } from '../conditions/condition-builder';
-import type { EvaluationContext } from '../../evaluation-context';
-import type { ParsingContext } from '../../parsing-context';
-import { checkAgainstSchema } from '../../schema-checker';
-import type { Ship } from '../ship';
-import { PositionedAbility } from './ability';
+import { checkAgainstSchema }      from '../../schema-checker';
+import { getActions }              from '../actions/action-getter';
+import { getAttributes }           from '../attributes/attribute-getter';
+import { Descriptor }              from '../common/descriptor';
+import { Pattern }                 from '../common/pattern';
+import { buildCondition }          from '../conditions/condition-builder';
+import { PositionedAbility }       from './ability';
+import { fireAbilityEvents }       from './events/fire-ability-event';
+import { abilityFireSchema }       from './sources/ability-fire';
+import type { EvaluationContext }  from '../../evaluation-context';
+import type { ParsingContext }     from '../../parsing-context';
+import type { AttributeMap }       from '../attributes/i-attribute-holder';
+import type { Condition }          from '../conditions/condition';
+import type { Ship }               from '../ship';
 import type { FireAbilityActions } from './events/fire-ability-event';
-import { fireAbilityEvents } from './events/fire-ability-event';
 import type { IAbilityFireSource } from './sources/ability-fire';
-import { abilityFireSchema } from './sources/ability-fire';
+import type { AbilityInfo }        from 'shared/network/scenario/ability-info';
 
 /**
  * AbilityFire - Server Version

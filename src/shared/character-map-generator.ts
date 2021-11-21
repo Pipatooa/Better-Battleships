@@ -4,7 +4,7 @@
  * Generates a mapping of single character strings to different values / objects
  */
 export class CharacterMapGenerator<T> {
-    
+
     private readonly map: { [char: string]: T } = {};
 
     /**
@@ -13,7 +13,7 @@ export class CharacterMapGenerator<T> {
      * @param  compareFunction Function used to compare known existing items to new items
      */
     public constructor(private readonly compareFunction: (existingItem: T, newItem: T) => boolean = (e, n) => e == n) {
-        
+
     }
 
     /**
@@ -24,7 +24,7 @@ export class CharacterMapGenerator<T> {
     public exportMap(): { [char: string]: T } {
         return this.map;
     }
-    
+
     /**
      * Generates a new single character string which is not within the character map
      *

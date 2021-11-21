@@ -1,10 +1,10 @@
-import type { EvaluationContext } from '../../evaluation-context';
-import type { ParsingContext } from '../../parsing-context';
-import { checkAgainstSchema } from '../../schema-checker';
-import type { Condition } from './condition';
-import { ConditionMultiple } from './condition-multiple';
+import { checkAgainstSchema }       from '../../schema-checker';
+import { ConditionMultiple }        from './condition-multiple';
+import { conditionAllSchema }       from './sources/condition-all';
+import type { EvaluationContext }   from '../../evaluation-context';
+import type { ParsingContext }      from '../../parsing-context';
+import type { Condition }           from './condition';
 import type { IConditionAllSource } from './sources/condition-all';
-import { conditionAllSchema } from './sources/condition-all';
 
 /**
  * ConditionAll - Server Version

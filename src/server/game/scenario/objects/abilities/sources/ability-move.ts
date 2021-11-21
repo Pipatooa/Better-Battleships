@@ -1,7 +1,7 @@
-import type { IPatternSource } from '../../common/sources/pattern';
-import { patternSchema } from '../../common/sources/pattern';
+import { patternSchema }           from '../../common/sources/pattern';
+import { baseAbilitySchema }       from './base-ability';
+import type { IPatternSource }     from '../../common/sources/pattern';
 import type { IBaseAbilitySource } from './base-ability';
-import { baseAbilitySchema } from './base-ability';
 
 /**
  * JSON source interface reflecting schema

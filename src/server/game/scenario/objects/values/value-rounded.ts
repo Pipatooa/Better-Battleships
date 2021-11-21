@@ -1,10 +1,10 @@
-import type { EvaluationContext } from '../../evaluation-context';
-import type { ParsingContext } from '../../parsing-context';
-import { checkAgainstSchema } from '../../schema-checker';
+import { checkAgainstSchema }       from '../../schema-checker';
+import { valueRoundedSchema }       from './sources/value-rounded';
+import { Value }                    from './value';
+import { buildValue }               from './value-builder';
+import type { EvaluationContext }   from '../../evaluation-context';
+import type { ParsingContext }      from '../../parsing-context';
 import type { IValueRoundedSource } from './sources/value-rounded';
-import { valueRoundedSchema } from './sources/value-rounded';
-import { Value } from './value';
-import { buildValue } from './value-builder';
 
 /**
  * ValueRounded - Server Version

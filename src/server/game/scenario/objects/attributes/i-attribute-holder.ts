@@ -1,4 +1,4 @@
-import type { Attribute } from './attribute';
+import type { Attribute }        from './attribute';
 import type { IAttributeSource } from './sources/attribute';
 
 /**

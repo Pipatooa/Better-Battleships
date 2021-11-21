@@ -1,5 +1,5 @@
-import type { IEnterSetupFailureEvent } from '../../../../shared/network/events/i-enter-setup-failure';
-import { gameCountdownManager } from './entering-setup';
+import { gameCountdownManager }         from './entering-setup';
+import type { IEnterSetupFailureEvent } from 'shared/network/events/i-enter-setup-failure';
 
 /**
  * Handles a game start failure event from the server

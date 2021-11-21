@@ -1,7 +1,7 @@
-import Joi from 'joi';
+import Joi                         from 'joi';
+import { attributeHolderSchema }   from '../attributes/sources/attribute-holder';
+import { genericNameSchema }       from '../common/sources/generic-name';
 import type { AttributeMapSource } from '../attributes/i-attribute-holder';
-import { attributeHolderSchema } from '../attributes/sources/attribute-holder';
-import { genericNameSchema } from '../common/sources/generic-name';
 
 /**
  * JSON source interface reflecting schema

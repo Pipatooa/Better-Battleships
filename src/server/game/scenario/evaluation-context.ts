@@ -1,7 +1,7 @@
-import type { Player } from './objects/player';
+import type { Player }   from './objects/player';
 import type { Scenario } from './objects/scenario';
-import type { Ship } from './objects/ship';
-import type { Team } from './objects/team';
+import type { Ship }     from './objects/ship';
+import type { Team }     from './objects/team';
 
 /**
  * UsageContext - Server Version

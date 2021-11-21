@@ -1,8 +1,8 @@
-import Joi from 'joi';
-import { valueSchema } from '../../values/sources/value';
+import Joi                                    from 'joi';
+import { valueSchema }                        from '../../values/sources/value';
 import type { IValueAtLeastConstraintSource } from './value-at-least-constraint';
-import type { IValueAtMostConstraintSource } from './value-at-most-constraint';
-import type { IValueEqualConstraintSource } from './value-equal-constraint';
+import type { IValueAtMostConstraintSource }  from './value-at-most-constraint';
+import type { IValueEqualConstraintSource }   from './value-equal-constraint';
 import type { IValueInRangeConstraintSource } from './value-in-range-constraint';
 
 /**

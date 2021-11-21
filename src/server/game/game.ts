@@ -1,9 +1,9 @@
-import * as console from 'console';
-import type { IServerEvent } from '../../shared/network/events/i-server-event';
-import { TimeoutManager } from '../../shared/timeout-manager';
-import config from '../config';
-import type { Scenario } from './scenario/objects/scenario';
-import type { Client } from './sockets/client';
+import console               from 'console';
+import { TimeoutManager }    from 'shared/timeout-manager';
+import config                from '../config';
+import type { Scenario }     from './scenario/objects/scenario';
+import type { Client }       from './sockets/client';
+import type { IServerEvent } from 'shared/network/events/i-server-event';
 
 /**
  * Game - Server Version

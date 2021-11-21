@@ -1,6 +1,6 @@
-import type { ITeamAssignmentEvent } from '../../../../shared/network/events/i-team-assignment';
-import { game } from '../../game';
-import { allPlayers } from '../../player';
+import { game }                      from '../../game';
+import { allPlayers }                from '../../player';
+import type { ITeamAssignmentEvent } from 'shared/network/events/i-team-assignment';
 
 /**
  * Handles a team assignment event from the server

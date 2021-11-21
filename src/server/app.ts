@@ -1,20 +1,20 @@
-import cookieParser from 'cookie-parser';
-import express from 'express';
-import exphbs from 'express-handlebars';
-import http from 'http';
-import WebSocket from 'isomorphic-ws';
-import path from 'path';
-import * as process from 'process';
+import http                       from 'http';
+import path                       from 'path';
+import process                    from 'process';
+import cookieParser               from 'cookie-parser';
+import express                    from 'express';
+import exphbs                     from 'express-handlebars';
+import WebSocket                  from 'isomorphic-ws';
 import { executeDBStartupScript } from './db/startup';
 
 import socketRegister from './game/sockets/register';
 
-import indexRouter from './routes/index';
-import gameRouter from './routes/game';
-import gameCreateRouter from './routes/game/create';
+import gameRouter         from './routes/game';
+import gameCreateRouter   from './routes/game/create';
 import gameNotFoundRouter from './routes/game/notfound';
-import loginRouter from './routes/login';
-import registerRouter from './routes/register';
+import indexRouter        from './routes/index';
+import loginRouter        from './routes/login';
+import registerRouter     from './routes/register';
 
 const app = express();
 const port = 8080;

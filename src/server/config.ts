@@ -1,8 +1,8 @@
-import * as assert from 'assert';
-import fs from 'fs';
-import ms from 'ms';
-import * as path from 'path';
-import toml from 'toml';
+import assert from 'assert';
+import fs     from 'fs';
+import path   from 'path';
+import ms     from 'ms';
+import toml   from 'toml';
 
 /**
  * Container object containing values from config.tml file

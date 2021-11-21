@@ -1,13 +1,13 @@
-import Joi from 'joi';
-import { actionSchema } from '../../actions/sources/action';
-import { attributeHolderSchema } from '../../attributes/sources/attribute-holder';
-import { patternSchema } from '../../common/sources/pattern';
-import { conditionSchema } from '../../conditions/sources/condition';
-import { baseAbilityEvents } from '../events/base-ability-events';
-import { fireAbilityEvents } from '../events/fire-ability-event';
-import { baseAbilitySchema } from './base-ability';
-import type { IAbilityFireSource } from './ability-fire';
-import type { IAbilityMoveSource } from './ability-move';
+import Joi                           from 'joi';
+import { actionSchema }              from '../../actions/sources/action';
+import { attributeHolderSchema }     from '../../attributes/sources/attribute-holder';
+import { patternSchema }             from '../../common/sources/pattern';
+import { conditionSchema }           from '../../conditions/sources/condition';
+import { baseAbilityEvents }         from '../events/base-ability-events';
+import { fireAbilityEvents }         from '../events/fire-ability-event';
+import { baseAbilitySchema }         from './base-ability';
+import type { IAbilityFireSource }   from './ability-fire';
+import type { IAbilityMoveSource }   from './ability-move';
 import type { IAbilityRotateSource } from './ability-rotate';
 
 /**

@@ -1,5 +1,5 @@
+import { ValueConstraint }        from './value-constaint';
 import type { EvaluationContext } from '../../evaluation-context';
-import { ValueConstraint } from './value-constaint';
 
 /**
  * EmptyValueConstraint - Server Version

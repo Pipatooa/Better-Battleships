@@ -1,22 +1,22 @@
-import type { FileJSON } from 'formidable';
-import type { IScenarioInfo } from '../../../../shared/network/scenario/i-scenario-info';
-import type { ITeamInfo } from '../../../../shared/network/scenario/i-team-info';
-import type { ParsingContext } from '../parsing-context';
-import { checkAgainstSchema } from '../schema-checker';
-import { TurnManager } from '../turn-manager';
-import { getJSONFromEntry, UnpackingError } from '../unpacker';
-import { ForeignAttributeRegistry } from './attribute-references/foreign-attribute-registry';
+import { checkAgainstSchema }                   from '../schema-checker';
+import { TurnManager }                          from '../turn-manager';
+import { getJSONFromEntry, UnpackingError }     from '../unpacker';
+import { ForeignAttributeRegistry }             from './attribute-references/foreign-attribute-registry';
+import { getAttributes }                        from './attributes/attribute-getter';
+import { Board }                                from './board';
+import { Descriptor }                           from './common/descriptor';
+import { scenarioSchema }                       from './sources/scenario';
+import { Team }                                 from './team';
+import type { ParsingContext }                  from '../parsing-context';
 import type { IForeignAttributeRegistrySource } from './attribute-references/sources/foreign-attribute-registry';
-import { getAttributes } from './attributes/attribute-getter';
-import type { AttributeMap } from './attributes/i-attribute-holder';
-import type { IAttributeHolder } from './attributes/sources/attribute-holder';
-import { Board } from './board';
-import { Descriptor } from './common/descriptor';
-import type { IBoardSource } from './sources/board';
-import type { IScenarioSource } from './sources/scenario';
-import { scenarioSchema } from './sources/scenario';
-import type { ITeamSource } from './sources/team';
-import { Team } from './team';
+import type { AttributeMap }                    from './attributes/i-attribute-holder';
+import type { IAttributeHolder }                from './attributes/sources/attribute-holder';
+import type { IBoardSource }                    from './sources/board';
+import type { IScenarioSource }                 from './sources/scenario';
+import type { ITeamSource }                     from './sources/team';
+import type { FileJSON }                        from 'formidable';
+import type { IScenarioInfo }                   from 'shared/network/scenario/i-scenario-info';
+import type { ITeamInfo }                       from 'shared/network/scenario/i-team-info';
 
 /**
  * Scenario - Server Version

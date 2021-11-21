@@ -1,14 +1,14 @@
-import Joi from 'joi';
-import type { ActionSource } from '../../actions/sources/action';
-import { actionSchema } from '../../actions/sources/action';
+import Joi                         from 'joi';
+import { actionSchema }            from '../../actions/sources/action';
+import { attributeHolderSchema }   from '../../attributes/sources/attribute-holder';
+import { descriptorSchema }        from '../../common/sources/descriptor';
+import { conditionSchema }         from '../../conditions/sources/condition';
+import { baseAbilityEvents }       from '../events/base-ability-events';
+import type { ActionSource }       from '../../actions/sources/action';
 import type { AttributeMapSource } from '../../attributes/i-attribute-holder';
-import { attributeHolderSchema } from '../../attributes/sources/attribute-holder';
-import type { IDescriptorSource } from '../../common/sources/descriptor';
-import { descriptorSchema } from '../../common/sources/descriptor';
-import type { ConditionSource } from '../../conditions/sources/condition';
-import { conditionSchema } from '../../conditions/sources/condition';
-import type { AbilityEvent } from '../events/base-ability-events';
-import { baseAbilityEvents } from '../events/base-ability-events';
+import type { IDescriptorSource }  from '../../common/sources/descriptor';
+import type { ConditionSource }    from '../../conditions/sources/condition';
+import type { AbilityEvent }       from '../events/base-ability-events';
 
 /**
  * JSON source interface reflecting base ability schema

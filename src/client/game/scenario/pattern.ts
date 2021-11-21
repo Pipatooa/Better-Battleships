@@ -1,4 +1,4 @@
-import type { IPatternInfo } from '../../../shared/network/scenario/i-pattern-info';
+import type { IPatternInfo } from 'shared/network/scenario/i-pattern-info';
 
 /**
  * Pattern - Client Version

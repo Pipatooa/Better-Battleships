@@ -1,6 +1,6 @@
-import Joi from 'joi';
+import Joi                         from 'joi';
+import { baseAbilitySchema }       from './base-ability';
 import type { IBaseAbilitySource } from './base-ability';
-import { baseAbilitySchema } from './base-ability';
 
 /**
  * JSON source interface reflecting schema

@@ -1,7 +1,8 @@
-import Joi from 'joi';
-import { genericNameRegex } from '../../common/sources/generic-name';
+import Joi                   from 'joi';
+import { genericNameRegex }  from '../../common/sources/generic-name';
+import { attributeSchema }   from './attribute';
 import type { AttributeMap } from '../i-attribute-holder';
-import { attributeSchema } from './attribute';
+
 
 /**
  * JSON source interface reflecting schema

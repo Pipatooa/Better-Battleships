@@ -1,6 +1,6 @@
 import { checkPassword, checkPassword2 } from './register/check-password';
-import { checkUsername } from './register/check-username';
-import { submitForm } from './register/submit-form';
+import { checkUsername }                 from './register/check-username';
+import { submitForm }                    from './register/submit-form';
 
 $(document).ready(() => {
 

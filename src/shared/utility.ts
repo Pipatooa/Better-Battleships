@@ -15,7 +15,7 @@ export function clamp(value: number, minimum: number, maximum: number): number {
  *
  * @param    arr1               First array to compare
  * @param    arr2               Second array to compare
- * @param    comparisonFunction Function used to compare items between the two arrays 
+ * @param    comparisonFunction Function used to compare items between the two arrays
  * @returns                     Whether ot not two arrays contain same elements
  */
 export function arraysEqual<T>(arr1: T[], arr2: T[], comparisonFunction: (a: T, b: T) => boolean = (a: T, b: T) => a === b): boolean {

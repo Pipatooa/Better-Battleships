@@ -1,11 +1,11 @@
-import type { EvaluationContext } from '../../evaluation-context';
-import type { ParsingContext } from '../../parsing-context';
-import { checkAgainstSchema } from '../../schema-checker';
-import type { Value } from '../values/value';
-import { buildValue } from '../values/value-builder';
+import { checkAgainstSchema }               from '../../schema-checker';
+import { buildValue }                       from '../values/value-builder';
+import { valueEqualConstraintSchema }       from './sources/value-equal-constraint';
+import { ValueConstraint }                  from './value-constaint';
+import type { EvaluationContext }           from '../../evaluation-context';
+import type { ParsingContext }              from '../../parsing-context';
+import type { Value }                       from '../values/value';
 import type { IValueEqualConstraintSource } from './sources/value-equal-constraint';
-import { valueEqualConstraintSchema } from './sources/value-equal-constraint';
-import { ValueConstraint } from './value-constaint';
 
 /**
  * ValueEqualConstraint - Server Version
@@ -38,9 +38,9 @@ export class ValueEqualConstraint extends ValueConstraint {
         // Validate JSON data against schema
         if (checkSchema)
             valueEqualConstraintSource = await checkAgainstSchema(valueEqualConstraintSource, valueEqualConstraintSchema, parsingContext);
-        
+
         const target: Value = await buildValue(parsingContext.withExtendedPath('.exactly'), valueEqualConstraintSource.exactly, false);
-        
+
         // Return created ValueEqualConstraint object
         return new ValueEqualConstraint(target);
     }

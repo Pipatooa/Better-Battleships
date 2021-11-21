@@ -1,7 +1,7 @@
-import type { GameRenderer } from './canvas/game-renderer';
+import type { GameRenderer }          from './canvas/game-renderer';
 import type { ShipSelectionRenderer } from './canvas/ship-selection-renderer';
-import type { Board } from './scenario/board';
-import type { Team } from './team';
+import type { Board }                 from './scenario/board';
+import type { Team }                  from './team';
 
 export let game: Game;
 

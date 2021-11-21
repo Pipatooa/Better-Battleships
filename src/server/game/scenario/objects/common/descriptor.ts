@@ -1,8 +1,8 @@
-import type { IDescriptorInfo } from '../../../../../shared/network/scenario/i-descriptor-info';
-import type { ParsingContext } from '../../parsing-context';
-import { checkAgainstSchema } from '../../schema-checker';
+import { checkAgainstSchema }     from '../../schema-checker';
+import { descriptorSchema }       from './sources/descriptor';
+import type { ParsingContext }    from '../../parsing-context';
 import type { IDescriptorSource } from './sources/descriptor';
-import { descriptorSchema } from './sources/descriptor';
+import type { IDescriptorInfo }   from 'shared/network/scenario/i-descriptor-info';
 
 /**
  * Descriptor - Server Version
@@ -46,4 +46,3 @@ export class Descriptor {
         };
     }
 }
-

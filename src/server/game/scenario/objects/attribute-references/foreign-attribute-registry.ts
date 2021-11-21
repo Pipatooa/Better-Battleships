@@ -1,7 +1,7 @@
-import type { ParsingContext } from '../../parsing-context';
-import { checkAgainstSchema } from '../../schema-checker';
+import { checkAgainstSchema }                   from '../../schema-checker';
+import { foreignAttributeRegistrySchema }       from './sources/foreign-attribute-registry';
+import type { ParsingContext }                  from '../../parsing-context';
 import type { IForeignAttributeRegistrySource } from './sources/foreign-attribute-registry';
-import { foreignAttributeRegistrySchema } from './sources/foreign-attribute-registry';
 
 /**
  * ForeignAttributeRegistry - Server Version
@@ -38,7 +38,7 @@ export class ForeignAttributeRegistry {
                 return this.foreignShipAttributes;
         }
     }
-    
+
     /**
      * Factory function to generate ForeignAttributeRegistry from JSON scenario data
      *
@@ -52,7 +52,7 @@ export class ForeignAttributeRegistry {
         // Validate JSON data against schema
         if (checkSchema)
             foreignAttributeRegistrySource = await checkAgainstSchema(foreignAttributeRegistrySource, foreignAttributeRegistrySchema, parsingContext);
-        
+
         // Return created ForeignAttributeRegistry object
         return new ForeignAttributeRegistry(foreignAttributeRegistrySource.team, foreignAttributeRegistrySource.player, foreignAttributeRegistrySource.ship);
     }

@@ -1,10 +1,10 @@
-import { BoardProgram } from './model-programs/board-program';
-import { Renderer } from './renderer';
-import { BoardInfoGenerator } from './board-info-generator';
+import { game }                   from '../game';
+import { BoardInfoGenerator }     from './board-info-generator';
+import { ColorAtlas }             from './color-atlas';
+import { BoardProgram }           from './model-programs/board-program';
+import { Renderer }               from './renderer';
 import { SelectionInfoGenerator } from './selection-info-generator';
-import { ViewportHandler } from './viewport-handler';
-import { ColorAtlas } from './color-atlas';
-import { game } from '../game';
+import { ViewportHandler }        from './viewport-handler';
 
 export class GameRenderer extends Renderer {
 

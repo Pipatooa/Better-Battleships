@@ -1,7 +1,7 @@
-import type { IValueConstraintSource } from '../../constraints/sources/value-constraint';
-import { valueConstraintSchema } from '../../constraints/sources/value-constraint';
+import { valueConstraintSchema }         from '../../constraints/sources/value-constraint';
+import { conditionMultipleSchema }       from './condition-multiple';
+import type { IValueConstraintSource }   from '../../constraints/sources/value-constraint';
 import type { IConditionMultipleSource } from './condition-multiple';
-import { conditionMultipleSchema } from './condition-multiple';
 
 /**
  * JSON source interface reflecting schema

@@ -11,11 +11,23 @@
   ],
   "plugins": [
     "@typescript-eslint",
+    "import",
+    "align-import",
     "jsdoc"
   ],
   "extends": [
     "eslint:recommended"
   ],
+  "settings": {
+    "import/parsers": {
+      "@typescript-eslint/parser": ["*.ts"]
+    },
+    "import/resolver": {
+      "typescript": {
+        "project": "../tsconfig.json"
+      }
+    }
+  },
   "rules": {
     "indent": ["error", 4, { "SwitchCase": 1, "FunctionDeclaration": { "parameters":  "first" }, "FunctionExpression": { "parameters": "first" } }],
     "max-len": "off",
@@ -51,7 +63,7 @@
     "@typescript-eslint/ban-ts-comment": "error",
     "@typescript-eslint/ban-types": "error",
     "@typescript-eslint/consistent-type-imports": "error",
-    "@typescript-eslint/explicit-function-return-type": ["error", { "allowExpressions":  true }],
+    "@typescript-eslint/explicit-function-return-type": ["error", { "allowExpressions": true }],
     "@typescript-eslint/explicit-member-accessibility": "error",
     "@typescript-eslint/explicit-module-boundary-types": "error",
     "@typescript-eslint/no-empty-interface": "error",
@@ -118,6 +130,46 @@
       "asyncArrow": "always"
     }],
     "@typescript-eslint/space-infix-ops": "error",
+    "import/no-unresolved": "error",
+    "import/named": "error",
+    "import/default": "error",
+    "import/namespace": "error",
+    "import/no-self-import": "error",
+    "import/no-useless-path-segments": "error",
+    "import/export": "error",
+    "import/no-named-as-default": "error",
+    "import/no-named-as-default-member": "error",
+    "import/no-deprecated": "error",
+    "import/no-extraneous-dependencies": "error",
+    "import/no-unused-modules": "error",
+    "import/unambiguous": "error",
+    "import/no-amd": "error",
+    "import/no-import-module-exports": "error",
+    "import/first": "error",
+    "import/no-duplicates": "error",
+    "import/no-namespace": "error",
+    "import/extensions": ["error", "always", { "ts": "never" }],
+    "import/order": ["error", {
+      "groups": [
+        "builtin",
+        "external",
+        "internal",
+        "parent",
+        "sibling",
+        "index",
+        "type"
+      ],
+      "alphabetize": {
+        "order": "asc",
+        "caseInsensitive": true
+      }
+    }],
+    "import/newline-after-import": ["error", { "count": 1 }],
+    "import/no-unassigned-import": "error",
+    "import/no-named-default": "error",
+    "import/no-anonymous-default-export": "error",
+    "align-import/align-import": "error",
+    "align-import/trim-import": "error",
     "jsdoc/check-alignment": "error",
     "jsdoc/check-line-alignment": ["error", "always", { "customSpacings": { "postTag": 0 } }],
     "jsdoc/check-param-names": "error",

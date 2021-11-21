@@ -1,8 +1,8 @@
-import Joi from 'joi';
+import Joi                             from 'joi';
+import { valueConstraintSchema }       from '../../constraints/sources/value-constraint';
+import { valueSchema }                 from '../../values/sources/value';
 import type { IValueConstraintSource } from '../../constraints/sources/value-constraint';
-import { valueConstraintSchema } from '../../constraints/sources/value-constraint';
-import type { ValueSource } from '../../values/sources/value';
-import { valueSchema } from '../../values/sources/value';
+import type { ValueSource }            from '../../values/sources/value';
 
 /**
  * JSON source interface reflecting schema

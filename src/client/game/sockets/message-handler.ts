@@ -1,16 +1,16 @@
-import type { MessageEvent } from 'isomorphic-ws';
-import type { IServerEvent, ServerEventID } from '../../../shared/network/events/i-server-event';
-import { handleConnectionInfo } from './event-handlers/connection-info';
-import { handleGameInfo } from './event-handlers/game-info';
-import { handleGameStart } from './event-handlers/game-start';
-import { handleSetupInfo } from './event-handlers/setup-info';
-import { handleEnterSetupFailure } from './event-handlers/enter-setup-failure';
-import { handleEnteringSetup } from './event-handlers/entering-setup';
-import { handlePlayerJoin } from './event-handlers/player-join';
-import { handlePlayerLeave } from './event-handlers/player-leave';
-import { handlePlayerReady } from './event-handlers/player-ready';
-import { handleTeamAssignment } from './event-handlers/team-assignment';
-import { handleTurnAdvancement } from './event-handlers/turn-advancement';
+import { handleConnectionInfo }             from './event-handlers/connection-info';
+import { handleEnterSetupFailure }          from './event-handlers/enter-setup-failure';
+import { handleEnteringSetup }              from './event-handlers/entering-setup';
+import { handleGameInfo }                   from './event-handlers/game-info';
+import { handleGameStart }                  from './event-handlers/game-start';
+import { handlePlayerJoin }                 from './event-handlers/player-join';
+import { handlePlayerLeave }                from './event-handlers/player-leave';
+import { handlePlayerReady }                from './event-handlers/player-ready';
+import { handleSetupInfo }                  from './event-handlers/setup-info';
+import { handleTeamAssignment }             from './event-handlers/team-assignment';
+import { handleTurnAdvancement }            from './event-handlers/turn-advancement';
+import type { MessageEvent }                from 'isomorphic-ws';
+import type { IServerEvent, ServerEventID } from 'shared/network/events/i-server-event';
 
 /**
  * Handles an event from the server

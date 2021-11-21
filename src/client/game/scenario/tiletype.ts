@@ -1,5 +1,5 @@
-import type { ITileTypeInfo } from '../../../shared/network/scenario/i-tiletype-info';
-import { Descriptor } from './descriptor';
+import { Descriptor }         from './descriptor';
+import type { ITileTypeInfo } from 'shared/network/scenario/i-tiletype-info';
 
 
 /**

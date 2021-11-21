@@ -1,7 +1,7 @@
+import WebSocket                                    from 'isomorphic-ws';
+import { handleMessage }                            from './message-handler';
 import type { CloseEvent, MessageEvent, OpenEvent } from 'isomorphic-ws';
-import WebSocket from 'isomorphic-ws';
-import type { IClientRequest } from '../../../shared/network/requests/i-client-request';
-import { handleMessage } from './message-handler';
+import type { IClientRequest }                      from 'shared/network/requests/i-client-request';
 
 let ws: WebSocket;
 

@@ -1,12 +1,12 @@
-import Joi from 'joi';
-import type { ActionSource } from '../../actions/sources/action';
-import { actionSchema } from '../../actions/sources/action';
-import type { IPatternSource } from '../../common/sources/pattern';
-import { patternSchema } from '../../common/sources/pattern';
-import type { FireAbilityEvent } from '../events/fire-ability-event';
-import { fireAbilityEvents } from '../events/fire-ability-event';
+import Joi                         from 'joi';
+import { actionSchema }            from '../../actions/sources/action';
+import { patternSchema }           from '../../common/sources/pattern';
+import { fireAbilityEvents }       from '../events/fire-ability-event';
+import { baseAbilitySchema }       from './base-ability';
+import type { ActionSource }       from '../../actions/sources/action';
+import type { IPatternSource }     from '../../common/sources/pattern';
+import type { FireAbilityEvent }   from '../events/fire-ability-event';
 import type { IBaseAbilitySource } from './base-ability';
-import { baseAbilitySchema } from './base-ability';
 
 /**
  * JSON source interface reflecting schema

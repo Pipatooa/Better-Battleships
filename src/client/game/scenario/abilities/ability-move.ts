@@ -1,7 +1,7 @@
-import type { IAbilityMoveInfo } from '../../../../shared/network/scenario/ability-info';
-import { Descriptor } from '../descriptor';
-import { Pattern } from '../pattern';
-import { Ability } from './ability';
+import { Descriptor }            from '../descriptor';
+import { Pattern }               from '../pattern';
+import { Ability }               from './ability';
+import type { IAbilityMoveInfo } from 'shared/network/scenario/ability-info';
 
 /**
  * AbilityFire - Client Version

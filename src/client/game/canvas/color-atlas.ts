@@ -1,6 +1,6 @@
-import { game } from '../game';
-import { allPlayers } from '../player';
-import type { TileType } from '../scenario/tiletype';
+import { game }              from '../game';
+import { allPlayers }        from '../player';
+import type { TileType }     from '../scenario/tiletype';
 import type { ModelProgram } from './model-programs/model-program';
 
 export class ColorAtlas {
@@ -63,7 +63,7 @@ export class ColorAtlas {
     }
 
     /**
-     * Adds a new color to the palette 
+     * Adds a new color to the palette
      *
      * @param    color RGB values to add to palette
      * @returns        Index of color in palette
@@ -72,7 +72,7 @@ export class ColorAtlas {
         this.colorData!.push(color);
         return this.colorData!.length - 1;
     }
-    
+
     /**
      * Adds a new color to the palette
      *

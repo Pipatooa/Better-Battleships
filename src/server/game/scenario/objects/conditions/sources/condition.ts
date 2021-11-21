@@ -1,11 +1,11 @@
-import Joi from 'joi';
-import { valueConstraintSchema } from '../../constraints/sources/value-constraint';
-import { valueSchema } from '../../values/sources/value';
-import { baseConditionSchema } from './base-condition';
-import type { IConditionAllSource } from './condition-all';
-import type { IConditionAnySource } from './condition-any';
-import type { IConditionFixedSource } from './condition-fixed';
-import type { IConditionSomeSource } from './condition-some';
+import Joi                                           from 'joi';
+import { valueConstraintSchema }                     from '../../constraints/sources/value-constraint';
+import { valueSchema }                               from '../../values/sources/value';
+import { baseConditionSchema }                       from './base-condition';
+import type { IConditionAllSource }                  from './condition-all';
+import type { IConditionAnySource }                  from './condition-any';
+import type { IConditionFixedSource }                from './condition-fixed';
+import type { IConditionSomeSource }                 from './condition-some';
 import type { IConditionValueMeetsConstraintSource } from './condition-value-meets-constraint';
 
 /**

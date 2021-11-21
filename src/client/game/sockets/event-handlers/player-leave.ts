@@ -1,5 +1,5 @@
-import type { IPlayerLeaveEvent } from '../../../../shared/network/events/i-player-leave';
-import { allPlayers } from '../../player';
+import { allPlayers }             from '../../player';
+import type { IPlayerLeaveEvent } from 'shared/network/events/i-player-leave';
 
 /**
  * Handles a player leave event from the server

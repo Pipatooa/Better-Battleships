@@ -1,7 +1,7 @@
-import type { ITeamInfo } from '../../shared/network/scenario/i-team-info';
-import type { Player } from './player';
+import { joinTeam }        from './sockets/button-functions';
+import type { Player }     from './player';
 import type { Descriptor } from './scenario/descriptor';
-import { joinTeam } from './sockets/button-functions';
+import type { ITeamInfo }  from 'shared/network/scenario/i-team-info';
 
 /**
  * Team - Client Version

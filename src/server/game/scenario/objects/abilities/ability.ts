@@ -1,11 +1,11 @@
-import type { AttributeMap } from '../attributes/i-attribute-holder';
-import type { IAttributeHolder } from '../attributes/sources/attribute-holder';
-import type { Descriptor } from '../common/descriptor';
-import type { Condition } from '../conditions/condition';
 import type { EvaluationContext } from '../../evaluation-context';
-import type { Ship } from '../ship';
-import type { AbilityActions } from './events/base-ability-events';
-import type { AbilityInfo } from '../../../../../shared/network/scenario/ability-info';
+import type { AttributeMap }      from '../attributes/i-attribute-holder';
+import type { IAttributeHolder }  from '../attributes/sources/attribute-holder';
+import type { Descriptor }        from '../common/descriptor';
+import type { Condition }         from '../conditions/condition';
+import type { Ship }              from '../ship';
+import type { AbilityActions }    from './events/base-ability-events';
+import type { AbilityInfo }       from 'shared/network/scenario/ability-info';
 
 /**
  * Ability - Server Version
@@ -13,9 +13,9 @@ import type { AbilityInfo } from '../../../../../shared/network/scenario/ability
  * Base class for abilities of a ship which execute actions upon use
  */
 export abstract class Ability implements IAttributeHolder {
-    
+
     protected usable: boolean | undefined;
-    
+
     /**
      * Ability constructor
      *

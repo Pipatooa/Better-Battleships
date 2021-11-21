@@ -1,7 +1,7 @@
-import type { IPlayerReadyEvent } from '../../../../shared/network/events/i-player-ready';
-import { allPlayers } from '../../player';
-import { ready } from '../button-functions';
-import { selfIdentity } from './connection-info';
+import { allPlayers }             from '../../player';
+import { ready }                  from '../button-functions';
+import { selfIdentity }           from './connection-info';
+import type { IPlayerReadyEvent } from 'shared/network/events/i-player-ready';
 
 /**
  * Handles a player ready event from the server

@@ -1,12 +1,12 @@
-import { EvaluationContext } from '../../evaluation-context';
-import type { ParsingContext } from '../../parsing-context';
-import { checkAgainstSchema } from '../../schema-checker';
-import type { ValueConstraint } from '../constraints/value-constaint';
-import { buildValueConstraint } from '../constraints/value-constraint-builder';
-import type { Value } from '../values/value';
-import { buildValue } from '../values/value-builder';
+import { EvaluationContext }     from '../../evaluation-context';
+import { checkAgainstSchema }    from '../../schema-checker';
+import { buildValueConstraint }  from '../constraints/value-constraint-builder';
+import { buildValue }            from '../values/value-builder';
+import { attributeSchema }       from './sources/attribute';
+import type { ParsingContext }   from '../../parsing-context';
+import type { ValueConstraint }  from '../constraints/value-constaint';
+import type { Value }            from '../values/value';
 import type { IAttributeSource } from './sources/attribute';
-import { attributeSchema } from './sources/attribute';
 
 /**
  * Attribute - Server Version

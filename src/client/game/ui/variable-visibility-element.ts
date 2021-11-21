@@ -4,9 +4,9 @@
  * Wrapper for JQuery elements whose visibility is frequently toggled
  */
 export class VariableVisibilityElement {
-    
+
     private _visible: boolean;
-    
+
     public constructor(public readonly element: JQuery) {
         this._visible = !this.element.hasClass('d-none');
     }
@@ -22,7 +22,7 @@ export class VariableVisibilityElement {
                 this.element.removeClass('d-none');
             else
                 this.element.addClass('d-none');
-            
+
             this._visible = newVisibility;
         }
     }

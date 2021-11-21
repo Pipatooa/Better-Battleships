@@ -1,11 +1,11 @@
-import type { EvaluationContext } from '../../evaluation-context';
-import type { ParsingContext } from '../../parsing-context';
-import { checkAgainstSchema } from '../../schema-checker';
+import { checkAgainstSchema }                  from '../../schema-checker';
+import { buildAttributeReference }             from '../attribute-references/attribute-reference-builder';
+import { valueAttributeReferenceSchema }       from './sources/value-attribute-reference';
+import { Value }                               from './value';
+import type { EvaluationContext }              from '../../evaluation-context';
+import type { ParsingContext }                 from '../../parsing-context';
+import type { AttributeReference }             from '../attribute-references/attribute-reference';
 import type { IValueAttributeReferenceSource } from './sources/value-attribute-reference';
-import { valueAttributeReferenceSchema } from './sources/value-attribute-reference';
-import type { AttributeReference } from '../attribute-references/attribute-reference';
-import { buildAttributeReference } from '../attribute-references/attribute-reference-builder';
-import { Value } from './value';
 
 /**
  * ValueAttributeReference - Server Version
@@ -13,7 +13,7 @@ import { Value } from './value';
  * When evaluated, returns the value that an attribute currently holds
  */
 export class ValueAttributeReference extends Value {
-    
+
     /**
      * ValueAttributeReference constructor
      *

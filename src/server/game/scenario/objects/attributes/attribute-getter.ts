@@ -1,7 +1,7 @@
-import type { ParsingContext } from '../../parsing-context';
-import { UnpackingError } from '../../unpacker';
+import { UnpackingError }                        from '../../unpacker';
+import { Attribute }                             from './attribute';
+import type { ParsingContext }                   from '../../parsing-context';
 import type { AttributeReferenceObjectSelector } from '../attribute-references/sources/attribute-reference';
-import { Attribute } from './attribute';
 import type { AttributeMap, AttributeMapSource } from './i-attribute-holder';
 
 /**
@@ -13,7 +13,7 @@ import type { AttributeMap, AttributeMapSource } from './i-attribute-holder';
  * @returns                 Created attribute knownItems
  */
 export async function getAttributes(parsingContext: ParsingContext, attributeData: AttributeMapSource, attributeLevel: AttributeReferenceObjectSelector): Promise<AttributeMap> {
-    
+
     const attributes: AttributeMap = {};
     for (const [name, attributeSource] of Object.entries(attributeData)) {
         attributes[name] = await Attribute.fromSource(parsingContext.withExtendedPath(`.${name}`), attributeSource, false);
@@ -26,6 +26,6 @@ export async function getAttributes(parsingContext: ParsingContext, attributeDat
                 throw new UnpackingError(`'${attributeLevel}.${foreignAttributeName}' is declared as a foreign attribute and must be declared on all attribute holders of type '${attributeLevel}'`, parsingContext);
         }
     }
-    
+
     return attributes;
 }

@@ -1,7 +1,7 @@
-import Joi from 'joi';
-import { baseRequestSchema } from '../../../../shared/network/requests/i-client-request';
-import type { IShipPlacementRequest } from '../../../../shared/network/requests/i-ship-placement-request';
-import type { Client } from '../client';
+import Joi                            from 'joi';
+import { baseRequestSchema }          from 'shared/network/requests/i-client-request';
+import type { Client }                from '../client';
+import type { IShipPlacementRequest } from 'shared/network/requests/i-ship-placement-request';
 
 /**
  * Handles a ship placement request from the client

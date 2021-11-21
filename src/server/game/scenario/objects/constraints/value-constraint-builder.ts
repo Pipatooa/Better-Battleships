@@ -1,13 +1,13 @@
-import type { ParsingContext } from '../../parsing-context';
-import { checkAgainstSchema } from '../../schema-checker';
-import { EmptyValueConstraint } from './empty-value-constraint';
+import { checkAgainstSchema }          from '../../schema-checker';
+import { EmptyValueConstraint }        from './empty-value-constraint';
+import { valueConstraintSchema }       from './sources/value-constraint';
+import { ValueAtLeastConstraint }      from './value-at-least-constraint';
+import { ValueAtMostConstraint }       from './value-at-most-constraint';
+import { ValueEqualConstraint }        from './value-equal-constraint';
+import { ValueInRangeConstraint }      from './value-in-range-constraint';
+import type { ParsingContext }         from '../../parsing-context';
 import type { IValueConstraintSource } from './sources/value-constraint';
-import { valueConstraintSchema } from './sources/value-constraint';
-import { ValueAtLeastConstraint } from './value-at-least-constraint';
-import { ValueAtMostConstraint } from './value-at-most-constraint';
-import type { ValueConstraint } from './value-constaint';
-import { ValueEqualConstraint } from './value-equal-constraint';
-import { ValueInRangeConstraint } from './value-in-range-constraint';
+import type { ValueConstraint }        from './value-constaint';
 
 /**
  * Factory function to generate ValueConstraint from JSON scenario data

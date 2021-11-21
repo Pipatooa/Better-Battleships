@@ -1,9 +1,9 @@
-import Joi from 'joi';
-import { baseRequestSchema } from '../../../../shared/network/requests/i-client-request';
-import type { IJoinTeamRequest } from '../../../../shared/network/requests/i-join-team';
-import { GamePhase } from '../../game';
-import type { Team } from '../../scenario/objects/team';
-import type { Client } from '../client';
+import Joi                       from 'joi';
+import { baseRequestSchema }     from 'shared/network/requests/i-client-request';
+import { GamePhase }             from '../../game';
+import type { Team }             from '../../scenario/objects/team';
+import type { Client }           from '../client';
+import type { IJoinTeamRequest } from 'shared/network/requests/i-join-team';
 
 /**
  * Handles a join team request from the client

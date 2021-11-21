@@ -1,11 +1,11 @@
-import type { Condition } from '../conditions/condition';
-import { buildCondition } from '../conditions/condition-builder';
+import { checkAgainstSchema }     from '../../schema-checker';
+import { buildCondition }         from '../conditions/condition-builder';
+import { Action }                 from './action';
+import { baseActionSchema }       from './sources/base-action';
 import type { EvaluationContext } from '../../evaluation-context';
-import type { ParsingContext } from '../../parsing-context';
-import { checkAgainstSchema } from '../../schema-checker';
-import { Action } from './action';
+import type { ParsingContext }    from '../../parsing-context';
+import type { Condition }         from '../conditions/condition';
 import type { IBaseActionSource } from './sources/base-action';
-import { baseActionSchema } from './sources/base-action';
 
 /**
  * ActionWin - Server Version
@@ -13,7 +13,7 @@ import { baseActionSchema } from './sources/base-action';
  * Action which causes the current team to win the game
  */
 export class ActionWin extends Action {
-    
+
     /**
      * Factory function to generate ActionWin from JSON scenario data
      *

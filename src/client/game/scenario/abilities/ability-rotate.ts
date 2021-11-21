@@ -1,6 +1,6 @@
-import type { IAbilityRotateInfo } from '../../../../shared/network/scenario/ability-info';
-import { Descriptor } from '../descriptor';
-import { Ability } from './ability';
+import { Descriptor }              from '../descriptor';
+import { Ability }                 from './ability';
+import type { IAbilityRotateInfo } from 'shared/network/scenario/ability-info';
 
 /**
  * AbilityFire - Client Version

@@ -1,5 +1,5 @@
 import type { EvaluationContext } from '../../evaluation-context';
-import type { Condition } from '../conditions/condition';
+import type { Condition }         from '../conditions/condition';
 
 /**
  * Action - Server Version

@@ -1,8 +1,8 @@
-import type { ParsingContext } from '../../parsing-context';
-import { checkAgainstSchema } from '../../schema-checker';
+import { checkAgainstSchema }     from '../../schema-checker';
+import { valueFixedSchema }       from './sources/value-fixed';
+import { Value }                  from './value';
+import type { ParsingContext }    from '../../parsing-context';
 import type { IValueFixedSource } from './sources/value-fixed';
-import { valueFixedSchema } from './sources/value-fixed';
-import { Value } from './value';
 
 /**
  * ValueRandom - Server Version

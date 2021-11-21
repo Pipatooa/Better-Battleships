@@ -1,12 +1,12 @@
-import { clamp } from '../../../../../shared/utility';
-import type { EvaluationContext } from '../../evaluation-context';
-import type { ParsingContext } from '../../parsing-context';
-import { checkAgainstSchema } from '../../schema-checker';
-import type { Value } from '../values/value';
-import { buildValue } from '../values/value-builder';
+import { clamp }                              from 'shared/utility';
+import { checkAgainstSchema }                 from '../../schema-checker';
+import { buildValue }                         from '../values/value-builder';
+import { valueInRangeConstraintSchema }       from './sources/value-in-range-constraint';
+import { ValueConstraint }                    from './value-constaint';
+import type { EvaluationContext }             from '../../evaluation-context';
+import type { ParsingContext }                from '../../parsing-context';
+import type { Value }                         from '../values/value';
 import type { IValueInRangeConstraintSource } from './sources/value-in-range-constraint';
-import { valueInRangeConstraintSchema } from './sources/value-in-range-constraint';
-import { ValueConstraint } from './value-constaint';
 
 /**
  * ValueInRangeConstraint - Server Version

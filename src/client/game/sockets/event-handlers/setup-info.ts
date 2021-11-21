@@ -1,18 +1,18 @@
-import type { ISetupInfoEvent } from '../../../../shared/network/events/i-setup-info';
-import { ColorAtlas } from '../../canvas/color-atlas';
-import { GameRenderer } from '../../canvas/game-renderer';
-import { ShipSelectionRenderer } from '../../canvas/ship-selection-renderer';
-import { game } from '../../game';
+import { ColorAtlas }             from '../../canvas/color-atlas';
+import { GameRenderer }           from '../../canvas/game-renderer';
+import { ShipSelectionRenderer }  from '../../canvas/ship-selection-renderer';
+import { game }                   from '../../game';
 import { allPlayers, selfPlayer } from '../../player';
-import type { Ability } from '../../scenario/abilities/ability';
-import { AbilityFire } from '../../scenario/abilities/ability-fire';
-import { AbilityMove } from '../../scenario/abilities/ability-move';
-import { AbilityRotate } from '../../scenario/abilities/ability-rotate';
-import { Board } from '../../scenario/board';
-import { Pattern } from '../../scenario/pattern';
-import { Ship } from '../../scenario/ship';
-import { ShipPlacer } from '../../ui/ship-placer';
-import { TooltipManager } from '../../ui/tooltip-manager';
+import { AbilityFire }            from '../../scenario/abilities/ability-fire';
+import { AbilityMove }            from '../../scenario/abilities/ability-move';
+import { AbilityRotate }          from '../../scenario/abilities/ability-rotate';
+import { Board }                  from '../../scenario/board';
+import { Pattern }                from '../../scenario/pattern';
+import { Ship }                   from '../../scenario/ship';
+import { ShipPlacer }             from '../../ui/ship-placer';
+import { TooltipManager }         from '../../ui/tooltip-manager';
+import type { Ability }           from '../../scenario/abilities/ability';
+import type { ISetupInfoEvent }   from 'shared/network/events/i-setup-info';
 
 /**
  * Handles a setup info event from the server
@@ -36,7 +36,7 @@ export async function handleSetupInfo(setupInfoEvent: ISetupInfoEvent): Promise<
 
     // Unpack player info
     const ships: Ship[] = [];
-    for (let shipIndex = 0; shipIndex < setupInfoEvent.playerInfo.ships.length; shipIndex++){
+    for (let shipIndex = 0; shipIndex < setupInfoEvent.playerInfo.ships.length; shipIndex++) {
         const shipInfo = setupInfoEvent.playerInfo.ships[shipIndex];
         const pattern = Pattern.fromSource(shipInfo.pattern);
         const abilities: Ability[] = [];

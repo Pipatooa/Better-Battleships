@@ -1,17 +1,13 @@
-import type { EvaluationContext } from '../../evaluation-context';
-import type { ParsingContext } from '../../parsing-context';
-import { checkAgainstSchema } from '../../schema-checker';
-import type { ValueConstraint } from '../constraints/value-constaint';
-import { buildValueConstraint } from '../constraints/value-constraint-builder';
-import type { Value } from '../values/value';
-import { buildValue } from '../values/value-builder';
-import { Condition } from './condition';
-import type {
-    IConditionValueMeetsConstraintSource
-} from './sources/condition-value-meets-constraint';
-import {
-    conditionValueMeetsConstraintSchema
-} from './sources/condition-value-meets-constraint';
+import { checkAgainstSchema }                        from '../../schema-checker';
+import { buildValueConstraint }                      from '../constraints/value-constraint-builder';
+import { buildValue }                                from '../values/value-builder';
+import { Condition }                                 from './condition';
+import { conditionValueMeetsConstraintSchema }       from './sources/condition-value-meets-constraint';
+import type { EvaluationContext }                    from '../../evaluation-context';
+import type { ParsingContext }                       from '../../parsing-context';
+import type { ValueConstraint }                      from '../constraints/value-constaint';
+import type { Value }                                from '../values/value';
+import type { IConditionValueMeetsConstraintSource } from './sources/condition-value-meets-constraint';
 
 /**
  * ConditionValueMeetsConstraint - Server Version

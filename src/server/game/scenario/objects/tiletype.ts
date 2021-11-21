@@ -1,9 +1,9 @@
-import type { ITileTypeInfo } from '../../../../shared/network/scenario/i-tiletype-info';
-import type { ParsingContext } from '../parsing-context';
-import { checkAgainstSchema } from '../schema-checker';
-import { Descriptor } from './common/descriptor';
+import { checkAgainstSchema }   from '../schema-checker';
+import { Descriptor }           from './common/descriptor';
+import { tileTypeSchema }       from './sources/tile-type';
+import type { ParsingContext }  from '../parsing-context';
 import type { ITileTypeSource } from './sources/tile-type';
-import { tileTypeSchema } from './sources/tile-type';
+import type { ITileTypeInfo }   from 'shared/network/scenario/i-tiletype-info';
 
 /**
  * TileType - Server Version

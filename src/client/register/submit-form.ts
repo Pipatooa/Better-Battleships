@@ -1,6 +1,6 @@
-import console from 'console';
+import console                           from 'console';
 import { checkPassword, checkPassword2 } from './check-password';
-import { checkUsername } from './check-username';
+import { checkUsername }                 from './check-username';
 
 /**
  * Submits registration form to the server

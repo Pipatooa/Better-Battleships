@@ -1,5 +1,5 @@
-import type { Action } from '../../actions/action';
 import { baseAbilityEvents } from './base-ability-events';
+import type { Action }       from '../../actions/action';
 
 /**
  * List of event names for fire ability

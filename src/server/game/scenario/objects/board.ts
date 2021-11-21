@@ -1,15 +1,15 @@
-import { CharacterMapGenerator } from '../../../../shared/character-map-generator';
-import type { IBoardInfo } from '../../../../shared/network/scenario/i-board-info';
-import type { ITileTypeInfo } from '../../../../shared/network/scenario/i-tiletype-info';
-import { arraysEqual } from '../../../../shared/utility';
-import type { ParsingContext } from '../parsing-context';
-import { checkAgainstSchema } from '../schema-checker';
-import { UnpackingError } from '../unpacker';
-import { Region } from './region';
-import type { IBoardSource } from './sources/board';
-import { boardSchema } from './sources/board';
-import type { TileGenerator } from './tile-generator';
-import { TileType } from './tiletype';
+import { CharacterMapGenerator } from 'shared/character-map-generator';
+import { arraysEqual }           from 'shared/utility';
+import { checkAgainstSchema }    from '../schema-checker';
+import { UnpackingError }        from '../unpacker';
+import { Region }                from './region';
+import { boardSchema }           from './sources/board';
+import { TileType }              from './tiletype';
+import type { ParsingContext }   from '../parsing-context';
+import type { IBoardSource }     from './sources/board';
+import type { TileGenerator }    from './tile-generator';
+import type { IBoardInfo }       from 'shared/network/scenario/i-board-info';
+import type { ITileTypeInfo }    from 'shared/network/scenario/i-tiletype-info';
 
 /**
  * Board - Server Version

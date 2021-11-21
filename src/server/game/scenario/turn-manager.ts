@@ -1,5 +1,5 @@
-import { TimeoutManager } from '../../../shared/timeout-manager';
-import type { Team } from './objects/team';
+import { TimeoutManager } from 'shared/timeout-manager';
+import type { Team }      from './objects/team';
 
 /**
  * TurnManager - Server Version
@@ -7,14 +7,14 @@ import type { Team } from './objects/team';
  * Responsible for managing how turns are passed between players
  */
 export class TurnManager {
-    
+
     private _turnOrder: string[] | undefined = undefined;
     private turnIndex = 0;
     private readonly turnsGenerated = false;
 
     private readonly timeoutManager: TimeoutManager<'turnTimeout'>;
     public turnAdvancementCallback: (() => any) | undefined = undefined;
-    
+
     /**
      * TurnManager constructor
      *

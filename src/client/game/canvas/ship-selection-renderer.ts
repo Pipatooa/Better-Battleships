@@ -1,13 +1,13 @@
-import { BoardInfoGenerator } from './board-info-generator';
-import type { ColorAtlas } from './color-atlas';
-import { BoardProgram } from './model-programs/board-program';
-import { Renderer } from './renderer';
+import { game }                   from '../game';
+import { Board }                  from '../scenario/board';
+import { BoardInfoGenerator }     from './board-info-generator';
+import { BoardProgram }           from './model-programs/board-program';
+import { Renderer }               from './renderer';
 import { SelectionInfoGenerator } from './selection-info-generator';
-import { ViewportHandler } from './viewport-handler';
-import { Board } from '../scenario/board';
-import type { Tile } from '../scenario/board';
-import { game } from '../game';
-import type { Ship } from '../scenario/ship';
+import { ViewportHandler }        from './viewport-handler';
+import type { Tile }              from '../scenario/board';
+import type { Ship }              from '../scenario/ship';
+import type { ColorAtlas }        from './color-atlas';
 
 export class ShipSelectionRenderer extends Renderer {
 

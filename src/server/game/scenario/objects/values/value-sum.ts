@@ -1,10 +1,10 @@
+import { checkAgainstSchema }     from '../../schema-checker';
+import { valueSumSchema }         from './sources/value-sum';
+import { ValueMultiple }          from './value-multiple';
 import type { EvaluationContext } from '../../evaluation-context';
-import type { ParsingContext } from '../../parsing-context';
-import { checkAgainstSchema } from '../../schema-checker';
-import type { IValueSumSource } from './sources/value-sum';
-import { valueSumSchema } from './sources/value-sum';
-import type { Value } from './value';
-import { ValueMultiple } from './value-multiple';
+import type { ParsingContext }    from '../../parsing-context';
+import type { IValueSumSource }   from './sources/value-sum';
+import type { Value }             from './value';
 
 /**
  * ValueSum - Server Version

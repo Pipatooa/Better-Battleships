@@ -1,14 +1,14 @@
-import type { EvaluationContext } from '../../evaluation-context';
-import type { ParsingContext } from '../../parsing-context';
-import { checkAgainstSchema } from '../../schema-checker';
-import type { AttributeReference } from '../attribute-references/attribute-reference';
-import { buildAttributeReference } from '../attribute-references/attribute-reference-builder';
-import type { Condition } from '../conditions/condition';
-import { buildCondition } from '../conditions/condition-builder';
-import type { Value } from '../values/value';
-import { buildValue } from '../values/value-builder';
-import { Action } from './action';
-import { actionWinSchema } from './action-win';
+import { checkAgainstSchema }             from '../../schema-checker';
+import { buildAttributeReference }        from '../attribute-references/attribute-reference-builder';
+import { buildCondition }                 from '../conditions/condition-builder';
+import { buildValue }                     from '../values/value-builder';
+import { Action }                         from './action';
+import { actionWinSchema }                from './action-win';
+import type { EvaluationContext }         from '../../evaluation-context';
+import type { ParsingContext }            from '../../parsing-context';
+import type { AttributeReference }        from '../attribute-references/attribute-reference';
+import type { Condition }                 from '../conditions/condition';
+import type { Value }                     from '../values/value';
 import type { IActionSetAttributeSource } from './sources/action-set-attribute';
 
 /**
@@ -49,7 +49,7 @@ export class ActionSetAttribute extends Action {
         const condition: Condition = await buildCondition(parsingContext.withExtendedPath('.condition'), actionSetAttributeSource.condition, false);
         const attribute: AttributeReference = await buildAttributeReference(parsingContext.withExtendedPath('.attribute'), actionSetAttributeSource.attribute, false);
         const value: Value = await buildValue(parsingContext.withExtendedPath('.value'), actionSetAttributeSource.value, false);
-        
+
         // Return created ActionSetAttribute object
         return new ActionSetAttribute(attribute, value, condition);
     }

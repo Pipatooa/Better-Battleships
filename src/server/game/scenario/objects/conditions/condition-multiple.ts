@@ -1,6 +1,6 @@
-import type { ParsingContext } from '../../parsing-context';
-import { Condition } from './condition';
-import { buildCondition } from './condition-builder';
+import { Condition }            from './condition';
+import { buildCondition }       from './condition-builder';
+import type { ParsingContext }  from '../../parsing-context';
 import type { ConditionSource } from './sources/condition';
 
 /**

@@ -1,8 +1,8 @@
-import csurf from 'csurf';
+import csurf                                    from 'csurf';
+import { Forbidden }                            from 'http-errors';
+import { checkRequestAuth }                     from './auth/request-handler';
+import type { IAuthPayload }                    from './auth/i-auth-payload';
 import type { NextFunction, Request, Response } from 'express';
-import { Forbidden } from 'http-errors';
-import type { IAuthPayload } from './auth/i-auth-payload';
-import { checkRequestAuth } from './auth/request-handler';
 
 const csurfProtection = csurf({ cookie: { sameSite: 'lax', secure: true, httpOnly: true } });
 

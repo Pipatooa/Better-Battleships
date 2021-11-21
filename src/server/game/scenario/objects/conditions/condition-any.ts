@@ -1,10 +1,10 @@
-import type { EvaluationContext } from '../../evaluation-context';
-import type { ParsingContext } from '../../parsing-context';
-import { checkAgainstSchema } from '../../schema-checker';
-import type { Condition } from './condition';
-import { ConditionMultiple } from './condition-multiple';
+import { checkAgainstSchema }       from '../../schema-checker';
+import { ConditionMultiple }        from './condition-multiple';
+import { conditionAnySchema }       from './sources/condition-any';
+import type { EvaluationContext }   from '../../evaluation-context';
+import type { ParsingContext }      from '../../parsing-context';
+import type { Condition }           from './condition';
 import type { IConditionAnySource } from './sources/condition-any';
-import { conditionAnySchema } from './sources/condition-any';
 
 /**
  * ConditionAny - Server Version

@@ -1,6 +1,6 @@
+import { AttributeReference }     from './attribute-reference';
 import type { EvaluationContext } from '../../evaluation-context';
-import type { Attribute } from '../attributes/attribute';
-import { AttributeReference } from './attribute-reference';
+import type { Attribute }         from '../attributes/attribute';
 
 /**
  * AttributeReferenceLocal - Server Version

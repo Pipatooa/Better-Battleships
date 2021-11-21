@@ -1,10 +1,10 @@
-import type { IPatternInfo } from '../../../../../shared/network/scenario/i-pattern-info';
+import { checkAgainstSchema }  from '../../schema-checker';
+import { UnpackingError }      from '../../unpacker';
+import { Rotation }            from './rotation';
+import { patternSchema }       from './sources/pattern';
 import type { ParsingContext } from '../../parsing-context';
-import { checkAgainstSchema } from '../../schema-checker';
-import { UnpackingError } from '../../unpacker';
-import { Rotation } from './rotation';
 import type { IPatternSource } from './sources/pattern';
-import { patternSchema } from './sources/pattern';
+import type { IPatternInfo }   from 'shared/network/scenario/i-pattern-info';
 
 /**
  * Pattern - Server Version
@@ -71,7 +71,7 @@ export class Pattern {
             const newX: number = newDx + this.center[0];
             const newY: number = newDy + this.center[1];
 
-            return [newX, newY, value];
+            return [ newX, newY, value ];
         });
 
         return new Pattern(patternEntries, this.center);

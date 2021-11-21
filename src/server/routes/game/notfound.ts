@@ -1,6 +1,6 @@
-import express from 'express';
+import express                  from 'express';
+import { requireAuth }          from '../../middleware';
 import type { RequestWithAuth } from '../../middleware';
-import { requireAuth } from '../../middleware';
 
 const router = express.Router();
 export default router;

@@ -1,7 +1,7 @@
-import Joi from 'joi';
-import { colorSchema } from '../common/sources/color';
+import Joi                        from 'joi';
+import { colorSchema }            from '../common/sources/color';
+import { descriptorSchema }       from '../common/sources/descriptor';
 import type { IDescriptorSource } from '../common/sources/descriptor';
-import { descriptorSchema } from '../common/sources/descriptor';
 
 /**
  * JSON source interface reflecting schema

@@ -1,10 +1,10 @@
-import type { EvaluationContext } from '../../evaluation-context';
-import type { ParsingContext } from '../../parsing-context';
-import { checkAgainstSchema } from '../../schema-checker';
-import type { Condition } from '../conditions/condition';
-import { buildCondition } from '../conditions/condition-builder';
-import { Action } from './action';
-import { actionWinSchema } from './action-win';
+import { checkAgainstSchema }            from '../../schema-checker';
+import { buildCondition }                from '../conditions/condition-builder';
+import { Action }                        from './action';
+import { actionWinSchema }               from './action-win';
+import type { EvaluationContext }        from '../../evaluation-context';
+import type { ParsingContext }           from '../../parsing-context';
+import type { Condition }                from '../conditions/condition';
 import type { IActionAdvanceTurnSource } from './sources/action-advance-turn';
 
 /**

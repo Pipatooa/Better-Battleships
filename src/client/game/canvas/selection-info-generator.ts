@@ -1,5 +1,5 @@
-import { Pattern } from '../scenario/pattern';
-import type { Ship } from '../scenario/ship';
+import { Pattern }           from '../scenario/pattern';
+import type { Ship }         from '../scenario/ship';
 import type { ModelProgram } from './model-programs/model-program';
 
 export class SelectionInfoGenerator {
@@ -8,7 +8,7 @@ export class SelectionInfoGenerator {
     private selectionInfoSizeUniform: number;
     private selectionOffsetUniform: Float32Array;
     private selectionOffsetRaw: [number, number];
-    
+
     private selectionOffsetDelta: [number, number] = [0, 0];
 
     private textureData: Uint8Array;
@@ -26,10 +26,10 @@ export class SelectionInfoGenerator {
         this.selectionInfoSizeUniform = 1;
         this.selectionOffsetUniform = new Float32Array([0, 0]);
         this.selectionOffsetRaw = [0, 0];
-        
+
         this.gl.useProgram(this.modelProgram.program);
         this.gl.uniform1i(this.modelProgram.uniformLocations.selectionInfo, 4);
-        
+
         this.textureData = new Uint8Array(1);
         this.setSelectionPattern();
         this.push();

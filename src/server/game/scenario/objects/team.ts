@@ -1,16 +1,16 @@
-import type { ITeamInfo } from '../../../../shared/network/scenario/i-team-info';
-import type { Client } from '../../sockets/client';
-import type { ParsingContext } from '../parsing-context';
-import { checkAgainstSchema } from '../schema-checker';
+import { checkAgainstSchema }               from '../schema-checker';
 import { getJSONFromEntry, UnpackingError } from '../unpacker';
-import { getAttributes } from './attributes/attribute-getter';
-import type { AttributeMap } from './attributes/i-attribute-holder';
-import type { IAttributeHolder } from './attributes/sources/attribute-holder';
-import { Descriptor } from './common/descriptor';
-import { Player } from './player';
-import type { IPlayerSource } from './sources/player';
-import type { IPlayerConfig, ITeamSource } from './sources/team';
-import { teamSchema } from './sources/team';
+import { getAttributes }                    from './attributes/attribute-getter';
+import { Descriptor }                       from './common/descriptor';
+import { Player }                           from './player';
+import { teamSchema }                       from './sources/team';
+import type { Client }                      from '../../sockets/client';
+import type { ParsingContext }              from '../parsing-context';
+import type { AttributeMap }                from './attributes/i-attribute-holder';
+import type { IAttributeHolder }            from './attributes/sources/attribute-holder';
+import type { IPlayerSource }               from './sources/player';
+import type { IPlayerConfig, ITeamSource }  from './sources/team';
+import type { ITeamInfo }                   from 'shared/network/scenario/i-team-info';
 
 /**
  * Team - Server Version

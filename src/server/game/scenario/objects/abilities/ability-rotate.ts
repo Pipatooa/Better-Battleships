@@ -1,20 +1,20 @@
-import type { AbilityInfo } from '../../../../../shared/network/scenario/ability-info';
-import type { EvaluationContext } from '../../evaluation-context';
-import type { ParsingContext } from '../../parsing-context';
-import { checkAgainstSchema } from '../../schema-checker';
-import { getActions } from '../actions/action-getter';
-import { getAttributes } from '../attributes/attribute-getter';
-import type { AttributeMap } from '../attributes/i-attribute-holder';
-import { Descriptor } from '../common/descriptor';
-import { Rotation } from '../common/rotation';
-import type { Condition } from '../conditions/condition';
-import { buildCondition } from '../conditions/condition-builder';
-import type { Ship } from '../ship';
-import { IndexedAbility } from './ability';
-import type { AbilityActions } from './events/base-ability-events';
-import { baseAbilityEvents } from './events/base-ability-events';
+import { checkAgainstSchema }        from '../../schema-checker';
+import { getActions }                from '../actions/action-getter';
+import { getAttributes }             from '../attributes/attribute-getter';
+import { Descriptor }                from '../common/descriptor';
+import { Rotation }                  from '../common/rotation';
+import { buildCondition }            from '../conditions/condition-builder';
+import { IndexedAbility }            from './ability';
+import { baseAbilityEvents }         from './events/base-ability-events';
+import { abilityRotateSchema }       from './sources/ability-rotate';
+import type { EvaluationContext }    from '../../evaluation-context';
+import type { ParsingContext }       from '../../parsing-context';
+import type { AttributeMap }         from '../attributes/i-attribute-holder';
+import type { Condition }            from '../conditions/condition';
+import type { Ship }                 from '../ship';
+import type { AbilityActions }       from './events/base-ability-events';
 import type { IAbilityRotateSource } from './sources/ability-rotate';
-import { abilityRotateSchema } from './sources/ability-rotate';
+import type { AbilityInfo }          from 'shared/network/scenario/ability-info';
 
 /**
  * AbilityFire - Server Version
@@ -22,7 +22,7 @@ import { abilityRotateSchema } from './sources/ability-rotate';
  * Ability which rotates a ship upon its use
  */
 export class AbilityRotate extends IndexedAbility {
-    
+
     /**
      * AbilityFire constructor
      *
@@ -30,7 +30,7 @@ export class AbilityRotate extends IndexedAbility {
      * @param  descriptor    Descriptor for ability
      * @param  rot90allowed  Whether or not a rotation by 90 degrees is allowed
      * @param  rot180allowed Whether or not a rotation by 180 degrees is allowed
-     * @param  rot270allowed Whether or not a rotation by 270 degrees is allowed 
+     * @param  rot270allowed Whether or not a rotation by 270 degrees is allowed
      * @param  condition     Condition which must hold true to be able to use this action
      * @param  actions       Actions to execute when events are triggered
      * @param  attributes    Attributes for the ability
@@ -87,7 +87,7 @@ export class AbilityRotate extends IndexedAbility {
         else if (evaluationContext.index === 1 && this.rot180allowed) this.ship.rotate(Rotation.Clockwise180);
         else if (evaluationContext.index === 2 && this.rot270allowed) this.ship.rotate(Rotation.Clockwise270);
     }
-    
+
     /**
      * Returns network transportable form of this object.
      *

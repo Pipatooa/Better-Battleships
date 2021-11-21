@@ -1,4 +1,4 @@
-import type { Board, Tile } from '../scenario/board';
+import type { Board, Tile }  from '../scenario/board';
 import type { ModelProgram } from './model-programs/model-program';
 
 /**

@@ -1,6 +1,6 @@
 import { registerGameLinkHandlers } from './game/game-link-tooltip';
-import { placementDone, ready } from './game/sockets/button-functions';
-import { openSocketConnection } from './game/sockets/opener';
+import { ready }                    from './game/sockets/button-functions';
+import { openSocketConnection }     from './game/sockets/opener';
 
 openSocketConnection();
 
@@ -18,5 +18,4 @@ $(document).ready(() => {
 
     // Register buttons
     $('#ready-button').on('click', () => ready(true));
-    $('#button-placement-done').on('click', () => placementDone());
 });

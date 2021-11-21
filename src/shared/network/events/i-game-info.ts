@@ -1,4 +1,4 @@
-import type { IScenarioInfo } from '../scenario/i-scenario-info';
+import type { IScenarioInfo }    from '../scenario/i-scenario-info';
 import type { IBaseServerEvent } from './i-server-event';
 
 /**

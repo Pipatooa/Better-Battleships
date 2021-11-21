@@ -1,5 +1,5 @@
+import { baseActionSchema }       from './base-action';
 import type { IBaseActionSource } from './base-action';
-import { baseActionSchema } from './base-action';
 
 /**
  * JSON source interface reflecting schema

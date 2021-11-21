@@ -1,4 +1,4 @@
-import type { IGameStartEvent } from '../../../../shared/network/events/i-game-start';
+import type { IGameStartEvent } from 'shared/network/events/i-game-start';
 
 /**
  * Handles a game start event from the server

@@ -1,8 +1,8 @@
-import type { IBoardInfo } from '../../../shared/network/scenario/i-board-info';
+import { Region }                  from './region';
+import { TileType }                from './tiletype';
 import type { BoardInfoGenerator } from '../canvas/board-info-generator';
-import { Region } from './region';
-import type { Ship } from './ship';
-import { TileType } from './tiletype';
+import type { Ship }               from './ship';
+import type { IBoardInfo }         from 'shared/network/scenario/i-board-info';
 
 /**
  * Board - Client Version

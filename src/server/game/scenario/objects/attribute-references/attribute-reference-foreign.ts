@@ -1,7 +1,7 @@
-import type { EvaluationContext } from '../../evaluation-context';
-import type { IAttributeHolder } from '../attributes/sources/attribute-holder';
-import { AttributeReference } from './attribute-reference';
-import type { Attribute } from '../attributes/attribute';
+import { AttributeReference }                    from './attribute-reference';
+import type { EvaluationContext }                from '../../evaluation-context';
+import type { Attribute }                        from '../attributes/attribute';
+import type { IAttributeHolder }                 from '../attributes/sources/attribute-holder';
 import type { AttributeReferenceObjectSelector } from './sources/attribute-reference';
 
 /**
@@ -21,17 +21,17 @@ export class AttributeReferenceForeign extends AttributeReference {
                        protected readonly attributeName: string) {
         super();
     }
-    
+
     /**
-     * Resolves underlying attribute that this attribute refers to under a given evaluation context 
+     * Resolves underlying attribute that this attribute refers to under a given evaluation context
      *
      * @param    evaluationContext Context for resolving objects and values during evaluation
      * @returns                    Referenced attribute
      */
     private getAttribute(evaluationContext: EvaluationContext): Attribute {
-        
+
         let attributeHolder: IAttributeHolder | undefined;
-        
+
         switch (this.objectSelector) {
             case 'scenario':
                 attributeHolder = evaluationContext.scenario;
@@ -52,7 +52,7 @@ export class AttributeReferenceForeign extends AttributeReference {
 
         return attributeHolder!.attributes[this.attributeName];
     }
-    
+
     /**
      * Get the value of the referenced attribute
      *

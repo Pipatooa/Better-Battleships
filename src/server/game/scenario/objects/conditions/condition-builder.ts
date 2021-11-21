@@ -1,13 +1,13 @@
-import type { ParsingContext } from '../../parsing-context';
-import { checkAgainstSchema } from '../../schema-checker';
-import type { Condition } from './condition';
-import { ConditionAll } from './condition-all';
-import { ConditionAny } from './condition-any';
+import { checkAgainstSchema }            from '../../schema-checker';
+import { ConditionAll }                  from './condition-all';
+import { ConditionAny }                  from './condition-any';
+import { ConditionFixed }                from './condition-fixed';
+import { ConditionSome }                 from './condition-some';
 import { ConditionValueMeetsConstraint } from './condition-value-meets-constraint';
-import { ConditionSome } from './condition-some';
-import { ConditionFixed } from './condition-fixed';
-import type { ConditionSource } from './sources/condition';
-import { conditionSchema } from './sources/condition';
+import { conditionSchema }               from './sources/condition';
+import type { ParsingContext }           from '../../parsing-context';
+import type { Condition }                from './condition';
+import type { ConditionSource }          from './sources/condition';
 
 /**
  * Factory function to generate Condition from JSON scenario data

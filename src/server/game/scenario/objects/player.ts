@@ -1,15 +1,15 @@
-import type { IPlayerInfo } from '../../../../shared/network/scenario/i-player-info';
-import type { Client } from '../../sockets/client';
-import type { ParsingContext } from '../parsing-context';
-import { checkAgainstSchema } from '../schema-checker';
+import { checkAgainstSchema }               from '../schema-checker';
 import { getJSONFromEntry, UnpackingError } from '../unpacker';
-import { getAttributes } from './attributes/attribute-getter';
-import type { AttributeMap } from './attributes/i-attribute-holder';
-import type { IAttributeHolder } from './attributes/sources/attribute-holder';
-import { Ship } from './ship';
-import type { IPlayerSource } from './sources/player';
-import { playerSchema } from './sources/player';
-import type { IShipSource } from './sources/ship';
+import { getAttributes }                    from './attributes/attribute-getter';
+import { Ship }                             from './ship';
+import { playerSchema }                     from './sources/player';
+import type { Client }                      from '../../sockets/client';
+import type { ParsingContext }              from '../parsing-context';
+import type { AttributeMap }                from './attributes/i-attribute-holder';
+import type { IAttributeHolder }            from './attributes/sources/attribute-holder';
+import type { IPlayerSource }               from './sources/player';
+import type { IShipSource }                 from './sources/ship';
+import type { IPlayerInfo }                 from 'shared/network/scenario/i-player-info';
 
 /**
  * Player - Server Version

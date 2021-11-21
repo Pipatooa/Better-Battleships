@@ -1,5 +1,5 @@
+import { conditionMultipleSchema }       from './condition-multiple';
 import type { IConditionMultipleSource } from './condition-multiple';
-import { conditionMultipleSchema } from './condition-multiple';
 
 /**
  * JSON source interface reflecting schema

@@ -1,8 +1,8 @@
-import Joi from 'joi';
+import Joi                           from 'joi';
+import { baseConditionSchema }       from './base-condition';
+import { conditionSchema }           from './condition';
 import type { IBaseConditionSource } from './base-condition';
-import { baseConditionSchema } from './base-condition';
-import type { ConditionSource } from './condition';
-import { conditionSchema } from './condition';
+import type { ConditionSource }      from './condition';
 
 /**
  * JSON source interface reflecting schema

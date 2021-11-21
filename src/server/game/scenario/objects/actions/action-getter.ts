@@ -1,7 +1,7 @@
+import { buildAction }         from './action-builder';
 import type { ParsingContext } from '../../parsing-context';
-import type { Action } from './action';
-import { buildAction } from './action-builder';
-import type { ActionSource } from './sources/action';
+import type { Action }         from './action';
+import type { ActionSource }   from './sources/action';
 
 /**
  * Gets a dictionary of actions tied to events from a dictionary of action sources

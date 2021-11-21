@@ -1,6 +1,6 @@
-import Joi from 'joi';
+import Joi                  from 'joi';
+import { valueSchema }      from '../../values/sources/value';
 import type { ValueSource } from '../../values/sources/value';
-import { valueSchema } from '../../values/sources/value';
 
 /**
  * JSON source interface reflecting schema

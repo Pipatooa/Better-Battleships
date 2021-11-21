@@ -1,11 +1,11 @@
-import type { EvaluationContext } from '../../evaluation-context';
-import type { ParsingContext } from '../../parsing-context';
-import { checkAgainstSchema } from '../../schema-checker';
-import type { Value } from '../values/value';
-import { buildValue } from '../values/value-builder';
+import { checkAgainstSchema }                 from '../../schema-checker';
+import { buildValue }                         from '../values/value-builder';
+import { valueAtLeastConstraintSchema }       from './sources/value-at-least-constraint';
+import { ValueConstraint }                    from './value-constaint';
+import type { EvaluationContext }             from '../../evaluation-context';
+import type { ParsingContext }                from '../../parsing-context';
+import type { Value }                         from '../values/value';
 import type { IValueAtLeastConstraintSource } from './sources/value-at-least-constraint';
-import { valueAtLeastConstraintSchema } from './sources/value-at-least-constraint';
-import { ValueConstraint } from './value-constaint';
 
 /**
  * ValueAtLeastConstraint - Server Version
@@ -38,9 +38,9 @@ export class ValueAtLeastConstraint extends ValueConstraint {
         // Validate JSON data against schema
         if (checkSchema)
             valueAtLeastConstraintSource = await checkAgainstSchema(valueAtLeastConstraintSource, valueAtLeastConstraintSchema, parsingContext);
-        
+
         const min: Value = await buildValue(parsingContext.withExtendedPath('.min'), valueAtLeastConstraintSource.min, false);
-        
+
         // Return created ValueAtLeastConstraint object
         return new ValueAtLeastConstraint(min);
     }

@@ -6,9 +6,9 @@ import type { Descriptor } from '../descriptor';
  * Base class for abilities of a ship which execute actions upon use
  */
 export abstract class Ability {
-    
+
     protected _gameElement: JQuery | undefined;
-    
+
     /**
      * Ability constructor
      *
@@ -17,7 +17,7 @@ export abstract class Ability {
      */
     public constructor(public readonly index: number,
                        public readonly descriptor: Descriptor) {
-        
+
     }
 
     /**

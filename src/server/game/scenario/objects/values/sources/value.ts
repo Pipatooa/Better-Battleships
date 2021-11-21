@@ -1,11 +1,11 @@
-import Joi from 'joi';
-import { attributeReferenceSchema } from '../../attribute-references/sources/attribute-reference';
+import Joi                                     from 'joi';
+import { attributeReferenceSchema }            from '../../attribute-references/sources/attribute-reference';
 import type { IValueAttributeReferenceSource } from './value-attribute-reference';
-import type { IValueFixedSource } from './value-fixed';
-import type { IValueProductSource } from './value-product';
-import type { IValueRandomSource } from './value-random';
-import type { IValueRoundedSource } from './value-rounded';
-import type { IValueSumSource } from './value-sum';
+import type { IValueFixedSource }              from './value-fixed';
+import type { IValueProductSource }            from './value-product';
+import type { IValueRandomSource }             from './value-random';
+import type { IValueRoundedSource }            from './value-rounded';
+import type { IValueSumSource }                from './value-sum';
 
 /**
  * Type matching all value sources

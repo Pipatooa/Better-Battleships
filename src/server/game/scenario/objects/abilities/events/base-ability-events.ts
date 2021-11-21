@@ -1,5 +1,5 @@
+import { baseEvents }  from '../../../events/base-events';
 import type { Action } from '../../actions/action';
-import { baseEvents } from '../../../events/base-events';
 
 /**
  * List of event names for abilities

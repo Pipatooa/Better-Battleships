@@ -1,5 +1,5 @@
+import { valueMultipleSchema }       from './value-multiple';
 import type { IValueMultipleSource } from './value-multiple';
-import { valueMultipleSchema } from './value-multiple';
 
 /**
  * Schema for validating source JSON data

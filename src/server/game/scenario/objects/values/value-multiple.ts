@@ -1,7 +1,7 @@
+import { Value }               from './value';
+import { buildValue }          from './value-builder';
 import type { ParsingContext } from '../../parsing-context';
-import type { ValueSource } from './sources/value';
-import { Value } from './value';
-import { buildValue } from './value-builder';
+import type { ValueSource }    from './sources/value';
 
 /**
  * ValueMultiple - Server Version

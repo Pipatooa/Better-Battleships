@@ -1,13 +1,13 @@
-import type { IZipEntry } from 'adm-zip';
-import type { FileJSON } from 'formidable';
+import { AttributeReferenceForeign }             from './objects/attribute-references/attribute-reference-foreign';
+import { AttributeReferenceLocal }               from './objects/attribute-references/attribute-reference-local';
+import { UnpackingError }                        from './unpacker';
+import type { ForeignAttributeRegistry }         from './objects/attribute-references/foreign-attribute-registry';
 import type { AttributeReferenceObjectSelector } from './objects/attribute-references/sources/attribute-reference';
-import type { AttributeMap } from './objects/attributes/i-attribute-holder';
-import { AttributeReferenceForeign } from './objects/attribute-references/attribute-reference-foreign';
-import { AttributeReferenceLocal } from './objects/attribute-references/attribute-reference-local';
-import type { ForeignAttributeRegistry } from './objects/attribute-references/foreign-attribute-registry';
-import type { Ship } from './objects/ship';
-import type { ZipEntryMap } from './unpacker';
-import { UnpackingError } from './unpacker';
+import type { AttributeMap }                     from './objects/attributes/i-attribute-holder';
+import type { Ship }                             from './objects/ship';
+import type { ZipEntryMap }                      from './unpacker';
+import type { IZipEntry }                        from 'adm-zip';
+import type { FileJSON }                         from 'formidable';
 
 /**
  * ParsingContext - Server Version
@@ -41,7 +41,7 @@ export class ParsingContext {
                        protected _currentFile: string,
                        protected _currentPath: string,
                        public readonly boardEntry: IZipEntry,
-                       public readonly foreignAttributeRegistryEntry: IZipEntry,               
+                       public readonly foreignAttributeRegistryEntry: IZipEntry,
                        public readonly teamEntries: ZipEntryMap,
                        public readonly playerPrototypeEntries: ZipEntryMap,
                        public readonly shipEntries: ZipEntryMap,
@@ -51,7 +51,7 @@ export class ParsingContext {
                        protected playerAttributes?: AttributeMap,
                        protected shipAttributes?: AttributeMap,
                        protected abilityAttributes?: AttributeMap,
-                       protected _foreignAttributeRegistry?: ForeignAttributeRegistry,               
+                       protected _foreignAttributeRegistry?: ForeignAttributeRegistry,
                        protected _shipPartial?: Partial<Ship>,
                        protected _foreignAttributeFlag: boolean = false) {
     }
@@ -107,7 +107,7 @@ export class ParsingContext {
         if (!this._foreignAttributeFlag)
             throw new UnpackingError(`Cannot reference foreign attribute 'foreign:${objectSelector}.${attributeName}' defined at '${this.currentPath}' in a context where no foreign object to address exists`,
                 this.currentFile);
-        
+
         if (!this.foreignAttributeRegistry!.getRegisteredAttributeNames(objectSelector).includes(attributeName))
             throw new UnpackingError(`Cannot find attribute 'foreign:${objectSelector}.${attributeName}' defined at '${this.currentPath}' since it is not declared as a foreign attribute in 'foreign-attributes.json'`,
                 this.currentFile);
@@ -260,7 +260,7 @@ export class ParsingContext {
         copy._foreignAttributeRegistry = foreignAttributeRegistry;
         return copy;
     }
-    
+
     /**
      * Factory function to generate a copy of this object with a reference to a ship
      *
@@ -301,7 +301,7 @@ export class ParsingContext {
             return '';
         return this.currentPath + '.';
     }
-    
+
     public get foreignAttributeRegistry(): ForeignAttributeRegistry | undefined {
         return this._foreignAttributeRegistry;
     }

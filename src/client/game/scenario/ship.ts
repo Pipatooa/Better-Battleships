@@ -1,9 +1,9 @@
 import type { BoardInfoGenerator } from '../canvas/board-info-generator';
-import type { Player } from '../player';
-import type { Ability } from './abilities/ability';
-import type { Board } from './board';
-import type { Descriptor } from './descriptor';
-import type { Pattern } from './pattern';
+import type { Player }             from '../player';
+import type { Ability }            from './abilities/ability';
+import type { Board }              from './board';
+import type { Descriptor }         from './descriptor';
+import type { Pattern }            from './pattern';
 
 /**
  * Ship - Client Version

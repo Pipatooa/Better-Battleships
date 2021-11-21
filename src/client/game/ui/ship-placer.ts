@@ -1,6 +1,6 @@
-import { game } from '../game';
-import type { Ship } from '../scenario/ship';
+import { game }           from '../game';
 import { tooltipManager } from './tooltip-manager';
+import type { Ship }      from '../scenario/ship';
 
 export class ShipPlacer {
 

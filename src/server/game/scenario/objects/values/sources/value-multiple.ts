@@ -1,8 +1,8 @@
-import Joi from 'joi';
+import Joi                       from 'joi';
+import { baseValueSchema }       from './base-value';
+import { valueSchema }           from './value';
 import type { IBaseValueSource } from './base-value';
-import { baseValueSchema } from './base-value';
-import type { ValueSource } from './value';
-import { valueSchema } from './value';
+import type { ValueSource }      from './value';
 
 /**
  * Schema for validating source JSON data

@@ -1,6 +1,6 @@
 import { attributeReferenceSchema } from '../../attribute-references/sources/attribute-reference';
-import type { IBaseValueSource } from './base-value';
-import { baseValueSchema } from './base-value';
+import { baseValueSchema }          from './base-value';
+import type { IBaseValueSource }    from './base-value';
 
 /**
  * Schema for validating source JSON data

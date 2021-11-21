@@ -1,8 +1,8 @@
-import Joi from 'joi';
-import type { IJoinTeamRequest } from './i-join-team';
-import type { IReadyRequest } from './i-ready';
+import Joi                            from 'joi';
+import type { IJoinTeamRequest }      from './i-join-team';
+import type { IReadyRequest }         from './i-ready';
 import type { IShipPlacementRequest } from './i-ship-placement-request';
-import type { IUseAbilityRequest } from './i-use-ability';
+import type { IUseAbilityRequest }    from './i-use-ability';
 
 /**
  * Base client request which all client requests extend

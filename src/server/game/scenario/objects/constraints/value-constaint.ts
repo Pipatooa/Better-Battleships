@@ -7,7 +7,7 @@ import type { EvaluationContext } from '../../evaluation-context';
  * or for a value to be changed to meet the constrain
  */
 export abstract class ValueConstraint {
-    
+
     /**
      * Checks whether or not a value meets this constraint
      *

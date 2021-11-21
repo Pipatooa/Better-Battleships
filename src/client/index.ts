@@ -1,6 +1,6 @@
+import { createCustomGame }                  from './index/create-custom-game';
 import { bindFileDrop, setFileFromDownload } from './index/filedrop';
-import { createCustomGame } from './index/create-custom-game';
-import { joinGame } from './index/join-game';
+import { joinGame }                          from './index/join-game';
 
 $(document).ready(async () => {
 

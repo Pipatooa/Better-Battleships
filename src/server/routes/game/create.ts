@@ -1,13 +1,13 @@
-import express from 'express';
-import type { FileJSON } from 'formidable';
-import formidable from 'formidable';
-import fs from 'fs';
-import stringify from 'json-stringify-safe';
-import type { Game } from '../../game/game';
+import fs                              from 'fs';
+import express                         from 'express';
+import formidable                      from 'formidable';
+import stringify                       from 'json-stringify-safe';
 import { capacityReached, createGame } from '../../game/game-manager';
-import type { Scenario } from '../../game/scenario/objects/scenario';
-import { unpack, UnpackingError } from '../../game/scenario/unpacker';
-import { preventCSRF, requireAuth } from '../../middleware';
+import { unpack, UnpackingError }      from '../../game/scenario/unpacker';
+import { preventCSRF, requireAuth }    from '../../middleware';
+import type { Game }                   from '../../game/game';
+import type { Scenario }               from '../../game/scenario/objects/scenario';
+import type { FileJSON }               from 'formidable';
 
 const router = express.Router();
 

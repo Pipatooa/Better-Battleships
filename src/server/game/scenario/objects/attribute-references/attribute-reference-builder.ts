@@ -1,15 +1,12 @@
-import type { ParsingContext } from '../../parsing-context';
-import { checkAgainstSchema } from '../../schema-checker';
-import type {
-    AttributeReference
-} from './attribute-reference';
+import { checkAgainstSchema }       from '../../schema-checker';
+import { attributeReferenceSchema } from './sources/attribute-reference';
+import type { ParsingContext }      from '../../parsing-context';
+import type { AttributeReference }  from './attribute-reference';
 import type {
     AttributeReferenceObjectSelector,
     AttributeReferenceSource,
     AttributeReferenceType
-} from './sources/attribute-reference';
-import { attributeReferenceSchema
-} from './sources/attribute-reference';
+}                                   from './sources/attribute-reference';
 
 /**
  * Factory function to generate AttributeReference from JSON scenario data
@@ -30,9 +27,9 @@ export async function buildAttributeReference(parsingContext: ParsingContext, at
     const referenceType = matches![1] as AttributeReferenceType;
     const objectSelector = matches![2] as AttributeReferenceObjectSelector;
     const attributeName = matches![3];
-    
+
     let attributeReference: AttributeReference;
-    
+
     switch (referenceType) {
         case 'local':
             attributeReference = parsingContext.getLocalAttributeReference(objectSelector, attributeName);
@@ -41,6 +38,6 @@ export async function buildAttributeReference(parsingContext: ParsingContext, at
             attributeReference = parsingContext.getForeignAttributeReference(objectSelector as 'team' | 'player' | 'ship', attributeName);
             break;
     }
-    
+
     return attributeReference;
 }

@@ -1,10 +1,10 @@
-import Joi from 'joi';
+import Joi                         from 'joi';
+import { attributeHolderSchema }   from '../attributes/sources/attribute-holder';
+import { colorSchema }             from '../common/sources/color';
+import { descriptorSchema }        from '../common/sources/descriptor';
+import { genericNameSchema }       from '../common/sources/generic-name';
 import type { AttributeMapSource } from '../attributes/i-attribute-holder';
-import { attributeHolderSchema } from '../attributes/sources/attribute-holder';
-import { colorSchema } from '../common/sources/color';
-import type { IDescriptorSource } from '../common/sources/descriptor';
-import { descriptorSchema } from '../common/sources/descriptor';
-import { genericNameSchema } from '../common/sources/generic-name';
+import type { IDescriptorSource }  from '../common/sources/descriptor';
 
 /**
  * JSON source interface reflecting schema

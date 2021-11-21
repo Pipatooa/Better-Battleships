@@ -1,6 +1,6 @@
 import boardFragmentShaderSource from '../shaders/board.frag';
-import boardVertexShaderSource from '../shaders/board.vert';
-import { ModelProgram } from './model-program';
+import boardVertexShaderSource   from '../shaders/board.vert';
+import { ModelProgram }          from './model-program';
 
 export class BoardProgram extends ModelProgram<'vertPosition' | 'vertTextureCoord', UniformName> {
     public constructor(gl: WebGL2RenderingContext) {

@@ -1,8 +1,8 @@
-import type { ParsingContext } from '../../parsing-context';
-import { checkAgainstSchema } from '../../schema-checker';
-import { Condition } from './condition';
+import { checkAgainstSchema }         from '../../schema-checker';
+import { Condition }                  from './condition';
+import { conditionFixedSchema }       from './sources/condition-fixed';
+import type { ParsingContext }        from '../../parsing-context';
 import type { IConditionFixedSource } from './sources/condition-fixed';
-import { conditionFixedSchema } from './sources/condition-fixed';
 
 /**
  * ConditionFixed - Server Version
@@ -48,7 +48,7 @@ export class ConditionFixed extends Condition {
         // Validate JSON data against schema
         if (checkSchema)
             conditionFixedSource = await checkAgainstSchema(conditionFixedSource, conditionFixedSchema, parsingContext);
-        
+
         return new ConditionFixed(conditionFixedSource.result);
     }
 }

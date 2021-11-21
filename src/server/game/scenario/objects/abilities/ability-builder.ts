@@ -1,11 +1,11 @@
+import { checkAgainstSchema }  from '../../schema-checker';
+import { AbilityFire }         from './ability-fire';
+import { AbilityMove }         from './ability-move';
+import { AbilityRotate }       from './ability-rotate';
+import { abilitySchema }       from './sources/ability';
 import type { ParsingContext } from '../../parsing-context';
-import { checkAgainstSchema } from '../../schema-checker';
-import type { Ability } from './ability';
-import { AbilityFire } from './ability-fire';
-import { AbilityMove } from './ability-move';
-import { AbilityRotate } from './ability-rotate';
-import type { AbilitySource } from './sources/ability';
-import { abilitySchema } from './sources/ability';
+import type { Ability }        from './ability';
+import type { AbilitySource }  from './sources/ability';
 
 /**
  * Factory function to generate Ability from JSON scenario data

@@ -1,7 +1,7 @@
-import * as console from 'console';
-import config from '../config';
+import console           from 'console';
+import config            from '../config';
 import { queryDatabase } from '../db/query';
-import { Game } from './game';
+import { Game }          from './game';
 import type { Scenario } from './scenario/objects/scenario';
 
 const games: { [id: string]: Game } = {};

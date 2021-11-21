@@ -1,13 +1,14 @@
-const path = require('path');
-const PnpWebpackPlugin = require('pnp-webpack-plugin');
-const NodemonPlugin = require('nodemon-webpack-plugin');
-const CopyWebpackPlugin = require('copy-webpack-plugin');
-const ZipWebpackPlugin = require('zip-file-webpack-plugin');
-const FileManagerPlugin = require('filemanager-webpack-plugin');
+const path                    = require('path');
+const PnpWebpackPlugin        = require('pnp-webpack-plugin');
+const TsconfigPathsPlugin     = require('tsconfig-paths-webpack-plugin');
+const NodemonPlugin           = require('nodemon-webpack-plugin');
+const CopyWebpackPlugin       = require('copy-webpack-plugin');
+const ZipWebpackPlugin        = require('zip-file-webpack-plugin');
+const FileManagerPlugin       = require('filemanager-webpack-plugin');
 const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const TerserPlugin = require('terser-webpack-plugin');
-const { readdirSync } = require('fs');
+const MiniCssExtractPlugin    = require('mini-css-extract-plugin');
+const TerserPlugin            = require('terser-webpack-plugin');
+const { readdirSync }         = require('fs');
 
 /**
  * Common config
@@ -16,7 +17,7 @@ const { readdirSync } = require('fs');
 const commonConfig = {
     resolve: {
         extensions: ['.js', '.json', '.ts', '.d.ts', '.glsl', '.vert', '.frag'],
-        plugins: [PnpWebpackPlugin]
+        plugins: [PnpWebpackPlugin, new TsconfigPathsPlugin()]
     },
     resolveLoader: {
         plugins: [PnpWebpackPlugin.moduleLoader(module)]

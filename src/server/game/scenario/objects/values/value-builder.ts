@@ -1,14 +1,14 @@
-import type { ParsingContext } from '../../parsing-context';
-import { checkAgainstSchema } from '../../schema-checker';
-import type { ValueSource } from './sources/value';
-import { valueSchema } from './sources/value';
-import type { Value } from './value';
+import { checkAgainstSchema }      from '../../schema-checker';
+import { valueSchema }             from './sources/value';
 import { ValueAttributeReference } from './value-attribute-reference';
-import { ValueFixed } from './value-fixed';
-import { ValueProduct } from './value-product';
-import { ValueRandom } from './value-random';
-import { ValueRounded } from './value-rounded';
-import { ValueSum } from './value-sum';
+import { ValueFixed }              from './value-fixed';
+import { ValueProduct }            from './value-product';
+import { ValueRandom }             from './value-random';
+import { ValueRounded }            from './value-rounded';
+import { ValueSum }                from './value-sum';
+import type { ParsingContext }     from '../../parsing-context';
+import type { ValueSource }        from './sources/value';
+import type { Value }              from './value';
 
 /**
  * Factory function to generate Value from JSON scenario data

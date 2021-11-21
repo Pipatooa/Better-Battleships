@@ -1,19 +1,19 @@
-import type { AbilityInfo } from '../../../../shared/network/scenario/ability-info';
-import type { IShipInfo } from '../../../../shared/network/scenario/i-ship-info';
-import type { ParsingContext } from '../parsing-context';
-import { checkAgainstSchema } from '../schema-checker';
+import { checkAgainstSchema }               from '../schema-checker';
 import { getJSONFromEntry, UnpackingError } from '../unpacker';
-import type { Ability } from './abilities/ability';
-import { buildAbility } from './abilities/ability-builder';
-import type { AbilitySource } from './abilities/sources/ability';
-import { getAttributes } from './attributes/attribute-getter';
-import type { AttributeMap } from './attributes/i-attribute-holder';
-import type { IAttributeHolder } from './attributes/sources/attribute-holder';
-import { Descriptor } from './common/descriptor';
-import { Pattern } from './common/pattern';
-import type { Rotation } from './common/rotation';
-import type { IShipSource } from './sources/ship';
-import { shipSchema } from './sources/ship';
+import { buildAbility }                     from './abilities/ability-builder';
+import { getAttributes }                    from './attributes/attribute-getter';
+import { Descriptor }                       from './common/descriptor';
+import { Pattern }                          from './common/pattern';
+import { shipSchema }                       from './sources/ship';
+import type { ParsingContext }              from '../parsing-context';
+import type { Ability }                     from './abilities/ability';
+import type { AbilitySource }               from './abilities/sources/ability';
+import type { AttributeMap }                from './attributes/i-attribute-holder';
+import type { IAttributeHolder }            from './attributes/sources/attribute-holder';
+import type { Rotation }                    from './common/rotation';
+import type { IShipSource }                 from './sources/ship';
+import type { AbilityInfo }                 from 'shared/network/scenario/ability-info';
+import type { IShipInfo }                   from 'shared/network/scenario/i-ship-info';
 
 /**
  * Ship - Server Version
@@ -165,11 +165,11 @@ export class Ship implements IAttributeHolder {
     /**
      * Getters and setters
      */
-    
+
     public get x(): number {
         return this._x;
     }
-    
+
     public get y(): number {
         return this._y;
     }

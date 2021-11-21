@@ -1,9 +1,9 @@
-import type { IGameInfoEvent } from '../../../../shared/network/events/i-game-info';
-import { searchParams } from '../../../game';
-import { Game } from '../../game';
-import { Player } from '../../player';
-import { Team } from '../../team';
-import { joinTeam, ready } from '../button-functions';
+import { searchParams }        from 'client/game';
+import { Game }                from '../../game';
+import { Player }              from '../../player';
+import { Team }                from '../../team';
+import { joinTeam, ready }     from '../button-functions';
+import type { IGameInfoEvent } from 'shared/network/events/i-game-info';
 
 /**
  * Handles a game info event from the server

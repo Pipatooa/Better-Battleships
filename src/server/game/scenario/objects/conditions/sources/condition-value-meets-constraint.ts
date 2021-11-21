@@ -1,9 +1,9 @@
+import { valueConstraintSchema }       from '../../constraints/sources/value-constraint';
+import { valueSchema }                 from '../../values/sources/value';
+import { baseConditionSchema }         from './base-condition';
 import type { IValueConstraintSource } from '../../constraints/sources/value-constraint';
-import { valueConstraintSchema } from '../../constraints/sources/value-constraint';
-import type { ValueSource } from '../../values/sources/value';
-import { valueSchema } from '../../values/sources/value';
-import type { IBaseConditionSource } from './base-condition';
-import { baseConditionSchema } from './base-condition';
+import type { ValueSource }            from '../../values/sources/value';
+import type { IBaseConditionSource }   from './base-condition';
 
 /**
  * JSON source interface reflecting schema

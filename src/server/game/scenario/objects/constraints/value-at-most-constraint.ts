@@ -1,11 +1,11 @@
-import type { EvaluationContext } from '../../evaluation-context';
-import type { ParsingContext } from '../../parsing-context';
-import { checkAgainstSchema } from '../../schema-checker';
-import type { Value } from '../values/value';
-import { buildValue } from '../values/value-builder';
+import { checkAgainstSchema }                from '../../schema-checker';
+import { buildValue }                        from '../values/value-builder';
+import { valueAtMostConstraintSchema }       from './sources/value-at-most-constraint';
+import { ValueConstraint }                   from './value-constaint';
+import type { EvaluationContext }            from '../../evaluation-context';
+import type { ParsingContext }               from '../../parsing-context';
+import type { Value }                        from '../values/value';
 import type { IValueAtMostConstraintSource } from './sources/value-at-most-constraint';
-import { valueAtMostConstraintSchema } from './sources/value-at-most-constraint';
-import { ValueConstraint } from './value-constaint';
 
 /**
  * ValueAtMostConstraint - Server Version
@@ -38,9 +38,9 @@ export class ValueAtMostConstraint extends ValueConstraint {
         // Validate JSON data against schema
         if (checkSchema)
             valueAtMostConstraintSource = await checkAgainstSchema(valueAtMostConstraintSource, valueAtMostConstraintSchema, parsingContext);
-        
+
         const max: Value = await buildValue(parsingContext.withExtendedPath('.max'), valueAtMostConstraintSource.max, false);
-        
+
         // Return created ValueAtMostConstraint object
         return new ValueAtMostConstraint(max);
     }

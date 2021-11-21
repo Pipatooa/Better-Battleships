@@ -1,6 +1,6 @@
-import Joi from 'joi';
+import Joi                     from 'joi';
+import { UnpackingError }      from './unpacker';
 import type { ParsingContext } from './parsing-context';
-import { UnpackingError } from './unpacker';
 
 /**
  * Validate JSON source data against a schema

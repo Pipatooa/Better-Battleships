@@ -1,5 +1,5 @@
-import { clamp } from '../../../shared/utility';
-import type { Board } from '../scenario/board';
+import { clamp }             from 'shared/utility';
+import type { Board }        from '../scenario/board';
 import type { ModelProgram } from './model-programs/model-program';
 
 export class ViewportHandler {
@@ -7,7 +7,7 @@ export class ViewportHandler {
     private readonly canvasOffsetParent: HTMLDivElement;
     private readonly canvasScale = 1.0;
     private canvasAspectRatio = 1;
-    
+
     private readonly offsetUniform: Float32Array;
     private readonly scaleUniform: Float32Array;
 
@@ -29,7 +29,7 @@ export class ViewportHandler {
                        private readonly forcedAspect?: number,
                        initialOffset?: [number, number],
                        initialScale?: [number, number]) {
-        
+
         this.offsetUniform = new Float32Array(initialOffset ?? [0, 0]);
         this.scaleUniform = new Float32Array(initialScale ?? [1, 1]);
 
@@ -135,8 +135,8 @@ export class ViewportHandler {
             return;
 
         ev.preventDefault();
-        this.offsetUniform[0]  += (ev.clientX - this.lastPointerPosition[0]) / this.canvas.clientWidth / this.scaleUniform[0] * 2;
-        this.offsetUniform[1]  -= (ev.clientY - this.lastPointerPosition[1]) / this.canvas.clientHeight / this.scaleUniform[1] * 2;
+        this.offsetUniform[0] += (ev.clientX - this.lastPointerPosition[0]) / this.canvas.clientWidth / this.scaleUniform[0] * 2;
+        this.offsetUniform[1] -= (ev.clientY - this.lastPointerPosition[1]) / this.canvas.clientHeight / this.scaleUniform[1] * 2;
         this.lastPointerPosition = [ev.clientX, ev.clientY];
     }
 

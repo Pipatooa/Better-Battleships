@@ -1,10 +1,10 @@
-import type { EvaluationContext } from '../../evaluation-context';
-import type { ParsingContext } from '../../parsing-context';
-import { checkAgainstSchema } from '../../schema-checker';
+import { checkAgainstSchema }      from '../../schema-checker';
+import { valueRandomSchema }       from './sources/value-random';
+import { Value }                   from './value';
+import { buildValue }              from './value-builder';
+import type { EvaluationContext }  from '../../evaluation-context';
+import type { ParsingContext }     from '../../parsing-context';
 import type { IValueRandomSource } from './sources/value-random';
-import { valueRandomSchema } from './sources/value-random';
-import { Value } from './value';
-import { buildValue } from './value-builder';
 
 /**
  * ValueRandom - Server Version

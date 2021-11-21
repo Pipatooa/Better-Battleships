@@ -1,9 +1,9 @@
-import Joi from 'joi';
-import { baseRequestSchema } from '../../../../shared/network/requests/i-client-request';
-import type { IUseAbilityRequest } from '../../../../shared/network/requests/i-use-ability';
+import Joi                                   from 'joi';
+import { baseRequestSchema }                 from 'shared/network/requests/i-client-request';
+import { EvaluationContext }                 from '../../scenario/evaluation-context';
 import { IndexedAbility, PositionedAbility } from '../../scenario/objects/abilities/ability';
-import { EvaluationContext } from '../../scenario/evaluation-context';
-import type { Client } from '../client';
+import type { Client }                       from '../client';
+import type { IUseAbilityRequest }           from 'shared/network/requests/i-use-ability';
 
 /**
  * Handles a ship placement request from the client
