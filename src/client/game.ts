@@ -1,21 +1,13 @@
-import { registerGameLinkHandlers } from './game/game-link-tooltip';
-import { ready }                    from './game/sockets/button-functions';
-import { openSocketConnection }     from './game/sockets/opener';
+import { openSocketConnection } from './game/sockets/opener';
+import { initiateLobbyUI }      from './game/ui/initiate';
 
+
+export const searchParams = new URLSearchParams(window.location.search);
 openSocketConnection();
 
-export let searchParams: URLSearchParams;
-export let flags: string;
-
+/**
+ * Called when page has finished loading
+ */
 $(document).ready(() => {
-
-    // Read dev flags
-    searchParams = new URLSearchParams(window.location.search);
-    flags = searchParams.has('flags') ? searchParams.get('flags')! : '';
-
-    // Prepare game link
-    registerGameLinkHandlers();
-
-    // Register buttons
-    $('#ready-button').on('click', () => ready(true));
+    initiateLobbyUI();
 });

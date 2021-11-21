@@ -13,12 +13,14 @@ export let allPlayers: { [id: string]: Player } = {};
 export class Player {
     public readonly name: string;
     public team: Team | undefined;
-    public readonly lobbyElement: JQuery;
 
     public color: string | undefined;
     public highlightColor: string | undefined;
 
     public colorPaletteIndex: number | undefined;
+
+    private readonly _lobbyElement: JQuery;
+    private _turnIndicatorElement: JQuery | undefined;
 
     /**
      * Player constructor
@@ -41,7 +43,7 @@ export class Player {
             selfPlayer = this;
 
         // Create representation of player in lobby
-        this.lobbyElement = this.createLobbyElements($('#unassigned-players'));
+        this._lobbyElement = this.createLobbyElements($('#unassigned-players'));
 
         if (ready)
             this.ready(true);
@@ -53,7 +55,7 @@ export class Player {
     public deconstruct(): void {
         this.team?.removePlayer(this);
         delete allPlayers[this.identity];
-        this.lobbyElement.remove();
+        this._lobbyElement.remove();
     }
 
     /**
@@ -63,16 +65,20 @@ export class Player {
      * @returns       Created parent element
      */
     private createLobbyElements(pane: JQuery): JQuery {
-
-        // Get display name from client identity string
-        const playerName = nameFromIdentity(this.identity);
-
-        // Create new element for player using identity and name. Add to pane
         const playerElement = $('<span class="player me-2 py-1 px-2 rounded-3"></span>');
-        playerElement.text(playerName);
+        playerElement.text(this.name);
         pane.append(playerElement);
-
         return playerElement;
+    }
+
+    /**
+     * Creates set of elements representing the player within the turn indicator
+     */
+    public createTurnIndicatorElement(): void {
+        this._turnIndicatorElement = $('<div class="turn-indicator py-1 px-2 rounded-3"></div>');
+        this._turnIndicatorElement.text(this.name);
+        this._turnIndicatorElement.css('--turn-indicator-team-color', this.team!.color);
+        $('#sidebar-turn-container').append($('<div class="col"></div>').append(this._turnIndicatorElement));
     }
 
     /**
@@ -81,13 +87,11 @@ export class Player {
      * @param  team New team to assign this player to
      */
     public assignTeam(team: Team): void {
-
-        // Remove player from current team and add player to new team
         this.team?.removePlayer(this);
         team.addPlayer(this);
 
         // Set new parent element for player elements in lobby
-        this.lobbyElement.appendTo(this.team!.lobbyPlayerContainerElement);
+        this._lobbyElement.appendTo(this.team!.lobbyPlayerContainerElement);
     }
 
     /**
@@ -97,8 +101,20 @@ export class Player {
      */
     public ready(readyState: boolean): void {
         if (readyState)
-            this.lobbyElement.addClass('player-ready');
+            this._lobbyElement.addClass('player-ready');
         else
-            this.lobbyElement.removeClass('player-ready');
+            this._lobbyElement.removeClass('player-ready');
+    }
+
+    /**
+     * Getters and setters
+     */
+
+    public get lobbyElement(): JQuery {
+        return this._lobbyElement;
+    }
+    
+    public get turnIndicatorElement(): JQuery | undefined {
+        return this._turnIndicatorElement;
     }
 }

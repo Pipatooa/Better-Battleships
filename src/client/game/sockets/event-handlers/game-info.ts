@@ -2,7 +2,7 @@ import { searchParams }        from 'client/game';
 import { Game }                from '../../game';
 import { Player }              from '../../player';
 import { Team }                from '../../team';
-import { joinTeam, ready }     from '../button-functions';
+import { joinTeam, ready }     from '../../ui/misc-buttons';
 import type { IGameInfoEvent } from 'shared/network/events/i-game-info';
 
 /**

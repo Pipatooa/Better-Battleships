@@ -1,4 +1,4 @@
-import { joinTeam }        from './sockets/button-functions';
+import { joinTeam }        from './ui/misc-buttons';
 import type { Player }     from './player';
 import type { Descriptor } from './scenario/descriptor';
 import type { ITeamInfo }  from 'shared/network/scenario/i-team-info';

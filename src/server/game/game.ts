@@ -209,13 +209,18 @@ export class Game {
             playerColors[client.identity] = [client.player!.color, client.player!.highlightColor];
         }
 
+        // Generate a sequence of turns
+        this.scenario.turnManager.generateTurns();
+
         // Broadcast game setup info
         for (const client of this.clients) {
             client.sendEvent({
                 event: 'setupInfo',
                 boardInfo: this.scenario.board.makeTransportable(),
                 playerInfo: client.player!.makeTransportable(),
-                playerColors: playerColors
+                playerColors: playerColors,
+                turnOrder: this.scenario.turnManager.turnOrder,
+                maxTurnTime: this.scenario.turnManager.turnTimeout
             });
         }
     }
@@ -240,17 +245,12 @@ export class Game {
     public startGame(): void {
         this._gamePhase = GamePhase.InProgress;
 
-        // Generate a sequence of turns and start turn timer
+        // Start first player's turn timer
         this.scenario.turnManager.start();
 
-        // Broadcast game start to all clients
-        for (const client of this.clients) {
-            client.sendEvent({
-                event: 'gameStart',
-                turnOrder: this.scenario.turnManager.turnOrder,
-                maxTurnTime: this.scenario.turnManager.turnTimeout
-            });
-        }
+        this.broadcastEvent({
+            event: 'gameStart'
+        });
     }
 
     /**

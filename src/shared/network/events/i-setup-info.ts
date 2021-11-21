@@ -6,5 +6,7 @@ export interface ISetupInfoEvent extends IBaseServerEvent {
     event: 'setupInfo',
     boardInfo: IBoardInfo,
     playerInfo: IPlayerInfo,
-    playerColors: { [id: string]: [string, string] }
+    playerColors: { [id: string]: [string, string] },
+    turnOrder: string[],
+    maxTurnTime: number
 }

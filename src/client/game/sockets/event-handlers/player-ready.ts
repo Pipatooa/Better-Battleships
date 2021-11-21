@@ -1,5 +1,5 @@
 import { allPlayers }             from '../../player';
-import { ready }                  from '../button-functions';
+import { ready }                  from '../../ui/misc-buttons';
 import { selfIdentity }           from './connection-info';
 import type { IPlayerReadyEvent } from 'shared/network/events/i-player-ready';
 

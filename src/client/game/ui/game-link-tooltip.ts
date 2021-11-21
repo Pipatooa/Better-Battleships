@@ -1,4 +1,4 @@
-import { copyToClipboard } from '../utils/utils';
+import { copyToClipboard } from '../../utils/utils';
 
 let shareLinkElement: JQuery;
 

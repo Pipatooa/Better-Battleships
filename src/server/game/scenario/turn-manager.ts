@@ -35,14 +35,13 @@ export class TurnManager {
      * Generates a sequence of turns and starts the turn timer
      */
     public start(): void {
-        this.generate();
         this.timeoutManager.startTimeout('turnTimeout');
     }
 
     /**
      * Generates a list of players turns using the current players from each team
      */
-    private generate(): void {
+    public generateTurns(): void {
         this._turnOrder = [];
         switch (this.turnOrdering) {
 

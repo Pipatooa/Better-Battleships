@@ -1,19 +1,31 @@
-import { game }                   from '../game';
-import { Board }                  from '../scenario/board';
-import { BoardInfoGenerator }     from './board-info-generator';
-import { BoardProgram }           from './model-programs/board-program';
-import { Renderer }               from './renderer';
-import { SelectionInfoGenerator } from './selection-info-generator';
-import { ViewportHandler }        from './viewport-handler';
-import type { Tile }              from '../scenario/board';
-import type { Ship }              from '../scenario/ship';
-import type { ColorAtlas }        from './color-atlas';
+import { game }                      from '../game';
+import { Board }                     from '../scenario/board';
+import { sendRequest }               from '../sockets/opener';
+import { initiateGameMainUI }        from '../ui/initiate';
+import { ShipPlacer }                from '../ui/ship-placer';
+import { UIManager }                 from '../ui/ui-manager';
+import { VariableVisibilityElement } from '../ui/variable-visibility-element';
+import { BoardInfoGenerator }        from './board-info-generator';
+import { BoardProgram }              from './model-programs/board-program';
+import { Renderer }                  from './renderer';
+import { SelectionInfoGenerator }    from './selection-info-generator';
+import { ViewportHandler }           from './viewport-handler';
+import type { Tile }                 from '../scenario/board';
+import type { Ship }                 from '../scenario/ship';
+import type { ColorAtlas }           from './color-atlas';
 
+/**
+ * ShipSelectionRenderer - Client Version
+ *
+ * Responsible for rendering ships to the ship selection canvas
+ */
 export class ShipSelectionRenderer extends Renderer {
 
     public readonly viewportHandler: ViewportHandler;
     private readonly boardInfoGenerator: BoardInfoGenerator;
     public readonly selectionInfoGenerator: SelectionInfoGenerator;
+
+    private readonly allShips: Ship[];
 
     private readonly ships: Ship[];
     private selectedIndex: number;
@@ -21,6 +33,17 @@ export class ShipSelectionRenderer extends Renderer {
 
     public readonly selectionBoard: Board;
 
+    private readonly cycleShipButtonContainer: VariableVisibilityElement;
+    private readonly placementDoneButton: VariableVisibilityElement;
+
+    private readonly sidebarShipSelectionRemainingCountElement: JQuery;
+
+    /**
+     * ShipSelectionRenderer constructor
+     *
+     * @param  colorAtlas Color atlas for rendering
+     * @param  ships      Array of ships to display to the player
+     */
     public constructor(colorAtlas: ColorAtlas,
                        ships: Ship[]) {
         const canvas = $('#ship-selection-canvas').get(0) as HTMLCanvasElement;
@@ -29,27 +52,36 @@ export class ShipSelectionRenderer extends Renderer {
 
         game.shipSelectionRenderer = this;
 
+        this.allShips = ships.slice();
+
         this.ships = ships;
         this.selectedIndex = 0;
         this.slotOpen = false;
         this.selectionBoard = this.generateSelectionBoard();
-        
+
+        // JQuery element caching
+        this.cycleShipButtonContainer = new VariableVisibilityElement($('#cycle-ship-button-container'));
+        this.placementDoneButton = new VariableVisibilityElement($('#placement-done-button'));
+        this.sidebarShipSelectionRemainingCountElement = $('#sidebar-ship-selection-remaining-count');
+
+        // Rendering initialisation
         this.viewportHandler = new ViewportHandler(canvas, this.gl, this.modelPrograms[0], false, 1, [-0.5, -0.5], [2, 2]);
         this.viewportHandler.resizeCallback = () => this.render();
         this.boardInfoGenerator = new BoardInfoGenerator(this.gl, this.modelPrograms[0], this.selectionBoard, false);
         this.boardInfoGenerator.push();
         this.selectionInfoGenerator = new SelectionInfoGenerator(this.gl, this.modelPrograms[0]);
         this.selectionInfoGenerator.push();
-
-        for (const ship of ships) {
-            this.selectionBoard.addShip(ship, true);
-        }
-
         colorAtlas.push(this.gl, this.modelPrograms);
+
+        for (const ship of ships)
+            this.selectionBoard.addShip(ship, true);
+
         this.showCurrentShip();
 
+        // Register event listeners
         $('#next-ship-button').get(0).addEventListener('click', () => this.cycleNextShip());
         $('#previous-ship-button').get(0).addEventListener('click', () => this.cyclePreviousShip());
+        this.placementDoneButton.element.get(0).addEventListener('click', () => this.onPlacementDone());
     }
 
     /**
@@ -58,9 +90,9 @@ export class ShipSelectionRenderer extends Renderer {
      * @returns  Created board
      */
     private generateSelectionBoard(): Board {
-        
+
         const tiles: Tile[][] = [];
-        
+
         // Find maximum length of ship
         let maxLength = 0;
         for (const ship of this.ships) {
@@ -77,7 +109,7 @@ export class ShipSelectionRenderer extends Renderer {
                 tiles[y][x] = [tileType, [], undefined];
             }
         }
-        
+
         return new Board(tiles, game.board!.tileTypes, tileType);
     }
 
@@ -117,7 +149,7 @@ export class ShipSelectionRenderer extends Renderer {
     private showCurrentShip(): void {
         if (this.ships.length === 0 || this.slotOpen)
             return;
-        
+
         const ship = this.ships[this.selectedIndex];
         const [maxX, maxY] = ship.pattern.getBounds();
 
@@ -126,6 +158,10 @@ export class ShipSelectionRenderer extends Renderer {
         const y = Math.floor((this.selectionBoard.size[1] - maxY - 1) / 2);
         ship.moveTo(x, y);
         this.render();
+
+        const currentUIManager = UIManager.currentManager;
+        if (currentUIManager instanceof ShipPlacer)
+            currentUIManager.selectedShip = this.ships[this.selectedIndex];
     }
 
     /**
@@ -141,6 +177,8 @@ export class ShipSelectionRenderer extends Renderer {
         this.selectionBoard.removeShip(ship, true);
         this.ships.splice(this.selectedIndex, 1);
         this.slotOpen = true;
+        this.render();
+        this.checkPlacementDone();
         return ship;
     }
 
@@ -151,6 +189,9 @@ export class ShipSelectionRenderer extends Renderer {
         this.slotOpen = true;
         const ship = this.ships[this.selectedIndex];
         ship?.moveTo(undefined, undefined);
+        this.render();
+        this.updateRemainingCount();
+        this.checkPlacementDone();
     }
 
     /**
@@ -169,6 +210,46 @@ export class ShipSelectionRenderer extends Renderer {
 
         this.slotOpen = false;
         this.showCurrentShip();
+        this.updateRemainingCount();
+        this.checkPlacementDone();
+    }
+
+    /**
+     * Updates remaining ship count display
+     */
+    private updateRemainingCount(): void {
+        let remaining = this.ships.length;
+        if (this.slotOpen)
+            remaining++;
+        this.sidebarShipSelectionRemainingCountElement.text(remaining);
+    }
+
+    /**
+     * Checks whether there are available ships left to place or being placed
+     */
+    private checkPlacementDone(): void {
+        const placementDone = this.ships.length === 0 && !this.slotOpen;
+        this.cycleShipButtonContainer.setVisibility(!placementDone);
+        this.placementDoneButton.setVisibility(placementDone);
+    }
+
+    /**
+     * Called when placement done button is clicked
+     */
+    private onPlacementDone(): void {
+        this.placementDoneButton.element.text('Waiting for other players...');
+        this.placementDoneButton.element.attr('disabled', true as any);
+
+        const shipPlacements: [number, number][] = [];
+        for (const ship of this.allShips)
+            shipPlacements.push([ship.x!, ship.y!]);
+
+        sendRequest({
+            request: 'shipPlacement',
+            shipPlacements: shipPlacements
+        });
+
+        initiateGameMainUI();
     }
 
     /**
@@ -179,5 +260,15 @@ export class ShipSelectionRenderer extends Renderer {
         this.gl.clearColor(0, 0, 0, 1.0);
         this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
         this.executePrograms();
+    }
+
+    /**
+     * Getters and setters
+     */
+
+    public get currentlyShown(): Ship | undefined {
+        return this.slotOpen
+            ? undefined
+            : this.ships[this.selectedIndex];
     }
 }

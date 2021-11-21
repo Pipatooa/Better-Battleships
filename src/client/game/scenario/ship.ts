@@ -1,9 +1,8 @@
-import type { BoardInfoGenerator } from '../canvas/board-info-generator';
-import type { Player }             from '../player';
-import type { Ability }            from './abilities/ability';
-import type { Board }              from './board';
-import type { Descriptor }         from './descriptor';
-import type { Pattern }            from './pattern';
+import type { Player }     from '../player';
+import type { Ability }    from './abilities/ability';
+import type { Board }      from './board';
+import type { Descriptor } from './descriptor';
+import type { Pattern }    from './pattern';
 
 /**
  * Ship - Client Version
@@ -13,7 +12,7 @@ import type { Pattern }            from './pattern';
 export class Ship {
 
     public board: Board | undefined;
-    public selected = false;
+    private _selected = false;
 
     /**
      * Ship constructor
@@ -62,12 +61,11 @@ export class Ship {
 
     /**
      * Updates board information for the area that the ship currently occupies
-     *
-     * @param  boardInfoGenerator Board information generator to update information with
      */
-    public updateArea(boardInfoGenerator: BoardInfoGenerator): void {
+    public updateArea(): void {
         const [maxX, maxY] = this.pattern.getBounds();
-        boardInfoGenerator.updateArea(this._x!, this._y!, this._x! + maxX, this._y! + maxY);
+        this.board?.boardInformationGenerator!.updateArea(this._x!, this._y!, this._x! + maxX, this._y! + maxY);
+        this.board?.boardInformationGenerator!.push();
     }
 
     /**
@@ -80,5 +78,14 @@ export class Ship {
 
     public get y(): number | undefined {
         return this._y;
+    }
+
+    public get selected(): boolean {
+        return this._selected;
+    }
+
+    public set selected(selected: boolean) {
+        this._selected = selected;
+        this.updateArea();
     }
 }

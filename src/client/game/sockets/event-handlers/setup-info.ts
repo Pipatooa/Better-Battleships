@@ -1,6 +1,4 @@
-import { ColorAtlas }             from '../../canvas/color-atlas';
-import { GameRenderer }           from '../../canvas/game-renderer';
-import { ShipSelectionRenderer }  from '../../canvas/ship-selection-renderer';
+import { initiateRenderers }      from '../../canvas/initiate';
 import { game }                   from '../../game';
 import { allPlayers, selfPlayer } from '../../player';
 import { AbilityFire }            from '../../scenario/abilities/ability-fire';
@@ -9,8 +7,8 @@ import { AbilityRotate }          from '../../scenario/abilities/ability-rotate'
 import { Board }                  from '../../scenario/board';
 import { Pattern }                from '../../scenario/pattern';
 import { Ship }                   from '../../scenario/ship';
-import { ShipPlacer }             from '../../ui/ship-placer';
-import { TooltipManager }         from '../../ui/tooltip-manager';
+import { initiateGameSetupUI }    from '../../ui/initiate';
+import { MainUIManager }          from '../../ui/main-ui-manager';
 import type { Ability }           from '../../scenario/abilities/ability';
 import type { ISetupInfoEvent }   from 'shared/network/events/i-setup-info';
 
@@ -61,13 +59,17 @@ export async function handleSetupInfo(setupInfoEvent: ISetupInfoEvent): Promise<
         ships.push(ship);
     }
 
-    const colorAtlas = new ColorAtlas();
-    colorAtlas.registerTeamColors();
-    colorAtlas.registerPlayerColors();
-    colorAtlas.registerTileColors(game.board.tileTypes);
-    new GameRenderer(colorAtlas, setupInfoEvent.playerInfo.spawnRegion);
-    new ShipSelectionRenderer(colorAtlas, ships);
+    // Create turn indicator elements in order
+    for (let i = 0; i < setupInfoEvent.turnOrder.length; i++){
+        const playerIdentity = setupInfoEvent.turnOrder[i];
+        const player = allPlayers[playerIdentity];
+        player.createTurnIndicatorElement();
+        MainUIManager.turnOrder.push(player);
 
-    new ShipPlacer();
-    new TooltipManager();
+        if (i === 0)
+            player.turnIndicatorElement!.addClass('turn-indicator-active');
+    }
+
+    initiateRenderers(setupInfoEvent.playerInfo.spawnRegion, ships);
+    initiateGameSetupUI();
 }

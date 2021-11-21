@@ -17,47 +17,44 @@
     background: var(--player-ready-color);
 }
 
-.turn-indicator {
-    --turn-indicator-team-color: #000;
-    background: linear-gradient(to bottom right, transparent 50%, var(--turn-indicator-team-color) 0) bottom right/1em 1em no-repeat, var(--turn-indicator-color);
-    white-space: nowrap;
-    transition: 150ms linear;
-}
-
-.turn-indicator.turn-indicator-active {
-    --turn-indicator-color: var(--turn-indicator-active-color);
-    transition: 150ms linear;
-}
-
 #game-link {
     width: min-content;
     white-space: nowrap;
 }
 
+#sidebar-ship-section {
+    overflow-y: auto;
+}
+
+#sidebar-ship-abilities {
+    grid-gap: 0.5em;
+    grid-template-columns: repeat(auto-fill, minmax(2em, 1fr));
+}
+
 #game-tooltip {
     position: absolute;
-    z-index: 1000;
+    z-index: 500;
 
     pointer-events: none;
 
     font-size: 0.75rem;
 }
 
-.attribute-list {
-    list-style-type: none;
+#info-popup {
+    position: absolute;
+    z-index: 1000;
+
+    width: inherit;
+    height: inherit;
+
+    top: 50%;
+    transform: translateY(-50%);
+
+    pointer-events: none;
 }
 
-.attribute-list > li {
-    text-indent: -1.5rem;
-}
-
-.attribute-list > li:before {
-    content: "- ";
-}
-
-#info-pane-ship-ability-container {
-    grid-gap: 0.5em;
-    grid-template-columns: repeat(auto-fill, minmax(2em, 1fr));
+#info-popup-close-button {
+    pointer-events: auto;
 }
 
 .ability {
@@ -74,6 +71,30 @@
 
 .ability.ability-unavailable {
     background-color: var(--ability-unavailable-color);
+}
+
+.attribute-list {
+    list-style-type: none;
+}
+
+.attribute-list > li {
+    text-indent: -1.5rem;
+}
+
+.attribute-list > li:before {
+    content: "- ";
+}
+
+.turn-indicator {
+    --turn-indicator-team-color: #000;
+    background: linear-gradient(to bottom right, transparent 50%, var(--turn-indicator-team-color) 0) bottom right/1.5em 1.5em no-repeat, var(--turn-indicator-color);
+    white-space: nowrap;
+    transition: 150ms linear;
+}
+
+.turn-indicator.turn-indicator-active {
+    --turn-indicator-color: var(--turn-indicator-active-color);
+    transition: 150ms linear;
 }
 
 .canvas-wrapper {
