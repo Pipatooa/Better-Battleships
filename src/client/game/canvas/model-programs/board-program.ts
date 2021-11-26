@@ -2,6 +2,11 @@ import boardFragmentShaderSource from '../shaders/board.frag';
 import boardVertexShaderSource   from '../shaders/board.vert';
 import { ModelProgram }          from './model-program';
 
+/**
+ * BoardProgram - Client Version
+ *
+ * Program for drawing a board to a canvas
+ */
 export class BoardProgram extends ModelProgram<'vertPosition' | 'vertTextureCoord', UniformName> {
     public constructor(gl: WebGL2RenderingContext) {
         super(gl, boardVertexShaderSource, boardFragmentShaderSource,
@@ -19,6 +24,9 @@ export class BoardProgram extends ModelProgram<'vertPosition' | 'vertTextureCoor
     }
 }
 
+/**
+ * List of shader uniform names
+ */
 const uniformNames = [
     'offset', 'scale',
     'backgroundColor',
@@ -30,4 +38,7 @@ const uniformNames = [
     'globalRenderFlags'
 ] as const;
 
+/**
+ * String union type matching all shader uniform names
+ */
 type UniformName = typeof uniformNames[number];

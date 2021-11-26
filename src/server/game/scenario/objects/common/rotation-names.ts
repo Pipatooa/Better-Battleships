@@ -1,12 +1,4 @@
-/**
- * Enum describing different rotations available
- */
-export enum Rotation {
-    NoChange,
-    Clockwise90,
-    Clockwise180,
-    Clockwise270
-}
+import { Rotation } from 'shared/scenario/objects/common/rotation';
 
 /**
  * Mapping of friendly rotation names to internal rotation amounts

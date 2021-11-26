@@ -4,7 +4,7 @@
  * N = Negative
  * P = Positive
  */
-export enum BorderFlag {
+export const enum BorderFlag {
     NXNY = 1,
     NY = 2,
     PXNY = 4,

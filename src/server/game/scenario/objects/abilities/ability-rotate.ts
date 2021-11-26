@@ -1,8 +1,8 @@
+import { Rotation }                  from '../../../../../shared/scenario/objects/common/rotation';
 import { checkAgainstSchema }        from '../../schema-checker';
 import { getActions }                from '../actions/action-getter';
 import { getAttributes }             from '../attributes/attribute-getter';
 import { Descriptor }                from '../common/descriptor';
-import { Rotation }                  from '../common/rotation';
 import { buildCondition }            from '../conditions/condition-builder';
 import { IndexedAbility }            from './ability';
 import { baseAbilityEvents }         from './events/base-ability-events';

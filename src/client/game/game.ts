@@ -1,5 +1,6 @@
-import type { GameRenderer }          from './canvas/game-renderer';
-import type { ShipSelectionRenderer } from './canvas/ship-selection-renderer';
+import type { AbilityRenderer }       from './canvas/renderers/ability-renderer';
+import type { GameRenderer }          from './canvas/renderers/game-renderer';
+import type { ShipSelectionRenderer } from './canvas/renderers/ship-selection-renderer';
 import type { Board }                 from './scenario/board';
 import type { Team }                  from './team';
 
@@ -13,9 +14,11 @@ export let game: Game;
 export class Game {
 
     public board: Board | undefined;
+    public spawnRegionID: string | undefined;
 
     public gameRenderer: GameRenderer | undefined;
     public shipSelectionRenderer: ShipSelectionRenderer | undefined;
+    public abilityRenderer: AbilityRenderer | undefined;
 
     /**
      * Game constructor

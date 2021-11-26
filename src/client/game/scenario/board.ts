@@ -1,6 +1,7 @@
 import { Region }                  from './region';
 import { TileType }                from './tiletype';
 import type { BoardInfoGenerator } from '../canvas/board-info-generator';
+import type { BoardRenderer }      from '../canvas/renderers/board-renderer';
 import type { Ship }               from './ship';
 import type { IBoardInfo }         from 'shared/network/scenario/i-board-info';
 
@@ -14,7 +15,8 @@ export class Board {
     public readonly size: [number, number];
     protected _ships: Ship[] = [];
 
-    public boardInformationGenerator: BoardInfoGenerator | undefined;
+    public renderer: BoardRenderer | undefined;
+    public informationGenerator: BoardInfoGenerator | undefined;
 
     /**
      * Board constructor
@@ -100,7 +102,7 @@ export class Board {
             const tile = this.tiles[y]?.[x];
             if (tile !== undefined) {
                 tile[2] = ship;
-                this.boardInformationGenerator?.updateTile(x, y, tile);
+                this.informationGenerator?.updateTile(x, y, tile);
             }
         }
     }
@@ -126,7 +128,7 @@ export class Board {
             const tile = this.tiles[y]?.[x];
             if (tile !== undefined) {
                 tile[2] = undefined;
-                this.boardInformationGenerator?.updateTile(x, y, tile);
+                this.informationGenerator?.updateTile(x, y, tile);
             }
         }
     }

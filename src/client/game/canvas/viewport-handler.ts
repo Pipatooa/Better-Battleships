@@ -6,7 +6,7 @@ export class ViewportHandler {
 
     private readonly canvasOffsetParent: HTMLDivElement;
     private readonly canvasScale = 1.0;
-    private canvasAspectRatio = 1;
+    private _canvasAspectRatio = 1;
 
     private readonly offsetUniform: Float32Array;
     private readonly scaleUniform: Float32Array;
@@ -19,8 +19,8 @@ export class ViewportHandler {
 
     private readonly scrollRatio = 0.85;
     private readonly scrollSensitivity = 0.01;
-
-    public _resizeCallback: (() => void) | undefined;
+    
+    private _updateCallback: (() => void) | undefined;
 
     public constructor(public readonly canvas: HTMLCanvasElement,
                        private readonly gl: WebGL2RenderingContext,
@@ -30,19 +30,13 @@ export class ViewportHandler {
                        initialOffset?: [number, number],
                        initialScale?: [number, number]) {
 
-        this.offsetUniform = new Float32Array(initialOffset ?? [0, 0]);
+        this.offsetUniform = new Float32Array(initialOffset ?? [-0.5, -0.5]);
         this.scaleUniform = new Float32Array(initialScale ?? [1, 1]);
 
         this.canvasOffsetParent = this.canvas.offsetParent as HTMLDivElement;
-        this.updateViewport();
-        this.push();
+        this.updateViewport(false);
 
-        window.addEventListener('resize', () => {
-            this.updateViewport();
-            if (!this.allowPanning)
-                this.push();
-            this._resizeCallback?.();
-        });
+        window.addEventListener('resize', () => this.updateViewport(true));
 
         if (this.allowPanning) {
             document.addEventListener('pointermove', (ev) => this.onPointerMove(ev));
@@ -52,8 +46,10 @@ export class ViewportHandler {
 
     /**
      * Resizes canvas to match screen size and updates GL viewport accordingly
+     *
+     * @param  callUpdateCallback Whether or not to call the update callback
      */
-    private updateViewport(): void {
+    public updateViewport(callUpdateCallback: boolean): void {
 
         // Update canvas dimensions
         const wrapperElement = this.canvas.parentElement!;
@@ -69,9 +65,11 @@ export class ViewportHandler {
         this.canvas.height = h;
 
         // Update viewport and scale information
-        this.canvasAspectRatio = w / h;
-        this.scaleUniform[1] = this.scaleUniform[0] * this.canvasAspectRatio;
+        this._canvasAspectRatio = w / h;
+        this.scaleUniform[1] = this.scaleUniform[0] * this._canvasAspectRatio;
         this.gl.viewport(0, 0, w, h);
+        if (callUpdateCallback)
+            this._updateCallback?.();
     }
 
     /**
@@ -111,6 +109,18 @@ export class ViewportHandler {
     }
 
     /**
+     * Manually sets the scale for the viewport
+     *
+     * @param  x Horizontal scale amount
+     * @param  y Vertical scale amount
+     */
+    public setScale(x: number, y: number): void {
+        this.offsetUniform[0] = x;
+        this.offsetUniform[1] = y;
+        this._updateCallback?.();
+    }
+
+    /**
      * Updates board position when pointer is dragged across board
      *
      * @param  ev Pointer movement event
@@ -138,6 +148,7 @@ export class ViewportHandler {
         this.offsetUniform[0] += (ev.clientX - this.lastPointerPosition[0]) / this.canvas.clientWidth / this.scaleUniform[0] * 2;
         this.offsetUniform[1] -= (ev.clientY - this.lastPointerPosition[1]) / this.canvas.clientHeight / this.scaleUniform[1] * 2;
         this.lastPointerPosition = [ev.clientX, ev.clientY];
+        this._updateCallback?.();
     }
 
     /**
@@ -146,9 +157,7 @@ export class ViewportHandler {
      * @param  ev Wheel event
      */
     private onWheel(ev: WheelEvent): void {
-
         ev.preventDefault();
-
         const scaleFactor = Math.pow(this.scrollRatio, ev.deltaY * this.scrollSensitivity);
         const deltaScaleFactor = 1 / scaleFactor - 1;
 
@@ -157,6 +166,7 @@ export class ViewportHandler {
         this.offsetUniform[1] += y / this.scaleUniform[1] * deltaScaleFactor;
         this.scaleUniform[0] *= scaleFactor;
         this.scaleUniform[1] *= scaleFactor;
+        this._updateCallback?.();
     }
 
     /**
@@ -164,14 +174,18 @@ export class ViewportHandler {
      */
     private constrainScale(): void {
         this.scaleUniform[0] = clamp(this.scaleUniform[0], this.scaleLowerBound, this.scaleUpperBound);
-        this.scaleUniform[1] = this.scaleUniform[0] * this.canvasAspectRatio;
+        this.scaleUniform[1] = this.scaleUniform[0] * this._canvasAspectRatio;
     }
 
     /**
      * Getters and setters
      */
 
-    public set resizeCallback(callback: () => any) {
-        this._resizeCallback = callback;
+    public get canvasAspectRatio(): number {
+        return this._canvasAspectRatio;
+    }
+
+    public set updateCallback(updateCallback: () => void) {
+        this._updateCallback = updateCallback;
     }
 }

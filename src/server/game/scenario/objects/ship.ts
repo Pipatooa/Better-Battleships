@@ -3,17 +3,17 @@ import { getJSONFromEntry, UnpackingError } from '../unpacker';
 import { buildAbility }                     from './abilities/ability-builder';
 import { getAttributes }                    from './attributes/attribute-getter';
 import { Descriptor }                       from './common/descriptor';
-import { Pattern }                          from './common/pattern';
+import { RotatablePattern }                 from './common/rotatable-pattern';
 import { shipSchema }                       from './sources/ship';
 import type { ParsingContext }              from '../parsing-context';
 import type { Ability }                     from './abilities/ability';
 import type { AbilitySource }               from './abilities/sources/ability';
 import type { AttributeMap }                from './attributes/i-attribute-holder';
 import type { IAttributeHolder }            from './attributes/sources/attribute-holder';
-import type { Rotation }                    from './common/rotation';
 import type { IShipSource }                 from './sources/ship';
 import type { AbilityInfo }                 from 'shared/network/scenario/ability-info';
 import type { IShipInfo }                   from 'shared/network/scenario/i-ship-info';
+import type { Rotation }                    from 'shared/scenario/objects/common/rotation';
 
 /**
  * Ship - Server Version
@@ -34,7 +34,7 @@ export class Ship implements IAttributeHolder {
      * @param  attributes Attributes for the ship
      */
     public constructor(public readonly descriptor: Descriptor,
-                       protected _pattern: Pattern,
+                       protected _pattern: RotatablePattern,
                        public readonly abilities: Ability[],
                        public readonly attributes: AttributeMap) {
     }
@@ -116,7 +116,7 @@ export class Ship implements IAttributeHolder {
 
         // Get component elements from source
         const descriptor = await Descriptor.fromSource(parsingContext.withExtendedPath('.descriptor'), shipSource.descriptor, false);
-        const pattern = await Pattern.fromSource(parsingContext.withExtendedPath('.pattern'), shipSource.pattern, false);
+        const pattern = await RotatablePattern.fromSource(parsingContext.withExtendedPath('.pattern'), shipSource.pattern, false);
 
         // Get abilities
         const abilities: Ability[] = [];

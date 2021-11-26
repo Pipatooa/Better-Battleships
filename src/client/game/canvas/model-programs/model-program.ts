@@ -1,4 +1,12 @@
-export class ModelProgram<A extends string, U extends string> {
+/**
+ * ModelProgram - Client Version
+ *
+ * Base class for all programs drawing a model to the canvas
+ *
+ * A - String union type of shader attribute names
+ * U - String union type of shader uniform names
+ */
+export abstract class ModelProgram<A extends string, U extends string> {
 
     public readonly program: WebGLProgram;
 
@@ -70,6 +78,9 @@ export class ModelProgram<A extends string, U extends string> {
         }
     }
 
+    /**
+     * Run this program, drawing to the canvas
+     */
     public executeProgram(): void {
         this.gl.useProgram(this.program);
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer);

@@ -273,7 +273,7 @@ export class Game {
     }
 }
 
-export enum GamePhase {
+export const enum GamePhase {
     Lobby,
     EnteringSetup,
     Setup,

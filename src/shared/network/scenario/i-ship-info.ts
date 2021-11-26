@@ -1,12 +1,12 @@
-import type { AbilityInfo }     from './ability-info';
-import type { IDescriptorInfo } from './i-descriptor-info';
-import type { IPatternInfo }    from './i-pattern-info';
+import type { AbilityInfo }           from './ability-info';
+import type { IDescriptorInfo }       from './i-descriptor-info';
+import type { IRotatablePatternInfo } from './i-rotatable-pattern-info';
 
 /**
  * Portable network version of Ship object
  */
 export interface IShipInfo {
     descriptor: IDescriptorInfo,
-    pattern: IPatternInfo,
+    pattern: IRotatablePatternInfo,
     abilities: AbilityInfo[]
 }

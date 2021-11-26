@@ -1,6 +1,5 @@
 import { checkAgainstSchema }  from '../../schema-checker';
 import { UnpackingError }      from '../../unpacker';
-import { Rotation }            from './rotation';
 import { patternSchema }       from './sources/pattern';
 import type { ParsingContext } from '../../parsing-context';
 import type { IPatternSource } from './sources/pattern';
@@ -21,60 +20,14 @@ export class Pattern {
      * @param  _patternEntries List of pattern entries for pattern
      * @param  center          Center of the pattern about which rotations happen
      */
-    public constructor(protected readonly _patternEntries: PatternEntry[],
-                       protected readonly center: [number, number]) {
+    protected constructor(protected readonly _patternEntries: PatternEntry[],
+                          protected readonly center: [number, number]) {
 
         this.patternEntryMap = {};
         for (const [x, y, value] of _patternEntries) {
             const key = `${x},${y}`;
             this.patternEntryMap[key] = value;
         }
-    }
-
-    /**
-     * Factory function to generate a rotated copy of this pattern
-     *
-     * @param    rotation Amount to rotate pattern by
-     * @returns           New Pattern object with all entries rotated about the center of the pattern
-     */
-    public rotated(rotation: Rotation): Pattern {
-        const patternEntries: PatternEntry[] = this._patternEntries.map(([x, y, value]) => {
-
-            // Get dx and dy of pattern entry from pattern center
-            const dx: number = x - this.center[0];
-            const dy: number = y - this.center[1];
-
-            let newDx: number;
-            let newDy: number;
-
-            // Perform rotation transforms
-            switch (rotation) {
-                case Rotation.NoChange:
-                    newDx = dx;
-                    newDy = dy;
-                    break;
-                case Rotation.Clockwise90:
-                    newDx = dy;
-                    newDy = -dx;
-                    break;
-                case Rotation.Clockwise180:
-                    newDx = -dx;
-                    newDy = -dy;
-                    break;
-                case Rotation.Clockwise270:
-                    newDx = -dy;
-                    newDy = dx;
-                    break;
-            }
-
-            // Offset new dx and dy from pattern center
-            const newX: number = newDx + this.center[0];
-            const newY: number = newDy + this.center[1];
-
-            return [ newX, newY, value ];
-        });
-
-        return new Pattern(patternEntries, this.center);
     }
 
     /**
@@ -105,6 +58,25 @@ export class Pattern {
         if (checkSchema)
             patternSource = await checkAgainstSchema(patternSource, patternSchema, parsingContext);
 
+        // Calculate center of the pattern
+        const centerX: number = (patternSource.size[0] - 1) / 2;
+        const centerY: number = (patternSource.size[1] - 1) / 2;
+        const patternEntries = Pattern.getPatternEntriesFromSource(parsingContext, patternSource, [0, 0]);
+
+        // Return new created Pattern object
+        return new Pattern(patternEntries, [ centerX, centerY ]);
+    }
+
+    /**
+     * Retrieves a set of pattern entries from JSON source data
+     *
+     * @param    parsingContext Context for resolving scenario data
+     * @param    patternSource  JSON data for Pattern
+     * @param    offset         Amount to offset all tile positions within defined pattern
+     * @returns                 Array of pattern entries
+     */
+    protected static getPatternEntriesFromSource(parsingContext: ParsingContext, patternSource: IPatternSource, offset: [number, number]): PatternEntry[] {
+
         // Unpack value data
         const values: { [char: string]: number } = {};
         for (const entry of Object.entries(patternSource.values)) {
@@ -115,10 +87,6 @@ export class Pattern {
         // Ensure that the number of entries in 'pattern' matches the declared size of the pattern
         if (patternSource.pattern.length !== patternSource.size[1])
             throw new UnpackingError(`"${parsingContext.currentPathPrefix}pattern" must contain ${patternSource.size[1]} items to match "${parsingContext.currentPathPrefix}size[1]"`, parsingContext);
-
-        // Calculate center of the pattern
-        const centerX: number = (patternSource.size[0] - 1) / 2;
-        const centerY: number = (patternSource.size[1] - 1) / 2;
 
         // Unpack pattern data
         const patternEntries: PatternEntry[] = [];
@@ -145,12 +113,11 @@ export class Pattern {
                     continue;
 
                 // Create new entry and store in pattern entries
-                patternEntries.push([x, y, value]);
+                patternEntries.push([x + offset[0], y + offset[1], value]);
             }
         }
 
-        // Return new created Pattern object
-        return new Pattern(patternEntries, [ centerX, centerY ]);
+        return patternEntries;
     }
 
     /**

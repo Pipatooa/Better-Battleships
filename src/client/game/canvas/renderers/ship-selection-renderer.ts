@@ -1,29 +1,32 @@
-import { game }                      from '../game';
-import { Board }                     from '../scenario/board';
-import { sendRequest }               from '../sockets/opener';
-import { initiateGameMainUI }        from '../ui/initiate';
-import { ShipPlacer }                from '../ui/ship-placer';
-import { UIManager }                 from '../ui/ui-manager';
-import { VariableVisibilityElement } from '../ui/variable-visibility-element';
-import { BoardInfoGenerator }        from './board-info-generator';
-import { BoardProgram }              from './model-programs/board-program';
+import { game }                      from '../../game';
+import { Board }                     from '../../scenario/board';
+import { sendRequest }               from '../../sockets/opener';
+import { initiateGameMainUI }        from '../../ui/initiate';
+import { ShipPlacer }                from '../../ui/managers/ship-placer';
+import { UIManager }                 from '../../ui/managers/ui-manager';
+import { VariableVisibilityElement } from '../../ui/variable-visibility-element';
+import { BoardInfoGenerator }        from '../board-info-generator';
+import { BoardProgram }              from '../model-programs/board-program';
+import { SelectionInfoGenerator }    from '../selection-info-generator';
+import { ViewportHandler }           from '../viewport-handler';
+import { BoardRenderer }             from './board-renderer';
 import { Renderer }                  from './renderer';
-import { SelectionInfoGenerator }    from './selection-info-generator';
-import { ViewportHandler }           from './viewport-handler';
-import type { Tile }                 from '../scenario/board';
-import type { Ship }                 from '../scenario/ship';
-import type { ColorAtlas }           from './color-atlas';
+import type { Tile }                 from '../../scenario/board';
+import type { Ship }                 from '../../scenario/ship';
+import type { ColorAtlas }           from '../color-atlas';
 
 /**
  * ShipSelectionRenderer - Client Version
  *
  * Responsible for rendering ships to the ship selection canvas
  */
-export class ShipSelectionRenderer extends Renderer {
+export class ShipSelectionRenderer extends BoardRenderer {
 
     public readonly viewportHandler: ViewportHandler;
-    private readonly boardInfoGenerator: BoardInfoGenerator;
+    protected readonly boardInfoGenerator: BoardInfoGenerator;
     public readonly selectionInfoGenerator: SelectionInfoGenerator;
+
+    protected readonly _board: Board;
 
     private readonly allShips: Ship[];
 
@@ -31,9 +34,13 @@ export class ShipSelectionRenderer extends Renderer {
     private selectedIndex: number;
     private slotOpen: boolean;
 
-    public readonly selectionBoard: Board;
+    private readonly nextShipButtonListener: () => void;
+    private readonly previousShipButtonListener: () => void;
+    private readonly placementDoneButtonListener: () => void;
 
     private readonly cycleShipButtonContainer: VariableVisibilityElement;
+    private readonly nextShipButtonElement: JQuery;
+    private readonly previousShipButtonElement: JQuery;
     private readonly placementDoneButton: VariableVisibilityElement;
 
     private readonly sidebarShipSelectionRemainingCountElement: JQuery;
@@ -44,7 +51,7 @@ export class ShipSelectionRenderer extends Renderer {
      * @param  colorAtlas Color atlas for rendering
      * @param  ships      Array of ships to display to the player
      */
-    public constructor(colorAtlas: ColorAtlas,
+    public constructor(colorAtlas: ColorAtlas<string>,
                        ships: Ship[]) {
         const canvas = $('#ship-selection-canvas').get(0) as HTMLCanvasElement;
         const gl = Renderer.getContext(canvas);
@@ -57,31 +64,54 @@ export class ShipSelectionRenderer extends Renderer {
         this.ships = ships;
         this.selectedIndex = 0;
         this.slotOpen = false;
-        this.selectionBoard = this.generateSelectionBoard();
+        this._board = this.generateSelectionBoard();
 
         // JQuery element caching
         this.cycleShipButtonContainer = new VariableVisibilityElement($('#cycle-ship-button-container'));
+        this.nextShipButtonElement = $('#next-ship-button');
+        this.previousShipButtonElement = $('#previous-ship-button');
         this.placementDoneButton = new VariableVisibilityElement($('#placement-done-button'));
         this.sidebarShipSelectionRemainingCountElement = $('#sidebar-ship-selection-remaining-count');
 
         // Rendering initialisation
         this.viewportHandler = new ViewportHandler(canvas, this.gl, this.modelPrograms[0], false, 1, [-0.5, -0.5], [2, 2]);
-        this.viewportHandler.resizeCallback = () => this.render();
-        this.boardInfoGenerator = new BoardInfoGenerator(this.gl, this.modelPrograms[0], this.selectionBoard, false);
+        this.viewportHandler.updateCallback = () => this.renderNext();
+        this.boardInfoGenerator = new BoardInfoGenerator(this.gl, this.modelPrograms[0], this._board);
         this.boardInfoGenerator.push();
         this.selectionInfoGenerator = new SelectionInfoGenerator(this.gl, this.modelPrograms[0]);
         this.selectionInfoGenerator.push();
         colorAtlas.push(this.gl, this.modelPrograms);
 
         for (const ship of ships)
-            this.selectionBoard.addShip(ship, true);
+            this._board.addShip(ship, true);
 
         this.showCurrentShip();
 
         // Register event listeners
-        $('#next-ship-button').get(0).addEventListener('click', () => this.cycleNextShip());
-        $('#previous-ship-button').get(0).addEventListener('click', () => this.cyclePreviousShip());
-        this.placementDoneButton.element.get(0).addEventListener('click', () => this.onPlacementDone());
+        this.nextShipButtonListener = () => this.cycleNextShip();
+        this.previousShipButtonListener = () => this.cyclePreviousShip();
+        this.placementDoneButtonListener = () => this.onPlacementDone();
+        this.nextShipButtonElement.get(0).addEventListener('click', this.nextShipButtonListener);
+        this.previousShipButtonElement.get(0).addEventListener('click', this.previousShipButtonListener);
+        this.placementDoneButton.element.get(0).addEventListener('click', this.placementDoneButtonListener);
+        this.doRender = true;
+    }
+
+    /**
+     * Allows this object to be discarded
+     */
+    private deconstruct(): void {
+        this.nextShipButtonElement.get(0).removeEventListener('click', this.nextShipButtonListener);
+        this.previousShipButtonElement.get(0).removeEventListener('click', this.previousShipButtonListener);
+        this.placementDoneButton.element.get(0).removeEventListener('click', this.placementDoneButtonListener);
+    }
+
+    /**
+     * Executed before attached programs are executed
+     */
+    public preRender(): void {
+        super.preRender();
+        this.boardInfoGenerator.push();
     }
 
     /**
@@ -154,10 +184,10 @@ export class ShipSelectionRenderer extends Renderer {
         const [maxX, maxY] = ship.pattern.getBounds();
 
         // Center ship
-        const x = Math.floor((this.selectionBoard.size[0] - maxX - 1) / 2);
-        const y = Math.floor((this.selectionBoard.size[1] - maxY - 1) / 2);
+        const x = Math.floor((this._board.size[0] - maxX - 1) / 2);
+        const y = Math.floor((this._board.size[1] - maxY - 1) / 2);
         ship.moveTo(x, y);
-        this.render();
+        this.renderNext();
 
         const currentUIManager = UIManager.currentManager;
         if (currentUIManager instanceof ShipPlacer)
@@ -174,10 +204,10 @@ export class ShipSelectionRenderer extends Renderer {
             return undefined;
 
         const ship = this.ships[this.selectedIndex];
-        this.selectionBoard.removeShip(ship, true);
+        this._board.removeShip(ship, true);
         this.ships.splice(this.selectedIndex, 1);
         this.slotOpen = true;
-        this.render();
+        this.renderNext();
         this.checkPlacementDone();
         return ship;
     }
@@ -189,7 +219,7 @@ export class ShipSelectionRenderer extends Renderer {
         this.slotOpen = true;
         const ship = this.ships[this.selectedIndex];
         ship?.moveTo(undefined, undefined);
-        this.render();
+        this.renderNext();
         this.updateRemainingCount();
         this.checkPlacementDone();
     }
@@ -202,7 +232,7 @@ export class ShipSelectionRenderer extends Renderer {
     public closeSlot(ship: Ship | undefined): void {
         if (ship !== undefined) {
             this.ships.splice(this.selectedIndex, 0, ship);
-            this.selectionBoard.addShip(ship, true);
+            this._board.addShip(ship, true);
         }
 
         if (this.ships.length > 0)
@@ -249,17 +279,8 @@ export class ShipSelectionRenderer extends Renderer {
             shipPlacements: shipPlacements
         });
 
+        this.deconstruct();
         initiateGameMainUI();
-    }
-
-    /**
-     * Re-renders the ship selection canvas
-     */
-    public render(): void {
-        this.boardInfoGenerator.push();
-        this.gl.clearColor(0, 0, 0, 1.0);
-        this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
-        this.executePrograms();
     }
 
     /**

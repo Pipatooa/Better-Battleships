@@ -1,8 +1,10 @@
-import type { Player }     from '../player';
-import type { Ability }    from './abilities/ability';
-import type { Board }      from './board';
-import type { Descriptor } from './descriptor';
-import type { Pattern }    from './pattern';
+import { game }                  from '../game';
+import type { Player }           from '../player';
+import type { Ability }          from './abilities/ability';
+import type { Board }            from './board';
+import type { Descriptor }       from './descriptor';
+import type { RotatablePattern } from './rotatable-pattern';
+import type { Rotation }         from 'shared/scenario/objects/common/rotation';
 
 /**
  * Ship - Client Version
@@ -29,7 +31,7 @@ export class Ship {
                        protected _x: number | undefined,
                        protected _y: number | undefined,
                        public readonly descriptor: Descriptor,
-                       public pattern: Pattern,
+                       public pattern: RotatablePattern,
                        public readonly player: Player,
                        public readonly abilities: Ability[]) {
     }
@@ -64,8 +66,47 @@ export class Ship {
      */
     public updateArea(): void {
         const [maxX, maxY] = this.pattern.getBounds();
-        this.board?.boardInformationGenerator!.updateArea(this._x!, this._y!, this._x! + maxX, this._y! + maxY);
-        this.board?.boardInformationGenerator!.push();
+        this.board?.informationGenerator!.updateArea(this._x!, this._y!, this._x! + maxX, this._y! + maxY);
+        this.board?.informationGenerator!.push();
+    }
+
+    /**
+     * Checks whether or not this ship's placement is valid
+     *
+     * @param    x     Suggested X coordinate of ship placement
+     * @param    y     Suggested Y coordinate of ship placement
+     * @param    board Board to place ship on
+     * @returns        Whether this ship's placement is valid
+     */
+    public checkPlacementValid(x: number, y: number, board: Board): [true, undefined] | [false, string] {
+
+        // Iterate through tiles to check if all are within spawn region
+        for (const [dx, dy] of this.pattern.patternEntries) {
+            const tileX = x + dx;
+            const tileY = y + dy;
+            const tile = board.tiles[tileY]?.[tileX];
+
+            if (!tile?.[1].map(r => r.id).includes(game.spawnRegionID!))
+                return [false, 'Ship must be placed within spawn region'];
+
+            if (tile[2] !== undefined)
+                return [false, 'Ships must not be overlapping'];
+
+            if (!tile[0].traversable)
+                return [false, 'Ship must be placed on traversable tiles'];
+        }
+
+        return [true, undefined];
+    }
+
+
+    /**
+     * Rotates the ship in place
+     *
+     * @param  rotation Amount to rotate ship by
+     */
+    public rotate(rotation: Rotation): void {
+        this.pattern = this.pattern.rotated(rotation);
     }
 
     /**

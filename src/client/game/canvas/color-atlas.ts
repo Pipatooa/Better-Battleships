@@ -1,14 +1,22 @@
-import { game }              from '../game';
-import { allPlayers }        from '../player';
-import type { TileType }     from '../scenario/tiletype';
-import type { ModelProgram } from './model-programs/model-program';
+import { game }                               from '../game';
+import { allPlayers }                         from '../player';
+import { getGLTextureLocation, TextureIndex } from './texture-index';
+import type { TileType }                      from '../scenario/tiletype';
+import type { ModelProgram }                  from './model-programs/model-program';
 
-export class ColorAtlas {
+export class ColorAtlas<C extends string> {
 
     private readonly colorData: [number, number, number][] | undefined = [
         [0, 0, 0],
         [255, 255, 255]
     ];
+    
+    public readonly specialColorIndices: Record<C, number>;
+
+    public constructor(specialColors: Record<C, string>) {
+        this.specialColorIndices = {} as Record<C, number>;
+        this.registerSpecialColors(specialColors);
+    }
 
     /**
      * Generates a texture containing all registered colors and pushes it to the GPU
@@ -16,7 +24,8 @@ export class ColorAtlas {
      * @param  gl            WebGL rendering context for canvas
      * @param  modelPrograms Programs to update attributes for
      */
-    public push(gl: WebGL2RenderingContext, modelPrograms: ModelProgram<never, 'colorAtlas' | 'colorAtlasSize'>[]): void {
+    public push(gl: WebGL2RenderingContext, 
+                modelPrograms: ModelProgram<never, 'colorAtlas' | 'colorAtlasSize'>[]): void {
 
         // Get minimum atlas size rounded to next power of 2
         let atlasSize = Math.sqrt(this.colorData!.length);
@@ -32,7 +41,8 @@ export class ColorAtlas {
         }
 
         const texture = gl.createTexture()!;
-        gl.activeTexture(gl.TEXTURE0);
+        const glTextureLocation = getGLTextureLocation(gl, TextureIndex.ColorAtlas);
+        gl.activeTexture(glTextureLocation);
         gl.bindTexture(gl.TEXTURE_2D, texture);
 
         gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
@@ -43,7 +53,7 @@ export class ColorAtlas {
         // Pass atlas texture to GPU
         for (const modelProgram of modelPrograms) {
             gl.useProgram(modelProgram.program);
-            gl.uniform1i(modelProgram.uniformLocations.colorAtlas, 0);
+            gl.uniform1i(modelProgram.uniformLocations.colorAtlas, TextureIndex.ColorAtlas);
             gl.uniform1f(modelProgram.uniformLocations.colorAtlasSize, atlasSize);
         }
     }
@@ -82,6 +92,17 @@ export class ColorAtlas {
     public registerHex(color: string): number {
         const rgb = ColorAtlas.colorFromHex(color);
         return this.registerRGB(rgb);
+    }
+
+    /**
+     * Registers all colors used for specific purposes
+     *
+     * @param  specialColors Record of color names to hex color strings
+     */
+    public registerSpecialColors(specialColors: Record<C, string>): void {
+        for (const [name, hexColor] of Object.entries(specialColors)) {
+            this.specialColorIndices[name as C] = this.registerHex(hexColor as string);
+        }
     }
 
     /**

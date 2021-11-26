@@ -6,6 +6,7 @@
 export class VariableVisibilityElement {
 
     private _visible: boolean;
+    private _visibilityChanged = false;
 
     public constructor(public readonly element: JQuery) {
         this._visible = !this.element.hasClass('d-none');
@@ -17,7 +18,8 @@ export class VariableVisibilityElement {
      * @param  newVisibility New visibility of the element
      */
     public setVisibility(newVisibility: boolean): void {
-        if (newVisibility !== this._visible) {
+        this._visibilityChanged = newVisibility !== this._visible;
+        if (this._visibilityChanged) {
             if (newVisibility)
                 this.element.removeClass('d-none');
             else
@@ -33,5 +35,13 @@ export class VariableVisibilityElement {
 
     public get visible(): boolean {
         return this._visible;
+    }
+
+    public get visibilityChanged(): boolean {
+        return this._visibilityChanged;
+    }
+
+    public get rawElement(): HTMLElement {
+        return this.element.get(0);
     }
 }

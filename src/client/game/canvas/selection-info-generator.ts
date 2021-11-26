@@ -1,7 +1,13 @@
-import { Pattern }           from '../scenario/pattern';
-import type { Ship }         from '../scenario/ship';
-import type { ModelProgram } from './model-programs/model-program';
+import { Pattern }                            from '../scenario/pattern';
+import { getGLTextureLocation, TextureIndex } from './texture-index';
+import type { Ship }                          from '../scenario/ship';
+import type { ModelProgram }                  from './model-programs/model-program';
 
+/**
+ * SelectionInfoGenerator - Client Version
+ *
+ * Generates selection information texture to be passed to GPU
+ */
 export class SelectionInfoGenerator {
 
     private readonly selectionInfoUniform: WebGLTexture;
@@ -20,7 +26,8 @@ export class SelectionInfoGenerator {
 
         // Create a new texture to hold information about the selected area
         this.selectionInfoUniform = this.gl.createTexture()!;
-        this.gl.activeTexture(this.gl.TEXTURE4);
+        const glTextureLocation = getGLTextureLocation(this.gl, TextureIndex.SelectionInfo);
+        this.gl.activeTexture(glTextureLocation);
         this.gl.bindTexture(this.gl.TEXTURE_2D, this.selectionInfoUniform);
 
         this.selectionInfoSizeUniform = 1;
@@ -28,13 +35,18 @@ export class SelectionInfoGenerator {
         this.selectionOffsetRaw = [0, 0];
 
         this.gl.useProgram(this.modelProgram.program);
-        this.gl.uniform1i(this.modelProgram.uniformLocations.selectionInfo, 4);
+        this.gl.uniform1i(this.modelProgram.uniformLocations.selectionInfo, TextureIndex.SelectionInfo);
 
         this.textureData = new Uint8Array(1);
         this.setSelectionPattern();
         this.push();
     }
 
+    /**
+     * Replaces selection pattern with provided pattern
+     *
+     * @param  selectionPattern Selection pattern to use
+     */
     public setSelectionPattern(selectionPattern: Pattern = this.defaultSelectionPattern): void {
         const patternLargeDimension = Math.max(...selectionPattern.getBounds()) + 1;
         this.selectionInfoSizeUniform = Math.pow(2, Math.ceil(Math.log2(patternLargeDimension)));
@@ -51,6 +63,11 @@ export class SelectionInfoGenerator {
         this.setOffsetDelta(-selectionPattern.center[0] - 0.5, -selectionPattern.center[1] - 0.5);
     }
 
+    /**
+     * Replaces selection pattern with a ship
+     *
+     * @param  ship Ship to use as selection
+     */
     public setSelectionShip(ship: Ship | undefined): void {
         if (ship === undefined) {
             this.setSelectionPattern();
@@ -79,15 +96,33 @@ export class SelectionInfoGenerator {
         this.setOffsetDelta(-ship.pattern.center[0] - 0.5, -ship.pattern.center[1] - 0.5);
     }
 
+    /**
+     * Sets the additional offset which is added to the offset when set
+     *
+     * @param  x Horizontal offset for set offset value
+     * @param  y Vertical offset for set offset value
+     */
     private setOffsetDelta(x: number, y: number): void {
         this.selectionOffsetDelta = [x, y];
         this.setOffset(...this.selectionOffsetRaw);
     }
 
-    public setOffset(x: number, y: number): void {
+    /**
+     * Set tile offset for selection
+     *
+     * @param    x Horizontal offset
+     * @param    y Vertical offset
+     * @returns    Whether the rounded tile offset was changed
+     */
+    public setOffset(x: number, y: number): boolean {
+        const oldX = this.selectionOffsetUniform[0];
+        const oldY = this.selectionOffsetUniform[1];
         this.selectionOffsetRaw = [x, y];
-        this.selectionOffsetUniform[0] = Math.round(x + this.selectionOffsetDelta[0]);
-        this.selectionOffsetUniform[1] = Math.round(y + this.selectionOffsetDelta[1]);
+        const newX = Math.round(x + this.selectionOffsetDelta[0]);
+        const newY = Math.round(y + this.selectionOffsetDelta[1]);
+        this.selectionOffsetUniform[0] = newX;
+        this.selectionOffsetUniform[1] = newY;
+        return newX !== oldX || newY !== oldY;
     }
 
     /**
@@ -95,7 +130,8 @@ export class SelectionInfoGenerator {
      */
     public push(): void {
         this.gl.useProgram(this.modelProgram.program);
-        this.gl.activeTexture(this.gl.TEXTURE4);
+        const glTextureLocation = getGLTextureLocation(this.gl, TextureIndex.SelectionInfo);
+        this.gl.activeTexture(glTextureLocation);
         this.gl.bindTexture(this.gl.TEXTURE_2D, this.selectionInfoUniform);
         this.gl.pixelStorei(this.gl.UNPACK_ALIGNMENT, 1);
         this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGB, this.selectionInfoSizeUniform, this.selectionInfoSizeUniform, 0, this.gl.RGB, this.gl.UNSIGNED_BYTE, this.textureData);

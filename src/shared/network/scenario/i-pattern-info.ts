@@ -3,5 +3,5 @@
  */
 export interface IPatternInfo {
     center: [number, number],
-    tiles: [number, number, number][] | [number, number][];
+    tiles: [number, number, number][] | [number, number][]
 }

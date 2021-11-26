@@ -33,20 +33,6 @@ export abstract class Ability {
     }
 
     /**
-     * Visually selects this ability
-     */
-    public select(): void {
-        this._gameElement?.addClass('selected-ability');
-    }
-
-    /**
-     * Visually deselects this ability
-     */
-    public deselect(): void {
-        this._gameElement?.removeClass('selected-ability');
-    }
-
-    /**
      * Getters and setters
      */
 

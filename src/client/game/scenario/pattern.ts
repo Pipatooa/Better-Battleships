@@ -14,14 +14,21 @@ export class Pattern {
      *
      * @param  _patternEntries List of pattern entries for pattern
      * @param  center          Center of the pattern about which rotations happen
+     * @param  patternEntryMap Optional pregenerated dictionary of positions to values
      */
     public constructor(protected readonly _patternEntries: PatternEntry[],
-                       public readonly center: [number, number]) {
+                       public readonly center: [number, number],
+                       patternEntryMap?: { [key: string]: number }) {
 
-        this.patternEntryMap = {};
-        for (const [x, y, value] of _patternEntries) {
-            const key = `${x},${y}`;
-            this.patternEntryMap[key] = value ?? 1;
+
+        if (patternEntryMap !== undefined)
+            this.patternEntryMap = patternEntryMap;
+        else {
+            this.patternEntryMap = {};
+            for (const [ x, y, value ] of _patternEntries) {
+                const key = `${x},${y}`;
+                this.patternEntryMap[key] = value ?? 1;
+            }
         }
     }
 

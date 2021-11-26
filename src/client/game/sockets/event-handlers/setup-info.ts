@@ -5,10 +5,10 @@ import { AbilityFire }            from '../../scenario/abilities/ability-fire';
 import { AbilityMove }            from '../../scenario/abilities/ability-move';
 import { AbilityRotate }          from '../../scenario/abilities/ability-rotate';
 import { Board }                  from '../../scenario/board';
-import { Pattern }                from '../../scenario/pattern';
+import { RotatablePattern }       from '../../scenario/rotatable-pattern';
 import { Ship }                   from '../../scenario/ship';
 import { initiateGameSetupUI }    from '../../ui/initiate';
-import { MainUIManager }          from '../../ui/main-ui-manager';
+import { MainUIManager }          from '../../ui/managers/main-ui-manager';
 import type { Ability }           from '../../scenario/abilities/ability';
 import type { ISetupInfoEvent }   from 'shared/network/events/i-setup-info';
 
@@ -25,6 +25,7 @@ export async function handleSetupInfo(setupInfoEvent: ISetupInfoEvent): Promise<
 
     // Unpack board data
     game.board = await Board.fromSource(setupInfoEvent.boardInfo);
+    game.spawnRegionID = setupInfoEvent.playerInfo.spawnRegion;
 
     // Unpack player colors
     for (const [playerIdentity, color] of Object.entries(setupInfoEvent.playerColors)) {
@@ -36,7 +37,7 @@ export async function handleSetupInfo(setupInfoEvent: ISetupInfoEvent): Promise<
     const ships: Ship[] = [];
     for (let shipIndex = 0; shipIndex < setupInfoEvent.playerInfo.ships.length; shipIndex++) {
         const shipInfo = setupInfoEvent.playerInfo.ships[shipIndex];
-        const pattern = Pattern.fromSource(shipInfo.pattern);
+        const pattern = RotatablePattern.fromSource(shipInfo.pattern);
         const abilities: Ability[] = [];
         for (let abilityIndex = 0; abilityIndex < shipInfo.abilities.length; abilityIndex++) {
             const abilityInfo = shipInfo.abilities[abilityIndex];
@@ -70,6 +71,6 @@ export async function handleSetupInfo(setupInfoEvent: ISetupInfoEvent): Promise<
             player.turnIndicatorElement!.addClass('turn-indicator-active');
     }
 
-    initiateRenderers(setupInfoEvent.playerInfo.spawnRegion, ships);
+    initiateRenderers(ships);
     initiateGameSetupUI();
 }
