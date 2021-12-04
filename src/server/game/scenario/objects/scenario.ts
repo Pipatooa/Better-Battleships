@@ -58,6 +58,7 @@ export class Scenario implements IAttributeHolder {
         // Get board
         const boardSource: IBoardSource = await getJSONFromEntry(parsingContext.boardEntry) as unknown as IBoardSource;
         const board = await Board.fromSource(parsingContext.withUpdatedFile('board.json'), boardSource, true);
+        parsingContext = parsingContext.withBoard(board);
 
         // Get foreign attribute registry and update parsing context
         const foreignAttributeRegistrySource = await getJSONFromEntry(parsingContext.foreignAttributeRegistryEntry) as unknown as IForeignAttributeRegistrySource;

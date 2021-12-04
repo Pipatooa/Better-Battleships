@@ -78,6 +78,10 @@ export class RotatablePattern extends Pattern {
                 newDx = dy;
                 newDy = -dx;
                 break;
+            case Rotation.FullRotation:
+                newDx = dx;
+                newDy = dy;
+                break;
         }
 
         // Offset new dx and dy from pattern center

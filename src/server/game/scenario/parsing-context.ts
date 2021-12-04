@@ -4,6 +4,7 @@ import { UnpackingError }                        from './unpacker';
 import type { ForeignAttributeRegistry }         from './objects/attribute-references/foreign-attribute-registry';
 import type { AttributeReferenceObjectSelector } from './objects/attribute-references/sources/attribute-reference';
 import type { AttributeMap }                     from './objects/attributes/i-attribute-holder';
+import type { Board }                            from './objects/board';
 import type { Ship }                             from './objects/ship';
 import type { ZipEntryMap }                      from './unpacker';
 import type { IZipEntry }                        from 'adm-zip';
@@ -28,6 +29,7 @@ export class ParsingContext {
      * @param  playerPrototypeEntries        Zip entries for player/player.json files
      * @param  shipEntries                   Zip entries for ship/ship.json files
      * @param  abilityEntries                Zip entries for abilities/ability.json files
+     * @param  _board                        Board for scenario
      * @param  scenarioAttributes            Dictionary of attributes belonging to current scenario
      * @param  teamAttributes                Dictionary of attributes belonging to current team,
      * @param  playerAttributes              Dictionary of attributes belonging to current player
@@ -46,6 +48,7 @@ export class ParsingContext {
                        public readonly playerPrototypeEntries: ZipEntryMap,
                        public readonly shipEntries: ZipEntryMap,
                        public readonly abilityEntries: ZipEntryMap,
+                       protected _board?: Board,
                        protected scenarioAttributes?: AttributeMap,
                        protected teamAttributes?: AttributeMap,
                        protected playerAttributes?: AttributeMap,
@@ -152,6 +155,7 @@ export class ParsingContext {
             this.playerPrototypeEntries,
             this.shipEntries,
             this.abilityEntries,
+            this._board,
             this.scenarioAttributes,
             this.teamAttributes,
             this.playerAttributes,
@@ -186,6 +190,18 @@ export class ParsingContext {
     public withExtendedPath(pathExtension: string): ParsingContext {
         const copy: ParsingContext = this.getCopy();
         copy._currentPath += pathExtension;
+        return copy;
+    }
+
+    /**
+     * Factory function to generate a copy of this object with an attached board
+     *
+     * @param    board Board to use in new context
+     * @returns        Created ParsingContext
+     */
+    public withBoard(board: Board): ParsingContext {
+        const copy: ParsingContext = this.getCopy();
+        copy._board = board;
         return copy;
     }
 
@@ -300,6 +316,10 @@ export class ParsingContext {
         if (this._currentPath === '')
             return '';
         return this.currentPath + '.';
+    }
+    
+    public get board(): Board | undefined {
+        return this._board;
     }
 
     public get foreignAttributeRegistry(): ForeignAttributeRegistry | undefined {

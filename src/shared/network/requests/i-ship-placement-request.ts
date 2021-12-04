@@ -1,3 +1,4 @@
+import type { Rotation }           from '../../scenario/objects/common/rotation';
 import type { IBaseClientRequest } from './i-client-request';
 
 /**
@@ -5,5 +6,5 @@ import type { IBaseClientRequest } from './i-client-request';
  */
 export interface IShipPlacementRequest extends IBaseClientRequest {
     request: 'shipPlacement',
-    shipPlacements: [number, number][]
+    shipPlacements: [number, number, Rotation][]
 }

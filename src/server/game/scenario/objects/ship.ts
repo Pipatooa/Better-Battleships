@@ -10,6 +10,7 @@ import type { Ability }                     from './abilities/ability';
 import type { AbilitySource }               from './abilities/sources/ability';
 import type { AttributeMap }                from './attributes/i-attribute-holder';
 import type { IAttributeHolder }            from './attributes/sources/attribute-holder';
+import type { Board }                       from './board';
 import type { IShipSource }                 from './sources/ship';
 import type { AbilityInfo }                 from 'shared/network/scenario/ability-info';
 import type { IShipInfo }                   from 'shared/network/scenario/i-ship-info';
@@ -28,12 +29,14 @@ export class Ship implements IAttributeHolder {
     /**
      * Ship constructor
      *
+     * @param  board      Board that this ship belongs to
      * @param  descriptor Descriptor for ship
      * @param  _pattern   Pattern describing shape of ship
      * @param  abilities  Dictionary of abilities available to the ship
      * @param  attributes Attributes for the ship
      */
-    public constructor(public readonly descriptor: Descriptor,
+    public constructor(protected board: Board,
+                       public readonly descriptor: Descriptor,
                        protected _pattern: RotatablePattern,
                        public readonly abilities: Ability[],
                        public readonly attributes: AttributeMap) {
@@ -46,8 +49,10 @@ export class Ship implements IAttributeHolder {
      * @param  y Destination y coordinate
      */
     public moveTo(x: number, y: number): void {
+        this.board.removeShip(this);
         this._x = x;
         this._y = y;
+        this.board.addShip(this);
     }
 
     /**
@@ -57,8 +62,10 @@ export class Ship implements IAttributeHolder {
      * @param  y Vertical distance to move ship by
      */
     public moveBy(x: number, y: number): void {
+        this.board.removeShip(this);
         this._x += x;
         this._y += y;
+        this.board.addShip(this);
     }
 
     /**
@@ -67,31 +74,9 @@ export class Ship implements IAttributeHolder {
      * @param  rotation Amount to rotate ship by
      */
     public rotate(rotation: Rotation): void {
+        this.board.removeShip(this);
         this._pattern = this._pattern.rotated(rotation);
-    }
-
-    /**
-     * Returns a list of the coordinates of every cell that this ship occupies.
-     *
-     * @param    offset Optional offset to apply to cell coordinates
-     * @returns         List of coordinates of every cell that this ship occupies
-     */
-    public getCells(offset: [number, number] = [ 0, 0 ]): [number, number][] {
-        const cells: [number, number][] = [];
-
-        // Iterate through entries in pattern
-        for (const [x, y] of this._pattern.patternEntries) {
-
-            // Offset pattern entries by the position of the ship and offset provided
-            const shipX: number = x + this.x + offset[0];
-            const shipY: number = y + this.y + offset[1];
-
-            // Add cell coordinate to list of cells
-            cells.push([shipX, shipY]);
-        }
-
-        // Return list of cell coordinates
-        return cells;
+        this.board.addShip(this);
     }
 
     /**
@@ -138,7 +123,7 @@ export class Ship implements IAttributeHolder {
         }
 
         // Return created Ship object
-        Ship.call(shipPartial, descriptor, pattern, abilities, attributes);
+        Ship.call(shipPartial, parsingContext.board!, descriptor, pattern, abilities, attributes);
         (shipPartial as any).__proto__ = Ship.prototype;
         return shipPartial as Ship;
     }
@@ -172,5 +157,9 @@ export class Ship implements IAttributeHolder {
 
     public get y(): number {
         return this._y;
+    }
+
+    public get pattern(): RotatablePattern {
+        return this._pattern;
     }
 }

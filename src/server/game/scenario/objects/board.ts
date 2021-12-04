@@ -5,7 +5,9 @@ import { UnpackingError }        from '../unpacker';
 import { Region }                from './region';
 import { boardSchema }           from './sources/board';
 import { TileType }              from './tiletype';
+import type { Rotation }         from '../../../../shared/scenario/objects/common/rotation';
 import type { ParsingContext }   from '../parsing-context';
+import type { Ship }             from './ship';
 import type { IBoardSource }     from './sources/board';
 import type { TileGenerator }    from './tile-generator';
 import type { IBoardInfo }       from 'shared/network/scenario/i-board-info';
@@ -66,9 +68,9 @@ export class Board {
 
         // Ensure that the number of entries in 'tiles' matches the declared size of the board
         if (boardSource.tiles.length !== boardSource.size[1])
-            throw new UnpackingError(`"${parsingContext.currentPathPrefix}tiles" must contain ${boardSource.size[1]} items to match "${parsingContext.currentPathPrefix}size[1]"`, parsingContext);
+            throw new UnpackingError(`"${parsingContext.currentPathPrefix}tiles" must contain ${boardSource.size[1]} items to match "${parsingContext.currentPathPrefix}size[1]. Found ${boardSource.tiles.length}"`, parsingContext);
         if (boardSource.regions.length !== boardSource.size[1])
-            throw new UnpackingError(`"${parsingContext.currentPathPrefix}regions" must contain ${boardSource.size[1]} items to match "${parsingContext.currentPathPrefix}size[1]"`, parsingContext);
+            throw new UnpackingError(`"${parsingContext.currentPathPrefix}regions" must contain ${boardSource.size[1]} items to match "${parsingContext.currentPathPrefix}size[1]. Found ${boardSource.regions.length}"`, parsingContext);
 
         // Unpack tile and region data
         const tiles: Tile[][] = [];
@@ -78,9 +80,9 @@ export class Board {
 
             // Ensure that the number of tiles within a row matches the declared size of the board
             if (tileRow.length !== boardSource.size[0])
-                throw new UnpackingError(`"${parsingContext.currentPathPrefix}tiles[${y}]" length must be ${boardSource.size[0]} characters long to match "${parsingContext.currentPathPrefix}size[0]"`, parsingContext);
+                throw new UnpackingError(`"${parsingContext.currentPathPrefix}tiles[${y}]" length must be ${boardSource.size[0]} characters long to match "${parsingContext.currentPathPrefix}size[0]. Found ${tileRow.length}"`, parsingContext);
             if (regionRow.length !== boardSource.size[0])
-                throw new UnpackingError(`"${parsingContext.currentPathPrefix}regions[${y}]" length must be ${boardSource.size[0]} characters long to match "${parsingContext.currentPathPrefix}size[0]"`, parsingContext);
+                throw new UnpackingError(`"${parsingContext.currentPathPrefix}regions[${y}]" length must be ${boardSource.size[0]} characters long to match "${parsingContext.currentPathPrefix}size[0]. Found ${regionRow.length}"`, parsingContext);
 
             // Create new tile row
             tiles[y] = [];
@@ -100,7 +102,7 @@ export class Board {
                 const tileRegions: Region[] = [];
                 for (const regionID of regionPalette[regionChar])
                     tileRegions.push(regions[regionID]);
-                tiles[y][x] = [tileType, tileRegions];
+                tiles[y][x] = [tileType, tileRegions, undefined];
             }
         }
 
@@ -155,9 +157,78 @@ export class Board {
             regions: regions
         };
     }
+
+    /**
+     * Adds a ship to the board
+     *
+     * @param  ship Ship to add to the board
+     */
+    public addShip(ship: Ship): void {
+        for (const [dx, dy] of ship.pattern.patternEntries) {
+            const x = ship.x + dx;
+            const y = ship.y + dy;
+            const tile = this.tiles[y][x];
+            tile[2] = ship;
+        }
+    }
+
+    /**
+     * Removes a ship from the board
+     *
+     * @param  ship Ship to remove the board
+     */
+    public removeShip(ship: Ship): void {
+        for (const [dx, dy] of ship.pattern.patternEntries) {
+            const x = ship.x + dx;
+            const y = ship.y + dy;
+            const tile = this.tiles[y][x];
+            tile[2] = undefined;
+        }
+    }
+
+    /**
+     * Checks whether a ship can be placed on this board at a particular location
+     *
+     * @param    ship        Ship to place
+     * @param    rotation    Rotation of ship
+     * @param    x           X coordinate of placement
+     * @param    y           Y coordinate of placement
+     * @param    validRegion Region within which the ship's placement is valid
+     * @returns              Whether or not the ship can be placed at that location
+     */
+    public checkPlacement(ship: Ship, rotation: Rotation, x: number, y: number, validRegion: Region): boolean {
+        const pattern = ship.pattern.rotated(rotation);
+        for (const [dx, dy] of pattern.patternEntries) {
+            const tile = this.tiles[y + dy]?.[x + dx];
+            if (!tile?.[1].includes(validRegion))
+                return false;
+            if (tile[2] !== undefined)
+                return false;
+        }
+        return true;
+    }
+
+    /**
+     * Checks whether a ship can perform a rotation successfully
+     *
+     * @param    ship     Ship to rotate
+     * @param    rotation Rotation to apply
+     * @returns           Whether or not ship can be rotated
+     */
+    public checkRotation(ship: Ship, rotation: Rotation): boolean {
+        const rotatedPattern = ship.pattern.rotated(rotation);
+        for (const [dx, dy] of rotatedPattern.patternEntries) {
+            const tile = this.tiles[ship.y + dy]?.[ship.x + dx];
+            if (!tile[0]?.traversable)
+                return false;
+            if (tile[2] !== undefined && tile[2] !== ship)
+                return false;
+        }
+        return true;
+    }
 }
 
 /**
  * Type describing an entry for a single tile
  */
-export type Tile = [TileType, Region[]];
+export type Tile = [TileType, Region[], Ship | undefined];

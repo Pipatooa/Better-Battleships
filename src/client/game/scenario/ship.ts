@@ -1,10 +1,10 @@
+import { Rotation }              from 'shared/scenario/objects/common/rotation';
 import { game }                  from '../game';
 import type { Player }           from '../player';
 import type { Ability }          from './abilities/ability';
 import type { Board }            from './board';
 import type { Descriptor }       from './descriptor';
 import type { RotatablePattern } from './rotatable-pattern';
-import type { Rotation }         from 'shared/scenario/objects/common/rotation';
 
 /**
  * Ship - Client Version
@@ -15,6 +15,8 @@ export class Ship {
 
     public board: Board | undefined;
     private _selected = false;
+    
+    protected _rotation = Rotation.NoChange;
 
     /**
      * Ship constructor
@@ -23,7 +25,7 @@ export class Ship {
      * @param  _x         X coordinate of ship
      * @param  _y         Y coordinate of ship
      * @param  descriptor Descriptor for ship
-     * @param  pattern    Pattern describing shape of ship
+     * @param  _pattern   Pattern describing shape of ship
      * @param  player     Player that this ship belongs to
      * @param  abilities  Dictionary of abilities available for this ship
      */
@@ -31,7 +33,7 @@ export class Ship {
                        protected _x: number | undefined,
                        protected _y: number | undefined,
                        public readonly descriptor: Descriptor,
-                       public pattern: RotatablePattern,
+                       protected _pattern: RotatablePattern,
                        public readonly player: Player,
                        public readonly abilities: Ability[]) {
     }
@@ -65,7 +67,7 @@ export class Ship {
      * Updates board information for the area that the ship currently occupies
      */
     public updateArea(): void {
-        const [maxX, maxY] = this.pattern.getBounds();
+        const [maxX, maxY] = this._pattern.getBounds();
         this.board?.informationGenerator!.updateArea(this._x!, this._y!, this._x! + maxX, this._y! + maxY);
         this.board?.informationGenerator!.push();
     }
@@ -81,7 +83,7 @@ export class Ship {
     public checkPlacementValid(x: number, y: number, board: Board): [true, undefined] | [false, string] {
 
         // Iterate through tiles to check if all are within spawn region
-        for (const [dx, dy] of this.pattern.patternEntries) {
+        for (const [dx, dy] of this._pattern.patternEntries) {
             const tileX = x + dx;
             const tileY = y + dy;
             const tile = board.tiles[tileY]?.[tileX];
@@ -106,7 +108,9 @@ export class Ship {
      * @param  rotation Amount to rotate ship by
      */
     public rotate(rotation: Rotation): void {
-        this.pattern = this.pattern.rotated(rotation);
+        this._pattern = this._pattern.rotated(rotation);
+        this._rotation += rotation;
+        this._rotation %= Rotation.FullRotation;
     }
 
     /**
@@ -119,6 +123,14 @@ export class Ship {
 
     public get y(): number | undefined {
         return this._y;
+    }
+
+    public get pattern(): RotatablePattern {
+        return this._pattern;
+    }
+    
+    public get rotation(): Rotation {
+        return this._rotation;
     }
 
     public get selected(): boolean {

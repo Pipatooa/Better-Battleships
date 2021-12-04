@@ -5,5 +5,6 @@ export const enum Rotation {
     NoChange,
     Clockwise90,
     Clockwise180,
-    Clockwise270
+    Clockwise270,
+    FullRotation
 }

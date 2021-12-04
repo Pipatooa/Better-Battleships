@@ -11,6 +11,7 @@ import { SelectionInfoGenerator }    from '../selection-info-generator';
 import { ViewportHandler }           from '../viewport-handler';
 import { BoardRenderer }             from './board-renderer';
 import { Renderer }                  from './renderer';
+import type { Rotation }             from '../../../../shared/scenario/objects/common/rotation';
 import type { Tile }                 from '../../scenario/board';
 import type { Ship }                 from '../../scenario/ship';
 import type { ColorAtlas }           from '../color-atlas';
@@ -270,9 +271,9 @@ export class ShipSelectionRenderer extends BoardRenderer {
         this.placementDoneButton.element.text('Waiting for other players...');
         this.placementDoneButton.element.attr('disabled', true as any);
 
-        const shipPlacements: [number, number][] = [];
+        const shipPlacements: [number, number, Rotation][] = [];
         for (const ship of this.allShips)
-            shipPlacements.push([ship.x!, ship.y!]);
+            shipPlacements.push([ship.x!, ship.y!, ship.rotation]);
 
         sendRequest({
             request: 'shipPlacement',

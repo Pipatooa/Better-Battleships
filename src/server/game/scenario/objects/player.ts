@@ -22,13 +22,13 @@ export class Player implements IAttributeHolder {
     /**
      * Player constructor
      *
-     * @param  spawnRegion    Region that the player should first be allowed to place ships in
+     * @param  spawnRegionID  Region that the player should first be allowed to place ships in
      * @param  color          Color for the player
      * @param  highlightColor Color for the player when highlighted
      * @param  ships          List of ships that belong to the player
      * @param  attributes     Attributes for the player
      */
-    public constructor(public readonly spawnRegion: string,
+    public constructor(public readonly spawnRegionID: string,
                        public readonly color: string,
                        public readonly highlightColor: string,
                        public readonly ships: Ship[],
@@ -83,7 +83,7 @@ export class Player implements IAttributeHolder {
     public makeTransportable(): IPlayerInfo {
         return {
             ships: this.ships.map(s => s.makeTransportable()),
-            spawnRegion: this.spawnRegion
+            spawnRegion: this.spawnRegionID
         };
     }
 }
