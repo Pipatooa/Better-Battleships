@@ -9,6 +9,7 @@ import { RotatablePattern }       from '../../scenario/rotatable-pattern';
 import { Ship }                   from '../../scenario/ship';
 import { initiateGameSetupUI }    from '../../ui/initiate';
 import { MainUIManager }          from '../../ui/managers/main-ui-manager';
+import { setupTurnIndicator }     from '../../ui/updaters/turn-updater';
 import type { Ability }           from '../../scenario/abilities/ability';
 import type { ISetupInfoEvent }   from 'shared/network/events/i-setup-info';
 
@@ -60,17 +61,7 @@ export async function handleSetupInfo(setupInfoEvent: ISetupInfoEvent): Promise<
         ships.push(ship);
     }
 
-    // Create turn indicator elements in order
-    for (let i = 0; i < setupInfoEvent.turnOrder.length; i++){
-        const playerIdentity = setupInfoEvent.turnOrder[i];
-        const player = allPlayers[playerIdentity];
-        player.createTurnIndicatorElement();
-        MainUIManager.turnOrder.push(player);
-
-        if (i === 0)
-            player.turnIndicatorElement!.addClass('turn-indicator-active');
-    }
-
+    setupTurnIndicator(setupInfoEvent.turnOrder, setupInfoEvent.maxTurnTime);
     initiateRenderers(ships);
     initiateGameSetupUI();
 }

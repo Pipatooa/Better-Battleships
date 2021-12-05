@@ -4,7 +4,7 @@ import { Rotation }                   from '../../../../shared/scenario/objects/
 import { GamePhase }                  from '../../game';
 import type { Ship }                  from '../../scenario/objects/ship';
 import type { Client }                from '../client';
-import type { IShipPlacementRequest } from 'shared/network/requests/i-ship-placement-request';
+import type { IShipPlacementRequest } from 'shared/network/requests/i-ship-placement';
 
 /**
  * Handles a ship placement request from the client

@@ -1,7 +1,8 @@
 import Joi                            from 'joi';
+import type { IEndTurnRequest }       from './i-end-turn';
 import type { IJoinTeamRequest }      from './i-join-team';
 import type { IReadyRequest }         from './i-ready';
-import type { IShipPlacementRequest } from './i-ship-placement-request';
+import type { IShipPlacementRequest } from './i-ship-placement';
 import type { IUseAbilityRequest }    from './i-use-ability';
 
 /**
@@ -18,7 +19,8 @@ export type IClientRequest =
     IJoinTeamRequest |
     IReadyRequest |
     IShipPlacementRequest |
-    IUseAbilityRequest;
+    IUseAbilityRequest |
+    IEndTurnRequest;
 
 /**
  * Intermediate variable to trick Typescript

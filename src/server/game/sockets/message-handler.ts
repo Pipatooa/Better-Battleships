@@ -1,15 +1,13 @@
 import Joi                                                        from 'joi';
 import { baseRequestSchema }                                      from 'shared/network/requests/i-client-request';
+import { endTurnRequestSchema, handleEndTurnRequest }             from './request-handlers/end-turn';
 import { handleJoinTeamRequest, joinTeamRequestSchema }           from './request-handlers/join-team';
 import { handleReadyRequest, readyRequestSchema }                 from './request-handlers/ready';
 import { handleShipPlacementRequest, shipPlacementRequestSchema } from './request-handlers/ship-placement';
 import { baseUseAbilityRequestSchema, handleUseAbilityRequest }   from './request-handlers/use-ability';
 import type { Client }                                            from './client';
 import type { Data }                                              from 'isomorphic-ws';
-import type {
-    ClientRequestID,
-    IClientRequest
-}                                                                 from 'shared/network/requests/i-client-request';
+import type { ClientRequestID, IClientRequest }                   from 'shared/network/requests/i-client-request';
 
 /**
  * Handles a request from the client
@@ -50,7 +48,7 @@ export async function handleMessage(client: Client, msg: Data): Promise<void> {
         request = await schema.validateAsync(request);
 
         // Parse message in handler function
-        handlerFunction(client, request);
+        await handlerFunction(client, request);
 
     } catch (e: unknown) {
         if (e instanceof Joi.ValidationError) {
@@ -70,5 +68,6 @@ const requestSchemaAndHandlers: Record<ClientRequestID, [ Joi.Schema, (client: C
     joinTeam: [ joinTeamRequestSchema, handleJoinTeamRequest ],
     ready: [ readyRequestSchema, handleReadyRequest ],
     shipPlacement: [ shipPlacementRequestSchema, handleShipPlacementRequest ],
-    useAbility: [ baseUseAbilityRequestSchema, handleUseAbilityRequest ]
+    useAbility: [ baseUseAbilityRequestSchema, handleUseAbilityRequest ],
+    endTurn: [ endTurnRequestSchema, handleEndTurnRequest ]
 };

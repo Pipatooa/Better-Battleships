@@ -17,12 +17,8 @@ export async function handleUseAbilityRequest(client: Client, useAbilityRequest:
     if (client.game.scenario.turnManager.currentTurn !== client.identity)
         return;
 
-    // Check if the ship exists
-    if (useAbilityRequest.ship < 0 || useAbilityRequest.ship >= client.player!.ships.length)
-        return;
-
     const ship = client.player!.ships[useAbilityRequest.ship];
-    const ability = ship.abilities[useAbilityRequest.ability];
+    const ability = ship?.abilities[useAbilityRequest.ability];
     if (ability === undefined)
         return;
 

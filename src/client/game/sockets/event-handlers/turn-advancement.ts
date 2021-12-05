@@ -1,3 +1,4 @@
+import { advanceTurnIndicator }  from '../../ui/updaters/turn-updater';
 import type { ITurnAdvancement } from 'shared/network/events/i-turn-advancement';
 
 /**
@@ -6,5 +7,5 @@ import type { ITurnAdvancement } from 'shared/network/events/i-turn-advancement'
  * @param  turnAdvancement Event object to handle
  */
 export function handleTurnAdvancement(turnAdvancement: ITurnAdvancement): void {
-
+    advanceTurnIndicator();
 }

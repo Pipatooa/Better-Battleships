@@ -1,3 +1,4 @@
+import { startTurnTimer }       from '../../ui/updaters/turn-updater';
 import type { IGameStartEvent } from 'shared/network/events/i-game-start';
 
 /**
@@ -12,4 +13,5 @@ export function handleGameStart(gameStartEvent: IGameStartEvent): void {
     $('#info-pane').removeClass('d-none');
     $('#info-pane-turn-section').removeClass('d-none');
 
+    startTurnTimer();
 }

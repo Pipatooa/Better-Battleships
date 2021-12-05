@@ -38,4 +38,11 @@ export namespace SidebarElements {
     export const shipAbilityName = $('#sidebar-ship-ability-name');
     export const shipAbilityDescription = $('#sidebar-ship-ability-description');
     export const shipAbilityHelpText = $('#sidebar-ship-ability-help-text');
+
+    export const turnSection = $('#sidebar-turn-section');
+    export const turnContainer = $('#sidebar-turn-container');
+    export const turnButton = $('#sidebar-turn-button');
+    export const turnText = $('#sidebar-turn-text');
+    export const turnCountdownSection = new VariableVisibilityElement($('#sidebar-turn-countdown-section'));
+    export const turnCountdown = $('#sidebar-turn-countdown');
 }
