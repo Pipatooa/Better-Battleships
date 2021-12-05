@@ -71,7 +71,9 @@ export class ConditionSome extends ConditionMultiple {
 
         // Get sub conditions and value constraint from source
         const subConditions: Condition[] = await ConditionMultiple.getSubConditions(parsingContext.withExtendedPath('.subConditions'), conditionSomeSource.subConditions);
+        parsingContext.reducePath();
         const valueConstraint: ValueConstraint = await buildValueConstraint(parsingContext.withExtendedPath('.valueConstraint'), conditionSomeSource.valueConstraint, true);
+        parsingContext.reducePath();
 
         // Return created ConditionSome object
         return new ConditionSome(subConditions, valueConstraint, conditionSomeSource.inverted !== undefined ? conditionSomeSource.inverted : false);

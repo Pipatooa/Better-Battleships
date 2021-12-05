@@ -36,5 +36,4 @@ export async function buildAbility(parsingContext: ParsingContext, abilitySource
     }
 
     return ability;
-
 }

@@ -50,20 +50,23 @@ export class Scenario implements IAttributeHolder {
 
         // Get attributes and update parsing context
         const attributes: AttributeMap = await getAttributes(parsingContext.withExtendedPath('.attributes'), scenarioSource.attributes, 'scenario');
-        parsingContext = parsingContext.withScenarioAttributes(attributes);
+        parsingContext.scenarioAttributes = attributes;
+        parsingContext.reducePath();
 
         // Get descriptor
         const descriptor = await Descriptor.fromSource(parsingContext.withExtendedPath('.descriptor'), scenarioSource.descriptor, false);
+        parsingContext.reducePath();
 
         // Get board
         const boardSource: IBoardSource = await getJSONFromEntry(parsingContext.boardEntry) as unknown as IBoardSource;
-        const board = await Board.fromSource(parsingContext.withUpdatedFile('board.json'), boardSource, true);
-        parsingContext = parsingContext.withBoard(board);
+        const board = await Board.fromSource(parsingContext.withFile('board.json'), boardSource, true);
+        parsingContext.reduceFileStack();
+        parsingContext.board = board;
 
         // Get foreign attribute registry and update parsing context
         const foreignAttributeRegistrySource = await getJSONFromEntry(parsingContext.foreignAttributeRegistryEntry) as unknown as IForeignAttributeRegistrySource;
-        const foreignAttributeRegistry = await ForeignAttributeRegistry.fromSource(parsingContext.withUpdatedFile('foreign-attributes.json'), foreignAttributeRegistrySource, true);
-        parsingContext = parsingContext.withForeignAttributeRegistry(foreignAttributeRegistry);
+        parsingContext.foreignAttributeRegistry = await ForeignAttributeRegistry.fromSource(parsingContext.withFile('foreign-attributes.json'), foreignAttributeRegistrySource, true);
+        parsingContext.reduceFileStack();
 
         // Get teams
         const teams: { [name: string]: Team } = {};
@@ -76,7 +79,8 @@ export class Scenario implements IAttributeHolder {
 
             // Unpack team data
             const teamSource: ITeamSource = await getJSONFromEntry(parsingContext.teamEntries[teamName]) as unknown as ITeamSource;
-            const team = await Team.fromSource(parsingContext.withUpdatedFile(`teams/${teamName}.json`), teamSource, teamName, true);
+            const team = await Team.fromSource(parsingContext.withFile(`teams/${teamName}.json`), teamSource, teamName, true);
+            parsingContext.reduceFileStack();
             teams[teamName] = team;
             teamsList.push(team);
         }
@@ -85,6 +89,7 @@ export class Scenario implements IAttributeHolder {
         const turnManager = new TurnManager(scenarioSource.turnOrdering, teamsList, scenarioSource.maxTurnTime);
 
         // Return created Scenario object
+        parsingContext.scenarioAttributes = undefined;
         return new Scenario(parsingContext.scenarioFile, scenarioSource.author, descriptor, board, teams, turnManager, attributes);
     }
 

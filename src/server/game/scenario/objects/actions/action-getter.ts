@@ -25,14 +25,16 @@ export async function getActions<T extends { [event in U]: ActionSource[] }, U e
         const [event, actionSources] = entry as [U, ActionSource[]];
 
         // If event is a foreign event, set foreign attribute flag for parsing context
-        const newParsingContext: ParsingContext = foreignEvents.includes(event) ? parsingContext.withForeignAttributeFlag() : parsingContext;
+        parsingContext.foreignAttributeFlag = foreignEvents.includes(event);
 
         for (let i = 0; i < actionSources.length; i++) {
             const actionSource = actionSources[i];
-            const action: Action = await buildAction(newParsingContext.withExtendedPath(`.${event}[${i}]`), actionSource, false);
+            const action: Action = await buildAction(parsingContext.withExtendedPath(`.${event}[${i}]`), actionSource, false);
+            parsingContext.reducePath();
             actions[event].push(action);
         }
     }
 
+    parsingContext.foreignAttributeFlag = false;
     return actions;
 }

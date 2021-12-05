@@ -58,15 +58,21 @@ export class AbilityMove extends PositionedAbility {
 
         // Get attributes and update parsing context
         const attributes: AttributeMap = await getAttributes(parsingContext.withExtendedPath('.attributes'), abilityMoveSource.attributes, 'ability');
-        parsingContext = parsingContext.withAbilityAttributes(attributes);
+        parsingContext.abilityAttributes = attributes;
+        parsingContext.reducePath();
 
         // Get component elements from source
         const descriptor: Descriptor = await Descriptor.fromSource(parsingContext.withExtendedPath('.descriptor'), abilityMoveSource.descriptor, false);
+        parsingContext.reducePath();
         const pattern: Pattern = await Pattern.fromSource(parsingContext.withExtendedPath('.pattern'), abilityMoveSource.pattern, false);
+        parsingContext.reducePath();
         const condition: Condition = await buildCondition(parsingContext.withExtendedPath('.condition'), abilityMoveSource.condition, false);
+        parsingContext.reducePath();
         const actions: AbilityActions = await getActions(parsingContext.withExtendedPath('.actions'), baseAbilityEvents, [], abilityMoveSource.actions);
+        parsingContext.reducePath();
 
         // Return created AbilityFire object
+        parsingContext.abilityAttributes = undefined;
         return new AbilityMove(parsingContext.shipPartial as Ship, descriptor, pattern, condition, actions, attributes);
     }
 

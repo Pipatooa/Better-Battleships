@@ -1,13 +1,13 @@
-import http                       from 'http';
-import path                       from 'path';
-import process                    from 'process';
-import cookieParser               from 'cookie-parser';
-import express                    from 'express';
-import exphbs                     from 'express-handlebars';
-import WebSocket                  from 'isomorphic-ws';
-import { executeDBStartupScript } from './db/startup';
+import http         from 'http';
+import path         from 'path';
+import process      from 'process';
+import cookieParser from 'cookie-parser';
+import express      from 'express';
+import exphbs       from 'express-handlebars';
+import WebSocket    from 'isomorphic-ws';
 
-import socketRegister from './game/sockets/register';
+import { executeDBStartupScript } from './db/startup';
+import socketRegister             from './game/sockets/register';
 
 import gameRouter         from './routes/game';
 import gameCreateRouter   from './routes/game/create';

@@ -77,12 +77,15 @@ export class Attribute {
 
         // Get initial value
         const initialValue: Value = await buildValue(parsingContext.withExtendedPath('.initialValue'), attributeSource.initialValue, false);
+        parsingContext.reducePath();
 
         // Get constraints
         const constraints: ValueConstraint[] = [];
         for (let i = 0; i < attributeSource.constraints.length; i++) {
             const constraintSource = attributeSource.constraints[i];
-            constraints.push(await buildValueConstraint(parsingContext.withExtendedPath(`.constraints[${i}]`), constraintSource, false));
+            const constraint = await buildValueConstraint(parsingContext.withExtendedPath(`.constraints[${i}]`), constraintSource, false);
+            parsingContext.reducePath();
+            constraints.push(constraint);
         }
 
         // Return created Attribute object

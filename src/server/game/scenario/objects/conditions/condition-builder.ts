@@ -20,8 +20,8 @@ import type { ConditionSource }          from './sources/condition';
 export async function buildCondition(parsingContext: ParsingContext, conditionSource: ConditionSource, checkSchema: boolean): Promise<Condition> {
 
     // Empty condition
-    if (conditionSource === {})
-        return await ConditionFixed.fromSource(parsingContext, conditionSource, false);
+    if (Object.entries(conditionSource).length === 0)
+        return await ConditionFixed.fromSource(parsingContext, conditionSource as Record<string, never>, false);
 
     // Validate JSON data against schema
     if (checkSchema)

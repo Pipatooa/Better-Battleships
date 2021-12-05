@@ -51,6 +51,7 @@ export class ValueSum extends ValueMultiple {
 
         // Get sub values from source
         const subValues: Value[] = await ValueMultiple.getSubValues(parsingContext.withExtendedPath('.values'), valueSumSource.values);
+        parsingContext.reducePath();
 
         // Return created ValueRandom object
         return new ValueSum(subValues);

@@ -49,6 +49,7 @@ export class ValueAttributeReference extends Value {
 
         // Get attribute from source
         const attribute: AttributeReference = await buildAttributeReference(parsingContext.withExtendedPath('.attribute'), valueAttributeReferenceSource.attribute, false);
+        parsingContext.reducePath();
 
         // Return created ValueAttributeReference object
         return new ValueAttributeReference(attribute);

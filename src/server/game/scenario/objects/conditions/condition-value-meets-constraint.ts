@@ -61,7 +61,9 @@ export class ConditionValueMeetsConstraint extends Condition {
 
         // Get value and value constraint from source
         const value: Value = await buildValue(parsingContext.withExtendedPath('.value'), conditionValueMeetsConstraintSource.value, false);
+        parsingContext.reducePath();
         const valueConstraint: ValueConstraint = await buildValueConstraint(parsingContext.withExtendedPath('.valueConstraint'), conditionValueMeetsConstraintSource.constraint, true);
+        parsingContext.reducePath();
 
         // Return created ConditionValueMeetsConstraint object
         return new ConditionValueMeetsConstraint(value, valueConstraint, conditionValueMeetsConstraintSource.inverted !== undefined ? conditionValueMeetsConstraintSource.inverted : false);

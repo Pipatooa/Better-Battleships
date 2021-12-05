@@ -5,18 +5,19 @@ import type { AttributeReferenceObjectSelector } from '../attribute-references/s
 import type { AttributeMap, AttributeMapSource } from './i-attribute-holder';
 
 /**
- * Gets a knownItems of attributes for an object
+ * Gets a map of attributes for an object
  *
  * @param    parsingContext Context for resolving scenario data
  * @param    attributeData  JSON data for attributes
  * @param    attributeLevel Type of object that this attribute set belongs to
- * @returns                 Created attribute knownItems
+ * @returns                 Created attribute map
  */
 export async function getAttributes(parsingContext: ParsingContext, attributeData: AttributeMapSource, attributeLevel: AttributeReferenceObjectSelector): Promise<AttributeMap> {
 
     const attributes: AttributeMap = {};
     for (const [name, attributeSource] of Object.entries(attributeData)) {
         attributes[name] = await Attribute.fromSource(parsingContext.withExtendedPath(`.${name}`), attributeSource, false);
+        parsingContext.reducePath();
     }
 
     // Enforce that foreign attributes exist for object type

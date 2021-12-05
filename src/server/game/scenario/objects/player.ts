@@ -54,7 +54,8 @@ export class Player implements IAttributeHolder {
 
         // Get attributes and update parsing context
         const attributes: AttributeMap = await getAttributes(parsingContext.withExtendedPath('.attributes'), playerSource.attributes, 'player');
-        parsingContext = parsingContext.withPlayerAttributes(attributes);
+        parsingContext.playerAttributes = attributes;
+        parsingContext.reducePath();
 
         // Get ships
         const ships: Ship[] = [];
@@ -66,10 +67,13 @@ export class Player implements IAttributeHolder {
 
             // Unpack ship data
             const shipSource: IShipSource = await getJSONFromEntry(parsingContext.shipEntries[shipName]) as unknown as IShipSource;
-            ships.push(await Ship.fromSource(parsingContext.withUpdatedFile(`ships/${shipName}.json`), shipSource, true));
+            const ship = await Ship.fromSource(parsingContext.withFile(`ships/${shipName}.json`), shipSource, true);
+            parsingContext.reduceFileStack();
+            ships.push(ship);
         }
 
         // Return created Player object
+        parsingContext.playerAttributes = undefined;
         return new Player(spawnRegion, color, highlightColor, ships, attributes);
     }
 

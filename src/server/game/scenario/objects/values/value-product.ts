@@ -51,6 +51,7 @@ export class ValueProduct extends ValueMultiple {
 
         // Get sub values from source
         const subValues: Value[] = await ValueMultiple.getSubValues(parsingContext.withExtendedPath('.values'), valueProductSource.values);
+        parsingContext.reducePath();
 
         // Return created ValueRandom object
         return new ValueProduct(subValues);

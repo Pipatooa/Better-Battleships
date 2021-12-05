@@ -44,7 +44,9 @@ export class ValueInRangeConstraint extends ValueConstraint {
             valueInRangeConstraintSource = await checkAgainstSchema(valueInRangeConstraintSource, valueInRangeConstraintSchema, parsingContext);
 
         const min: Value = await buildValue(parsingContext.withExtendedPath('.min'), valueInRangeConstraintSource.min, false);
+        parsingContext.reducePath();
         const max: Value = await buildValue(parsingContext.withExtendedPath('.max'), valueInRangeConstraintSource.max, false);
+        parsingContext.reducePath();
 
         // Return created ValueInRangeConstraint object
         return new ValueInRangeConstraint(min, max);

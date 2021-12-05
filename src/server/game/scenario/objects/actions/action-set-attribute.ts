@@ -47,8 +47,11 @@ export class ActionSetAttribute extends Action {
 
         // Get condition, attribute and value from source
         const condition: Condition = await buildCondition(parsingContext.withExtendedPath('.condition'), actionSetAttributeSource.condition, false);
+        parsingContext.reducePath();
         const attribute: AttributeReference = await buildAttributeReference(parsingContext.withExtendedPath('.attribute'), actionSetAttributeSource.attribute, false);
+        parsingContext.reducePath();
         const value: Value = await buildValue(parsingContext.withExtendedPath('.value'), actionSetAttributeSource.value, false);
+        parsingContext.reducePath();
 
         // Return created ActionSetAttribute object
         return new ActionSetAttribute(attribute, value, condition);

@@ -30,6 +30,7 @@ export class ActionWin extends Action {
 
         // Get condition from source
         const condition: Condition = await buildCondition(parsingContext.withExtendedPath('.condition'), actionWinSource.condition, false);
+        parsingContext.reducePath();
 
         // Return created ActionWin object
         return new ActionWin(condition);

@@ -54,6 +54,7 @@ export class Board {
         const palette: { [char: string]: TileType } = {};
         for (const [char, tileTypeSource] of Object.entries(boardSource.tilePalette)) {
             palette[char] = await TileType.fromSource(parsingContext.withExtendedPath(`.palette.${char}`), tileTypeSource, false);
+            parsingContext.reducePath();
         }
 
         // Unpack region palette data

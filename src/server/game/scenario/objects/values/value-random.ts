@@ -92,10 +92,15 @@ export class ValueRandom extends Value {
 
         // Get min, max and step from source
         const min: Value = await buildValue(parsingContext.withExtendedPath('.min'), valueRandomSource.min, true);
+        parsingContext.reducePath();
         const max: Value = await buildValue(parsingContext.withExtendedPath('.max'), valueRandomSource.max, true);
-        const step: Value | undefined = valueRandomSource.step === undefined ?
-            undefined :
+        parsingContext.reducePath();
+
+        let step: Value | undefined;
+        if (valueRandomSource.step !== undefined) {
             await buildValue(parsingContext.withExtendedPath('.step'), valueRandomSource.step, true);
+            parsingContext.reducePath();
+        }
 
         // Return created ValueRandom object
         return new ValueRandom(min, max, step, valueRandomSource.generateOnce);

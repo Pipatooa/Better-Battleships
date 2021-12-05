@@ -51,6 +51,7 @@ export class ConditionAny extends ConditionMultiple {
 
         // Get sub conditions from source
         const subConditions: Condition[] = await ConditionMultiple.getSubConditions(parsingContext.withExtendedPath('.subConditions'), conditionAnySource.subConditions);
+        parsingContext.reducePath();
 
         // Return created ConditionAny object
         return new ConditionAny(subConditions, conditionAnySource.inverted !== undefined ? conditionAnySource.inverted : false);

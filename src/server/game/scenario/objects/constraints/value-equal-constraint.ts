@@ -40,6 +40,7 @@ export class ValueEqualConstraint extends ValueConstraint {
             valueEqualConstraintSource = await checkAgainstSchema(valueEqualConstraintSource, valueEqualConstraintSchema, parsingContext);
 
         const target: Value = await buildValue(parsingContext.withExtendedPath('.exactly'), valueEqualConstraintSource.exactly, false);
+        parsingContext.reducePath();
 
         // Return created ValueEqualConstraint object
         return new ValueEqualConstraint(target);

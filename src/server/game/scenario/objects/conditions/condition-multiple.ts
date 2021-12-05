@@ -38,6 +38,7 @@ export abstract class ConditionMultiple extends Condition {
 
             // Build condition from sub condition source and add to list
             const subCondition: Condition = await buildCondition(parsingContext.withExtendedPath(`[${i}]`), subConditionSources[i], true);
+            parsingContext.reducePath();
             subConditions.push(subCondition);
         }
 

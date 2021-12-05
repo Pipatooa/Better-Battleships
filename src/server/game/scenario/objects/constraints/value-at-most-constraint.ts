@@ -40,6 +40,7 @@ export class ValueAtMostConstraint extends ValueConstraint {
             valueAtMostConstraintSource = await checkAgainstSchema(valueAtMostConstraintSource, valueAtMostConstraintSchema, parsingContext);
 
         const max: Value = await buildValue(parsingContext.withExtendedPath('.max'), valueAtMostConstraintSource.max, false);
+        parsingContext.reducePath();
 
         // Return created ValueAtMostConstraint object
         return new ValueAtMostConstraint(max);

@@ -101,7 +101,7 @@ export class Pattern {
             for (let x = 0; x < patternSource.size[0]; x++) {
                 const c: string = row.charAt(x);
 
-                // If character did not match any value within the values knownItems
+                // If character did not match any value within the values map
                 if (!(c in values))
                     throw new UnpackingError(`Could not find value for the character '${c}' in value map at '${parsingContext.currentPathPrefix}pattern[${y}][${x}]'`, parsingContext);
 

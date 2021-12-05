@@ -93,15 +93,20 @@ export class Ship implements IAttributeHolder {
         if (checkSchema)
             shipSource = await checkAgainstSchema(shipSource, shipSchema, parsingContext);
 
-        // Get attributes and update parsing context
-        // Ship partial refers to future ship object
+        // Get attributes
         const attributes: AttributeMap = await getAttributes(parsingContext.withExtendedPath('.attributes'), shipSource.attributes, 'ship');
+        parsingContext.shipAttributes = attributes;
+        parsingContext.reducePath();
+
+        // Ship partial refers to future ship object
         const shipPartial: Partial<Ship> = {};
-        parsingContext = parsingContext.withShipAttributes(attributes).withShipReference(shipPartial);
+        parsingContext.shipPartial = shipPartial;
 
         // Get component elements from source
         const descriptor = await Descriptor.fromSource(parsingContext.withExtendedPath('.descriptor'), shipSource.descriptor, false);
+        parsingContext.reducePath();
         const pattern = await RotatablePattern.fromSource(parsingContext.withExtendedPath('.pattern'), shipSource.pattern, false);
+        parsingContext.reducePath();
 
         // Get abilities
         const abilities: Ability[] = [];
@@ -118,11 +123,14 @@ export class Ship implements IAttributeHolder {
 
             // Unpack ability data
             const abilitySource: AbilitySource = await getJSONFromEntry(parsingContext.abilityEntries[abilityName]) as unknown as AbilitySource;
-            const ability = await buildAbility(parsingContext.withUpdatedFile(`abilities/${abilityName}.json`), abilitySource, true);
+            const ability = await buildAbility(parsingContext.withFile(`abilities/${abilityName}.json`), abilitySource, true);
+            parsingContext.reduceFileStack();
             abilities.push(ability);
         }
 
         // Return created Ship object
+        parsingContext.shipAttributes = undefined;
+        parsingContext.shipPartial = undefined;
         Ship.call(shipPartial, parsingContext.board!, descriptor, pattern, abilities, attributes);
         (shipPartial as any).__proto__ = Ship.prototype;
         return shipPartial as Ship;

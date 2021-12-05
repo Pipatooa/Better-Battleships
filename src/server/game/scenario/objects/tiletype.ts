@@ -32,6 +32,7 @@ export class TileType {
 
         // Create sub-objects
         const descriptor = await Descriptor.fromSource(parsingContext.withExtendedPath('.descriptor'), tileTypeSource.descriptor, false);
+        parsingContext.reducePath();
 
         // Return tile type object
         return new TileType(descriptor, tileTypeSource.color, tileTypeSource.traversable);

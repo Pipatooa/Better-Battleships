@@ -78,10 +78,12 @@ export class Team implements IAttributeHolder {
 
         // Get attributes and update parsing context
         const attributes: AttributeMap = await getAttributes(parsingContext.withExtendedPath('.attributes'), teamSource.attributes, 'team');
-        parsingContext = parsingContext.withTeamAttributes(attributes);
+        parsingContext.teamAttributes = attributes;
+        parsingContext.reducePath();
 
         // Get descriptor
         const descriptor = await Descriptor.fromSource(parsingContext.withExtendedPath('.descriptor'), teamSource.descriptor, false);
+        parsingContext.reducePath();
 
         // Get player prototypes for each possible player count
         const playerPrototypes: Player[][] = [];
@@ -104,7 +106,9 @@ export class Team implements IAttributeHolder {
 
                 // Unpack player
                 const playerSource: IPlayerSource = await getJSONFromEntry(parsingContext.playerPrototypeEntries[playerName]) as unknown as IPlayerSource;
-                players.push(await Player.fromSource(parsingContext.withUpdatedFile(`players/${playerName}.json`), playerSource, playerConfig.spawnRegion, playerConfig.color, playerConfig.highlightColor, true));
+                const player = await Player.fromSource(parsingContext.withFile(`players/${playerName}.json`), playerSource, playerConfig.spawnRegion, playerConfig.color, playerConfig.highlightColor, true);
+                parsingContext.reduceFileStack();
+                players.push(player);
             }
 
             // Add list of players to list of possible player configurations
@@ -112,6 +116,7 @@ export class Team implements IAttributeHolder {
         }
 
         // Return created Team object
+        parsingContext.teamAttributes = undefined;
         return new Team(id, descriptor, playerPrototypes, teamSource.color, teamSource.highlightColor, attributes);
     }
 

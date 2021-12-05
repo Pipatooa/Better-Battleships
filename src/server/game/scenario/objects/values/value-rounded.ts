@@ -56,7 +56,9 @@ export class ValueRounded extends Value {
 
         // Get value and step from source
         const value: Value = await buildValue(parsingContext.withExtendedPath('.value'), valueRoundedSource.value, true);
+        parsingContext.reducePath();
         const step: Value = await buildValue(parsingContext.withExtendedPath('.step'), valueRoundedSource.step, true);
+        parsingContext.reducePath();
 
         // Return created ValueRounded object
         return new ValueRounded(value, step);

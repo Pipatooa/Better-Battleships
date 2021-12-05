@@ -17,46 +17,40 @@ import type { FileJSON }                         from 'formidable';
  */
 export class ParsingContext {
 
+    private readonly fileStack: string[] = [];
+    private readonly pathSegments: string[] = [];
+
+    public board: Board | undefined;
+    public shipPartial: Partial<Ship> | undefined;
+
+    public foreignAttributeRegistry: ForeignAttributeRegistry | undefined;
+    public foreignAttributeFlag = false;
+
+    public scenarioAttributes: AttributeMap | undefined;
+    public teamAttributes: AttributeMap | undefined;
+    public playerAttributes: AttributeMap | undefined;
+    public shipAttributes: AttributeMap | undefined;
+    public abilityAttributes: AttributeMap | undefined;
+
     /**
      * ParsingContext constructor
      *
      * @param  scenarioFile                  Scenario file to use
-     * @param  _currentFile                  Path to current file being parsed
-     * @param  _currentPath                  JSON path to object within current file being evaluated
      * @param  boardEntry                    Zip entry for board.json
      * @param  foreignAttributeRegistryEntry Zip entry for foreign-attributes.json
      * @param  teamEntries                   Zip entries for teams/team.json files
      * @param  playerPrototypeEntries        Zip entries for player/player.json files
      * @param  shipEntries                   Zip entries for ship/ship.json files
      * @param  abilityEntries                Zip entries for abilities/ability.json files
-     * @param  _board                        Board for scenario
-     * @param  scenarioAttributes            Dictionary of attributes belonging to current scenario
-     * @param  teamAttributes                Dictionary of attributes belonging to current team,
-     * @param  playerAttributes              Dictionary of attributes belonging to current player
-     * @param  shipAttributes                Dictionary of attributes belonging to current ship
-     * @param  abilityAttributes             Dictionary of attributes belonging to current ability
-     * @param  _foreignAttributeRegistry     Registry of registered foreign attribute names
-     * @param  _shipPartial                  Empty ship object which is yet to be constructed
-     * @param  _foreignAttributeFlag         Whether or not to treat attribute references as foreign references
      */
     public constructor(public readonly scenarioFile: FileJSON,
-                       protected _currentFile: string,
-                       protected _currentPath: string,
                        public readonly boardEntry: IZipEntry,
                        public readonly foreignAttributeRegistryEntry: IZipEntry,
                        public readonly teamEntries: ZipEntryMap,
                        public readonly playerPrototypeEntries: ZipEntryMap,
                        public readonly shipEntries: ZipEntryMap,
-                       public readonly abilityEntries: ZipEntryMap,
-                       protected _board?: Board,
-                       protected scenarioAttributes?: AttributeMap,
-                       protected teamAttributes?: AttributeMap,
-                       protected playerAttributes?: AttributeMap,
-                       protected shipAttributes?: AttributeMap,
-                       protected abilityAttributes?: AttributeMap,
-                       protected _foreignAttributeRegistry?: ForeignAttributeRegistry,
-                       protected _shipPartial?: Partial<Ship>,
-                       protected _foreignAttributeFlag: boolean = false) {
+                       public readonly abilityEntries: ZipEntryMap) {
+
     }
 
     /**
@@ -70,7 +64,7 @@ export class ParsingContext {
 
         let attributeMap: AttributeMap | undefined;
 
-        // Select attribute knownItems depending on attribute selector
+        // Select attribute map depending on attribute selector
         switch (objectSelector) {
             case 'scenario':
                 attributeMap = this.scenarioAttributes;
@@ -89,13 +83,12 @@ export class ParsingContext {
                 break;
         }
 
-        // If attribute knownItems could not be found with selector, or attribute could not be found within the attribute knownItems
-        if (attributeMap === undefined || !(attributeName in attributeMap))
-            throw new UnpackingError(`Could not find attribute 'local:${objectSelector}.${attributeName}' defined at '${this.currentPath}' in current context '${this.getAttributeContextName()}'`,
+        const attribute = attributeMap?.[attributeName];
+        if (attribute === undefined)
+            throw new UnpackingError(`Could not find attribute 'local:${objectSelector}.${attributeName}' defined at '${this.currentPath}' in current context '${this.attributeContextName}'`,
                 this.currentFile);
 
-        // Return reference to found attribute
-        return new AttributeReferenceLocal(attributeMap[attributeName]);
+        return new AttributeReferenceLocal(attribute);
     }
 
     /**
@@ -107,7 +100,7 @@ export class ParsingContext {
      */
     public getForeignAttributeReference(objectSelector: 'team' | 'player' | 'ship', attributeName: string): AttributeReferenceForeign {
 
-        if (!this._foreignAttributeFlag)
+        if (!this.foreignAttributeFlag)
             throw new UnpackingError(`Cannot reference foreign attribute 'foreign:${objectSelector}.${attributeName}' defined at '${this.currentPath}' in a context where no foreign object to address exists`,
                 this.currentFile);
 
@@ -118,186 +111,23 @@ export class ParsingContext {
         return new AttributeReferenceForeign(objectSelector, attributeName);
     }
 
-    /**
-     * Returns the lowest level of attribute currently known
-     *
-     * @returns  Object selector
-     */
-    public getAttributeContextName(): AttributeReferenceObjectSelector {
-        if (this.abilityAttributes !== undefined)
-            return 'ability';
-
-        if (this.shipAttributes !== undefined)
-            return 'ship';
-
-        if (this.playerAttributes !== undefined)
-            return 'player';
-
-        if (this.teamAttributes !== undefined)
-            return 'team';
-
-        return 'scenario';
+    public withFile(file: string): this {
+        this.fileStack.push(file);
+        return this;
     }
 
-    /**
-     * Factory function to generate a copy of this object.
-     *
-     * @returns  Shallow copy of this parsing context
-     */
-    public getCopy(): ParsingContext {
-        return new ParsingContext(
-            this.scenarioFile,
-            this._currentFile,
-            this._currentPath,
-            this.boardEntry,
-            this.foreignAttributeRegistryEntry,
-            this.teamEntries,
-            this.playerPrototypeEntries,
-            this.shipEntries,
-            this.abilityEntries,
-            this._board,
-            this.scenarioAttributes,
-            this.teamAttributes,
-            this.playerAttributes,
-            this.shipAttributes,
-            this.abilityAttributes,
-            this._foreignAttributeRegistry,
-            this._shipPartial,
-            this._foreignAttributeFlag);
+    public reduceFileStack(): void {
+        this.fileStack.pop();
     }
 
-    /**
-     * Factory function to generate a copy of this object with an updated current file
-     *
-     * Will also reset the current path
-     *
-     * @param    newFile New filename to use in new context
-     * @returns          Created ParsingContext
-     */
-    public withUpdatedFile(newFile: string): ParsingContext {
-        const copy: ParsingContext = this.getCopy();
-        copy._currentFile = newFile;
-        copy._currentPath = '';
-        return copy;
+    public withExtendedPath(pathSegment: string): this {
+        this.pathSegments.push(pathSegment);
+        return this;
     }
 
-    /**
-     * Factory function to generate a copy of this object with an extended JSON object path
-     *
-     * @param    pathExtension Extension to add to current path
-     * @returns                Created ParsingContext
-     */
-    public withExtendedPath(pathExtension: string): ParsingContext {
-        const copy: ParsingContext = this.getCopy();
-        copy._currentPath += pathExtension;
-        return copy;
-    }
-
-    /**
-     * Factory function to generate a copy of this object with an attached board
-     *
-     * @param    board Board to use in new context
-     * @returns        Created ParsingContext
-     */
-    public withBoard(board: Board): ParsingContext {
-        const copy: ParsingContext = this.getCopy();
-        copy._board = board;
-        return copy;
-    }
-
-    /**
-     * Factory function to generate a copy of this object with a set of scenario attributes
-     *
-     * @param    scenarioAttributes Scenario attributes to use
-     * @returns                     Created ParsingContext
-     */
-    public withScenarioAttributes(scenarioAttributes: AttributeMap): ParsingContext {
-        const copy: ParsingContext = this.getCopy();
-        copy.scenarioAttributes = scenarioAttributes;
-        return copy;
-    }
-
-    /**
-     * Factory function to generate a copy of this object with a set of team attributes
-     *
-     * @param    teamAttributes Team attributes to use
-     * @returns                 Created ParsingContext
-     */
-    public withTeamAttributes(teamAttributes: AttributeMap): ParsingContext {
-        const copy: ParsingContext = this.getCopy();
-        copy.teamAttributes = teamAttributes;
-        return copy;
-    }
-
-    /**
-     * Factory function to generate a copy of this object with a set of player attributes
-     *
-     * @param    playerAttributes Player attributes to use
-     * @returns                   Created ParsingContext
-     */
-    public withPlayerAttributes(playerAttributes: AttributeMap): ParsingContext {
-        const copy: ParsingContext = this.getCopy();
-        copy.playerAttributes = playerAttributes;
-        return copy;
-    }
-
-    /**
-     * Factory function to generate a copy of this object with a set of ship attributes
-     *
-     * @param    shipAttributes Ship attributes to use
-     * @returns                 Created ParsingContext
-     */
-    public withShipAttributes(shipAttributes: AttributeMap): ParsingContext {
-        const copy: ParsingContext = this.getCopy();
-        copy.shipAttributes = shipAttributes;
-        return copy;
-    }
-
-    /**
-     * Factory function to generate a copy of this object with a set of ability attributes
-     *
-     * @param    abilityAttributes Ability attributes to use
-     * @returns                    Created ParsingContext
-     */
-    public withAbilityAttributes(abilityAttributes: AttributeMap): ParsingContext {
-        const copy: ParsingContext = this.getCopy();
-        copy.abilityAttributes = abilityAttributes;
-        return copy;
-    }
-
-    /**
-     * Factory function to generate a copy of this object with foreign attribute registry
-     *
-     * @param    foreignAttributeRegistry Foreign attribute registry to include
-     * @returns                           Created ParsingContext
-     */
-    public withForeignAttributeRegistry(foreignAttributeRegistry: ForeignAttributeRegistry): ParsingContext {
-        const copy: ParsingContext = this.getCopy();
-        copy._foreignAttributeRegistry = foreignAttributeRegistry;
-        return copy;
-    }
-
-    /**
-     * Factory function to generate a copy of this object with a reference to a ship
-     *
-     * @param    ship Empty ship object which is yet to be constructed
-     * @returns       Created ParsingContext
-     */
-    public withShipReference(ship: Partial<Ship>): ParsingContext {
-        const copy: ParsingContext = this.getCopy();
-        copy._shipPartial = ship;
-        return copy;
-    }
-
-    /**
-     * Factory function to generate a copy of this object with foreign attribute flag set to true
-     *
-     * @returns  Created ParsingContext
-     */
-    public withForeignAttributeFlag(): ParsingContext {
-        const copy: ParsingContext = this.getCopy();
-        copy._foreignAttributeFlag = true;
-        return copy;
+    public reducePath(): void {
+        if (this.pathSegments.length > 0)
+            this.pathSegments.pop();
     }
 
     /**
@@ -305,32 +135,28 @@ export class ParsingContext {
      */
 
     public get currentFile(): string {
-        return this._currentFile;
+        return this.fileStack[this.fileStack.length - 1];
     }
 
     public get currentPath(): string {
-        return this._currentPath.replace(/^\./, '');
+        return this.pathSegments.join('').replace(/^\./, '');
     }
 
     public get currentPathPrefix(): string {
-        if (this._currentPath === '')
-            return '';
-        return this.currentPath + '.';
-    }
-    
-    public get board(): Board | undefined {
-        return this._board;
+        return this.pathSegments.length === 0
+            ? ''
+            : this.pathSegments.join('') + '.';
     }
 
-    public get foreignAttributeRegistry(): ForeignAttributeRegistry | undefined {
-        return this._foreignAttributeRegistry;
-    }
-
-    public get shipPartial(): Partial<Ship> | undefined {
-        return this._shipPartial;
-    }
-
-    public get foreignAttributeFlag(): boolean {
-        return this._foreignAttributeFlag;
+    public get attributeContextName(): AttributeReferenceObjectSelector {
+        if (this.abilityAttributes !== undefined)
+            return 'ability';
+        if (this.shipAttributes !== undefined)
+            return 'ship';
+        if (this.playerAttributes !== undefined)
+            return 'player';
+        if (this.teamAttributes !== undefined)
+            return 'team';
+        return 'scenario';
     }
 }

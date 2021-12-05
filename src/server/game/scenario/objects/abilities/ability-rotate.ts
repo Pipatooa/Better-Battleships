@@ -62,14 +62,19 @@ export class AbilityRotate extends IndexedAbility {
 
         // Get attributes and update parsing context
         const attributes: AttributeMap = await getAttributes(parsingContext.withExtendedPath('.attributes'), abilityRotateSource.attributes, 'ability');
-        parsingContext = parsingContext.withAbilityAttributes(attributes);
+        parsingContext.abilityAttributes = attributes;
+        parsingContext.reducePath();
 
         // Get component elements from source
         const descriptor: Descriptor = await Descriptor.fromSource(parsingContext.withExtendedPath('.descriptor'), abilityRotateSource.descriptor, false);
+        parsingContext.reducePath();
         const condition: Condition = await buildCondition(parsingContext.withExtendedPath('.condition'), abilityRotateSource.condition, false);
+        parsingContext.reducePath();
         const actions: AbilityActions = await getActions(parsingContext.withExtendedPath('.actions'), baseAbilityEvents, [], abilityRotateSource.actions);
+        parsingContext.reducePath();
 
         // Return created AbilityFire object
+        parsingContext.abilityAttributes = undefined;
         return new AbilityRotate(parsingContext.shipPartial as Ship, descriptor, abilityRotateSource.rot90, abilityRotateSource.rot180, abilityRotateSource.rot270, condition, actions, attributes);
     }
 

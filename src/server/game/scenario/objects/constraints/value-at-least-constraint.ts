@@ -40,6 +40,7 @@ export class ValueAtLeastConstraint extends ValueConstraint {
             valueAtLeastConstraintSource = await checkAgainstSchema(valueAtLeastConstraintSource, valueAtLeastConstraintSchema, parsingContext);
 
         const min: Value = await buildValue(parsingContext.withExtendedPath('.min'), valueAtLeastConstraintSource.min, false);
+        parsingContext.reducePath();
 
         // Return created ValueAtLeastConstraint object
         return new ValueAtLeastConstraint(min);

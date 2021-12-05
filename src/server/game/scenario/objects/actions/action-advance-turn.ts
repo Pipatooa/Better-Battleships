@@ -30,6 +30,7 @@ export class ActionAdvanceTurn extends Action {
 
         // Get condition from source
         const condition: Condition = await buildCondition(parsingContext.withExtendedPath('.condition'), actionAdvanceTurnSource.condition, false);
+        parsingContext.reducePath();
 
         // Return created ActionAdvanceTurn object
         return new ActionAdvanceTurn(condition);

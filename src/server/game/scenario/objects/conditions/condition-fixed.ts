@@ -42,7 +42,7 @@ export class ConditionFixed extends Condition {
     public static async fromSource(parsingContext: ParsingContext, conditionFixedSource: IConditionFixedSource | Record<string, never>, checkSchema: boolean): Promise<ConditionFixed> {
 
         // Empty condition
-        if (conditionFixedSource === {})
+        if (Object.entries(conditionFixedSource).length === 0)
             return new ConditionFixed(true);
 
         // Validate JSON data against schema
