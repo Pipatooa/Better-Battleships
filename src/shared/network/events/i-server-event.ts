@@ -7,6 +7,10 @@ import type { IPlayerJoinEvent }        from './i-player-join';
 import type { IPlayerLeaveEvent }       from './i-player-leave';
 import type { IPlayerReadyEvent }       from './i-player-ready';
 import type { ISetupInfoEvent }         from './i-setup-info';
+import type { IShipAppearEvent }        from './i-ship-appear';
+import type { IShipDisappearEvent }     from './i-ship-disappear';
+import type { IShipMoveEvent }          from './i-ship-move';
+import type { IShipRotateEvent }        from './i-ship-rotate';
 import type { ITeamAssignmentEvent }    from './i-team-assignment';
 import type { ITurnAdvancement }        from './i-turn-advancement';
 
@@ -31,6 +35,10 @@ export type IServerEvent =
     IEnteringSetupEvent |
     ISetupInfoEvent |
     IGameStartEvent |
+    IShipAppearEvent |
+    IShipDisappearEvent |
+    IShipMoveEvent |
+    IShipRotateEvent |
     ITurnAdvancement;
 
 

@@ -7,6 +7,10 @@ import { handlePlayerJoin }                 from './event-handlers/player-join';
 import { handlePlayerLeave }                from './event-handlers/player-leave';
 import { handlePlayerReady }                from './event-handlers/player-ready';
 import { handleSetupInfo }                  from './event-handlers/setup-info';
+import { handleShipAppear }                 from './event-handlers/ship-appear';
+import { handleShipDisappear }              from './event-handlers/ship-disappear';
+import { handleShipMove }                   from './event-handlers/ship-movement';
+import { handleShipRotate }                 from './event-handlers/ship-rotate';
 import { handleTeamAssignment }             from './event-handlers/team-assignment';
 import { handleTurnAdvancement }            from './event-handlers/turn-advancement';
 import type { MessageEvent }                from 'isomorphic-ws';
@@ -51,5 +55,9 @@ const handlers: Record<ServerEventID, (event: any) => void> = {
     enteringSetup: handleEnteringSetup,
     setupInfo: handleSetupInfo,
     gameStart: handleGameStart,
+    shipAppear: handleShipAppear,
+    shipDisappear: handleShipDisappear,
+    shipMove: handleShipMove,
+    shipRotate: handleShipRotate,
     turnAdvancement: handleTurnAdvancement
 };

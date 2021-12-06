@@ -1,20 +1,23 @@
-import { checkAgainstSchema }               from '../schema-checker';
-import { getJSONFromEntry, UnpackingError } from '../unpacker';
-import { buildAbility }                     from './abilities/ability-builder';
-import { getAttributes }                    from './attributes/attribute-getter';
-import { Descriptor }                       from './common/descriptor';
-import { RotatablePattern }                 from './common/rotatable-pattern';
-import { shipSchema }                       from './sources/ship';
-import type { ParsingContext }              from '../parsing-context';
-import type { Ability }                     from './abilities/ability';
-import type { AbilitySource }               from './abilities/sources/ability';
-import type { AttributeMap }                from './attributes/i-attribute-holder';
-import type { IAttributeHolder }            from './attributes/sources/attribute-holder';
-import type { Board }                       from './board';
-import type { IShipSource }                 from './sources/ship';
-import type { AbilityInfo }                 from 'shared/network/scenario/ability-info';
-import type { IShipInfo }                   from 'shared/network/scenario/i-ship-info';
-import type { Rotation }                    from 'shared/scenario/objects/common/rotation';
+import { v4 }                                 from 'uuid';
+import { checkAgainstSchema }                 from '../schema-checker';
+import { getJSONFromEntry, UnpackingError }   from '../unpacker';
+import { buildAbility }                       from './abilities/ability-builder';
+import { getAttributes }                      from './attributes/attribute-getter';
+import { Descriptor }                         from './common/descriptor';
+import { RotatablePattern }                   from './common/rotatable-pattern';
+import { shipSchema }                         from './sources/ship';
+import type { ParsingContext }                from '../parsing-context';
+import type { Ability }                       from './abilities/ability';
+import type { AbilitySource }                 from './abilities/sources/ability';
+import type { AttributeMap }                  from './attributes/i-attribute-holder';
+import type { IAttributeHolder }              from './attributes/sources/attribute-holder';
+import type { Board }                         from './board';
+import type { Player }                        from './player';
+import type { IShipSource }                   from './sources/ship';
+import type { Team }                          from './team';
+import type { AbilityInfo }                   from 'shared/network/scenario/ability-info';
+import type { IShipInfo, IShipPrototypeInfo } from 'shared/network/scenario/i-ship-prototype-info';
+import type { Rotation }                      from 'shared/scenario/objects/common/rotation';
 
 /**
  * Ship - Server Version
@@ -26,46 +29,157 @@ export class Ship implements IAttributeHolder {
     protected _x = 0;
     protected _y = 0;
 
+    protected spottedBy: Ship[] = [];
+    protected spotting: Ship[] = [];
+    protected knownTo: [team: Team, trackingID: string, newlyAppeared: boolean][] = [];
+
     /**
      * Ship constructor
      *
-     * @param  board      Board that this ship belongs to
-     * @param  descriptor Descriptor for ship
-     * @param  _pattern   Pattern describing shape of ship
-     * @param  abilities  Dictionary of abilities available to the ship
-     * @param  attributes Attributes for the ship
+     * @param  owner             Owner of this ship
+     * @param  board             Board that this ship belongs to
+     * @param  descriptor        Descriptor for ship
+     * @param  _pattern          Pattern describing shape of ship
+     * @param  visibilityPattern Pattern describing cells from which this ship is visible
+     * @param  abilities         Dictionary of abilities available to the ship
+     * @param  attributes        Attributes for the ship
      */
-    public constructor(protected board: Board,
+    public constructor(protected owner: Player,
+                       protected board: Board,
                        public readonly descriptor: Descriptor,
                        protected _pattern: RotatablePattern,
+                       protected visibilityPattern: RotatablePattern,
                        public readonly abilities: Ability[],
                        public readonly attributes: AttributeMap) {
     }
 
     /**
-     * Moves the ship to a destination coordinate on the board
+     * Places this ship onto the board
      *
-     * @param  x Destination x coordinate
-     * @param  y Destination y coordinate
+     * @param  x Destination X coordinate
+     * @param  y Destination Y coordinate
      */
-    public moveTo(x: number, y: number): void {
-        this.board.removeShip(this);
+    public place(x: number, y: number): void {
         this._x = x;
         this._y = y;
         this.board.addShip(this);
     }
 
     /**
+     * Sets initial spotting status of this ship
+     */
+    public spotInitial(): void {
+        this.spot();
+        this.updateKnown();
+    }
+
+    /**
+     * Makes this ship visible to all other ships within its current visibility radius
+     */
+    private spot(): void {
+        for (const [dx, dy] of this.visibilityPattern.patternEntries) {
+            const tile = this.board.tiles[this._y + dy]?.[this._x + dx];
+            const ship = tile?.[2];
+            if (ship === undefined || ship.spotting.includes(this))
+                continue;
+
+            ship.spotting.push(this);
+            this.spottedBy.push(ship);
+        }
+    }
+
+    /**
+     * Makes this ship invisible to all other ships within its current visibility radius
+     */
+    private unSpot(): void {
+        const alreadyRemoved: Ship[] = [];
+        for (const [dx, dy] of this.visibilityPattern.patternEntries) {
+            const tile = this.board.tiles[this._y + dy]?.[this._x + dx];
+            const ship = tile?.[2];
+            if (ship === undefined || alreadyRemoved.includes(ship))
+                continue;
+
+            ship.spotting = ship.spotting.filter(s => s !== this);
+            this.spottedBy = this.spottedBy.filter(s => s !== ship);
+            alreadyRemoved.push(ship);
+        }
+    }
+
+    /**
+     * Updates the list of who knows about the location of this ship
+     */
+    private updateKnown(): void {
+
+        // Create a dictionary of team IDs to existing ship tracking IDs
+        const oldKnownEntries: { [id: string]: string } = {};
+        for (const [team, trackingID] of this.knownTo) {
+            oldKnownEntries[team.id] = trackingID;
+        }
+
+        // Create a new array of [team, trackingID, newlyAppeared] entries
+        this.knownTo = [];
+        const alreadyIncluded: Team[] = [];
+        for (const ship of this.spottedBy) {
+            const team = ship.owner.team;
+            const previousEntry = oldKnownEntries[team.id];
+
+            if (alreadyIncluded.includes(team))
+                continue;
+
+            let trackingID: string;
+            const newlyAppeared = previousEntry === undefined;
+
+            if (newlyAppeared) {
+                trackingID = v4();
+                team.broadcastEvent({
+                    event: 'shipAppear',
+                    trackingID: trackingID,
+                    shipInfo: this.makeTransportable(false)
+                });
+            } else {
+                trackingID = previousEntry;
+            }
+
+            this.knownTo.push([team, trackingID, newlyAppeared]);
+            alreadyIncluded.push(team);
+        }
+    }
+
+    /**
+     * Moves the ship to a destination coordinate on the board
+     *
+     * @param  x Destination X coordinate
+     * @param  y Destination Y coordinate
+     */
+    public moveTo(x: number, y: number): void {
+        this.unSpot();
+        this.board.removeShip(this);
+        this._x = x;
+        this._y = y;
+        this.board.addShip(this);
+        this.spot();
+        this.updateKnown();
+
+        // Broadcast movement to teams which know of this ship
+        for (const [team, trackingID, newlyAppeared] of this.knownTo) {
+            if (!newlyAppeared)
+                team.broadcastEvent({
+                    event: 'shipMove',
+                    trackingID: trackingID,
+                    x: this._x,
+                    y: this._y
+                });
+        }
+    }
+
+    /**
      * Moves the ship by an offset
      *
-     * @param  x Horizontal distance to move ship by
-     * @param  y Vertical distance to move ship by
+     * @param  dx Horizontal distance to move ship by
+     * @param  dy Vertical distance to move ship by
      */
-    public moveBy(x: number, y: number): void {
-        this.board.removeShip(this);
-        this._x += x;
-        this._y += y;
-        this.board.addShip(this);
+    public moveBy(dx: number, dy: number): void {
+        this.moveTo(this._x + dx, this._y + dy);
     }
 
     /**
@@ -74,9 +188,23 @@ export class Ship implements IAttributeHolder {
      * @param  rotation Amount to rotate ship by
      */
     public rotate(rotation: Rotation): void {
+        this.unSpot();
         this.board.removeShip(this);
         this._pattern = this._pattern.rotated(rotation);
+        this.visibilityPattern = this.visibilityPattern.rotated(rotation);
         this.board.addShip(this);
+        this.spot();
+        this.updateKnown();
+
+        // Broadcast rotation to teams which know of this ship
+        for (const [team, trackingID, newlyAppeared] of this.knownTo) {
+            if (!newlyAppeared)
+                team.broadcastEvent({
+                    event: 'shipRotate',
+                    trackingID: trackingID,
+                    rotation: rotation
+                });
+        }
     }
 
     /**
@@ -108,6 +236,9 @@ export class Ship implements IAttributeHolder {
         const pattern = await RotatablePattern.fromSource(parsingContext.withExtendedPath('.pattern'), shipSource.pattern, false);
         parsingContext.reducePath();
 
+        // Create an extended pattern describing area from which this ship is visible
+        const visibilityPattern = pattern.getExtendedPattern(shipSource.visibility);
+
         // Get abilities
         const abilities: Ability[] = [];
         for (let i = 0; i < shipSource.abilities.length; i++) {
@@ -131,7 +262,7 @@ export class Ship implements IAttributeHolder {
         // Return created Ship object
         parsingContext.shipAttributes = undefined;
         parsingContext.shipPartial = undefined;
-        Ship.call(shipPartial, parsingContext.board!, descriptor, pattern, abilities, attributes);
+        Ship.call(shipPartial, parsingContext.playerPartial as Player, parsingContext.board!, descriptor, pattern, visibilityPattern, abilities, attributes);
         (shipPartial as any).__proto__ = Ship.prototype;
         return shipPartial as Ship;
     }
@@ -141,18 +272,32 @@ export class Ship implements IAttributeHolder {
      *
      * May not include all details of the object. Just those that the client needs to know.
      *
-     * @returns  Created IShipInfo object
+     * @param    prototypeOnly Whether to export IShipPrototypeInfo or IShipInfo
+     * @returns                Created IShipPrototype | IShipInfo object
      */
-    public makeTransportable(): IShipInfo {
+    public makeTransportable(prototypeOnly: false): IShipInfo;
+    public makeTransportable(prototypeOnly: true): IShipPrototypeInfo;
+    public makeTransportable(prototypeOnly: boolean): IShipPrototypeInfo | IShipInfo {
         const abilityInfo: AbilityInfo[] = [];
         for (const ability of this.abilities)
             abilityInfo.push(ability.makeTransportable());
-
-        return {
+        
+        const prototypeInfo: IShipPrototypeInfo = {
             descriptor: this.descriptor.makeTransportable(),
             pattern: this._pattern.makeTransportable(false),
+            visibilityPattern: this.visibilityPattern.makeTransportable(false),
             abilities: abilityInfo
-        };
+        }; 
+        
+        if (prototypeOnly)
+            return prototypeInfo;
+        else
+            return {
+                ...prototypeInfo,
+                owner: this.owner.client!.identity,
+                x: this._x,
+                y: this._y
+            };
     }
 
     /**

@@ -5,7 +5,9 @@ import type { ForeignAttributeRegistry }         from './objects/attribute-refer
 import type { AttributeReferenceObjectSelector } from './objects/attribute-references/sources/attribute-reference';
 import type { AttributeMap }                     from './objects/attributes/i-attribute-holder';
 import type { Board }                            from './objects/board';
+import type { Player }                           from './objects/player';
 import type { Ship }                             from './objects/ship';
+import type { Team }                             from './objects/team';
 import type { ZipEntryMap }                      from './unpacker';
 import type { IZipEntry }                        from 'adm-zip';
 import type { FileJSON }                         from 'formidable';
@@ -21,6 +23,8 @@ export class ParsingContext {
     private readonly pathSegments: string[] = [];
 
     public board: Board | undefined;
+    public teamPartial: Partial<Team> | undefined;
+    public playerPartial: Partial<Player> | undefined;
     public shipPartial: Partial<Ship> | undefined;
 
     public foreignAttributeRegistry: ForeignAttributeRegistry | undefined;

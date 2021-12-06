@@ -39,7 +39,7 @@ export async function handleShipPlacementRequest(client: Client, shipPlacementRe
             return;
         }
 
-        client.game.scenario.board.addShip(ship);
+        ship.place(x, y);
         shipsPlaced.push(ship);
     }
 

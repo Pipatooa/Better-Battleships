@@ -8,7 +8,6 @@ import { Board }                  from '../../scenario/board';
 import { RotatablePattern }       from '../../scenario/rotatable-pattern';
 import { Ship }                   from '../../scenario/ship';
 import { initiateGameSetupUI }    from '../../ui/initiate';
-import { MainUIManager }          from '../../ui/managers/main-ui-manager';
 import { setupTurnIndicator }     from '../../ui/updaters/turn-updater';
 import type { Ability }           from '../../scenario/abilities/ability';
 import type { ISetupInfoEvent }   from 'shared/network/events/i-setup-info';

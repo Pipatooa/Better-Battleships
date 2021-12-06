@@ -14,6 +14,7 @@ export interface IShipSource {
     descriptor: IDescriptorSource;
     pattern: IPatternSource;
     abilities: string[];
+    visibility: number;
     attributes: { [name: string]: IAttributeSource };
 }
 
@@ -23,5 +24,6 @@ export interface IShipSource {
 export const shipSchema = Joi.object({
     descriptor: descriptorSchema.required(),
     pattern: patternSchema.required(),
+    visibility: Joi.number().integer().min(1).required(),
     abilities: Joi.array().items(genericNameSchema).required()
 }).concat(attributeHolderSchema);

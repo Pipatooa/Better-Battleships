@@ -17,6 +17,7 @@
       ".#."
     ]
   },
+  "visibility": 10,
   "abilities": [
     "test-move-ability",
     "battleship-fire-ability"

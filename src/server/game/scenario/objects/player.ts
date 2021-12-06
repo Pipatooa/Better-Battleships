@@ -9,6 +9,7 @@ import type { AttributeMap }                from './attributes/i-attribute-holde
 import type { IAttributeHolder }            from './attributes/sources/attribute-holder';
 import type { IPlayerSource }               from './sources/player';
 import type { IShipSource }                 from './sources/ship';
+import type { Team }                        from './team';
 import type { IPlayerInfo }                 from 'shared/network/scenario/i-player-info';
 
 /**
@@ -22,13 +23,15 @@ export class Player implements IAttributeHolder {
     /**
      * Player constructor
      *
+     * @param  team           Team that this player belongs to
      * @param  spawnRegionID  Region that the player should first be allowed to place ships in
      * @param  color          Color for the player
      * @param  highlightColor Color for the player when highlighted
      * @param  ships          List of ships that belong to the player
      * @param  attributes     Attributes for the player
      */
-    public constructor(public readonly spawnRegionID: string,
+    public constructor(public readonly team: Team,
+                       public readonly spawnRegionID: string,
                        public readonly color: string,
                        public readonly highlightColor: string,
                        public readonly ships: Ship[],
@@ -57,6 +60,10 @@ export class Player implements IAttributeHolder {
         parsingContext.playerAttributes = attributes;
         parsingContext.reducePath();
 
+        // Player partial refers to future player object
+        const playerPartial: Partial<Player> = {};
+        parsingContext.playerPartial = playerPartial;
+
         // Get ships
         const ships: Ship[] = [];
         for (const shipName of playerSource.ships) {
@@ -74,7 +81,10 @@ export class Player implements IAttributeHolder {
 
         // Return created Player object
         parsingContext.playerAttributes = undefined;
-        return new Player(spawnRegion, color, highlightColor, ships, attributes);
+        parsingContext.playerPartial = undefined;
+        Player.call(playerPartial, parsingContext.teamPartial as Team, spawnRegion, color, highlightColor, ships, attributes);
+        (playerPartial as any).__proto__ = Player.prototype;
+        return playerPartial as Player;
     }
 
     /**
@@ -86,7 +96,7 @@ export class Player implements IAttributeHolder {
      */
     public makeTransportable(): IPlayerInfo {
         return {
-            ships: this.ships.map(s => s.makeTransportable()),
+            ships: this.ships.map(s => s.makeTransportable(true)),
             spawnRegion: this.spawnRegionID
         };
     }

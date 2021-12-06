@@ -245,6 +245,13 @@ export class Game {
     public startGame(): void {
         this._gamePhase = GamePhase.InProgress;
 
+        // Update spotting status of all ships
+        for (const client of this.clients) {
+            for (const ship of client.player!.ships) {
+                ship.spotInitial();
+            }
+        }
+
         // Start first player's turn timer
         this.scenario.turnManager.start();
 

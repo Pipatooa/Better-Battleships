@@ -121,6 +121,45 @@ export class Pattern {
     }
 
     /**
+     * Expands the pattern so that all cells within the radius of the pattern are included in a new pattern
+     *
+     * @param    radius Radius of cells around this pattern to include in new pattern
+     * @returns         Created pattern
+     */
+    public getExtendedPattern(radius: number): Pattern {
+        const patternEntries = this.getExtendedPatternEntries(radius);
+        return new Pattern(patternEntries, this.center);
+    }
+
+    /**
+     * Creates an expanded array of pattern entries so that all cells within the radius of the pattern are included
+     *
+     * @param    radius Radius of cells around this pattern to include in new pattern entry list
+     * @returns         Expanded array of pattern entries
+     */
+    protected getExtendedPatternEntries(radius: number): PatternEntry[] {
+        const patternEntryMap: { [char: string]: number } = {};
+        for (const [x, y] of this.patternEntries) {
+            for (let dx = -radius; dx <= radius; dx++) {
+                for (let dy = -radius; dy <= radius; dy++) {
+                    if (Math.abs(dx) + Math.abs(dy) > radius)
+                        continue;
+                    const key = `${x + dx},${y + dy}`;
+                    patternEntryMap[key] = 1;
+                }
+            }
+        }
+
+        const patternEntries: PatternEntry[] = [];
+        for (const key of Object.keys(patternEntryMap)) {
+            const [x, y] = key.split(',');
+            patternEntries.push([parseInt(x), parseInt(y), 1]);
+        }
+
+        return patternEntries;
+    }
+
+    /**
      * Returns network transportable form of this object.
      *
      * May not include all details of the object. Just those that the client needs to know.

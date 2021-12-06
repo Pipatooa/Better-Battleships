@@ -130,4 +130,15 @@ export class RotatablePattern extends Pattern {
             rotationCenter: this.rotationalCenter
         };
     }
+
+    /**
+     * Expands the pattern so that all cells within the radius of the pattern are included in a new pattern
+     *
+     * @param    radius Radius of cells around this pattern to include in new pattern
+     * @returns         Created pattern
+     */
+    public getExtendedPattern(radius: number): RotatablePattern {
+        const patternEntries = this.getExtendedPatternEntries(radius);
+        return new RotatablePattern(patternEntries, this.center, this.rotationalCenter);
+    }
 }

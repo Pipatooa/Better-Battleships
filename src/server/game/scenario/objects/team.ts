@@ -4,6 +4,7 @@ import { getAttributes }                    from './attributes/attribute-getter'
 import { Descriptor }                       from './common/descriptor';
 import { Player }                           from './player';
 import { teamSchema }                       from './sources/team';
+import type { IServerEvent }                from '../../../../shared/network/events/i-server-event';
 import type { Client }                      from '../../sockets/client';
 import type { ParsingContext }              from '../parsing-context';
 import type { AttributeMap }                from './attributes/i-attribute-holder';
@@ -81,6 +82,10 @@ export class Team implements IAttributeHolder {
         parsingContext.teamAttributes = attributes;
         parsingContext.reducePath();
 
+        // Team partial refers to future team object
+        const teamPartial: Partial<Team> = {};
+        parsingContext.teamPartial = teamPartial;
+
         // Get descriptor
         const descriptor = await Descriptor.fromSource(parsingContext.withExtendedPath('.descriptor'), teamSource.descriptor, false);
         parsingContext.reducePath();
@@ -117,7 +122,10 @@ export class Team implements IAttributeHolder {
 
         // Return created Team object
         parsingContext.teamAttributes = undefined;
-        return new Team(id, descriptor, playerPrototypes, teamSource.color, teamSource.highlightColor, attributes);
+        parsingContext.teamPartial = undefined;
+        Team.call(teamPartial, id, descriptor, playerPrototypes, teamSource.color, teamSource.highlightColor, attributes);
+        (teamPartial as any).__proto__ = Team.prototype;
+        return teamPartial as Team;
     }
 
     /**
@@ -134,6 +142,17 @@ export class Team implements IAttributeHolder {
             color: this.color,
             highlightColor: this.highlightColor
         };
+    }
+
+    /**
+     * Broadcasts a server event to all players of this team
+     *
+     * @param  serverEvent Event to broadcast
+     */
+    public broadcastEvent(serverEvent: IServerEvent): void {
+        for (const player of this._players) {
+            player.client?.sendEvent(serverEvent);
+        }
     }
 
     /**

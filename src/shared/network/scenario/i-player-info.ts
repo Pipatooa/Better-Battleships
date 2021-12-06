@@ -1,9 +1,9 @@
-import type { IShipInfo } from './i-ship-info';
+import type { IShipPrototypeInfo } from './i-ship-prototype-info';
 
 /**
  * Portable network version of Player object
  */
 export interface IPlayerInfo {
-    ships: IShipInfo[],
+    ships: IShipPrototypeInfo[],
     spawnRegion: string
 }

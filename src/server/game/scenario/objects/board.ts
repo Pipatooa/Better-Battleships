@@ -21,6 +21,7 @@ import type { ITileTypeInfo }    from 'shared/network/scenario/i-tiletype-info';
 export class Board {
 
     public readonly size: [number, number];
+    private readonly _allShips: Ship[] = [];
 
     /**
      * Board constructor
@@ -226,6 +227,14 @@ export class Board {
                 return false;
         }
         return true;
+    }
+
+    /**
+     * Getters and setters
+     */
+
+    public get allShips(): readonly Ship[] {
+        return this._allShips;
     }
 }
 
