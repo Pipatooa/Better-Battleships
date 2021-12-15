@@ -19,5 +19,6 @@
       { "playerPrototype": "player", "spawnRegion": "spawn-blue-3", "color": "#1056a6", "highlightColor": "#3378c6" }
     ]
   ],
-  "attributes": {}
+  "attributes": {},
+  "actions": {}
 }

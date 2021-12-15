@@ -1,8 +1,8 @@
+import { GenericEventContext }                from '../../events/event-context';
 import { checkAgainstSchema }                 from '../../schema-checker';
 import { buildValue }                         from '../values/value-builder';
 import { valueAtLeastConstraintSchema }       from './sources/value-at-least-constraint';
 import { ValueConstraint }                    from './value-constaint';
-import type { EvaluationContext }             from '../../evaluation-context';
 import type { ParsingContext }                from '../../parsing-context';
 import type { Value }                         from '../values/value';
 import type { IValueAtLeastConstraintSource } from './sources/value-at-least-constraint';
@@ -39,7 +39,7 @@ export class ValueAtLeastConstraint extends ValueConstraint {
         if (checkSchema)
             valueAtLeastConstraintSource = await checkAgainstSchema(valueAtLeastConstraintSource, valueAtLeastConstraintSchema, parsingContext);
 
-        const min: Value = await buildValue(parsingContext.withExtendedPath('.min'), valueAtLeastConstraintSource.min, false);
+        const min = await buildValue(parsingContext.withExtendedPath('.min'), valueAtLeastConstraintSource.min, false);
         parsingContext.reducePath();
 
         // Return created ValueAtLeastConstraint object
@@ -49,23 +49,23 @@ export class ValueAtLeastConstraint extends ValueConstraint {
     /**
      * Checks whether or not a value meets this constraint
      *
-     * @param    evaluationContext Context for resolving objects and values during evaluation
-     * @param    value             Value to check
-     * @returns                    Whether value met this constraint
+     * @param    eventContext Context for resolving objects and values when an event is triggered
+     * @param    value        Value to check
+     * @returns               Whether value met this constraint
      */
-    public check(evaluationContext: EvaluationContext, value: number): boolean {
-        return value >= this.min.evaluate(evaluationContext);
+    public check(eventContext: GenericEventContext, value: number): boolean {
+        return value >= this.min.evaluate(eventContext);
     }
 
     /**
      * Changes a value to meet this constraint
      *
-     * @param    evaluationContext Context for resolving objects and values during evaluation
-     * @param    value             Value to constrain
-     * @returns                    New value that meets this constraint
+     * @param    eventContext Context for resolving objects and values when an event is triggered
+     * @param    value        Value to constrain
+     * @returns               New value that meets this constraint
      */
-    public constrain(evaluationContext: EvaluationContext, value: number): number {
-        return Math.max(this.min.evaluate(evaluationContext), value);
+    public constrain(eventContext: GenericEventContext, value: number): number {
+        return Math.max(this.min.evaluate(eventContext), value);
     }
 }
 

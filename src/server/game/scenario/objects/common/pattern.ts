@@ -21,7 +21,7 @@ export class Pattern {
      * @param  center          Center of the pattern about which rotations happen
      */
     protected constructor(protected readonly _patternEntries: PatternEntry[],
-                          protected readonly center: [number, number]) {
+                          public readonly center: [number, number]) {
 
         this.patternEntryMap = {};
         for (const [x, y, value] of _patternEntries) {

@@ -1,12 +1,16 @@
-import { checkAgainstSchema }       from '../../schema-checker';
-import { attributeReferenceSchema } from './sources/attribute-reference';
-import type { ParsingContext }      from '../../parsing-context';
-import type { AttributeReference }  from './attribute-reference';
+import { checkAgainstSchema }                                from '../../schema-checker';
+import { AttributeReferenceEvent }                           from './attribute-reference-event';
+import { AttributeReferenceForeign }                         from './attribute-reference-foreign';
+import { AttributeReferenceLocal }                           from './attribute-reference-local';
+import { attributeReferenceRegex, attributeReferenceSchema } from './sources/attribute-reference';
+import type { ParsingContext }                               from '../../parsing-context';
+import type { AttributeReference }                           from './attribute-reference';
 import type {
-    AttributeReferenceObjectSelector,
     AttributeReferenceSource,
-    AttributeReferenceType
-}                                   from './sources/attribute-reference';
+    AttributeReferenceType,
+    AttributeReferenceForeignObjectSelector,
+    AttributeReferenceObjectSelector
+}                                    from './sources/attribute-reference';
 
 /**
  * Factory function to generate AttributeReference from JSON scenario data
@@ -23,19 +27,22 @@ export async function buildAttributeReference(parsingContext: ParsingContext, at
         attributeReferenceSource = await checkAgainstSchema(attributeReferenceSource, attributeReferenceSchema, parsingContext);
 
     // Split attribute reference string into different components
-    const matches = /^(local|foreign):(scenario|team|player|ship|ability)\.([a-zA-Z\-_\d]+)$/.exec(attributeReferenceSource);
-    const referenceType = matches![1] as AttributeReferenceType;
-    const objectSelector = matches![2] as AttributeReferenceObjectSelector;
-    const attributeName = matches![3];
+    const matches = attributeReferenceRegex.exec(attributeReferenceSource)!;
+    const referenceType = matches[1] as AttributeReferenceType;
+    const objectSelector = matches[2] as AttributeReferenceObjectSelector;
+    const builtin = matches[3] !== undefined;
+    const attributeName = matches[4];
 
-    let attributeReference: AttributeReference;
-
+    let attributeReference;
     switch (referenceType) {
         case 'local':
-            attributeReference = parsingContext.getLocalAttributeReference(objectSelector, attributeName);
+            if (objectSelector === 'event')
+                attributeReference = await AttributeReferenceEvent.fromSource(parsingContext, attributeName, builtin);
+            else
+                attributeReference = await AttributeReferenceLocal.fromSource(parsingContext, objectSelector, attributeName, builtin);
             break;
         case 'foreign':
-            attributeReference = parsingContext.getForeignAttributeReference(objectSelector as 'team' | 'player' | 'ship', attributeName);
+            attributeReference = await AttributeReferenceForeign.fromSource(parsingContext, objectSelector as AttributeReferenceForeignObjectSelector, attributeName, builtin);
             break;
     }
 

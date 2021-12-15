@@ -15,9 +15,11 @@ export abstract class UIManager {
 
     private static _currentManager: UIManager | undefined;
 
-    protected highlightedLocationRaw: [number, number] = [-Infinity, -Infinity];
     protected highlightedLocation: [number, number] = [-Infinity, -Infinity];
     protected highlightedTile: Tile | undefined;
+
+    protected mainCanvasCoordinates: [number, number] | undefined;
+    protected abilityCanvasCoordinates: [number, number] | undefined;
 
     protected tooltipInfoText: [string, string] | undefined = undefined;
 
@@ -148,32 +150,29 @@ export abstract class UIManager {
             ? `${y - tooltipGap - rawTooltip.clientHeight}px`
             : `${y + tooltipGap}px`;
     }
-
+    
     /**
      * Updates the location of the current selection
      *
-     * @param    ev Pointer movement event
-     * @returns     Non-rounded main board coordinates corresponding to mouse position
+     * @param  ev Pointer movement event
      */
-    protected updateSelection(ev: PointerEvent): ([number, number] | undefined)[] {
-        const mainCoordinates = game.gameRenderer!.updateSelectionLocation(ev);
-        const abilityCoordinates = game.abilityRenderer!.updateSelectionLocation(ev);
+    protected updateSelection(ev: PointerEvent): void {
+        this.mainCanvasCoordinates = game.gameRenderer!.updateSelectionLocation(ev);
+        this.abilityCanvasCoordinates = game.abilityRenderer!.updateSelectionLocation(ev);
 
         // Update highlighted location on the main canvas
-        if (mainCoordinates !== undefined && ev.target === game.gameRenderer!.viewportHandler.canvas) {
-            const [x, y] = mainCoordinates;
-            this.highlightedLocationRaw = [x, y];
+        if (this.mainCanvasCoordinates !== undefined && ev.target === game.gameRenderer!.viewportHandler.canvas) {
+            const [x, y] = this.mainCanvasCoordinates;
             this.highlightedLocation = [Math.floor(x), Math.floor(y)];
             this.highlightedTile = game.board!.tiles[Math.floor(y)]?.[Math.floor(x)];
         } else {
-            this.highlightedLocationRaw = [-Infinity, -Infinity];
             this.highlightedLocation = [-Infinity, -Infinity];
             this.highlightedTile = undefined;
         }
 
         // Update info text if hovering over ability board
-        if (abilityCoordinates !== undefined && ev.target === game.abilityRenderer!.viewportHandler.canvas) {
-            const [x, y] = abilityCoordinates;
+        if (this.abilityCanvasCoordinates !== undefined && ev.target === game.abilityRenderer!.viewportHandler.canvas) {
+            const [x, y] = this.abilityCanvasCoordinates;
             const tileType = game.abilityRenderer!.board?.tiles[Math.floor(y)]?.[Math.floor(x)][0];
             if (tileType !== undefined) {
                 this.tooltipInfoText = [tileType.descriptor.name, tileType.descriptor.description];
@@ -181,8 +180,6 @@ export abstract class UIManager {
         } else {
             this.tooltipInfoText = undefined;
         }
-        
-        return [mainCoordinates, abilityCoordinates];
     }
 
     /**

@@ -1,9 +1,9 @@
 import { clamp }                              from 'shared/utility';
+import { GenericEventContext }                from '../../events/event-context';
 import { checkAgainstSchema }                 from '../../schema-checker';
 import { buildValue }                         from '../values/value-builder';
 import { valueInRangeConstraintSchema }       from './sources/value-in-range-constraint';
 import { ValueConstraint }                    from './value-constaint';
-import type { EvaluationContext }             from '../../evaluation-context';
 import type { ParsingContext }                from '../../parsing-context';
 import type { Value }                         from '../values/value';
 import type { IValueInRangeConstraintSource } from './sources/value-in-range-constraint';
@@ -43,9 +43,9 @@ export class ValueInRangeConstraint extends ValueConstraint {
         if (checkSchema)
             valueInRangeConstraintSource = await checkAgainstSchema(valueInRangeConstraintSource, valueInRangeConstraintSchema, parsingContext);
 
-        const min: Value = await buildValue(parsingContext.withExtendedPath('.min'), valueInRangeConstraintSource.min, false);
+        const min = await buildValue(parsingContext.withExtendedPath('.min'), valueInRangeConstraintSource.min, false);
         parsingContext.reducePath();
-        const max: Value = await buildValue(parsingContext.withExtendedPath('.max'), valueInRangeConstraintSource.max, false);
+        const max = await buildValue(parsingContext.withExtendedPath('.max'), valueInRangeConstraintSource.max, false);
         parsingContext.reducePath();
 
         // Return created ValueInRangeConstraint object
@@ -55,23 +55,23 @@ export class ValueInRangeConstraint extends ValueConstraint {
     /**
      * Checks whether or not a value meets this constraint
      *
-     * @param    evaluationContext Context for resolving objects and values during evaluation
-     * @param    value             Value to check
-     * @returns                    Whether value met this constraint
+     * @param    eventContext Context for resolving objects and values when an event is triggered
+     * @param    value        Value to check
+     * @returns               Whether value met this constraint
      */
-    public check(evaluationContext: EvaluationContext, value: number): boolean {
-        return value >= this.min.evaluate(evaluationContext) && value <= this.max.evaluate(evaluationContext);
+    public check(eventContext: GenericEventContext, value: number): boolean {
+        return value >= this.min.evaluate(eventContext) && value <= this.max.evaluate(eventContext);
     }
 
     /**
      * Changes a value to meet this constraint
      *
-     * @param    evaluationContext Context for resolving objects and values during evaluation
-     * @param    value             Value to constrain
-     * @returns                    New value that meets this constraint
+     * @param    eventContext Context for resolving objects and values when an event is triggered
+     * @param    value        Value to constrain
+     * @returns               New value that meets this constraint
      */
-    public constrain(evaluationContext: EvaluationContext, value: number): number {
-        return clamp(value, this.min.evaluate(evaluationContext), this.max.evaluate(evaluationContext));
+    public constrain(eventContext: GenericEventContext, value: number): number {
+        return clamp(value, this.min.evaluate(eventContext), this.max.evaluate(eventContext));
     }
 }
 

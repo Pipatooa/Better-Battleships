@@ -1,11 +1,10 @@
-import { checkAgainstSchema }     from '../../schema-checker';
-import { buildCondition }         from '../conditions/condition-builder';
-import { Action }                 from './action';
-import { baseActionSchema }       from './sources/base-action';
-import type { EvaluationContext } from '../../evaluation-context';
-import type { ParsingContext }    from '../../parsing-context';
-import type { Condition }         from '../conditions/condition';
-import type { IBaseActionSource } from './sources/base-action';
+import { checkAgainstSchema }    from '../../schema-checker';
+import { buildCondition }        from '../conditions/condition-builder';
+import { Action }                from './action';
+import { actionWinSchema }                        from './sources/action-win';
+import type { EventContext, GenericEventContext } from '../../events/event-context';
+import type { ParsingContext }                    from '../../parsing-context';
+import type { IActionWinSource } from './sources/action-win';
 
 /**
  * ActionWin - Server Version
@@ -29,7 +28,7 @@ export class ActionWin extends Action {
             actionWinSource = await checkAgainstSchema(actionWinSource, actionWinSchema, parsingContext);
 
         // Get condition from source
-        const condition: Condition = await buildCondition(parsingContext.withExtendedPath('.condition'), actionWinSource.condition, false);
+        const condition = await buildCondition(parsingContext.withExtendedPath('.condition'), actionWinSource.condition, false);
         parsingContext.reducePath();
 
         // Return created ActionWin object
@@ -39,27 +38,13 @@ export class ActionWin extends Action {
     /**
      * Executes this action's logic if action condition holds true
      *
-     * @param  evaluationContext Context for resolving objects and values during evaluation
+     * @param  eventContext Context for resolving objects and values when an event is triggered
      */
-    public execute(evaluationContext: EvaluationContext): void {
+    public execute(eventContext: GenericEventContext): void {
 
-        if (!this.condition.check(evaluationContext))
+        if (!this.condition.check(eventContext))
             return;
 
         // TODO: Implement winning
     }
 }
-
-/**
- * JSON source interface reflecting schema
- */
-export interface IActionWinSource extends IBaseActionSource {
-    type: 'win'
-}
-
-/**
- * Schema for validating source JSON data
- */
-export const actionWinSchema = baseActionSchema.keys({
-    type: 'win'
-});

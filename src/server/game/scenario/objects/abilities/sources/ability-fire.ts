@@ -1,7 +1,7 @@
 import Joi                         from 'joi';
 import { actionSchema }            from '../../actions/sources/action';
 import { patternSchema }           from '../../common/sources/pattern';
-import { fireAbilityEvents }       from '../events/fire-ability-event';
+import { fireAbilityEventInfo }    from '../events/fire-ability-event';
 import { baseAbilitySchema }       from './base-ability';
 import type { ActionSource }       from '../../actions/sources/action';
 import type { IPatternSource }     from '../../common/sources/pattern';
@@ -27,5 +27,5 @@ export const abilityFireSchema = baseAbilitySchema.keys({
     selectionPattern: patternSchema.required(),
     effectPattern: patternSchema.required(),
     displayEffectPatternValues: Joi.boolean().required(),
-    actions: Joi.object().pattern(Joi.valid(...fireAbilityEvents), Joi.array().items(actionSchema)).required()
+    actions: Joi.object().pattern(Joi.valid(...Object.keys(fireAbilityEventInfo)), Joi.array().items(actionSchema)).required()
 });

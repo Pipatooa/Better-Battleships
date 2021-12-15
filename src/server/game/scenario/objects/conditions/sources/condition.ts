@@ -5,6 +5,7 @@ import { baseConditionSchema }                       from './base-condition';
 import type { IConditionAllSource }                  from './condition-all';
 import type { IConditionAnySource }                  from './condition-any';
 import type { IConditionFixedSource }                from './condition-fixed';
+import type { IConditionNoneSource }                 from './condition-none';
 import type { IConditionSomeSource }                 from './condition-some';
 import type { IConditionValueMeetsConstraintSource } from './condition-value-meets-constraint';
 
@@ -12,7 +13,7 @@ import type { IConditionValueMeetsConstraintSource } from './condition-value-mee
  * Type matching all condition sources
  */
 export type ConditionSource =
-    Record<string, never> |
+    IConditionNoneSource |
     IConditionAnySource |
     IConditionAllSource |
     IConditionSomeSource |
@@ -25,7 +26,7 @@ export type ConditionSource =
  * Able to verify all conditions
  */
 export const conditionSchema = baseConditionSchema.keys({
-    type: Joi.valid('any', 'all', 'some', 'fixed', 'none', 'valueMeetsConstraint').required(),
+    type: Joi.valid('none', 'any', 'all', 'some', 'fixed', 'valueMeetsConstraint').required(),
     subConditions: Joi.array().items(Joi.link('...')).min(2).when('type',
         { is: Joi.valid('any', 'all', 'some'), then: Joi.required(), otherwise: Joi.forbidden() }),
     valueConstraint: valueConstraintSchema.when('type',

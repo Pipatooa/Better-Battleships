@@ -12,10 +12,12 @@ export abstract class Ability {
     /**
      * Ability constructor
      *
+     * @param  shipIndex  Index of the ship that this ability belongs to
      * @param  index      Index of this ability in ship's ability list
      * @param  descriptor Descriptor for ability
      */
-    public constructor(public readonly index: number,
+    public constructor(protected readonly shipIndex: number,
+                       protected readonly index: number,
                        public readonly descriptor: Descriptor) {
 
     }

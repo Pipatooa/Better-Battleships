@@ -1,12 +1,30 @@
+import type { AttributeReferenceForeignObjectSelector } from '../objects/attribute-references/sources/attribute-reference';
+
 /**
- * List of global event names
+ * Type describing dictionary of event name strings to foreign attribute level available and special attribute names
  */
-export const baseEvents = [
-    'onTurnStart',
-    'onTurnEnd'
-] as const;
+export type EventInfoEntry = readonly [readonly AttributeReferenceForeignObjectSelector[], readonly string[]];
+
+/**
+ * Record describing all base events
+ */
+export const baseEventInfo = {
+    onGameStart: [[], []],
+    onTurnAdvancement: [['team', 'player'], []],
+    onAbilityUsed: [['team', 'player', 'ship', 'ability'], []]
+} as const;
+
+/**
+ * Type matching record describing all base events
+ */
+export type BaseEventInfo = typeof baseEventInfo;
 
 /**
  * Type matching all global event name strings
  */
-export type BaseEvent = typeof baseEvents[number];
+export type BaseEvent = keyof BaseEventInfo;
+
+/**
+ * Type matching all special attributes names for a specific event
+ */
+export type EventSpecialAttributes<T extends Record<S, EventInfoEntry>, S extends string, X extends S> = T[X][1][number];

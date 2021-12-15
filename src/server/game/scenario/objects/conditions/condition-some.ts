@@ -1,8 +1,8 @@
+import { GenericEventContext }       from '../../events/event-context';
 import { checkAgainstSchema }        from '../../schema-checker';
 import { buildValueConstraint }      from '../constraints/value-constraint-builder';
 import { ConditionMultiple }         from './condition-multiple';
 import { conditionSomeSchema }       from './sources/condition-some';
-import type { EvaluationContext }    from '../../evaluation-context';
 import type { ParsingContext }       from '../../parsing-context';
 import type { ValueConstraint }      from '../constraints/value-constaint';
 import type { Condition }            from './condition';
@@ -34,22 +34,22 @@ export class ConditionSome extends ConditionMultiple {
     /**
      * Checks whether or not this condition holds true
      *
-     * @param    evaluationContext Context for resolving objects and values during evaluation
-     * @returns                    Whether or not this condition holds true
+     * @param    eventContext Context for resolving objects and values when an event is triggered
+     * @returns               Whether or not this condition holds true
      */
-    public check(evaluationContext: EvaluationContext): boolean {
+    public check(eventContext: GenericEventContext): boolean {
 
         // Keep count of number of sub conditions which hold true
         let count = 0;
 
         // Loop through sub conditions and increment count for each condition that holds true
         for (const item of this.subConditions) {
-            if (item.check(evaluationContext))
+            if (item.check(eventContext))
                 count++;
         }
 
         // Check whether the count meets the held value constraint
-        const meetsConstraint: boolean = this.valueConstraint.check(evaluationContext, count);
+        const meetsConstraint: boolean = this.valueConstraint.check(eventContext, count);
 
         // Return result (invert result if necessary)
         return this.inverted ? !meetsConstraint : meetsConstraint;
@@ -72,7 +72,7 @@ export class ConditionSome extends ConditionMultiple {
         // Get sub conditions and value constraint from source
         const subConditions: Condition[] = await ConditionMultiple.getSubConditions(parsingContext.withExtendedPath('.subConditions'), conditionSomeSource.subConditions);
         parsingContext.reducePath();
-        const valueConstraint: ValueConstraint = await buildValueConstraint(parsingContext.withExtendedPath('.valueConstraint'), conditionSomeSource.valueConstraint, true);
+        const valueConstraint = await buildValueConstraint(parsingContext.withExtendedPath('.valueConstraint'), conditionSomeSource.valueConstraint, true);
         parsingContext.reducePath();
 
         // Return created ConditionSome object

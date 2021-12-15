@@ -1,20 +1,23 @@
-import { checkAgainstSchema }      from '../../schema-checker';
-import { getActions }              from '../actions/action-getter';
-import { getAttributes }           from '../attributes/attribute-getter';
-import { Descriptor }              from '../common/descriptor';
-import { Pattern }                 from '../common/pattern';
-import { buildCondition }          from '../conditions/condition-builder';
-import { PositionedAbility }       from './ability';
-import { fireAbilityEvents }       from './events/fire-ability-event';
-import { abilityFireSchema }       from './sources/ability-fire';
-import type { EvaluationContext }  from '../../evaluation-context';
-import type { ParsingContext }     from '../../parsing-context';
-import type { AttributeMap }       from '../attributes/i-attribute-holder';
-import type { Condition }          from '../conditions/condition';
-import type { Ship }               from '../ship';
-import type { FireAbilityActions } from './events/fire-ability-event';
-import type { IAbilityFireSource } from './sources/ability-fire';
-import type { AbilityInfo }        from 'shared/network/scenario/ability-info';
+import { EventRegistrar }                              from '../../events/event-registrar';
+import { checkAgainstSchema }                          from '../../schema-checker';
+import { eventListenersFromActionSource }              from '../actions/action-getter';
+import { getAttributes }                               from '../attributes/attribute-getter';
+import { AttributeSpecial }                            from '../attributes/attribute-special';
+import { Descriptor }                                  from '../common/descriptor';
+import { Pattern }                                     from '../common/pattern';
+import { buildCondition }                              from '../conditions/condition-builder';
+import { Ability }                                     from './ability';
+import { fireAbilityEventInfo }                        from './events/fire-ability-event';
+import { PositionedAbility }                           from './positioned-ability';
+import { abilityFireSchema }                           from './sources/ability-fire';
+import type { ParsingContext }                         from '../../parsing-context';
+import type { SpecialAttributeRecord }                 from '../attributes/attribute-holder';
+import type { AttributeMap }                           from '../attributes/i-attribute-holder';
+import type { Condition }                              from '../conditions/condition';
+import type { Ship }                                   from '../ship';
+import type { FireAbilityEvent, FireAbilityEventInfo } from './events/fire-ability-event';
+import type { IAbilityFireSource }                     from './sources/ability-fire';
+import type { AbilityInfo }                            from 'shared/network/scenario/ability-info';
 
 /**
  * AbilityFire - Server Version
@@ -22,6 +25,8 @@ import type { AbilityInfo }        from 'shared/network/scenario/ability-info';
  * Ability which acts upon a selected group of cells upon its use
  */
 export class AbilityFire extends PositionedAbility {
+
+    public readonly eventRegistrar: EventRegistrar<FireAbilityEventInfo, FireAbilityEvent>;
 
     /**
      * AbilityFire constructor
@@ -32,8 +37,9 @@ export class AbilityFire extends PositionedAbility {
      * @param  effectPattern              Pattern determining which cells around the selected cell are affected
      * @param  displayEffectPatternValues Whether or not effect pattern values should be displayed to the client when using the ability
      * @param  condition                  Condition which must hold true to be able to use this action
-     * @param  actions                    Actions to execute when events are triggered
+     * @param  eventRegistrar             Registrar of all ability event listeners
      * @param  attributes                 Attributes for the ability
+     * @param  specialAttributes          Special attributes for the ability
      */
     public constructor(ship: Ship,
                        descriptor: Descriptor,
@@ -41,9 +47,12 @@ export class AbilityFire extends PositionedAbility {
                        public readonly effectPattern: Pattern,
                        public readonly displayEffectPatternValues: boolean,
                        condition: Condition,
-                       actions: FireAbilityActions,
-                       attributes: AttributeMap) {
-        super(ship, descriptor, condition, actions, attributes);
+                       eventRegistrar: EventRegistrar<FireAbilityEventInfo, FireAbilityEvent>,
+                       attributes: AttributeMap,
+                       specialAttributes: SpecialAttributeRecord<'ability'>) {
+
+        super(ship, descriptor, condition, eventRegistrar, attributes, specialAttributes);
+        this.eventRegistrar = eventRegistrar;
     }
 
     /**
@@ -60,43 +69,86 @@ export class AbilityFire extends PositionedAbility {
         if (checkSchema)
             abilityFireSource = await checkAgainstSchema(abilityFireSource, abilityFireSchema, parsingContext);
 
+        // Ability partial refers to future Ability object
+        const abilityPartial: Partial<Ability> = {};
+
         // Get attributes and update parsing context
         const attributes: AttributeMap = await getAttributes(parsingContext.withExtendedPath('.attributes'), abilityFireSource.attributes, 'ability');
-        parsingContext.abilityAttributes = attributes;
+        const specialAttributes = Ability.generateSpecialAttributes(abilityPartial as Ability);
+        parsingContext.localAttributes.ability = [attributes, specialAttributes];
         parsingContext.reducePath();
 
         // Get component elements from source
-        const descriptor: Descriptor = await Descriptor.fromSource(parsingContext.withExtendedPath('.descriptor'), abilityFireSource.descriptor, false);
+        const descriptor = await Descriptor.fromSource(parsingContext.withExtendedPath('.descriptor'), abilityFireSource.descriptor, false);
         parsingContext.reducePath();
-        const selectionPattern: Pattern = await Pattern.fromSource(parsingContext.withExtendedPath('.selectionPattern'), abilityFireSource.selectionPattern, false);
+        const selectionPattern = await Pattern.fromSource(parsingContext.withExtendedPath('.selectionPattern'), abilityFireSource.selectionPattern, false);
         parsingContext.reducePath();
-        const effectPattern: Pattern = await Pattern.fromSource(parsingContext.withExtendedPath('.effectPattern'), abilityFireSource.effectPattern, false);
+        const effectPattern = await Pattern.fromSource(parsingContext.withExtendedPath('.effectPattern'), abilityFireSource.effectPattern, false);
         parsingContext.reducePath();
-        const condition: Condition = await buildCondition(parsingContext.withExtendedPath('.condition'), abilityFireSource.condition, false);
+        const condition = await buildCondition(parsingContext.withExtendedPath('.condition'), abilityFireSource.condition, false);
         parsingContext.reducePath();
-        const actions: FireAbilityActions = await getActions(parsingContext.withExtendedPath('.actions'), fireAbilityEvents, ['onHit'], abilityFireSource.actions);
+        const eventListeners = await eventListenersFromActionSource(parsingContext.withExtendedPath('.actions'), fireAbilityEventInfo, abilityFireSource.actions);
         parsingContext.reducePath();
 
         // Return created AbilityFire object
-        parsingContext.abilityAttributes = undefined;
-        return new AbilityFire(parsingContext.shipPartial as Ship, descriptor, selectionPattern, effectPattern, abilityFireSource.displayEffectPatternValues, condition, actions, attributes);
+        parsingContext.localAttributes.ability = undefined;
+        const eventRegistrar = new EventRegistrar(eventListeners, []);
+        AbilityFire.call(abilityPartial, parsingContext.shipPartial as Ship, descriptor, selectionPattern, effectPattern, abilityFireSource.displayEffectPatternValues, condition, eventRegistrar, attributes, specialAttributes);
+        (abilityPartial as any).__proto__ = AbilityFire.prototype;
+        return abilityPartial as AbilityFire;
     }
 
     /**
      * Execute actions related to this ability if the ability's condition is met
      *
-     * @param  evaluationContext Context for resolving objects and values during evaluation
+     * @param  x X coordinate of effect pattern
+     * @param  y Y coordinate of effect pattern
      */
-    public use(evaluationContext: EvaluationContext): void {
+    public use(x: number, y: number): void {
 
         if (!this.usable!)
             return;
 
-        // Check that the movement is allowed
-        if (this.selectionPattern.query(evaluationContext.x!, evaluationContext.y!) === 0)
+        const selectionPatternX = x - this.selectionPattern.center[0];
+        const selectionPatternY = y - this.selectionPattern.center[1];
+
+        if (this.selectionPattern.query(selectionPatternX, selectionPatternY) === 0)
             return;
 
-        this.ship.moveBy(evaluationContext.x!, evaluationContext.y!);
+        this.eventRegistrar.triggerEvent('onUse', {
+            specialAttributes: {}
+        });
+
+        let hit = false;
+        for (const [dx, dy, v] of this.effectPattern.patternEntries) {
+            const tile = this.ship.board.tiles[y + dy]?.[x + dx];
+            const ship = tile?.[2];
+            if (ship !== undefined) {
+                this.eventRegistrar.triggerEvent('onHit', {
+                    specialAttributes: {
+                        patternValue: new AttributeSpecial(() => v)
+                    },
+                    foreignTeam: ship.owner.team,
+                    foreignPlayer: ship.owner,
+                    foreignShip: ship
+                });
+                hit = true;
+            }
+        }
+
+        if (!hit) {
+            this.eventRegistrar.triggerEvent('onMiss', {
+                specialAttributes: {}
+            });
+        }
+
+        this.eventRegistrar.triggerEvent('onAbilityUsed', {
+            specialAttributes: {},
+            foreignTeam: this.ship.owner.team,
+            foreignPlayer: this.ship.owner,
+            foreignShip: this.ship,
+            foreignAbility: this
+        });
     }
 
     /**

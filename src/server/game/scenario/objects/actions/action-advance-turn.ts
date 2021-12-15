@@ -1,9 +1,10 @@
 import { checkAgainstSchema }            from '../../schema-checker';
 import { buildCondition }                from '../conditions/condition-builder';
 import { Action }                        from './action';
-import { actionWinSchema }               from './action-win';
-import type { EvaluationContext }        from '../../evaluation-context';
+import { actionWinSchema }               from './sources/action-win';
+import type { GenericEventContext }      from '../../events/event-context';
 import type { ParsingContext }           from '../../parsing-context';
+import type { TurnManager }              from '../../turn-manager';
 import type { Condition }                from '../conditions/condition';
 import type { IActionAdvanceTurnSource } from './sources/action-advance-turn';
 
@@ -13,6 +14,11 @@ import type { IActionAdvanceTurnSource } from './sources/action-advance-turn';
  * Action which advances the current turn
  */
 export class ActionAdvanceTurn extends Action {
+
+    public constructor(condition: Condition,
+                       public readonly turnManager: TurnManager) {
+        super(condition);
+    }
 
     /**
      * Factory function to generate ActionAdvanceTurn from JSON scenario data
@@ -29,24 +35,24 @@ export class ActionAdvanceTurn extends Action {
             actionAdvanceTurnSource = await checkAgainstSchema(actionAdvanceTurnSource, actionWinSchema, parsingContext);
 
         // Get condition from source
-        const condition: Condition = await buildCondition(parsingContext.withExtendedPath('.condition'), actionAdvanceTurnSource.condition, false);
+        const condition = await buildCondition(parsingContext.withExtendedPath('.condition'), actionAdvanceTurnSource.condition, false);
         parsingContext.reducePath();
 
         // Return created ActionAdvanceTurn object
-        return new ActionAdvanceTurn(condition);
+        return new ActionAdvanceTurn(condition, parsingContext.turnManagerPartial as TurnManager);
     }
 
     /**
      * Executes this action's logic if action condition holds true
      *
-     * @param  evaluationContext Context for resolving objects and values during evaluation
+     * @param  eventContext Context for resolving objects and values when an event is triggered
      */
-    public execute(evaluationContext: EvaluationContext): void {
+    public execute(eventContext: GenericEventContext): void {
 
-        if (!this.condition.check(evaluationContext))
+        if (!this.condition.check(eventContext))
             return;
 
-        evaluationContext.scenario!.turnManager.advanceTurn();
+        this.turnManager.advanceTurn();
     }
 }
 

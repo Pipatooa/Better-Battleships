@@ -74,7 +74,7 @@ export class Board {
 
                 const tileType: TileType = tileTypes[tileTypeChar];
                 const regionIDs: string[] = boardSource.regionPalette[regionChar];
-                tiles[y][x] = [tileType, regionIDs.map(id => regions[id]), undefined];
+                tiles[y][x] = [tileType, regionIDs.map(id => regions[id]), undefined, undefined];
             }
         }
 
@@ -145,4 +145,4 @@ export class Board {
 /**
  * Type describing an entry for a single tile
  */
-export type Tile = [TileType, Region[], Ship | undefined];
+export type Tile = [TileType, Region[], Ship | undefined, (() => void) | undefined];

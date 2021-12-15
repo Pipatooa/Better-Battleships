@@ -1,5 +1,5 @@
-import { ValueConstraint }        from './value-constaint';
-import type { EvaluationContext } from '../../evaluation-context';
+import { GenericEventContext } from '../../events/event-context';
+import { ValueConstraint }     from './value-constaint';
 
 /**
  * EmptyValueConstraint - Server Version
@@ -22,11 +22,11 @@ export class EmptyValueConstraint extends ValueConstraint {
     /**
      * Changes a value to meet this constraint
      *
-     * @param    evaluationContext Context for resolving objects and values during evaluation
-     * @param    value             Value to constrain
-     * @returns                    Unrestrained original value
+     * @param    eventContext Context for resolving objects and values when an event is triggered
+     * @param    value        Value to constrain
+     * @returns               Unrestrained original value
      */
-    public constrain(evaluationContext: EvaluationContext, value: number): number {
+    public constrain(eventContext: GenericEventContext, value: number): number {
         return value;
     }
 }

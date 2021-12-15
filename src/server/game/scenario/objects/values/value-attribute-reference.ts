@@ -1,8 +1,8 @@
+import { GenericEventContext }                 from '../../events/event-context';
 import { checkAgainstSchema }                  from '../../schema-checker';
 import { buildAttributeReference }             from '../attribute-references/attribute-reference-builder';
 import { valueAttributeReferenceSchema }       from './sources/value-attribute-reference';
 import { Value }                               from './value';
-import type { EvaluationContext }              from '../../evaluation-context';
 import type { ParsingContext }                 from '../../parsing-context';
 import type { AttributeReference }             from '../attribute-references/attribute-reference';
 import type { IValueAttributeReferenceSource } from './sources/value-attribute-reference';
@@ -26,11 +26,11 @@ export class ValueAttributeReference extends Value {
     /**
      * Evaluate this dynamic value as a number
      *
-     * @param    evaluationContext Context for resolving objects and values during evaluation
-     * @returns                    Value of referenced attribute
+     * @param    eventContext Context for resolving objects and values when an event is triggered
+     * @returns               Value of referenced attribute
      */
-    public evaluate(evaluationContext: EvaluationContext): number {
-        return this.attributeReference.getValue(evaluationContext);
+    public evaluate(eventContext: GenericEventContext): number {
+        return this.attributeReference.getValue(eventContext);
     }
 
     /**
@@ -48,7 +48,7 @@ export class ValueAttributeReference extends Value {
             valueAttributeReferenceSource = await checkAgainstSchema(valueAttributeReferenceSource, valueAttributeReferenceSchema, parsingContext);
 
         // Get attribute from source
-        const attribute: AttributeReference = await buildAttributeReference(parsingContext.withExtendedPath('.attribute'), valueAttributeReferenceSource.attribute, false);
+        const attribute = await buildAttributeReference(parsingContext.withExtendedPath('.attribute'), valueAttributeReferenceSource.attribute, false);
         parsingContext.reducePath();
 
         // Return created ValueAttributeReference object

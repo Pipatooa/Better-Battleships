@@ -1,9 +1,19 @@
-import Joi                                   from 'joi';
-import { baseRequestSchema }                 from 'shared/network/requests/i-client-request';
-import { EvaluationContext }                 from '../../scenario/evaluation-context';
-import { IndexedAbility, PositionedAbility } from '../../scenario/objects/abilities/ability';
-import type { Client }                       from '../client';
-import type { IUseAbilityRequest }           from 'shared/network/requests/i-use-ability';
+import Joi            from 'joi';
+import {
+    IndexedAbility
+}                      from 'server/game/scenario/objects/abilities/indexed-ability';
+import {
+    baseRequestSchema
+}                      from 'shared/network/requests/i-client-request';
+import {
+    PositionedAbility
+}                      from '../../scenario/objects/abilities/positioned-ability';
+import type { Client }              from '../client';
+import type {
+    IUseAbilityRequest,
+    IUseIndexedAbilityRequest,
+    IUsePositionedAbilityRequest
+}                      from 'shared/network/requests/i-use-ability';
 
 /**
  * Handles a ship placement request from the client
@@ -13,12 +23,15 @@ import type { IUseAbilityRequest }           from 'shared/network/requests/i-use
  */
 export async function handleUseAbilityRequest(client: Client, useAbilityRequest: IUseAbilityRequest): Promise<void> {
 
+    console.log(client.game.scenario.turnManager.currentTurn, client.identity);
+
     // Check if it is the player's turn
     if (client.game.scenario.turnManager.currentTurn !== client.identity)
         return;
 
     const ship = client.player!.ships[useAbilityRequest.ship];
     const ability = ship?.abilities[useAbilityRequest.ability];
+    console.log(ship !== undefined, ability !== undefined, useAbilityRequest);
     if (ability === undefined)
         return;
 
@@ -42,10 +55,12 @@ export async function handleUseAbilityRequest(client: Client, useAbilityRequest:
         }
     }
 
-    // Use ability under new evaluation context
-    const useAbilityRequestCast = useAbilityRequest as any;
-    const evaluationContext = new EvaluationContext(client.game.scenario, client.team, client.player, ship, useAbilityRequestCast.index, useAbilityRequestCast.x, useAbilityRequestCast.y);
-    ability?.use(evaluationContext);
+    if (ability instanceof IndexedAbility)
+        ability.use((useAbilityRequest as IUseIndexedAbilityRequest).index);
+    else if (ability instanceof PositionedAbility) {
+        let usePositionedAbilityRequest = useAbilityRequest as IUsePositionedAbilityRequest;
+        ability.use(usePositionedAbilityRequest.x, usePositionedAbilityRequest.y);
+    }
 }
 
 /**

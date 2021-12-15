@@ -1,20 +1,24 @@
-import { checkAgainstSchema }      from '../../schema-checker';
-import { getActions }              from '../actions/action-getter';
-import { getAttributes }           from '../attributes/attribute-getter';
-import { Descriptor }              from '../common/descriptor';
-import { Pattern }                 from '../common/pattern';
-import { buildCondition }          from '../conditions/condition-builder';
-import { PositionedAbility }       from './ability';
-import { baseAbilityEvents }       from './events/base-ability-events';
-import { abilityMoveSchema }       from './sources/ability-move';
-import type { EvaluationContext }  from '../../evaluation-context';
-import type { ParsingContext }     from '../../parsing-context';
-import type { AttributeMap }       from '../attributes/i-attribute-holder';
-import type { Condition }          from '../conditions/condition';
-import type { Ship }               from '../ship';
-import type { AbilityActions }     from './events/base-ability-events';
-import type { IAbilityMoveSource } from './sources/ability-move';
-import type { AbilityInfo }        from 'shared/network/scenario/ability-info';
+import { EventRegistrar }                      from '../../events/event-registrar';
+import { checkAgainstSchema }                  from '../../schema-checker';
+import { eventListenersFromActionSource }      from '../actions/action-getter';
+import { getAttributes }                       from '../attributes/attribute-getter';
+import { Descriptor }                          from '../common/descriptor';
+import { Pattern }                             from '../common/pattern';
+import { buildCondition }                      from '../conditions/condition-builder';
+import { Ability }                             from './ability';
+import { abilityEventInfo }                    from './events/ability-events';
+import { PositionedAbility }                   from './positioned-ability';
+import { abilityMoveSchema }                   from './sources/ability-move';
+import type { BaseEvent, BaseEventInfo }       from '../../events/base-events';
+import type { EventContextForEvent }           from '../../events/event-context';
+import type { ParsingContext }                 from '../../parsing-context';
+import type { SpecialAttributeRecord }         from '../attributes/attribute-holder';
+import type { AttributeMap }                   from '../attributes/i-attribute-holder';
+import type { Condition }                      from '../conditions/condition';
+import type { Ship }                           from '../ship';
+import type { AbilityEvent, AbilityEventInfo } from './events/ability-events';
+import type { IAbilityMoveSource }             from './sources/ability-move';
+import type { IAbilityMoveInfo }               from 'shared/network/scenario/ability-info';
 
 /**
  * AbilityFire - Server Version
@@ -26,20 +30,22 @@ export class AbilityMove extends PositionedAbility {
     /**
      * AbilityFire constructor
      *
-     * @param  ship       Parent ship which this ability belongs to
-     * @param  descriptor Descriptor for ability
-     * @param  pattern    Pattern describing possible movements
-     * @param  condition  Condition which must hold true to be able to use this action
-     * @param  actions    Actions to execute when events are triggered
-     * @param  attributes Attributes for the ability
+     * @param  ship              Parent ship which this ability belongs to
+     * @param  descriptor        Descriptor for ability
+     * @param  pattern           Pattern describing possible movements
+     * @param  condition         Condition which must hold true to be able to use this action
+     * @param  eventRegistrar    Registrar of all ability event listeners
+     * @param  attributes        Attributes for the ability
+     * @param  specialAttributes Special attributes for the ability
      */
     public constructor(ship: Ship,
                        descriptor: Descriptor,
                        public readonly pattern: Pattern,
                        condition: Condition,
-                       actions: AbilityActions,
-                       attributes: AttributeMap) {
-        super(ship, descriptor, condition, actions, attributes);
+                       eventRegistrar: EventRegistrar<AbilityEventInfo, AbilityEvent>,
+                       attributes: AttributeMap,
+                       specialAttributes: SpecialAttributeRecord<'ability'>) {
+        super(ship, descriptor, condition, eventRegistrar, attributes, specialAttributes);
     }
 
     /**
@@ -56,41 +62,62 @@ export class AbilityMove extends PositionedAbility {
         if (checkSchema)
             abilityMoveSource = await checkAgainstSchema(abilityMoveSource, abilityMoveSchema, parsingContext);
 
+        // Ability partial refers to future Ability object
+        const abilityPartial: Partial<Ability> = {};
+
         // Get attributes and update parsing context
         const attributes: AttributeMap = await getAttributes(parsingContext.withExtendedPath('.attributes'), abilityMoveSource.attributes, 'ability');
-        parsingContext.abilityAttributes = attributes;
+        const specialAttributes = Ability.generateSpecialAttributes(abilityPartial as Ability);
+        parsingContext.localAttributes.ability = [attributes, specialAttributes];
         parsingContext.reducePath();
 
         // Get component elements from source
-        const descriptor: Descriptor = await Descriptor.fromSource(parsingContext.withExtendedPath('.descriptor'), abilityMoveSource.descriptor, false);
+        const descriptor = await Descriptor.fromSource(parsingContext.withExtendedPath('.descriptor'), abilityMoveSource.descriptor, false);
         parsingContext.reducePath();
-        const pattern: Pattern = await Pattern.fromSource(parsingContext.withExtendedPath('.pattern'), abilityMoveSource.pattern, false);
+        const pattern = await Pattern.fromSource(parsingContext.withExtendedPath('.pattern'), abilityMoveSource.pattern, false);
         parsingContext.reducePath();
-        const condition: Condition = await buildCondition(parsingContext.withExtendedPath('.condition'), abilityMoveSource.condition, false);
+        const condition = await buildCondition(parsingContext.withExtendedPath('.condition'), abilityMoveSource.condition, false);
         parsingContext.reducePath();
-        const actions: AbilityActions = await getActions(parsingContext.withExtendedPath('.actions'), baseAbilityEvents, [], abilityMoveSource.actions);
+        const eventListeners = await eventListenersFromActionSource(parsingContext.withExtendedPath('.actions'), abilityEventInfo, abilityMoveSource.actions);
         parsingContext.reducePath();
 
-        // Return created AbilityFire object
-        parsingContext.abilityAttributes = undefined;
-        return new AbilityMove(parsingContext.shipPartial as Ship, descriptor, pattern, condition, actions, attributes);
+        // Return created AbilityMove object
+        parsingContext.localAttributes.ability = undefined;
+        const eventRegistrar = new EventRegistrar(eventListeners, []);
+        AbilityMove.call(abilityPartial, parsingContext.shipPartial as Ship, descriptor, pattern, condition, eventRegistrar, attributes, specialAttributes);
+        (abilityPartial as any).__proto__ = AbilityMove.prototype;
+        return abilityPartial as AbilityMove;
     }
 
     /**
      * Execute actions related to this ability if the ability's condition is met
      *
-     * @param  evaluationContext Context for resolving objects and values during evaluation
+     * @param  dx Horizontal amount to move
+     * @param  dy Vertical amount to move
      */
-    public use(evaluationContext: EvaluationContext): void {
+    public use(dx: number, dy: number): void {
 
         if (!this.usable!)
             return;
 
         // Check that the movement is allowed
-        if (this.pattern.query(evaluationContext.x!, evaluationContext.y!) === 0)
+        const patternX = dx + this.pattern.center[0];
+        const patternY = dy + this.pattern.center[1];
+        if (this.pattern.query(patternX, patternY) === 0)
             return;
 
-        this.ship.moveBy(evaluationContext.x!, evaluationContext.y!);
+        this.ship.moveBy(dx, dy);
+        this.eventRegistrar.triggerEvent('onUse', {
+            specialAttributes: {}
+        });
+
+        this.eventRegistrar.triggerEventFromRoot('onAbilityUsed', {
+            specialAttributes: {},
+            foreignTeam: this.ship.owner.team,
+            foreignPlayer: this.ship.owner,
+            foreignShip: this.ship,
+            foreignAbility: this
+        });
     }
 
     /**
@@ -100,7 +127,7 @@ export class AbilityMove extends PositionedAbility {
      *
      * @returns  Created AbilityInfo object
      */
-    public makeTransportable(): AbilityInfo {
+    public makeTransportable(): IAbilityMoveInfo {
         return {
             type: 'move',
             descriptor: this.descriptor.makeTransportable(),
@@ -108,3 +135,5 @@ export class AbilityMove extends PositionedAbility {
         };
     }
 }
+
+export type A = EventContextForEvent<BaseEventInfo, BaseEvent, 'onAbilityUsed'>;

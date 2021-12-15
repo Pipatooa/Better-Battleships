@@ -2,9 +2,9 @@ import Joi                                from 'joi';
 import { attributeReferenceSchema }       from '../../attribute-references/sources/attribute-reference';
 import { valueSchema }                    from '../../values/sources/value';
 import { baseActionSchema }               from './base-action';
-import type { IActionWinSource }          from '../action-win';
 import type { IActionAdvanceTurnSource }  from './action-advance-turn';
 import type { IActionSetAttributeSource } from './action-set-attribute';
+import type { IActionWinSource }          from './action-win';
 
 /**
  * Type matching all action sources

@@ -12,6 +12,9 @@ export class MainUIManager extends UIManager {
 
     private oldHighlightRegionID: string | undefined;
 
+    /**
+     * Called when the main canvas is clicked on
+     */
     protected onMainCanvasClick(): void {
         const oldSelected = this._selectedShip;
         this._selectedShip = this.highlightedTile?.[2];
@@ -32,6 +35,18 @@ export class MainUIManager extends UIManager {
             game.gameRenderer!.renderNext();
             this.updateSidebar();
         }
+    }
+
+    /**
+     * Called when the ability canvas is clicked on
+     *
+     * @param  ev
+     */
+    protected onAbilityCanvasClick(): void {
+        const [x, y] = this.abilityCanvasCoordinates!;
+        const tile = game.abilityRenderer!.board?.tiles[Math.floor(y)]?.[Math.floor(x)];
+        const abilityCallback = tile![3];
+        abilityCallback?.();
     }
 
     /**

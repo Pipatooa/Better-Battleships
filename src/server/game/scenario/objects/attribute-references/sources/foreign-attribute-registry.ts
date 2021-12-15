@@ -1,20 +1,21 @@
-import Joi                   from 'joi';
-import { genericNameSchema } from '../../common/sources/generic-name';
+import Joi                                              from 'joi';
+import { genericNameSchema }                            from '../../common/sources/generic-name';
+import { attributeReferenceForeignObjectSelectors }     from './attribute-reference';
+import type { AttributeReferenceForeignObjectSelector } from './attribute-reference';
 
 /**
- * JSON source interface reflecting schema
+ * JSON source type reflecting schema
  */
-export interface IForeignAttributeRegistrySource {
-    team: string[],
-    player: string[],
-    ship: string[]
-}
+export type ForeignAttributeRegistrySource = Record<AttributeReferenceForeignObjectSelector, string[]>;
+
+/**
+ * Dynamic schema construction
+ */
+const internalSchema = {} as Record<AttributeReferenceForeignObjectSelector, Joi.Schema>;
+for (const attributeReferenceForeignObjectSelector of attributeReferenceForeignObjectSelectors)
+    internalSchema[attributeReferenceForeignObjectSelector] = Joi.array().items(genericNameSchema).required();
 
 /**
  * Schema for validating source JSON data
  */
-export const foreignAttributeRegistrySchema = Joi.object({
-    team: Joi.array().items(genericNameSchema).required(),
-    player: Joi.array().items(genericNameSchema).required(),
-    ship: Joi.array().items(genericNameSchema).required()
-});
+export const foreignAttributeRegistrySchema = Joi.object(internalSchema);

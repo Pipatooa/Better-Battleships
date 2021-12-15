@@ -10,5 +10,6 @@
   ],
   "turnOrdering": "team",
   "maxTurnTime": 120,
-  "attributes": {}
+  "attributes": {},
+  "actions": {}
 }

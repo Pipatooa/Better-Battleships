@@ -44,13 +44,13 @@ export async function handleSetupInfo(setupInfoEvent: ISetupInfoEvent): Promise<
             let ability: Ability;
             switch (abilityInfo.type) {
                 case 'move':
-                    ability = AbilityMove.fromSource(abilityInfo, abilityIndex);
+                    ability = AbilityMove.fromSource(abilityInfo, shipIndex, abilityIndex);
                     break;
                 case 'rotate':
-                    ability = AbilityRotate.fromSource(abilityInfo, abilityIndex);
+                    ability = AbilityRotate.fromSource(abilityInfo, shipIndex, abilityIndex);
                     break;
                 case 'fire':
-                    ability = AbilityFire.fromSource(abilityInfo, abilityIndex);
+                    ability = AbilityFire.fromSource(abilityInfo, shipIndex, abilityIndex);
                     break;
             }
             abilities.push(ability);

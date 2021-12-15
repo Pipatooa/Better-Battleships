@@ -1,7 +1,7 @@
+import { GenericEventContext }      from '../../events/event-context';
 import { checkAgainstSchema }       from '../../schema-checker';
 import { valueProductSchema }       from './sources/value-product';
 import { ValueMultiple }            from './value-multiple';
-import type { EvaluationContext }   from '../../evaluation-context';
 import type { ParsingContext }      from '../../parsing-context';
 import type { IValueProductSource } from './sources/value-product';
 import type { Value }               from './value';
@@ -18,17 +18,17 @@ export class ValueProduct extends ValueMultiple {
     /**
      * Evaluate this dynamic value as a number
      *
-     * @param    evaluationContext Context for resolving objects and values during evaluation
-     * @returns                    Static value
+     * @param    eventContext Context for resolving objects and values when an event is triggered
+     * @returns               Static value
      */
-    public evaluate(evaluationContext: EvaluationContext): number {
+    public evaluate(eventContext: GenericEventContext): number {
 
         // Keep track of product of values
         let product = 1;
 
         // Loop through sub values and add to running product
         for (const subValue of this.subValues) {
-            product *= subValue.evaluate(evaluationContext);
+            product *= subValue.evaluate(eventContext);
         }
 
         // Return product

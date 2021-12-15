@@ -1,11 +1,16 @@
-import { AttributeReference }     from './attribute-reference';
-import type { EvaluationContext } from '../../evaluation-context';
-import type { Attribute }         from '../attributes/attribute';
+import { UnpackingError }                             from '../../unpacker';
+import { builtinAttributePrefix }                     from '../attributes/sources/builtin-attributes';
+import { AttributeReference }                         from './attribute-reference';
+import { attributeReferenceLocalObjectSelectors }     from './sources/attribute-reference';
+import type { GenericEventContext }                   from '../../events/event-context';
+import type { ParsingContext }                        from '../../parsing-context';
+import type { Attribute }                             from '../attributes/attribute';
+import type { AttributeReferenceLocalObjectSelector } from './sources/attribute-reference';
 
 /**
  * AttributeReferenceLocal - Server Version
  *
- * Provides a fixed reference to an attribute assigned at scenario creation time
+ * Provides a fixed reference to an attribute, assigned at scenario creation time
  */
 export class AttributeReferenceLocal extends AttributeReference {
 
@@ -16,6 +21,42 @@ export class AttributeReferenceLocal extends AttributeReference {
      */
     public constructor(protected readonly attribute: Attribute) {
         super();
+    }
+
+    /**
+     * Factory function to generate AttributeReferenceLocal from JSON scenario data
+     *
+     * @param    parsingContext Context for resolving objects and values when an event is triggered
+     * @param    objectSelector Object selector part of attribute reference string
+     * @param    attributeName  Name of attribute to reference
+     * @param    builtin        Whether or not this attribute reference refers to a built-in value or a user defined
+     * @returns                 Created AttributeReferenceLocal object
+     */
+    public static async fromSource(parsingContext: ParsingContext, objectSelector: AttributeReferenceLocalObjectSelector, attributeName: string, builtin: boolean): Promise<AttributeReferenceLocal> {
+
+        // Verify object selector is valid for a local reference
+        if (!attributeReferenceLocalObjectSelectors.includes(objectSelector))
+            throw new UnpackingError(`The object selector in the attribute 'local:${objectSelector}.${attributeName}' defined at '${parsingContext.currentPath}' is not valid. Must be one of [${attributeReferenceLocalObjectSelectors.join(', ')}]`,
+                parsingContext.currentFile);
+
+        // Check is object exists to be referenced
+        const attributeMaps = parsingContext.localAttributes[objectSelector];
+        if (attributeMaps === undefined)
+            throw new UnpackingError(`Could not find attribute 'local:${objectSelector}.${attributeName}' defined at '${parsingContext.currentPath}' in local context '${parsingContext.attributeContextName}'. No '${objectSelector}' to refer to.`,
+                parsingContext.currentFile);
+
+        // Switch between special attribute and regular attribute map
+        const attributeMap = builtin
+            ? attributeMaps[1]
+            : attributeMaps[0];
+
+        // Lookup attribute in attribute map
+        const attribute = attributeMap[attributeName];
+        if (attribute === undefined)
+            throw new UnpackingError(`Could not find attribute 'local:${objectSelector}.${builtin ? builtinAttributePrefix : ''}${attributeName}' defined at '${parsingContext.currentPath}'. No such attribute exists on that object.`,
+                parsingContext.currentFile);
+
+        return new AttributeReferenceLocal(attribute);
     }
 
     /**
@@ -30,10 +71,10 @@ export class AttributeReferenceLocal extends AttributeReference {
     /**
      * Set the value of the referenced attribute
      *
-     * @param  evaluationContext Context for resolving objects and values during evaluation
-     * @param  value             New value to assign to referenced attribute
+     * @param  eventContext Context for resolving objects and values when an event is triggered
+     * @param  value        New value to assign to referenced attribute
      */
-    public setValue(evaluationContext: EvaluationContext, value: number): void {
-        this.attribute.setValue(evaluationContext, value);
+    public setValue(eventContext: GenericEventContext, value: number): void {
+        this.attribute.setValue(eventContext, value);
     }
 }

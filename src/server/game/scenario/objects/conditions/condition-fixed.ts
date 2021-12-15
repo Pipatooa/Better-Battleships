@@ -27,8 +27,7 @@ export class ConditionFixed extends Condition {
      * @returns  Whether or not this condition holds true
      */
     public check(): boolean {
-        // Return result (invert result if necessary)
-        return this.inverted ? !this.result : this.result;
+        return this.result;
     }
 
     /**
@@ -39,11 +38,11 @@ export class ConditionFixed extends Condition {
      * @param    checkSchema          When true, validates source JSON data against schema
      * @returns                       Created ConditionFixed object
      */
-    public static async fromSource(parsingContext: ParsingContext, conditionFixedSource: IConditionFixedSource | Record<string, never>, checkSchema: boolean): Promise<ConditionFixed> {
+    public static async fromSource(parsingContext: ParsingContext, conditionFixedSource: IConditionFixedSource | boolean, checkSchema: boolean): Promise<ConditionFixed> {
 
-        // Empty condition
-        if (Object.entries(conditionFixedSource).length === 0)
-            return new ConditionFixed(true);
+        // Boolean source
+        if (conditionFixedSource === true || conditionFixedSource === false)
+            return new ConditionFixed(conditionFixedSource);
 
         // Validate JSON data against schema
         if (checkSchema)

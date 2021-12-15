@@ -1,8 +1,8 @@
+import { GenericEventContext }     from '../../events/event-context';
 import { checkAgainstSchema }      from '../../schema-checker';
 import { valueRandomSchema }       from './sources/value-random';
 import { Value }                   from './value';
 import { buildValue }              from './value-builder';
-import type { EvaluationContext }  from '../../evaluation-context';
 import type { ParsingContext }     from '../../parsing-context';
 import type { IValueRandomSource } from './sources/value-random';
 
@@ -39,16 +39,16 @@ export class ValueRandom extends Value {
      *
      * If step is not undefined, returned value will be a multiple of the step value
      *
-     * @param    evaluationContext Context for resolving objects and values during evaluation
-     * @returns                    Randomly generated value
+     * @param    eventContext Context for resolving objects and values when an event is triggered
+     * @returns               Randomly generated value
      * @protected
      */
-    protected getRandom(evaluationContext: EvaluationContext): number {
+    protected getRandom(eventContext: GenericEventContext): number {
 
         // Evaluate sub-values to numbers
-        const min: number = this.min.evaluate(evaluationContext);
-        const max: number = this.max.evaluate(evaluationContext);
-        const step: number | undefined = this.step?.evaluate(evaluationContext);
+        const min: number = this.min.evaluate(eventContext);
+        const max: number = this.max.evaluate(eventContext);
+        const step: number | undefined = this.step?.evaluate(eventContext);
 
         // Returns free-floating random value between min and max
         if (step === undefined) {
@@ -62,18 +62,18 @@ export class ValueRandom extends Value {
     /**
      * Evaluate this dynamic value as a number
      *
-     * @param    evaluationContext Context for resolving objects and values during evaluation
-     * @returns                    Static value
+     * @param    eventContext Context for resolving objects and values when an event is triggered
+     * @returns               Static value
      */
-    public evaluate(evaluationContext: EvaluationContext): number {
+    public evaluate(eventContext: GenericEventContext): number {
         if (this.generateOnce) {
             if (this.generatedValue === undefined)
-                this.generatedValue = this.getRandom(evaluationContext);
+                this.generatedValue = this.getRandom(eventContext);
 
             return this.generatedValue;
         }
 
-        return this.getRandom(evaluationContext);
+        return this.getRandom(eventContext);
     }
 
     /**
@@ -91,9 +91,9 @@ export class ValueRandom extends Value {
             valueRandomSource = await checkAgainstSchema(valueRandomSource, valueRandomSchema, parsingContext);
 
         // Get min, max and step from source
-        const min: Value = await buildValue(parsingContext.withExtendedPath('.min'), valueRandomSource.min, true);
+        const min = await buildValue(parsingContext.withExtendedPath('.min'), valueRandomSource.min, true);
         parsingContext.reducePath();
-        const max: Value = await buildValue(parsingContext.withExtendedPath('.max'), valueRandomSource.max, true);
+        const max = await buildValue(parsingContext.withExtendedPath('.max'), valueRandomSource.max, true);
         parsingContext.reducePath();
 
         let step: Value | undefined;

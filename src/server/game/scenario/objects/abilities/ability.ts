@@ -1,54 +1,62 @@
-import type { EvaluationContext } from '../../evaluation-context';
-import type { AttributeMap }      from '../attributes/i-attribute-holder';
-import type { IAttributeHolder }  from '../attributes/sources/attribute-holder';
-import type { Descriptor }        from '../common/descriptor';
-import type { Condition }         from '../conditions/condition';
-import type { Ship }              from '../ship';
-import type { AbilityActions }    from './events/base-ability-events';
-import type { AbilityInfo }       from 'shared/network/scenario/ability-info';
+import type { AbilityInfo }                               from '../../../../../shared/network/scenario/ability-info';
+import type { EventContextForEvent, GenericEventContext } from '../../events/event-context';
+import type { EventRegistrar }                            from '../../events/event-registrar';
+import type { IAttributeHolder, SpecialAttributeRecord }  from '../attributes/attribute-holder';
+import type { AttributeMap }                              from '../attributes/i-attribute-holder';
+import type { Descriptor }                                from '../common/descriptor';
+import type { Condition }                                 from '../conditions/condition';
+import type { Ship }                                      from '../ship';
+import type { AbilityEvent, AbilityEventInfo }            from './events/ability-events';
 
 /**
  * Ability - Server Version
  *
  * Base class for abilities of a ship which execute actions upon use
  */
-export abstract class Ability implements IAttributeHolder {
+export abstract class Ability implements IAttributeHolder, SpecialAttributeRecord<'ability'> {
 
     protected usable: boolean | undefined;
 
     /**
      * Ability constructor
      *
-     * @param  ship       Parent ship which this ability belongs to
-     * @param  descriptor Descriptor for ability
-     * @param  condition  Condition which must hold true to be able to use this ability
-     * @param  actions    Actions to execute when events are triggered
-     * @param  attributes Attributes for the ability
+     * @param  ship              Parent ship which this ability belongs to
+     * @param  descriptor        Descriptor for ability
+     * @param  condition         Condition which must hold true to be able to use this ability
+     * @param  eventRegistrar    Registrar of all team event listeners
+     * @param  attributes        Attributes for the ability
+     * @param  specialAttributes Special attributes for the ability
      */
     public constructor(public readonly ship: Ship,
                        public readonly descriptor: Descriptor,
                        public readonly condition: Condition,
-                       public readonly actions: AbilityActions,
-                       public readonly attributes: AttributeMap) {
+                       public readonly eventRegistrar: EventRegistrar<AbilityEventInfo, AbilityEvent>,
+                       public readonly attributes: AttributeMap,
+                       public readonly specialAttributes: SpecialAttributeRecord<'ability'>) {
+
+        this.eventRegistrar.addEventListener('onAbilityUsed', (eventContext: EventContextForEvent<AbilityEventInfo, AbilityEvent, 'onAbilityUsed'>) => this.checkUsable(eventContext), true);
+    }
+
+    /**
+     * Generates special attributes for Ability object
+     *
+     * @param    object Object to generate special attributes for
+     * @returns         Record of special attributes for the object
+     */
+    protected static generateSpecialAttributes(object: Ability): SpecialAttributeRecord<'ability'> {
+        return {};
     }
 
     /**
      * Checks whether or not this ability is usable
      *
-     * @param    evaluationContext Context for resolving objects and values during evaluation
-     * @returns                    Whether or not this ability is usable
+     * @param    eventContext Context for resolving objects and values when an event is triggered
+     * @returns               Whether or not this ability is usable
      */
-    public checkUsable(evaluationContext: EvaluationContext): boolean {
-        this.usable = this.condition.check(evaluationContext);
+    public checkUsable(eventContext: GenericEventContext): boolean {
+        this.usable = this.condition.check(eventContext);
         return this.usable;
     }
-
-    /**
-     * Execute actions related to this ability if the ability's condition is met
-     *
-     * @param  evaluationContext Context for resolving objects and values during evaluation
-     */
-    public abstract use(evaluationContext: EvaluationContext): void;
 
     /**
      * Returns network transportable form of this object.
@@ -59,11 +67,3 @@ export abstract class Ability implements IAttributeHolder {
      */
     public abstract makeTransportable(): AbilityInfo;
 }
-
-/**
- * Abstract subclasses for grouping abilities into two types
- *
- * Allows inheriting classes to be determined as instances of one of these abstract classes
- */
-export abstract class IndexedAbility extends Ability {}
-export abstract class PositionedAbility extends Ability {}

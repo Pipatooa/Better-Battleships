@@ -1,8 +1,8 @@
+import { GenericEventContext }      from '../../events/event-context';
 import { checkAgainstSchema }       from '../../schema-checker';
 import { valueRoundedSchema }       from './sources/value-rounded';
 import { Value }                    from './value';
 import { buildValue }               from './value-builder';
-import type { EvaluationContext }   from '../../evaluation-context';
 import type { ParsingContext }      from '../../parsing-context';
 import type { IValueRoundedSource } from './sources/value-rounded';
 
@@ -28,16 +28,16 @@ export class ValueRounded extends Value {
     /**
      * Evaluate this dynamic value as a number
      *
-     * @param    evaluationContext Context for resolving objects and values during evaluation
-     * @returns                    Static value
+     * @param    eventContext Context for resolving objects and values when an event is triggered
+     * @returns               Static value
      */
-    public evaluate(evaluationContext: EvaluationContext): number {
+    public evaluate(eventContext: GenericEventContext): number {
 
         // Evaluate step value once in-case it is changing
-        const step: number = this.step.evaluate(evaluationContext);
+        const step: number = this.step.evaluate(eventContext);
 
         // Round evaluated sub-value and round to nearest multiple of step
-        return Math.round(this.value.evaluate(evaluationContext) / step) * step;
+        return Math.round(this.value.evaluate(eventContext) / step) * step;
     }
 
     /**
@@ -55,9 +55,9 @@ export class ValueRounded extends Value {
             valueRoundedSource = await checkAgainstSchema(valueRoundedSource, valueRoundedSchema, parsingContext);
 
         // Get value and step from source
-        const value: Value = await buildValue(parsingContext.withExtendedPath('.value'), valueRoundedSource.value, true);
+        const value = await buildValue(parsingContext.withExtendedPath('.value'), valueRoundedSource.value, true);
         parsingContext.reducePath();
-        const step: Value = await buildValue(parsingContext.withExtendedPath('.step'), valueRoundedSource.step, true);
+        const step = await buildValue(parsingContext.withExtendedPath('.step'), valueRoundedSource.step, true);
         parsingContext.reducePath();
 
         // Return created ValueRounded object

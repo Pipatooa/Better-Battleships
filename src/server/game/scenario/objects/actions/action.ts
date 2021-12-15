@@ -1,5 +1,5 @@
-import type { EvaluationContext } from '../../evaluation-context';
-import type { Condition }         from '../conditions/condition';
+import type { GenericEventContext } from '../../events/event-context';
+import type { Condition }           from '../conditions/condition';
 
 /**
  * Action - Server Version
@@ -19,8 +19,7 @@ export abstract class Action {
     /**
      * Executes this action's logic if action condition holds true
      *
-     * @param  evaluationContext Context for resolving objects and values during evaluation
+     * @param  eventContext Context for resolving objects and values when an event is triggered
      */
-    public abstract execute(evaluationContext: EvaluationContext): void;
+    public abstract execute(eventContext: GenericEventContext): void;
 }
-

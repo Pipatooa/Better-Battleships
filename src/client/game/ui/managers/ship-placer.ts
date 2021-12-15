@@ -25,24 +25,21 @@ export class ShipPlacer extends UIManager {
         document.removeEventListener('keypress', this.keyPressListener);
     }
 
-    protected updateSelection(ev: PointerEvent): ([number, number] | undefined)[] {
-        const [mainCoordinates, abilityCoordinates] = super.updateSelection(ev);
-        const shipSelectionCoordinates = game.shipSelectionRenderer!.updateSelectionLocation(ev);
+    protected updateSelection(ev: PointerEvent): void {
+        super.updateSelection(ev);
 
         // Update info text if hovering over the main board with a ship
-        if (mainCoordinates !== undefined && this._heldShip !== undefined
+        if (this.mainCanvasCoordinates !== undefined && this._heldShip !== undefined
                 && ev.target === game.gameRenderer!.viewportHandler.canvas) {
 
-            const shipX = Math.floor(mainCoordinates[0] - this._heldShip.pattern.center[0]);
-            const shipY = Math.floor(mainCoordinates[1] - this._heldShip.pattern.center[1]);
+            const shipX = Math.floor(this.mainCanvasCoordinates[0] - this._heldShip.pattern.center[0]);
+            const shipY = Math.floor(this.mainCanvasCoordinates[1] - this._heldShip.pattern.center[1]);
             const [ placementValid, invalidReason ] = this._heldShip.checkPlacementValid(shipX, shipY, game.board!);
             this.tooltipInfoText = placementValid
                 ? undefined
                 : [ 'Invalid Placement!', invalidReason! ];
             this.placementValid = placementValid;
         }
-
-        return [mainCoordinates, abilityCoordinates, shipSelectionCoordinates];
     }
 
     /**
@@ -58,8 +55,11 @@ export class ShipPlacer extends UIManager {
                 this.selectedShip = ship;
             }
         } else if (this.placementValid) {
-            const x = Math.floor(this.highlightedLocationRaw[0] - this._heldShip.pattern.center[0]);
-            const y = Math.floor(this.highlightedLocationRaw[1] - this._heldShip.pattern.center[1]);
+            const [rawX, rawY] = this.mainCanvasCoordinates !== undefined
+                ? this.mainCanvasCoordinates
+                : [-Infinity, -Infinity];
+            const x = Math.floor(rawX - this._heldShip.pattern.center[0]);
+            const y = Math.floor(rawY - this._heldShip.pattern.center[1]);
             this._heldShip.moveTo(x, y);
             game.board!.addShip(this._heldShip, true);
             game.shipSelectionRenderer!.closeSlot(undefined);

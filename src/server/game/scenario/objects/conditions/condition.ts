@@ -1,4 +1,4 @@
-import type { EvaluationContext } from '../../evaluation-context';
+import type { GenericEventContext } from '../../events/event-context';
 
 /**
  * Condition - Server Version
@@ -19,8 +19,8 @@ export abstract class Condition {
     /**
      * Checks whether or not this condition holds true
      *
-     * @param    evaluationContext Context for resolving objects and values during evaluation
-     * @returns                    Whether or not this condition holds true
+     * @param    eventContext Context for resolving objects and values when an event is triggered
+     * @returns               Whether or not this condition holds true
      */
-    public abstract check(evaluationContext: EvaluationContext): boolean;
+    public abstract check(eventContext: GenericEventContext): boolean;
 }

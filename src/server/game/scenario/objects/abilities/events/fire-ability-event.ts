@@ -1,20 +1,20 @@
-import { baseAbilityEvents } from './base-ability-events';
-import type { Action }       from '../../actions/action';
+import { abilityEventInfo } from './ability-events';
 
 /**
- * List of event names for fire ability
+ * Record describing all fire ability events
  */
-export const fireAbilityEvents = [
-    ...baseAbilityEvents,
-    'onHit'
-] as const;
+export const fireAbilityEventInfo = {
+    ...abilityEventInfo,
+    onHit: [['team', 'player', 'ship'], ['patternValue']],
+    onMiss: [[], []]
+} as const;
+
+/**
+ * Type matching record describing all fire ability events
+ */
+export type FireAbilityEventInfo = typeof fireAbilityEventInfo;
 
 /**
  * Type matching all fire ability event name strings
  */
-export type FireAbilityEvent = typeof fireAbilityEvents[number];
-
-/**
- * Type describing a dictionary of actions tied to ability event names
- */
-export type FireAbilityActions = { [event in FireAbilityEvent]: Action[] };
+export type FireAbilityEvent = keyof FireAbilityEventInfo;

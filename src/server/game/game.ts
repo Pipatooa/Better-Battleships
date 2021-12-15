@@ -245,14 +245,20 @@ export class Game {
     public startGame(): void {
         this._gamePhase = GamePhase.InProgress;
 
-        // Update spotting status of all ships
+        // Update spotting status of all ships and usability of abilities
         for (const client of this.clients) {
             for (const ship of client.player!.ships) {
                 ship.spotInitial();
+                for (const ability of ship.abilities)
+                    ability.checkUsable({
+                        specialAttributes: {}
+                    });
             }
         }
 
-        // Start first player's turn timer
+        this.scenario.eventRegistrar.triggerEvent('onGameStart', {
+            specialAttributes: {}
+        });
         this.scenario.turnManager.start();
 
         this.broadcastEvent({

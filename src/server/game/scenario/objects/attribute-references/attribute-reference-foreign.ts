@@ -1,13 +1,17 @@
-import { AttributeReference }                    from './attribute-reference';
-import type { EvaluationContext }                from '../../evaluation-context';
-import type { Attribute }                        from '../attributes/attribute';
-import type { IAttributeHolder }                 from '../attributes/sources/attribute-holder';
-import type { AttributeReferenceObjectSelector } from './sources/attribute-reference';
+import { UnpackingError }                                 from '../../unpacker';
+import { builtinAttributePrefix }                         from '../attributes/sources/builtin-attributes';
+import { AttributeReference }                             from './attribute-reference';
+import { attributeReferenceForeignObjectSelectors }       from './sources/attribute-reference';
+import type { ECA, EventContext, GenericEventContext }    from '../../events/event-context';
+import type { ParsingContext }                            from '../../parsing-context';
+import type { Attribute }                                 from '../attributes/attribute';
+import type { IAttributeHolder, ISpecialAttributeHolder } from '../attributes/attribute-holder';
+import type { AttributeReferenceForeignObjectSelector }   from './sources/attribute-reference';
 
 /**
  * AttributeReferenceForeign - Server Version
  *
- * Provides a reference to an attribute which exists on other objects depending on context
+ * Provides a dynamic reference to an attribute which exists on other objects depending on context
  */
 export class AttributeReferenceForeign extends AttributeReference {
 
@@ -16,60 +20,90 @@ export class AttributeReferenceForeign extends AttributeReference {
      *
      * @param  objectSelector Object selector part of attribute reference string
      * @param  attributeName  Name of referenced attribute
+     * @param  special        Whether or not this attribute reference refers to a built-in value or a user defined value
      */
-    public constructor(protected readonly objectSelector: AttributeReferenceObjectSelector,
-                       protected readonly attributeName: string) {
+    public constructor(protected readonly objectSelector: AttributeReferenceForeignObjectSelector,
+                       protected readonly attributeName: string,
+                       protected readonly special: boolean) {
         super();
+    }
+
+    /**
+     * Factory function to generate AttributeReferenceForeign from JSON scenario data
+     *
+     * @param    parsingContext Context for resolving objects and values when an event is triggered
+     * @param    objectSelector Object selector part of attribute reference string
+     * @param    attributeName  Name of attribute to reference
+     * @param    builtin        Whether or not this attribute reference refers to a built-in value or a user defined value
+     * @returns                 Created AttributeReferenceForeign object
+     */
+    public static async fromSource(parsingContext: ParsingContext, objectSelector: AttributeReferenceForeignObjectSelector, attributeName: string, builtin: boolean): Promise<AttributeReferenceForeign> {
+
+        // Verify object selector is valid for a local reference
+        if (!attributeReferenceForeignObjectSelectors.includes(objectSelector))
+            throw new UnpackingError(`The object selector in the attribute 'foreign:${objectSelector}.${attributeName}' defined at '${parsingContext.currentPath}' is not valid. Must be one of [${attributeReferenceForeignObjectSelectors.join(', ')}].`,
+                parsingContext.currentFile);
+
+        // Check is object exists to be referenced
+        if (parsingContext.currentEventInfo?.[0].includes(objectSelector) !== true) {
+            throw new UnpackingError(`Could not find attribute 'foreign:${objectSelector}.${builtin ? builtinAttributePrefix : ''}${attributeName}' defined at '${parsingContext.currentPath}'. No '${objectSelector}' to refer to.`,
+                parsingContext.currentFile);
+        }
+
+        // Check if attribute exists for object
+        if (!parsingContext.foreignAttributeRegistry!.registeredAttributes[objectSelector].includes(attributeName))
+            throw new UnpackingError(`Could not find attribute 'foreign:${objectSelector}.${builtin ? builtinAttributePrefix : ''}${attributeName}' defined at '${parsingContext.currentPath}'. No such attribute exists on that object.`,
+                parsingContext.currentFile);
+        
+        return new AttributeReferenceForeign(objectSelector, attributeName, builtin);
     }
 
     /**
      * Resolves underlying attribute that this attribute refers to under a given evaluation context
      *
-     * @param    evaluationContext Context for resolving objects and values during evaluation
-     * @returns                    Referenced attribute
+     * @param    eventContext Context for resolving objects and values when an event is triggered
+     * @returns               Referenced attribute
      */
-    private getAttribute(evaluationContext: EvaluationContext): Attribute {
+    private getAttribute(eventContext: GenericEventContext): Attribute {
 
-        let attributeHolder: IAttributeHolder | undefined;
+        let attributeHolder: IAttributeHolder & ISpecialAttributeHolder<any>;
 
         switch (this.objectSelector) {
-            case 'scenario':
-                attributeHolder = evaluationContext.scenario;
-                break;
             case 'team':
-                attributeHolder = evaluationContext.team;
+                attributeHolder = (eventContext as EventContext<'team', ECA>).foreignTeam;
                 break;
             case 'player':
-                attributeHolder = evaluationContext.player;
+                attributeHolder = (eventContext as EventContext<'player', ECA>).foreignPlayer;
                 break;
             case 'ship':
-                attributeHolder = evaluationContext.ship;
+                attributeHolder = (eventContext as EventContext<'ship', ECA>).foreignShip;
                 break;
             case 'ability':
-                attributeHolder = undefined;
+                attributeHolder = (eventContext as EventContext<'ability', ECA>).foreignAbility;
                 break;
         }
 
-        return attributeHolder!.attributes[this.attributeName];
+        const attributeMap = this.special ? attributeHolder.attributes : attributeHolder.specialAttributes;
+        return attributeMap[this.attributeName];
     }
 
     /**
      * Get the value of the referenced attribute
      *
-     * @param    evaluationContext Context for resolving objects and values during evaluation
-     * @returns                    Value of the referenced attribute
+     * @param    eventContext Context for resolving objects and values when an event is triggered
+     * @returns               Value of the referenced attribute
      */
-    public getValue(evaluationContext: EvaluationContext): number {
-        return this.getAttribute(evaluationContext).getValue();
+    public getValue(eventContext: GenericEventContext): number {
+        return this.getAttribute(eventContext).getValue();
     }
 
     /**
      * Set the value of the referenced attribute
      *
-     * @param  evaluationContext Context for resolving objects and values during evaluation
-     * @param  value             New value to assign to referenced attribute
+     * @param  eventContext Context for resolving objects and values when an event is triggered
+     * @param  value        New value to assign to referenced attribute
      */
-    public setValue(evaluationContext: EvaluationContext, value: number): void {
-        this.getAttribute(evaluationContext).setValue(evaluationContext, value);
+    public setValue(eventContext: GenericEventContext, value: number): void {
+        this.getAttribute(eventContext).setValue(eventContext, value);
     }
 }

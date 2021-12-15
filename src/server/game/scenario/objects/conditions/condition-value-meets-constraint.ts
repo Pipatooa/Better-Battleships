@@ -1,9 +1,9 @@
+import { GenericEventContext }                       from '../../events/event-context';
 import { checkAgainstSchema }                        from '../../schema-checker';
 import { buildValueConstraint }                      from '../constraints/value-constraint-builder';
 import { buildValue }                                from '../values/value-builder';
 import { Condition }                                 from './condition';
 import { conditionValueMeetsConstraintSchema }       from './sources/condition-value-meets-constraint';
-import type { EvaluationContext }                    from '../../evaluation-context';
 import type { ParsingContext }                       from '../../parsing-context';
 import type { ValueConstraint }                      from '../constraints/value-constaint';
 import type { Value }                                from '../values/value';
@@ -33,13 +33,13 @@ export class ConditionValueMeetsConstraint extends Condition {
     /**
      * Checks whether or not this condition holds true
      *
-     * @param    evaluationContext Context for resolving objects and values during evaluation
-     * @returns                    Whether or not this condition holds true
+     * @param    eventContext Context for resolving objects and values when an event is triggered
+     * @returns               Whether or not this condition holds true
      */
-    public check(evaluationContext: EvaluationContext): boolean {
+    public check(eventContext: GenericEventContext): boolean {
         // Check value against value constraint
-        const value: number = this.value.evaluate(evaluationContext);
-        const result: boolean = this.valueConstraint.check(evaluationContext, value);
+        const value: number = this.value.evaluate(eventContext);
+        const result: boolean = this.valueConstraint.check(eventContext, value);
 
         // Return result (invert if necessary)
         return this.inverted ? !result : result;
@@ -60,9 +60,9 @@ export class ConditionValueMeetsConstraint extends Condition {
             conditionValueMeetsConstraintSource = await checkAgainstSchema(conditionValueMeetsConstraintSource, conditionValueMeetsConstraintSchema, parsingContext);
 
         // Get value and value constraint from source
-        const value: Value = await buildValue(parsingContext.withExtendedPath('.value'), conditionValueMeetsConstraintSource.value, false);
+        const value = await buildValue(parsingContext.withExtendedPath('.value'), conditionValueMeetsConstraintSource.value, false);
         parsingContext.reducePath();
-        const valueConstraint: ValueConstraint = await buildValueConstraint(parsingContext.withExtendedPath('.valueConstraint'), conditionValueMeetsConstraintSource.constraint, true);
+        const valueConstraint = await buildValueConstraint(parsingContext.withExtendedPath('.valueConstraint'), conditionValueMeetsConstraintSource.constraint, true);
         parsingContext.reducePath();
 
         // Return created ConditionValueMeetsConstraint object

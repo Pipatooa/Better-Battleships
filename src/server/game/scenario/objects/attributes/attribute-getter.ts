@@ -21,10 +21,12 @@ export async function getAttributes(parsingContext: ParsingContext, attributeDat
     }
 
     // Enforce that foreign attributes exist for object type
-    if (['team', 'player', 'ship'].includes(attributeLevel)) {
-        for (const foreignAttributeName of parsingContext.foreignAttributeRegistry!.getRegisteredAttributeNames(attributeLevel as 'team' | 'player' | 'ship')) {
+    const foreignAttributes = parsingContext.foreignAttributeRegistry!.registeredAttributes[attributeLevel as 'team' | 'player' | 'ship' | 'ability'];
+    if (foreignAttributes !== undefined) {
+        for (const foreignAttributeName of foreignAttributes) {
             if (attributes[foreignAttributeName] === undefined)
-                throw new UnpackingError(`'${attributeLevel}.${foreignAttributeName}' is declared as a foreign attribute and must be declared on all attribute holders of type '${attributeLevel}'`, parsingContext);
+                throw new UnpackingError(`'${attributeLevel}.${foreignAttributeName}' is declared as a foreign attribute and must be declared on all attribute holders of type '${attributeLevel}' but was not found in '${parsingContext.currentPath}'.`,
+                    parsingContext);
         }
     }
 

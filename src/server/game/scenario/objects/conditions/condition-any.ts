@@ -1,7 +1,7 @@
+import { GenericEventContext }      from '../../events/event-context';
 import { checkAgainstSchema }       from '../../schema-checker';
 import { ConditionMultiple }        from './condition-multiple';
 import { conditionAnySchema }       from './sources/condition-any';
-import type { EvaluationContext }   from '../../evaluation-context';
 import type { ParsingContext }      from '../../parsing-context';
 import type { Condition }           from './condition';
 import type { IConditionAnySource } from './sources/condition-any';
@@ -18,16 +18,16 @@ export class ConditionAny extends ConditionMultiple {
     /**
      * Checks whether or not this condition holds true
      *
-     * @param    evaluationContext Context for resolving objects and values during evaluation
-     * @returns                    Whether or not this condition holds true
+     * @param    eventContext Context for resolving objects and values when an event is triggered
+     * @returns               Whether or not this condition holds true
      */
-    public check(evaluationContext: EvaluationContext): boolean {
+    public check(eventContext: GenericEventContext): boolean {
 
         // Loop through sub conditions
         for (const item of this.subConditions) {
 
             // If any sub condition holds true, return true (unless inverted)
-            if (item.check(evaluationContext))
+            if (item.check(eventContext))
                 return !this.inverted;
         }
 

@@ -1,4 +1,4 @@
-import type { EvaluationContext } from '../../evaluation-context';
+import type { GenericEventContext } from '../../events/event-context';
 
 /**
  * ValueConstraint - Server Version
@@ -11,18 +11,18 @@ export abstract class ValueConstraint {
     /**
      * Checks whether or not a value meets this constraint
      *
-     * @param    evaluationContext Context for resolving objects and values during evaluation
-     * @param    value             Value to check
-     * @returns                    Whether value met this constraint
+     * @param    eventContext Context for resolving objects and values when an event is triggered
+     * @param    value        Value to check
+     * @returns               Whether value met this constraint
      */
-    abstract check(evaluationContext: EvaluationContext, value: number): boolean;
+    abstract check(eventContext: GenericEventContext, value: number): boolean;
 
     /**
      * Changes a value to meet this constraint
      *
-     * @param    evaluationContext Context for resolving objects and values during evaluation
-     * @param    value             Value to constrain
-     * @returns                    New value that meets this constraint
+     * @param    eventContext Context for resolving objects and values when an event is triggered
+     * @param    value        Value to constrain
+     * @returns               New value that meets this constraint
      */
-    abstract constrain(evaluationContext: EvaluationContext, value: number): number;
+    abstract constrain(eventContext: GenericEventContext, value: number): number;
 }

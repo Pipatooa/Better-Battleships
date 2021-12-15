@@ -69,15 +69,18 @@ export class AbilityRenderer extends BoardRenderer {
         for (let y = 0; y < boardSize; y++) {
             tiles[y] = [];
             for (let x = 0; x < boardSize; x++) {
-                const dx = x - offsetX;
-                const dy = y - offsetY;
+                const patternX = x - offsetX;
+                const patternY = y - offsetY;
 
-                if (dx === ability.pattern.center[0] && dy === ability.pattern.center[1])
-                    tiles[y][x] = [this.moveOriginTileType, [], undefined];
-                else if (ability.pattern.query(dx, dy))
-                    tiles[y][x] = [this.moveValidTileType, [], undefined];
+                const dx = patternX - ability.pattern.center[0];
+                const dy = patternY - ability.pattern.center[1];
+
+                if (dx === 0 && dy === 0)
+                    tiles[y][x] = [this.moveOriginTileType, [], undefined, undefined];
+                else if (ability.pattern.query(patternX, patternY))
+                    tiles[y][x] = [this.moveValidTileType, [], undefined, () => ability.use(dx, dy)];
                 else
-                    tiles[y][x] = [game.board!.primaryTileType, [], undefined];
+                    tiles[y][x] = [game.board!.primaryTileType, [], undefined, undefined];
             }
         }
 

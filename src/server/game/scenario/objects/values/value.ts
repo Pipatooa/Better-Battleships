@@ -1,4 +1,4 @@
-import type { EvaluationContext } from '../../evaluation-context';
+import type { GenericEventContext } from '../../events/event-context';
 
 /**
  * Value - Server Version
@@ -12,7 +12,7 @@ export abstract class Value {
     /**
      * Evaluate this dynamic value as a number
      *
-     * @param  evaluationContext Context for resolving objects and values during evaluation
+     * @param  eventContext Context for resolving objects and values when an event is triggered
      */
-    public abstract evaluate(evaluationContext: EvaluationContext): number;
+    public abstract evaluate(eventContext: GenericEventContext): number;
 }

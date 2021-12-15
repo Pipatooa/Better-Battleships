@@ -1,15 +1,15 @@
-import { checkAgainstSchema }             from '../../schema-checker';
-import { buildAttributeReference }        from '../attribute-references/attribute-reference-builder';
-import { buildCondition }                 from '../conditions/condition-builder';
-import { buildValue }                     from '../values/value-builder';
-import { Action }                         from './action';
-import { actionWinSchema }                from './action-win';
-import type { EvaluationContext }         from '../../evaluation-context';
-import type { ParsingContext }            from '../../parsing-context';
-import type { AttributeReference }        from '../attribute-references/attribute-reference';
-import type { Condition }                 from '../conditions/condition';
-import type { Value }                     from '../values/value';
-import type { IActionSetAttributeSource } from './sources/action-set-attribute';
+import { checkAgainstSchema }                               from '../../schema-checker';
+import { buildAttributeReference }                          from '../attribute-references/attribute-reference-builder';
+import { buildCondition }                                   from '../conditions/condition-builder';
+import { buildValue }                                       from '../values/value-builder';
+import { Action }                                           from './action';
+import { actionWinSchema }                                  from './sources/action-win';
+import type { ECA, ECF, EventContext, GenericEventContext } from '../../events/event-context';
+import type { ParsingContext }                              from '../../parsing-context';
+import type { AttributeReference }                          from '../attribute-references/attribute-reference';
+import type { Condition }                                   from '../conditions/condition';
+import type { Value }                                       from '../values/value';
+import type { IActionSetAttributeSource }                   from './sources/action-set-attribute';
 
 /**
  * ActionSetAttribute - Server Version
@@ -46,11 +46,11 @@ export class ActionSetAttribute extends Action {
             actionSetAttributeSource = await checkAgainstSchema(actionSetAttributeSource, actionWinSchema, parsingContext);
 
         // Get condition, attribute and value from source
-        const condition: Condition = await buildCondition(parsingContext.withExtendedPath('.condition'), actionSetAttributeSource.condition, false);
+        const condition = await buildCondition(parsingContext.withExtendedPath('.condition'), actionSetAttributeSource.condition, false);
         parsingContext.reducePath();
-        const attribute: AttributeReference = await buildAttributeReference(parsingContext.withExtendedPath('.attribute'), actionSetAttributeSource.attribute, false);
+        const attribute = await buildAttributeReference(parsingContext.withExtendedPath('.attribute'), actionSetAttributeSource.attribute, false);
         parsingContext.reducePath();
-        const value: Value = await buildValue(parsingContext.withExtendedPath('.value'), actionSetAttributeSource.value, false);
+        const value = await buildValue(parsingContext.withExtendedPath('.value'), actionSetAttributeSource.value, false);
         parsingContext.reducePath();
 
         // Return created ActionSetAttribute object
@@ -60,13 +60,13 @@ export class ActionSetAttribute extends Action {
     /**
      * Executes this action's logic if action condition holds true
      *
-     * @param  evaluationContext Context for resolving objects and values during evaluation
+     * @param  eventContext Context for resolving objects and values when an event is triggered
      */
-    public execute(evaluationContext: EvaluationContext): void {
+    public execute(eventContext: GenericEventContext): void {
 
-        if (!this.condition.check(evaluationContext))
+        if (!this.condition.check(eventContext))
             return;
 
-        this.attributeReference.setValue(evaluationContext, this.value.evaluate(evaluationContext));
+        this.attributeReference.setValue(eventContext, this.value.evaluate(eventContext));
     }
 }

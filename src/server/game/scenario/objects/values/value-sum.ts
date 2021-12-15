@@ -1,10 +1,10 @@
-import { checkAgainstSchema }     from '../../schema-checker';
-import { valueSumSchema }         from './sources/value-sum';
-import { ValueMultiple }          from './value-multiple';
-import type { EvaluationContext } from '../../evaluation-context';
-import type { ParsingContext }    from '../../parsing-context';
-import type { IValueSumSource }   from './sources/value-sum';
-import type { Value }             from './value';
+import { GenericEventContext }  from '../../events/event-context';
+import { checkAgainstSchema }   from '../../schema-checker';
+import { valueSumSchema }       from './sources/value-sum';
+import { ValueMultiple }        from './value-multiple';
+import type { ParsingContext }  from '../../parsing-context';
+import type { IValueSumSource } from './sources/value-sum';
+import type { Value }           from './value';
 
 /**
  * ValueSum - Server Version
@@ -18,17 +18,17 @@ export class ValueSum extends ValueMultiple {
     /**
      * Evaluate this dynamic value as a number
      *
-     * @param    evaluationContext Context for resolving objects and values during evaluation
-     * @returns                    Static value
+     * @param    eventContext Context for resolving objects and values when an event is triggered
+     * @returns               Static value
      */
-    public evaluate(evaluationContext: EvaluationContext): number {
+    public evaluate(eventContext: GenericEventContext): number {
 
         // Keep track of sum of values
         let sum = 0;
 
         // Loop through sub values and add to running sum
         for (const subValue of this.subValues) {
-            sum += subValue.evaluate(evaluationContext);
+            sum += subValue.evaluate(eventContext);
         }
 
         // Return sum

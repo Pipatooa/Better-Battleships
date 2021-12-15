@@ -1,8 +1,8 @@
+import { GenericEventContext }              from '../../events/event-context';
 import { checkAgainstSchema }               from '../../schema-checker';
 import { buildValue }                       from '../values/value-builder';
 import { valueEqualConstraintSchema }       from './sources/value-equal-constraint';
 import { ValueConstraint }                  from './value-constaint';
-import type { EvaluationContext }           from '../../evaluation-context';
 import type { ParsingContext }              from '../../parsing-context';
 import type { Value }                       from '../values/value';
 import type { IValueEqualConstraintSource } from './sources/value-equal-constraint';
@@ -39,7 +39,7 @@ export class ValueEqualConstraint extends ValueConstraint {
         if (checkSchema)
             valueEqualConstraintSource = await checkAgainstSchema(valueEqualConstraintSource, valueEqualConstraintSchema, parsingContext);
 
-        const target: Value = await buildValue(parsingContext.withExtendedPath('.exactly'), valueEqualConstraintSource.exactly, false);
+        const target = await buildValue(parsingContext.withExtendedPath('.exactly'), valueEqualConstraintSource.exactly, false);
         parsingContext.reducePath();
 
         // Return created ValueEqualConstraint object
@@ -49,22 +49,22 @@ export class ValueEqualConstraint extends ValueConstraint {
     /**
      * Checks whether or not a value meets this constraint
      *
-     * @param    evaluationContext Context for resolving objects and values during evaluation
-     * @param    value             Value to check
-     * @returns                    Whether value met this constraint
+     * @param    eventContext Context for resolving objects and values when an event is triggered
+     * @param    value        Value to check
+     * @returns               Whether value met this constraint
      */
-    public check(evaluationContext: EvaluationContext, value: number): boolean {
-        return value === this.target.evaluate(evaluationContext);
+    public check(eventContext: GenericEventContext, value: number): boolean {
+        return value === this.target.evaluate(eventContext);
     }
 
     /**
      * Changes a value to meet this constraint
      *
-     * @param    evaluationContext Context for resolving objects and values during evaluation
-     * @returns                    New value that meets this constraint
+     * @param    eventContext Context for resolving objects and values when an event is triggered
+     * @returns               New value that meets this constraint
      */
-    public constrain(evaluationContext: EvaluationContext): number {
-        return this.target.evaluate(evaluationContext);
+    public constrain(eventContext: GenericEventContext): number {
+        return this.target.evaluate(eventContext);
     }
 }
 

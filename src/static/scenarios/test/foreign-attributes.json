@@ -1,5 +1,6 @@
 {
   "team": [],
   "player": [],
-  "ship": ["health"]
+  "ship": ["health"],
+  "ability": []
 }

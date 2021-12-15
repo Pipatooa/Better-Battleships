@@ -40,7 +40,7 @@ export function openSocketConnection(): void {
  * @param  clientRequest Request to send
  */
 export function sendRequest(clientRequest: IClientRequest): void {
-
-    // Convert request to JSON and send to server
-    ws.send(JSON.stringify(clientRequest));
+    const msg = JSON.stringify(clientRequest);
+    console.log(`Sending to server: ${msg}`);
+    ws.send(msg);
 }

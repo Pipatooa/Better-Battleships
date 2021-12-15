@@ -137,7 +137,7 @@ export class ShipSelectionRenderer extends BoardRenderer {
         for (let y = 0; y < boardSize; y++) {
             tiles[y] = [];
             for (let x = 0; x < boardSize; x++) {
-                tiles[y][x] = [tileType, [], undefined];
+                tiles[y][x] = [tileType, [], undefined, undefined];
             }
         }
 

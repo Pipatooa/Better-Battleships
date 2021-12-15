@@ -1,14 +1,14 @@
-import console                  from 'console';
-import { checkRequestAuth }     from '../../auth/request-handler';
-import { GamePhase }            from '../game';
-import { queryGame }            from '../game-manager';
-import { Client }               from './client';
-import { handleMessage }        from './message-handler';
+import console                        from 'console';
+import { checkRequestAuth }           from '../../auth/request-handler';
+import { GamePhase }                  from '../game';
+import { queryGame }                  from '../game-manager';
+import { Client }                     from './client';
+import { handleMessage }              from './message-handler';
 import type http                from 'http';
 import type { IncomingMessage } from 'http';
-import type WebSocket           from 'isomorphic-ws';
-import type { Data }            from 'isomorphic-ws';
-import type { Socket }          from 'net';
+import type WebSocket from 'isomorphic-ws';
+import type { Data } from 'isomorphic-ws';
+import type { Socket }                from 'net';
 
 const connectionLimit = 64;
 let currentConnections = 0;
