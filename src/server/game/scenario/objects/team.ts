@@ -1,12 +1,10 @@
-import { EventRegistrar }                   from '../events/event-registrar';
-import { checkAgainstSchema }               from '../schema-checker';
-import { getJSONFromEntry, UnpackingError } from '../unpacker';
-import { eventListenersFromActionSource }   from './actions/action-getter';
-import {
-    getAttributeListeners
-}                                                                                 from './attribute-listeners/attribute-listener-getter';
+import { EventRegistrar }                                                         from '../events/event-registrar';
+import { checkAgainstSchema }                                                     from '../schema-checker';
+import { getJSONFromEntry, UnpackingError }                                       from '../unpacker';
+import { eventListenersFromActionSource }                                         from './actions/action-getter';
+import { getAttributeListeners }                                                  from './attribute-listeners/attribute-listener-getter';
+import { AttributeCodeControlled }                                                from './attributes/attribute-code-controlled';
 import { getAttributes }                                                          from './attributes/attribute-getter';
-import { AttributeSpecial }                                                       from './attributes/attribute-special';
 import { Descriptor }                                                             from './common/descriptor';
 import { teamEventInfo }                                                          from './events/team-events';
 import { Player }                                                                 from './player';
@@ -14,7 +12,7 @@ import { teamSchema }                                                           
 import type { IServerEvent }                                                      from '../../../../shared/network/events/i-server-event';
 import type { Client }                                                            from '../../sockets/client';
 import type { ParsingContext }                                                    from '../parsing-context';
-import type { IAttributeHolder, ISpecialAttributeHolder, SpecialAttributeRecord } from './attributes/attribute-holder';
+import type { IAttributeHolder, IBuiltinAttributeHolder, BuiltinAttributeRecord } from './attributes/attribute-holder';
 import type { AttributeMap }                                                      from './attributes/i-attribute-holder';
 import type { TeamEventInfo, TeamEvent }                                          from './events/team-events';
 import type { IPlayerSource }                                                     from './sources/player';
@@ -26,7 +24,7 @@ import type { ITeamInfo }                                                       
  *
  * Contains information about a collection of players
  */
-export class Team implements IAttributeHolder, ISpecialAttributeHolder<'team'> {
+export class Team implements IAttributeHolder, IBuiltinAttributeHolder<'team'> {
 
     private _players: Player[] = [];
 
@@ -40,7 +38,7 @@ export class Team implements IAttributeHolder, ISpecialAttributeHolder<'team'> {
      * @param  highlightColor    Team color when highlighted
      * @param  eventRegistrar    Registrar of all team event listeners
      * @param  attributes        Attributes for the team
-     * @param  specialAttributes Special attributes for the team
+     * @param  builtinAttributes Built-in attributes for the team
      */
     public constructor(public readonly id: string,
                        public readonly descriptor: Descriptor,
@@ -49,19 +47,19 @@ export class Team implements IAttributeHolder, ISpecialAttributeHolder<'team'> {
                        public readonly highlightColor: string,
                        public readonly eventRegistrar: EventRegistrar<TeamEventInfo, TeamEvent>,
                        public readonly attributes: AttributeMap,
-                       public readonly specialAttributes: SpecialAttributeRecord<'team'>) {
+                       public readonly builtinAttributes: BuiltinAttributeRecord<'team'>) {
         
     }
 
     /**
-     * Generates special attributes for Team object
+     * Generates built-in attributes for Team object
      *
-     * @param    object Object to generate special attributes for
-     * @returns         Record of special attributes for the object
+     * @param    object Object to generate built-in attributes for
+     * @returns         Record of built-in attributes for the object
      */
-    private static generateSpecialAttributes(object: Team): SpecialAttributeRecord<'team'> {
+    private static generateBuiltinAttributes(object: Team): BuiltinAttributeRecord<'team'> {
         return {
-            playerCount: new AttributeSpecial(() => object._players.length)
+            playerCount: new AttributeCodeControlled(() => object._players.length)
         };
     }
 
@@ -113,8 +111,8 @@ export class Team implements IAttributeHolder, ISpecialAttributeHolder<'team'> {
 
         // Get attributes and update parsing context
         const attributes: AttributeMap = await getAttributes(parsingContext.withExtendedPath('.attributes'), teamSource.attributes, 'team');
-        const specialAttributes = Team.generateSpecialAttributes(teamPartial as Team);
-        parsingContext.localAttributes.team = [attributes, specialAttributes];
+        const builtinAttributes = Team.generateBuiltinAttributes(teamPartial as Team);
+        parsingContext.localAttributes.team = [attributes, builtinAttributes];
         parsingContext.reducePath();
 
         const attributeListeners = await getAttributeListeners(parsingContext.withExtendedPath('.attributeListeners'), teamSource.attributeListeners);
@@ -163,7 +161,7 @@ export class Team implements IAttributeHolder, ISpecialAttributeHolder<'team'> {
         parsingContext.localAttributes.team = undefined;
         parsingContext.teamPartial = undefined;
         const eventRegistrar = new EventRegistrar(eventListeners, []);
-        Team.call(teamPartial, id, descriptor, playerPrototypes, teamSource.color, teamSource.highlightColor, eventRegistrar, attributes, specialAttributes);
+        Team.call(teamPartial, id, descriptor, playerPrototypes, teamSource.color, teamSource.highlightColor, eventRegistrar, attributes, builtinAttributes);
         (teamPartial as any).__proto__ = Team.prototype;
         return teamPartial as Team;
     }

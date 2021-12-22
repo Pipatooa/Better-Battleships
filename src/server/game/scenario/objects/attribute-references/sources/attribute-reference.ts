@@ -28,9 +28,9 @@ export const attributeReferenceLocalObjectSelectors = [
 ] as const;
 
 /**
- * Array of possible object selectors for special attribute references
+ * Array of possible object selectors for built-in attribute references
  */
-export const attributeReferenceSpecialObjectSelectors = [
+export const attributeReferenceBuiltinObjectSelectors = [
     ...attributeReferenceLocalObjectSelectors,
     'event'
 ] as const;
@@ -41,13 +41,13 @@ export const attributeReferenceSpecialObjectSelectors = [
 export const attributeReferenceObjectSelectors = [
     ...attributeReferenceForeignObjectSelectors,
     ...attributeReferenceForeignObjectSelectors,
-    ...attributeReferenceSpecialObjectSelectors
+    ...attributeReferenceBuiltinObjectSelectors
 ] as const;
 
 /**
  * Regex matching all attribute reference strings
  */
-export const attributeReferenceRegex = new RegExp(`^(${attributeReferenceTypes.join('|')}):(${attributeReferenceSpecialObjectSelectors.join('|')})\\.(${builtinAttributePrefix})?([a-zA-Z\\-_\\d]+)$`);
+export const attributeReferenceRegex = new RegExp(`^(${attributeReferenceTypes.join('|')}):(${attributeReferenceBuiltinObjectSelectors.join('|')})\\.(${builtinAttributePrefix})?([a-zA-Z\\-_\\d]+)$`);
 
 /**
  * Schema for validating source JSON data
@@ -77,7 +77,7 @@ export type AttributeReferenceForeignObjectSelector = typeof attributeReferenceF
 /**
  * Type matching all reference special object selector strings
  */
-export type AttributeReferenceSpecialObjectSelector = typeof attributeReferenceSpecialObjectSelectors[number];
+export type AttributeReferenceSpecialObjectSelector = typeof attributeReferenceBuiltinObjectSelectors[number];
 
 /**
  * Type matching all attribute reference strings

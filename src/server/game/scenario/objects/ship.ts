@@ -5,8 +5,8 @@ import { getJSONFromEntry, UnpackingError }                                     
 import { buildAbility }                                                           from './abilities/ability-builder';
 import { eventListenersFromActionSource }                                         from './actions/action-getter';
 import { getAttributeListeners }                                                  from './attribute-listeners/attribute-listener-getter';
+import { AttributeCodeControlled }                                                from './attributes/attribute-code-controlled';
 import { getAttributes }                                                          from './attributes/attribute-getter';
-import { AttributeSpecial }                                                       from './attributes/attribute-special';
 import { Descriptor }                                                             from './common/descriptor';
 import { RotatablePattern }                                                       from './common/rotatable-pattern';
 import { shipEventInfo }                                                          from './events/ship-events';
@@ -15,7 +15,7 @@ import type { ParsingContext }                                                  
 import type { Ability }                                                           from './abilities/ability';
 import type { AbilitySource }                                                     from './abilities/sources/ability';
 import type { AttributeListener }                                                 from './attribute-listeners/attribute-listener';
-import type { IAttributeHolder, ISpecialAttributeHolder, SpecialAttributeRecord } from './attributes/attribute-holder';
+import type { IAttributeHolder, IBuiltinAttributeHolder, BuiltinAttributeRecord } from './attributes/attribute-holder';
 import type { AttributeMap }                                                      from './attributes/i-attribute-holder';
 import type { Board }                                                             from './board';
 import type { ShipEvent, ShipEventInfo }                                          from './events/ship-events';
@@ -31,7 +31,7 @@ import type { Rotation }                                                        
  *
  * Movable object that exists on the board
  */
-export class Ship implements IAttributeHolder, ISpecialAttributeHolder<'ship'> {
+export class Ship implements IAttributeHolder, IBuiltinAttributeHolder<'ship'> {
 
     protected _x = 0;
     protected _y = 0;
@@ -51,7 +51,7 @@ export class Ship implements IAttributeHolder, ISpecialAttributeHolder<'ship'> {
      * @param  abilities          Dictionary of abilities available to the ship
      * @param  eventRegistrar     Registrar of all ship event listeners
      * @param  attributes         Attributes for the ship
-     * @param  specialAttributes  Special attributes for the ship
+     * @param  builtinAttributes  Built-in attributes for the ship
      * @param  attributeListeners Attribute listeners for the ship
      */
     public constructor(public readonly owner: Player,
@@ -62,19 +62,19 @@ export class Ship implements IAttributeHolder, ISpecialAttributeHolder<'ship'> {
                        public readonly abilities: Ability[],
                        public readonly eventRegistrar: EventRegistrar<ShipEventInfo, ShipEvent>,
                        public readonly attributes: AttributeMap,
-                       public readonly specialAttributes: SpecialAttributeRecord<'ship'>,
+                       public readonly builtinAttributes: BuiltinAttributeRecord<'ship'>,
                        private readonly attributeListeners: AttributeListener[]) {
     }
 
     /**
-     * Generates special attributes for Ship object
+     * Generates built-in attributes for Ship object
      *
-     * @param    object Object to generate special attributes for
-     * @returns         Record of special attributes for the object
+     * @param    object Object to generate built-in attributes for
+     * @returns         Record of built-in attributes for the object
      */
-    private static generateSpecialAttributes(object: Ship): SpecialAttributeRecord<'ship'> {
+    private static generateBuiltinAttributes(object: Ship): BuiltinAttributeRecord<'ship'> {
         return {
-            abilityCount: new AttributeSpecial(() => object.abilities.length)
+            abilityCount: new AttributeCodeControlled(() => object.abilities.length)
         };
     }
 
@@ -98,8 +98,8 @@ export class Ship implements IAttributeHolder, ISpecialAttributeHolder<'ship'> {
         
         // Get attributes
         const attributes: AttributeMap = await getAttributes(parsingContext.withExtendedPath('.attributes'), shipSource.attributes, 'ship');
-        const specialAttributes = Ship.generateSpecialAttributes(shipPartial as Ship);
-        parsingContext.localAttributes.ship = [attributes, specialAttributes];
+        const builtinAttributes = Ship.generateBuiltinAttributes(shipPartial as Ship);
+        parsingContext.localAttributes.ship = [attributes, builtinAttributes];
         parsingContext.reducePath();
 
         const attributeListeners = await getAttributeListeners(parsingContext.withExtendedPath('.attributeListeners'), shipSource.attributeListeners);
@@ -143,7 +143,7 @@ export class Ship implements IAttributeHolder, ISpecialAttributeHolder<'ship'> {
         parsingContext.localAttributes.ship = undefined;
         parsingContext.shipPartial = undefined;
         const eventRegistrar = new EventRegistrar(eventListeners, subRegistrars);
-        Ship.call(shipPartial, parsingContext.playerPartial as Player, parsingContext.board!, descriptor, pattern, visibilityPattern, abilities, eventRegistrar, attributes, specialAttributes, attributeListeners);
+        Ship.call(shipPartial, parsingContext.playerPartial as Player, parsingContext.board!, descriptor, pattern, visibilityPattern, abilities, eventRegistrar, attributes, builtinAttributes, attributeListeners);
         (shipPartial as any).__proto__ = Ship.prototype;
         return shipPartial as Ship;
     }

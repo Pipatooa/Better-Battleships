@@ -251,13 +251,13 @@ export class Game {
                 ship.spotInitial();
                 for (const ability of ship.abilities)
                     ability.checkUsable({
-                        specialAttributes: {}
+                        builtinAttributes: {}
                     });
             }
         }
 
         this.scenario.eventRegistrar.triggerEvent('onGameStart', {
-            specialAttributes: {}
+            builtinAttributes: {}
         });
         this.scenario.turnManager.start();
 

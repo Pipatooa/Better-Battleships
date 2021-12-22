@@ -1,7 +1,7 @@
 import type { AttributeReferenceForeignObjectSelector } from '../objects/attribute-references/sources/attribute-reference';
 
 /**
- * Type describing dictionary of event name strings to foreign attribute level available and special attribute names
+ * Type describing dictionary of event name strings to foreign attribute level available and built-in attribute names
  */
 export type EventInfoEntry = readonly [readonly AttributeReferenceForeignObjectSelector[], readonly string[]];
 
@@ -25,6 +25,6 @@ export type BaseEventInfo = typeof baseEventInfo;
 export type BaseEvent = keyof BaseEventInfo;
 
 /**
- * Type matching all special attributes names for a specific event
+ * Type matching all built-in attributes names for a specific event
  */
-export type EventSpecialAttributes<T extends Record<S, EventInfoEntry>, S extends string, X extends S> = T[X][1][number];
+export type EventbuiltinAttributes<T extends Record<S, EventInfoEntry>, S extends string, X extends S> = T[X][1][number];

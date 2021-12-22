@@ -1,5 +1,5 @@
 import { UnpackingError }                        from '../../unpacker';
-import { Attribute }                             from './attribute';
+import { AttributeUserControlled }               from './attribute-user-controlled';
 import type { ParsingContext }                   from '../../parsing-context';
 import type { AttributeReferenceObjectSelector } from '../attribute-references/sources/attribute-reference';
 import type { AttributeMap, AttributeMapSource } from './i-attribute-holder';
@@ -16,7 +16,7 @@ export async function getAttributes(parsingContext: ParsingContext, attributeDat
 
     const attributes: AttributeMap = {};
     for (const [name, attributeSource] of Object.entries(attributeData)) {
-        attributes[name] = await Attribute.fromSource(parsingContext.withExtendedPath(`.${name}`), attributeSource, false);
+        attributes[name] = await AttributeUserControlled.fromSource(parsingContext.withExtendedPath(`.${name}`), attributeSource, false);
         parsingContext.reducePath();
     }
 

@@ -1,12 +1,10 @@
-import type { Ability }                        from '../objects/abilities/ability';
-import type {
-    AttributeReferenceForeignObjectSelector
-}                              from '../objects/attribute-references/sources/attribute-reference';
-import type { AttributeSpecial } from '../objects/attributes/attribute-special';
-import type { Player }           from '../objects/player';
-import type { Ship }             from '../objects/ship';
-import type { Team }             from '../objects/team';
-import type { EventInfoEntry }   from './base-events';
+import type { Ability }                                 from '../objects/abilities/ability';
+import type { AttributeReferenceForeignObjectSelector } from '../objects/attribute-references/sources/attribute-reference';
+import type { AttributeCodeControlled }                 from '../objects/attributes/attribute-code-controlled';
+import type { Player }                                  from '../objects/player';
+import type { Ship }                                    from '../objects/ship';
+import type { Team }                                    from '../objects/team';
+import type { EventInfoEntry }                          from './base-events';
 
 /**
  * Type alias for event context A type
@@ -22,13 +20,13 @@ export type ECF = AttributeReferenceForeignObjectSelector;
  * Type describing information for resolving relevant objects and values when an event is triggered
  */
 export type EventContext<F extends ECF, A extends ECA>
-    = IEventContextSpecialAttributes<A> & EventContextForeignObjects<F>;
+    = IEventContextBuiltinAttributes<A> & EventContextForeignObjects<F>;
 
 /**
- * Interface describing a holder of special attributes
+ * Interface describing a holder of built-in attributes
  */
-interface IEventContextSpecialAttributes<A extends string> {
-    specialAttributes: Record<A, AttributeSpecial>
+interface IEventContextBuiltinAttributes<A extends string> {
+    builtinAttributes: Record<A, AttributeCodeControlled>
 }
 
 /**

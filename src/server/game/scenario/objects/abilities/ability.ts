@@ -2,7 +2,7 @@ import type { AbilityInfo }                               from '../../../../../s
 import type { EventContextForEvent, GenericEventContext } from '../../events/event-context';
 import type { EventRegistrar }                            from '../../events/event-registrar';
 import type { AttributeListener }                         from '../attribute-listeners/attribute-listener';
-import type { IAttributeHolder, SpecialAttributeRecord }  from '../attributes/attribute-holder';
+import type { IAttributeHolder, BuiltinAttributeRecord }  from '../attributes/attribute-holder';
 import type { AttributeMap }                              from '../attributes/i-attribute-holder';
 import type { Descriptor }                                from '../common/descriptor';
 import type { Condition }                                 from '../conditions/condition';
@@ -14,7 +14,7 @@ import type { AbilityEvent, AbilityEventInfo }            from './events/ability
  *
  * Base class for abilities of a ship which execute actions upon use
  */
-export abstract class Ability implements IAttributeHolder, SpecialAttributeRecord<'ability'> {
+export abstract class Ability implements IAttributeHolder, BuiltinAttributeRecord<'ability'> {
 
     protected usable: boolean | undefined;
 
@@ -26,7 +26,7 @@ export abstract class Ability implements IAttributeHolder, SpecialAttributeRecor
      * @param  condition          Condition which must hold true to be able to use this ability
      * @param  eventRegistrar     Registrar of all team event listeners
      * @param  attributes         Attributes for the ability
-     * @param  specialAttributes  Special attributes for the ability
+     * @param  builtinAttributes  Built-in attributes for the ability
      * @param  attributeListeners Attribute listeners for the ability
      */
     public constructor(public readonly ship: Ship,
@@ -34,7 +34,7 @@ export abstract class Ability implements IAttributeHolder, SpecialAttributeRecor
                        public readonly condition: Condition,
                        public readonly eventRegistrar: EventRegistrar<AbilityEventInfo, AbilityEvent>,
                        public readonly attributes: AttributeMap,
-                       public readonly specialAttributes: SpecialAttributeRecord<'ability'>,
+                       public readonly builtinAttributes: BuiltinAttributeRecord<'ability'>,
                        private readonly attributeListeners: AttributeListener[]) {
 
         this.eventRegistrar.addEventListener('onAbilityUsed', (eventContext: EventContextForEvent<AbilityEventInfo, AbilityEvent, 'onAbilityUsed'>) => this.checkUsable(eventContext), true);
@@ -49,12 +49,12 @@ export abstract class Ability implements IAttributeHolder, SpecialAttributeRecor
     }
 
     /**
-     * Generates special attributes for Ability object
+     * Generates built-in attributes for Ability object
      *
-     * @param    object Object to generate special attributes for
-     * @returns         Record of special attributes for the object
+     * @param    object Object to generate built-in attributes for
+     * @returns         Record of built-in attributes for the object
      */
-    protected static generateSpecialAttributes(object: Ability): SpecialAttributeRecord<'ability'> {
+    protected static generateBuiltinAttributes(object: Ability): BuiltinAttributeRecord<'ability'> {
         return {};
     }
 

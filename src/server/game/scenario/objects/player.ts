@@ -3,15 +3,15 @@ import { checkAgainstSchema }                                                   
 import { getJSONFromEntry, UnpackingError }                                       from '../unpacker';
 import { eventListenersFromActionSource }                                         from './actions/action-getter';
 import { getAttributeListeners }                                                  from './attribute-listeners/attribute-listener-getter';
+import { AttributeCodeControlled }                                                from './attributes/attribute-code-controlled';
 import { getAttributes }                                                          from './attributes/attribute-getter';
-import { AttributeSpecial }                                                       from './attributes/attribute-special';
 import { playerEventInfo }                                                        from './events/player-events';
 import { Ship }                                                                   from './ship';
 import { playerSchema }                                                           from './sources/player';
 import type { Client }                                                            from '../../sockets/client';
 import type { ParsingContext }                                                    from '../parsing-context';
 import type { AttributeListener }                                                 from './attribute-listeners/attribute-listener';
-import type { IAttributeHolder, ISpecialAttributeHolder, SpecialAttributeRecord } from './attributes/attribute-holder';
+import type { IAttributeHolder, IBuiltinAttributeHolder, BuiltinAttributeRecord } from './attributes/attribute-holder';
 import type { AttributeMap }                                                      from './attributes/i-attribute-holder';
 import type { PlayerEvent, PlayerEventInfo }                                      from './events/player-events';
 import type { IPlayerSource }                                                     from './sources/player';
@@ -24,7 +24,7 @@ import type { IPlayerInfo }                                                     
  *
  * Contains game information for a single player
  */
-export class Player implements IAttributeHolder, ISpecialAttributeHolder<'player'> {
+export class Player implements IAttributeHolder, IBuiltinAttributeHolder<'player'> {
     
     public client: Client | undefined;
 
@@ -38,7 +38,7 @@ export class Player implements IAttributeHolder, ISpecialAttributeHolder<'player
      * @param  ships              List of ships that belong to the player
      * @param  eventRegistrar     Registrar of all player event listeners
      * @param  attributes         Attributes for the player
-     * @param  specialAttributes  Special attributes for the player
+     * @param  builtinAttributes  Built-in attributes for the player
      * @param  attributeListeners Attribute listeners for the player
      */
     public constructor(public readonly team: Team,
@@ -48,19 +48,19 @@ export class Player implements IAttributeHolder, ISpecialAttributeHolder<'player
                        public readonly ships: Ship[],
                        public readonly eventRegistrar: EventRegistrar<PlayerEventInfo, PlayerEvent>,
                        public readonly attributes: AttributeMap,
-                       public readonly specialAttributes: SpecialAttributeRecord<'player'>,
+                       public readonly builtinAttributes: BuiltinAttributeRecord<'player'>,
                        private readonly attributeListeners: AttributeListener[]) {
     }
 
     /**
-     * Generates special attributes for Player object
+     * Generates built-in attributes for Player object
      *
-     * @param    object Object to generate special attributes for
-     * @returns         Record of special attributes for the object
+     * @param    object Object to generate built-in attributes for
+     * @returns         Record of built-in attributes for the object
      */
-    private static generateSpecialAttributes(object: Player): SpecialAttributeRecord<'player'> {
+    private static generateBuiltinAttributes(object: Player): BuiltinAttributeRecord<'player'> {
         return {
-            shipCount: new AttributeSpecial(() => object.ships.length)
+            shipCount: new AttributeCodeControlled(() => object.ships.length)
         };
     }
 
@@ -87,8 +87,8 @@ export class Player implements IAttributeHolder, ISpecialAttributeHolder<'player
         
         // Get attributes and update parsing context
         const attributes: AttributeMap = await getAttributes(parsingContext.withExtendedPath('.attributes'), playerSource.attributes, 'player');
-        const specialAttributes = Player.generateSpecialAttributes(playerPartial as Player);
-        parsingContext.localAttributes.player = [attributes, specialAttributes];
+        const builtinAttributes = Player.generateBuiltinAttributes(playerPartial as Player);
+        parsingContext.localAttributes.player = [attributes, builtinAttributes];
         parsingContext.reducePath();
 
         const attributeListeners = await getAttributeListeners(parsingContext.withExtendedPath('.attributeListeners'), playerSource.attributeListeners);
@@ -118,7 +118,7 @@ export class Player implements IAttributeHolder, ISpecialAttributeHolder<'player
         parsingContext.localAttributes.player = undefined;
         parsingContext.playerPartial = undefined;
         const eventRegistrar = new EventRegistrar(eventListeners, subRegistrars);
-        Player.call(playerPartial, parsingContext.teamPartial as Team, spawnRegion, color, highlightColor, ships, eventRegistrar, attributes, specialAttributes, attributeListeners);
+        Player.call(playerPartial, parsingContext.teamPartial as Team, spawnRegion, color, highlightColor, ships, eventRegistrar, attributes, builtinAttributes, attributeListeners);
         (playerPartial as any).__proto__ = Player.prototype;
         return playerPartial as Player;
     }

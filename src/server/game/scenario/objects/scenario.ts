@@ -6,8 +6,8 @@ import { getJSONFromEntry, UnpackingError }                                     
 import { eventListenersFromActionSource }                                         from './actions/action-getter';
 import { getAttributeListeners }                                                  from './attribute-listeners/attribute-listener-getter';
 import { ForeignAttributeRegistry }                                               from './attribute-references/foreign-attribute-registry';
+import { AttributeCodeControlled }                                                from './attributes/attribute-code-controlled';
 import { getAttributes }                                                          from './attributes/attribute-getter';
-import { AttributeSpecial }                                                       from './attributes/attribute-special';
 import { Board }                                                                  from './board';
 import { Descriptor }                                                             from './common/descriptor';
 import { scenarioSchema }                                                         from './sources/scenario';
@@ -15,7 +15,7 @@ import { Team }                                                                 
 import type { BaseEvent, BaseEventInfo }                                          from '../events/base-events';
 import type { ParsingContext }                                                    from '../parsing-context';
 import type { ForeignAttributeRegistrySource }                                    from './attribute-references/sources/foreign-attribute-registry';
-import type { IAttributeHolder, ISpecialAttributeHolder, SpecialAttributeRecord } from './attributes/attribute-holder';
+import type { IAttributeHolder, IBuiltinAttributeHolder, BuiltinAttributeRecord } from './attributes/attribute-holder';
 import type { AttributeMap }                                                      from './attributes/i-attribute-holder';
 import type { IBoardSource }                                                      from './sources/board';
 import type { IScenarioSource }                                                   from './sources/scenario';
@@ -29,7 +29,7 @@ import type { ITeamInfo }                                                       
  *
  * Stores all information about the scenario and is the container object for most other objects in the scenario
  */
-export class Scenario implements IAttributeHolder, ISpecialAttributeHolder<'scenario'> {
+export class Scenario implements IAttributeHolder, IBuiltinAttributeHolder<'scenario'> {
 
     public constructor(public readonly fileJSON: FileJSON,
                        public readonly author: string,
@@ -39,18 +39,18 @@ export class Scenario implements IAttributeHolder, ISpecialAttributeHolder<'scen
                        public readonly turnManager: TurnManager,
                        public readonly eventRegistrar: EventRegistrar<BaseEventInfo, BaseEvent>,
                        public readonly attributes: AttributeMap,
-                       public readonly specialAttributes: SpecialAttributeRecord<'scenario'>) {
+                       public readonly builtinAttributes: BuiltinAttributeRecord<'scenario'>) {
     }
 
     /**
-     * Generates special attributes for Scenario object
+     * Generates built-in attributes for Scenario object
      *
-     * @param    object Object to generate special attributes for
-     * @returns         Record of special attributes for the object
+     * @param    object Object to generate built-in attributes for
+     * @returns         Record of built-in attributes for the object
      */
-    private static generateSpecialAttributes(object: Scenario): SpecialAttributeRecord<'scenario'> {
+    private static generateBuiltinAttributes(object: Scenario): BuiltinAttributeRecord<'scenario'> {
         return {
-            teamCount: new AttributeSpecial(() => Object.entries(object.teams).length)
+            teamCount: new AttributeCodeControlled(() => Object.entries(object.teams).length)
         };
     }
 
@@ -81,8 +81,8 @@ export class Scenario implements IAttributeHolder, ISpecialAttributeHolder<'scen
 
         // Get attributes and update parsing context
         const attributes: AttributeMap = await getAttributes(parsingContext.withExtendedPath('.attributes'), scenarioSource.attributes, 'scenario');
-        const specialAttributes = Scenario.generateSpecialAttributes(scenarioPartial as Scenario);
-        parsingContext.localAttributes.scenario = [attributes, specialAttributes];
+        const builtinAttributes = Scenario.generateBuiltinAttributes(scenarioPartial as Scenario);
+        parsingContext.localAttributes.scenario = [attributes, builtinAttributes];
         parsingContext.reducePath();
 
         const attributeListeners = await getAttributeListeners(parsingContext.withExtendedPath('.attributeListeners'), scenarioSource.attributeListeners);
@@ -132,7 +132,7 @@ export class Scenario implements IAttributeHolder, ISpecialAttributeHolder<'scen
         parsingContext.board = undefined;
         parsingContext.foreignAttributeRegistry = undefined;
         const eventRegistrar = new EventRegistrar(eventListeners, subRegistrars);
-        return new Scenario(parsingContext.scenarioFile, scenarioSource.author, descriptor, board, teams, turnManagerPartial as TurnManager, eventRegistrar, attributes, specialAttributes);
+        return new Scenario(parsingContext.scenarioFile, scenarioSource.author, descriptor, board, teams, turnManagerPartial as TurnManager, eventRegistrar, attributes, builtinAttributes);
     }
 
     /**

@@ -5,7 +5,7 @@ import { attributeReferenceForeignObjectSelectors }       from './sources/attrib
 import type { ECA, EventContext, GenericEventContext }    from '../../events/event-context';
 import type { ParsingContext }                            from '../../parsing-context';
 import type { Attribute }                                 from '../attributes/attribute';
-import type { IAttributeHolder, ISpecialAttributeHolder } from '../attributes/attribute-holder';
+import type { IAttributeHolder, IBuiltinAttributeHolder } from '../attributes/attribute-holder';
 import type { AttributeReferenceForeignObjectSelector }   from './sources/attribute-reference';
 
 /**
@@ -66,7 +66,7 @@ export class AttributeReferenceForeign extends AttributeReference {
      */
     private getAttribute(eventContext: GenericEventContext): Attribute {
 
-        let attributeHolder: IAttributeHolder & ISpecialAttributeHolder<any>;
+        let attributeHolder: IAttributeHolder & IBuiltinAttributeHolder<any>;
 
         switch (this.objectSelector) {
             case 'team':
@@ -83,7 +83,7 @@ export class AttributeReferenceForeign extends AttributeReference {
                 break;
         }
 
-        const attributeMap = this.special ? attributeHolder.attributes : attributeHolder.specialAttributes;
+        const attributeMap = this.special ? attributeHolder.attributes : attributeHolder.builtinAttributes;
         return attributeMap[this.attributeName];
     }
 

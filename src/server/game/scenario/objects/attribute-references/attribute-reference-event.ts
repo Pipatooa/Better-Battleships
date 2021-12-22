@@ -50,7 +50,7 @@ export class AttributeReferenceEvent extends AttributeReference {
      * @returns               Value of the referenced attribute
      */
     public getValue(eventContext: GenericEventContext): number {
-        return eventContext.specialAttributes[this.attributeName].getValue();
+        return eventContext.builtinAttributes[this.attributeName].getValue();
     }
 
     /**
@@ -60,6 +60,6 @@ export class AttributeReferenceEvent extends AttributeReference {
      * @param  value        New value to assign to referenced attribute
      */
     public setValue(eventContext: GenericEventContext, value: number): void {
-        eventContext.specialAttributes[this.attributeName].setValue(eventContext, value);
+        eventContext.builtinAttributes[this.attributeName].setValue(eventContext, value);
     }
 }

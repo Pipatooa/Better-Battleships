@@ -2,8 +2,8 @@ import { EventRegistrar }                              from '../../events/event-
 import { checkAgainstSchema }                          from '../../schema-checker';
 import { eventListenersFromActionSource }              from '../actions/action-getter';
 import { getAttributeListeners }                       from '../attribute-listeners/attribute-listener-getter';
+import { AttributeCodeControlled }                     from '../attributes/attribute-code-controlled';
 import { getAttributes }                               from '../attributes/attribute-getter';
-import { AttributeSpecial }                            from '../attributes/attribute-special';
 import { Descriptor }                                  from '../common/descriptor';
 import { Pattern }                                     from '../common/pattern';
 import { buildCondition }                              from '../conditions/condition-builder';
@@ -13,7 +13,7 @@ import { PositionedAbility }                           from './positioned-abilit
 import { abilityFireSchema }                           from './sources/ability-fire';
 import type { ParsingContext }                         from '../../parsing-context';
 import type { AttributeListener }                      from '../attribute-listeners/attribute-listener';
-import type { SpecialAttributeRecord }                 from '../attributes/attribute-holder';
+import type { BuiltinAttributeRecord }                 from '../attributes/attribute-holder';
 import type { AttributeMap }                           from '../attributes/i-attribute-holder';
 import type { Condition }                              from '../conditions/condition';
 import type { Ship }                                   from '../ship';
@@ -41,7 +41,7 @@ export class AbilityFire extends PositionedAbility {
      * @param  condition                  Condition which must hold true to be able to use this action
      * @param  eventRegistrar             Registrar of all ability event listeners
      * @param  attributes                 Attributes for the ability
-     * @param  specialAttributes          Special attributes for the ability
+     * @param  builtinAttributes          Built-in attributes for the ability
      * @param  attributeListeners         Attribute listeners for the ability
      */
     public constructor(ship: Ship,
@@ -52,10 +52,10 @@ export class AbilityFire extends PositionedAbility {
                        condition: Condition,
                        eventRegistrar: EventRegistrar<FireAbilityEventInfo, FireAbilityEvent>,
                        attributes: AttributeMap,
-                       specialAttributes: SpecialAttributeRecord<'ability'>,
+                       builtinAttributes: BuiltinAttributeRecord<'ability'>,
                        attributeListeners: AttributeListener[]) {
 
-        super(ship, descriptor, condition, eventRegistrar, attributes, specialAttributes, attributeListeners);
+        super(ship, descriptor, condition, eventRegistrar, attributes, builtinAttributes, attributeListeners);
         this.eventRegistrar = eventRegistrar;
     }
 
@@ -78,8 +78,8 @@ export class AbilityFire extends PositionedAbility {
 
         // Get attributes and update parsing context
         const attributes: AttributeMap = await getAttributes(parsingContext.withExtendedPath('.attributes'), abilityFireSource.attributes, 'ability');
-        const specialAttributes = Ability.generateSpecialAttributes(abilityPartial as Ability);
-        parsingContext.localAttributes.ability = [attributes, specialAttributes];
+        const builtinAttributes = Ability.generateBuiltinAttributes(abilityPartial as Ability);
+        parsingContext.localAttributes.ability = [attributes, builtinAttributes];
         parsingContext.reducePath();
 
         const attributeListeners = await getAttributeListeners(parsingContext.withExtendedPath('.attributeListeners'), abilityFireSource.attributeListeners);
@@ -100,7 +100,7 @@ export class AbilityFire extends PositionedAbility {
         // Return created AbilityFire object
         parsingContext.localAttributes.ability = undefined;
         const eventRegistrar = new EventRegistrar(eventListeners, []);
-        AbilityFire.call(abilityPartial, parsingContext.shipPartial as Ship, descriptor, selectionPattern, effectPattern, abilityFireSource.displayEffectPatternValues, condition, eventRegistrar, attributes, specialAttributes, attributeListeners);
+        AbilityFire.call(abilityPartial, parsingContext.shipPartial as Ship, descriptor, selectionPattern, effectPattern, abilityFireSource.displayEffectPatternValues, condition, eventRegistrar, attributes, builtinAttributes, attributeListeners);
         (abilityPartial as any).__proto__ = AbilityFire.prototype;
         return abilityPartial as AbilityFire;
     }
@@ -123,7 +123,7 @@ export class AbilityFire extends PositionedAbility {
             return;
 
         this.eventRegistrar.triggerEvent('onUse', {
-            specialAttributes: {}
+            builtinAttributes: {}
         });
 
         let hit = false;
@@ -132,8 +132,8 @@ export class AbilityFire extends PositionedAbility {
             const ship = tile?.[2];
             if (ship !== undefined) {
                 this.eventRegistrar.triggerEvent('onHit', {
-                    specialAttributes: {
-                        patternValue: new AttributeSpecial(() => v)
+                    builtinAttributes: {
+                        patternValue: new AttributeCodeControlled(() => v)
                     },
                     foreignTeam: ship.owner.team,
                     foreignPlayer: ship.owner,
@@ -145,12 +145,12 @@ export class AbilityFire extends PositionedAbility {
 
         if (!hit) {
             this.eventRegistrar.triggerEvent('onMiss', {
-                specialAttributes: {}
+                builtinAttributes: {}
             });
         }
 
         this.eventRegistrar.triggerEvent('onAbilityUsed', {
-            specialAttributes: {},
+            builtinAttributes: {},
             foreignTeam: this.ship.owner.team,
             foreignPlayer: this.ship.owner,
             foreignShip: this.ship,

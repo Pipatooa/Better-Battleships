@@ -45,7 +45,7 @@ export class AttributeReferenceLocal extends AttributeReference {
             throw new UnpackingError(`Could not find attribute 'local:${objectSelector}.${attributeName}' defined at '${parsingContext.currentPath}' in local context '${parsingContext.attributeContextName}'. No '${objectSelector}' to refer to.`,
                 parsingContext.currentFile);
 
-        // Switch between special attribute and regular attribute map
+        // Switch between built-in attribute and regular attribute map
         const attributeMap = builtin
             ? attributeMaps[1]
             : attributeMaps[0];

@@ -13,7 +13,7 @@ import { abilityRotateSchema }                 from './sources/ability-rotate';
 import type { IAbilityRotateInfo }             from '../../../../../shared/network/scenario/ability-info';
 import type { ParsingContext }                 from '../../parsing-context';
 import type { AttributeListener }              from '../attribute-listeners/attribute-listener';
-import type { SpecialAttributeRecord }         from '../attributes/attribute-holder';
+import type { BuiltinAttributeRecord }         from '../attributes/attribute-holder';
 import type { AttributeMap }                   from '../attributes/i-attribute-holder';
 import type { Condition }                      from '../conditions/condition';
 import type { Ship }                           from '../ship';
@@ -38,7 +38,7 @@ export class AbilityRotate extends IndexedAbility {
      * @param  condition          Condition which must hold true to be able to use this action
      * @param  eventRegistrar     Registrar of all ability event listeners
      * @param  attributes         Attributes for the ability
-     * @param  specialAttributes  Special attributes for the ability
+     * @param  builtinAttributes  Built-in attributes for the ability
      * @param  attributeListeners Attribute listeners for the ability
      */
     public constructor(ship: Ship,
@@ -49,9 +49,9 @@ export class AbilityRotate extends IndexedAbility {
                        condition: Condition,
                        eventRegistrar: EventRegistrar<AbilityEventInfo, AbilityEvent>,
                        attributes: AttributeMap,
-                       specialAttributes: SpecialAttributeRecord<'ability'>,
+                       builtinAttributes: BuiltinAttributeRecord<'ability'>,
                        attributeListeners: AttributeListener[]) {
-        super(ship, descriptor, condition, eventRegistrar, attributes, specialAttributes, attributeListeners);
+        super(ship, descriptor, condition, eventRegistrar, attributes, builtinAttributes, attributeListeners);
     }
 
     /**
@@ -73,8 +73,8 @@ export class AbilityRotate extends IndexedAbility {
         
         // Get attributes and update parsing context
         const attributes: AttributeMap = await getAttributes(parsingContext.withExtendedPath('.attributes'), abilityRotateSource.attributes, 'ability');
-        const specialAttributes = Ability.generateSpecialAttributes(abilityPartial as Ability);
-        parsingContext.localAttributes.ability = [attributes, specialAttributes];
+        const builtinAttributes = Ability.generateBuiltinAttributes(abilityPartial as Ability);
+        parsingContext.localAttributes.ability = [attributes, builtinAttributes];
         parsingContext.reducePath();
 
         const attributeListeners = await getAttributeListeners(parsingContext.withExtendedPath('.attributeListeners'), abilityRotateSource.attributeListeners);
@@ -91,7 +91,7 @@ export class AbilityRotate extends IndexedAbility {
         // Return created AbilityFire object
         parsingContext.localAttributes.ability = undefined;
         const eventRegistrar = new EventRegistrar(eventListeners, []);
-        AbilityRotate.call(abilityPartial, parsingContext.shipPartial as Ship, descriptor, abilityRotateSource.rot90, abilityRotateSource.rot180, abilityRotateSource.rot270, condition, eventRegistrar, attributes, specialAttributes, attributeListeners);
+        AbilityRotate.call(abilityPartial, parsingContext.shipPartial as Ship, descriptor, abilityRotateSource.rot90, abilityRotateSource.rot180, abilityRotateSource.rot270, condition, eventRegistrar, attributes, builtinAttributes, attributeListeners);
         (abilityPartial as any).__proto__ = AbilityRotate.prototype;
         return abilityPartial as AbilityRotate;
     }
@@ -111,7 +111,7 @@ export class AbilityRotate extends IndexedAbility {
         else if (rotation === Rotation.Clockwise270 && this.rot270allowed) this.ship.rotate(rotation);
 
         this.eventRegistrar.triggerEvent('onUse', {
-            specialAttributes: {},
+            builtinAttributes: {},
             foreignTeam: this.ship.owner.team,
             foreignPlayer: this.ship.owner,
             foreignShip: this.ship,
