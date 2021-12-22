@@ -20,5 +20,6 @@
     ]
   },
   "actions": {},
-  "attributes": {}
+  "attributes": {},
+  "attributeListeners": []
 }

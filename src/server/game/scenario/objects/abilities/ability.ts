@@ -1,6 +1,7 @@
 import type { AbilityInfo }                               from '../../../../../shared/network/scenario/ability-info';
 import type { EventContextForEvent, GenericEventContext } from '../../events/event-context';
 import type { EventRegistrar }                            from '../../events/event-registrar';
+import type { AttributeListener }                         from '../attribute-listeners/attribute-listener';
 import type { IAttributeHolder, SpecialAttributeRecord }  from '../attributes/attribute-holder';
 import type { AttributeMap }                              from '../attributes/i-attribute-holder';
 import type { Descriptor }                                from '../common/descriptor';
@@ -20,21 +21,31 @@ export abstract class Ability implements IAttributeHolder, SpecialAttributeRecor
     /**
      * Ability constructor
      *
-     * @param  ship              Parent ship which this ability belongs to
-     * @param  descriptor        Descriptor for ability
-     * @param  condition         Condition which must hold true to be able to use this ability
-     * @param  eventRegistrar    Registrar of all team event listeners
-     * @param  attributes        Attributes for the ability
-     * @param  specialAttributes Special attributes for the ability
+     * @param  ship               Parent ship which this ability belongs to
+     * @param  descriptor         Descriptor for ability
+     * @param  condition          Condition which must hold true to be able to use this ability
+     * @param  eventRegistrar     Registrar of all team event listeners
+     * @param  attributes         Attributes for the ability
+     * @param  specialAttributes  Special attributes for the ability
+     * @param  attributeListeners Attribute listeners for the ability
      */
     public constructor(public readonly ship: Ship,
                        public readonly descriptor: Descriptor,
                        public readonly condition: Condition,
                        public readonly eventRegistrar: EventRegistrar<AbilityEventInfo, AbilityEvent>,
                        public readonly attributes: AttributeMap,
-                       public readonly specialAttributes: SpecialAttributeRecord<'ability'>) {
+                       public readonly specialAttributes: SpecialAttributeRecord<'ability'>,
+                       private readonly attributeListeners: AttributeListener[]) {
 
         this.eventRegistrar.addEventListener('onAbilityUsed', (eventContext: EventContextForEvent<AbilityEventInfo, AbilityEvent, 'onAbilityUsed'>) => this.checkUsable(eventContext), true);
+    }
+
+    /**
+     * Registers all attribute listeners for this object and all sub-objects
+     */
+    public registerAttributeListeners(): void {
+        for (const attributeListener of this.attributeListeners)
+            attributeListener.register();
     }
 
     /**

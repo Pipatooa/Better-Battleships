@@ -4,6 +4,7 @@ import { checkAgainstSchema }                                                   
 import { TurnManager }                                                            from '../turn-manager';
 import { getJSONFromEntry, UnpackingError }                                       from '../unpacker';
 import { eventListenersFromActionSource }                                         from './actions/action-getter';
+import { getAttributeListeners }                                                  from './attribute-listeners/attribute-listener-getter';
 import { ForeignAttributeRegistry }                                               from './attribute-references/foreign-attribute-registry';
 import { getAttributes }                                                          from './attributes/attribute-getter';
 import { AttributeSpecial }                                                       from './attributes/attribute-special';
@@ -83,6 +84,11 @@ export class Scenario implements IAttributeHolder, ISpecialAttributeHolder<'scen
         const specialAttributes = Scenario.generateSpecialAttributes(scenarioPartial as Scenario);
         parsingContext.localAttributes.scenario = [attributes, specialAttributes];
         parsingContext.reducePath();
+
+        const attributeListeners = await getAttributeListeners(parsingContext.withExtendedPath('.attributeListeners'), scenarioSource.attributeListeners);
+        parsingContext.reducePath();
+        for (const attributeListener of attributeListeners)
+            attributeListener.register();
 
         // Get descriptor
         const descriptor = await Descriptor.fromSource(parsingContext.withExtendedPath('.descriptor'), scenarioSource.descriptor, false);

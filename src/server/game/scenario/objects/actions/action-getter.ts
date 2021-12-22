@@ -4,7 +4,7 @@ import type {
     EventContextForEvent,
     EventListeners,
     GenericEventContext
-} from '../../events/event-context';
+}                              from '../../events/event-context';
 import type { ParsingContext } from '../../parsing-context';
 import type { ActionSource }   from './sources/action';
 

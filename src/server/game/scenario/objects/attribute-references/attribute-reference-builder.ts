@@ -1,16 +1,11 @@
-import { checkAgainstSchema }                                from '../../schema-checker';
-import { AttributeReferenceEvent }                           from './attribute-reference-event';
-import { AttributeReferenceForeign }                         from './attribute-reference-foreign';
-import { AttributeReferenceLocal }                           from './attribute-reference-local';
-import { attributeReferenceRegex, attributeReferenceSchema } from './sources/attribute-reference';
-import type { ParsingContext }                               from '../../parsing-context';
-import type { AttributeReference }                           from './attribute-reference';
-import type {
-    AttributeReferenceSource,
-    AttributeReferenceType,
-    AttributeReferenceForeignObjectSelector,
-    AttributeReferenceObjectSelector
-}                                    from './sources/attribute-reference';
+import { checkAgainstSchema }                                                     from '../../schema-checker';
+import { AttributeReference }                                                     from './attribute-reference';
+import { AttributeReferenceEvent }                                                from './attribute-reference-event';
+import { AttributeReferenceForeign }                                              from './attribute-reference-foreign';
+import { AttributeReferenceLocal }                                                from './attribute-reference-local';
+import { attributeReferenceSchema }                                               from './sources/attribute-reference';
+import type { ParsingContext }                                                    from '../../parsing-context';
+import type { AttributeReferenceSource, AttributeReferenceForeignObjectSelector } from './sources/attribute-reference';
 
 /**
  * Factory function to generate AttributeReference from JSON scenario data
@@ -27,11 +22,7 @@ export async function buildAttributeReference(parsingContext: ParsingContext, at
         attributeReferenceSource = await checkAgainstSchema(attributeReferenceSource, attributeReferenceSchema, parsingContext);
 
     // Split attribute reference string into different components
-    const matches = attributeReferenceRegex.exec(attributeReferenceSource)!;
-    const referenceType = matches[1] as AttributeReferenceType;
-    const objectSelector = matches[2] as AttributeReferenceObjectSelector;
-    const builtin = matches[3] !== undefined;
-    const attributeName = matches[4];
+    const [referenceType, objectSelector, builtin, attributeName] = AttributeReference.deconstructReferenceString(attributeReferenceSource);
 
     let attributeReference;
     switch (referenceType) {

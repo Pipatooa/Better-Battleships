@@ -1,10 +1,10 @@
-import { checkAgainstSchema }    from '../../schema-checker';
-import { buildCondition }        from '../conditions/condition-builder';
-import { Action }                from './action';
-import { actionWinSchema }                        from './sources/action-win';
-import type { EventContext, GenericEventContext } from '../../events/event-context';
-import type { ParsingContext }                    from '../../parsing-context';
-import type { IActionWinSource } from './sources/action-win';
+import { checkAgainstSchema }       from '../../schema-checker';
+import { buildCondition }           from '../conditions/condition-builder';
+import { Action }                   from './action';
+import { actionWinSchema }          from './sources/action-win';
+import type { GenericEventContext } from '../../events/event-context';
+import type { ParsingContext }      from '../../parsing-context';
+import type { IActionWinSource }    from './sources/action-win';
 
 /**
  * ActionWin - Server Version

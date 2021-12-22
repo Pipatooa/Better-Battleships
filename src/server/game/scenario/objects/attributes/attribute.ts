@@ -4,6 +4,7 @@ import { buildValue }               from '../values/value-builder';
 import { attributeSchema }          from './sources/attribute';
 import type { GenericEventContext } from '../../events/event-context';
 import type { ParsingContext }      from '../../parsing-context';
+import type { AttributeListener }   from '../attribute-listeners/attribute-listener';
 import type { ValueConstraint }     from '../constraints/value-constaint';
 import type { IAttributeSource }    from './sources/attribute';
 
@@ -13,6 +14,8 @@ import type { IAttributeSource }    from './sources/attribute';
  * Ties a user-controlled named value to an attribute holder object
  */
 export class Attribute {
+
+    private readonly attributeListeners: AttributeListener[] = [];
     
     /**
      * Attribute constructor
@@ -62,6 +65,15 @@ export class Attribute {
     }
 
     /**
+     * Register an attribute listener for this attribute
+     *
+     * @param  attributeListener Attribute listener to register
+     */
+    public registerAttributeListener(attributeListener: AttributeListener): void {
+        this.attributeListeners.push(attributeListener);
+    }
+
+    /**
      * Get the value of this attribute
      *
      * @returns  Value of this attribute
@@ -91,5 +103,11 @@ export class Attribute {
 
         // Set value as new constrained value
         this.value = value;
+
+        // Call update on attribute listeners
+        for (const attributeListener of this.attributeListeners)
+            attributeListener.onAttributeValueUpdate({
+                specialAttributes: {}
+            }, value);
     }
 }

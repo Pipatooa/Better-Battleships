@@ -1,19 +1,18 @@
-import Joi                         from 'joi';
-import { actionSchema }            from '../actions/sources/action';
-import { attributeHolderSchema }   from '../attributes/sources/attribute-holder';
-import { genericNameSchema }       from '../common/sources/generic-name';
-import { playerEventInfo }         from '../events/player-events';
-import type { ActionSource }       from '../actions/sources/action';
-import type { AttributeMapSource } from '../attributes/i-attribute-holder';
-import type { PlayerEvent }        from '../events/player-events';
+import Joi                             from 'joi';
+import { actionSchema }                from '../actions/sources/action';
+import { attributeHolderSchema }       from '../attributes/sources/attribute-holder';
+import { genericNameSchema }           from '../common/sources/generic-name';
+import { playerEventInfo }             from '../events/player-events';
+import type { ActionSource }           from '../actions/sources/action';
+import type { IAttributeHolderSource } from '../attributes/sources/attribute-holder';
+import type { PlayerEvent }            from '../events/player-events';
 
 /**
  * JSON source interface reflecting schema
  */
-export interface IPlayerSource {
+export interface IPlayerSource extends IAttributeHolderSource {
     ships: string[],
-    actions: { [event in PlayerEvent]: ActionSource[] },
-    attributes: AttributeMapSource
+    actions: { [event in PlayerEvent]: ActionSource[] }
 }
 
 /**

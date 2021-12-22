@@ -1,27 +1,26 @@
-import Joi                         from 'joi';
-import { baseEventInfo }           from '../../events/base-events';
-import { turnOrderings }           from '../../turn-manager';
-import { actionSchema }            from '../actions/sources/action';
-import { attributeHolderSchema }   from '../attributes/sources/attribute-holder';
-import { descriptorSchema }        from '../common/sources/descriptor';
-import { genericNameSchema }       from '../common/sources/generic-name';
-import type { BaseEvent }          from '../../events/base-events';
-import type { TurnOrdering }       from '../../turn-manager';
-import type { ActionSource }       from '../actions/sources/action';
-import type { AttributeMapSource } from '../attributes/i-attribute-holder';
-import type { IDescriptorSource }  from '../common/sources/descriptor';
+import Joi                             from 'joi';
+import { baseEventInfo }               from '../../events/base-events';
+import { turnOrderings }               from '../../turn-manager';
+import { actionSchema }                from '../actions/sources/action';
+import { attributeHolderSchema }       from '../attributes/sources/attribute-holder';
+import { descriptorSchema }            from '../common/sources/descriptor';
+import { genericNameSchema }           from '../common/sources/generic-name';
+import type { BaseEvent }              from '../../events/base-events';
+import type { TurnOrdering }           from '../../turn-manager';
+import type { ActionSource }           from '../actions/sources/action';
+import type { IAttributeHolderSource } from '../attributes/sources/attribute-holder';
+import type { IDescriptorSource }      from '../common/sources/descriptor';
 
 /**
  * JSON source interface reflecting schema
  */
-export interface IScenarioSource {
+export interface IScenarioSource extends IAttributeHolderSource {
     author: string,
     descriptor: IDescriptorSource,
     teams: string[],
     turnOrdering: TurnOrdering,
     maxTurnTime: number,
-    actions: { [event in BaseEvent]: ActionSource[] },
-    attributes: AttributeMapSource
+    actions: { [event in BaseEvent]: ActionSource[] }
 }
 
 /**

@@ -2,6 +2,7 @@ import { EventRegistrar }                                                       
 import { checkAgainstSchema }                                                     from '../schema-checker';
 import { getJSONFromEntry, UnpackingError }                                       from '../unpacker';
 import { eventListenersFromActionSource }                                         from './actions/action-getter';
+import { getAttributeListeners }                                                  from './attribute-listeners/attribute-listener-getter';
 import { getAttributes }                                                          from './attributes/attribute-getter';
 import { AttributeSpecial }                                                       from './attributes/attribute-special';
 import { playerEventInfo }                                                        from './events/player-events';
@@ -9,6 +10,7 @@ import { Ship }                                                                 
 import { playerSchema }                                                           from './sources/player';
 import type { Client }                                                            from '../../sockets/client';
 import type { ParsingContext }                                                    from '../parsing-context';
+import type { AttributeListener }                                                 from './attribute-listeners/attribute-listener';
 import type { IAttributeHolder, ISpecialAttributeHolder, SpecialAttributeRecord } from './attributes/attribute-holder';
 import type { AttributeMap }                                                      from './attributes/i-attribute-holder';
 import type { PlayerEvent, PlayerEventInfo }                                      from './events/player-events';
@@ -29,14 +31,15 @@ export class Player implements IAttributeHolder, ISpecialAttributeHolder<'player
     /**
      * Player constructor
      *
-     * @param  team              Team that this player belongs to
-     * @param  spawnRegionID     Region that the player should first be allowed to place ships in
-     * @param  color             Color for the player
-     * @param  highlightColor    Color for the player when highlighted
-     * @param  ships             List of ships that belong to the player
-     * @param  eventRegistrar    Registrar of all player event listeners
-     * @param  attributes        Attributes for the player
-     * @param  specialAttributes Special attributes for the player
+     * @param  team               Team that this player belongs to
+     * @param  spawnRegionID      Region that the player should first be allowed to place ships in
+     * @param  color              Color for the player
+     * @param  highlightColor     Color for the player when highlighted
+     * @param  ships              List of ships that belong to the player
+     * @param  eventRegistrar     Registrar of all player event listeners
+     * @param  attributes         Attributes for the player
+     * @param  specialAttributes  Special attributes for the player
+     * @param  attributeListeners Attribute listeners for the player
      */
     public constructor(public readonly team: Team,
                        public readonly spawnRegionID: string,
@@ -45,7 +48,8 @@ export class Player implements IAttributeHolder, ISpecialAttributeHolder<'player
                        public readonly ships: Ship[],
                        public readonly eventRegistrar: EventRegistrar<PlayerEventInfo, PlayerEvent>,
                        public readonly attributes: AttributeMap,
-                       public readonly specialAttributes: SpecialAttributeRecord<'player'>) {
+                       public readonly specialAttributes: SpecialAttributeRecord<'player'>,
+                       private readonly attributeListeners: AttributeListener[]) {
     }
 
     /**
@@ -87,6 +91,9 @@ export class Player implements IAttributeHolder, ISpecialAttributeHolder<'player
         parsingContext.localAttributes.player = [attributes, specialAttributes];
         parsingContext.reducePath();
 
+        const attributeListeners = await getAttributeListeners(parsingContext.withExtendedPath('.attributeListeners'), playerSource.attributeListeners);
+        parsingContext.reducePath();
+
         // Get ships
         const ships: Ship[] = [];
         const subRegistrars: EventRegistrar<PlayerEventInfo, PlayerEvent>[] = [];
@@ -111,9 +118,19 @@ export class Player implements IAttributeHolder, ISpecialAttributeHolder<'player
         parsingContext.localAttributes.player = undefined;
         parsingContext.playerPartial = undefined;
         const eventRegistrar = new EventRegistrar(eventListeners, subRegistrars);
-        Player.call(playerPartial, parsingContext.teamPartial as Team, spawnRegion, color, highlightColor, ships, eventRegistrar, attributes, specialAttributes);
+        Player.call(playerPartial, parsingContext.teamPartial as Team, spawnRegion, color, highlightColor, ships, eventRegistrar, attributes, specialAttributes, attributeListeners);
         (playerPartial as any).__proto__ = Player.prototype;
         return playerPartial as Player;
+    }
+
+    /**
+     * Registers all attribute listeners for this object and all sub-objects
+     */
+    public registerAttributeListeners(): void {
+        for (const attributeListener of this.attributeListeners)
+            attributeListener.register();
+        for (const ship of this.ships)
+            ship.registerAttributeListeners();
     }
 
     /**

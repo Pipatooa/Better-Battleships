@@ -1,5 +1,6 @@
 import { checkAgainstSchema }  from '../../schema-checker';
 import { ActionAdvanceTurn }   from './action-advance-turn';
+import { ActionLose }          from './action-lose';
 import { ActionSetAttribute }  from './action-set-attribute';
 import { ActionWin }           from './action-win';
 import { actionSchema }        from './sources/action';
@@ -32,6 +33,9 @@ export async function buildAction(parsingContext: ParsingContext, actionSource: 
             break;
         case 'win':
             action = await ActionWin.fromSource(parsingContext, actionSource, false);
+            break;
+        case 'lose':
+            action = await ActionLose.fromSource(parsingContext, actionSource, false);
             break;
     }
 

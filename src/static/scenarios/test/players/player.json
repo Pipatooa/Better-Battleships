@@ -4,11 +4,26 @@
     "cruiser"
   ],
   "attributes": {
-    "shipCount": {
+    "test": {
       "initialValue": 2,
       "constraints": [],
       "readonly": false
     }
   },
+  "attributeListeners": [
+    {
+      "attribute": "local:player.@shipCount",
+      "constraint": {
+        "exactly": 0
+      },
+      "actions": [
+        {
+          "type": "lose",
+          "condition": {}
+        }
+      ],
+      "triggerType": "once"
+    }
+  ],
   "actions": {}
 }

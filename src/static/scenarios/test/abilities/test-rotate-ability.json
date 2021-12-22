@@ -8,5 +8,6 @@
   "rot180": false,
   "rot270": true,
   "actions": {},
-  "attributes": {}
+  "attributes": {},
+  "attributeListeners": []
 }

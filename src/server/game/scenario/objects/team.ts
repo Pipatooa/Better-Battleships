@@ -1,7 +1,10 @@
-import { EventRegistrar }                                                         from '../events/event-registrar';
-import { checkAgainstSchema }                                                     from '../schema-checker';
-import { getJSONFromEntry, UnpackingError }                                       from '../unpacker';
-import { eventListenersFromActionSource }                                         from './actions/action-getter';
+import { EventRegistrar }                   from '../events/event-registrar';
+import { checkAgainstSchema }               from '../schema-checker';
+import { getJSONFromEntry, UnpackingError } from '../unpacker';
+import { eventListenersFromActionSource }   from './actions/action-getter';
+import {
+    getAttributeListeners
+}                                                                                 from './attribute-listeners/attribute-listener-getter';
 import { getAttributes }                                                          from './attributes/attribute-getter';
 import { AttributeSpecial }                                                       from './attributes/attribute-special';
 import { Descriptor }                                                             from './common/descriptor';
@@ -14,10 +17,9 @@ import type { ParsingContext }                                                  
 import type { IAttributeHolder, ISpecialAttributeHolder, SpecialAttributeRecord } from './attributes/attribute-holder';
 import type { AttributeMap }                                                      from './attributes/i-attribute-holder';
 import type { TeamEventInfo, TeamEvent }                                          from './events/team-events';
-
-import type { IPlayerSource }              from './sources/player';
-import type { IPlayerConfig, ITeamSource } from './sources/team';
-import type { ITeamInfo }                  from 'shared/network/scenario/i-team-info';
+import type { IPlayerSource }                                                     from './sources/player';
+import type { IPlayerConfig, ITeamSource }                                        from './sources/team';
+import type { ITeamInfo }                                                         from 'shared/network/scenario/i-team-info';
 
 /**
  * Team - Server Version
@@ -83,6 +85,7 @@ export class Team implements IAttributeHolder, ISpecialAttributeHolder<'team'> {
             clients[i].player = player;
 
             this.eventRegistrar.addSubRegistrar(player.eventRegistrar);
+            player.registerAttributeListeners();
         }
 
         // Clear player prototypes list
@@ -113,6 +116,11 @@ export class Team implements IAttributeHolder, ISpecialAttributeHolder<'team'> {
         const specialAttributes = Team.generateSpecialAttributes(teamPartial as Team);
         parsingContext.localAttributes.team = [attributes, specialAttributes];
         parsingContext.reducePath();
+
+        const attributeListeners = await getAttributeListeners(parsingContext.withExtendedPath('.attributeListeners'), teamSource.attributeListeners);
+        parsingContext.reducePath();
+        for (const attributeListener of attributeListeners)
+            attributeListener.register();
 
         // Get descriptor
         const descriptor = await Descriptor.fromSource(parsingContext.withExtendedPath('.descriptor'), teamSource.descriptor, false);

@@ -24,15 +24,15 @@ export class AttributeReferenceLocal extends AttributeReference {
     }
 
     /**
-     * Factory function to generate AttributeReferenceLocal from JSON scenario data
+     * Finds a local Attribute within the current parsing context
      *
      * @param    parsingContext Context for resolving objects and values when an event is triggered
      * @param    objectSelector Object selector part of attribute reference string
      * @param    attributeName  Name of attribute to reference
      * @param    builtin        Whether or not this attribute reference refers to a built-in value or a user defined
-     * @returns                 Created AttributeReferenceLocal object
+     * @returns                 Found Attribute object
      */
-    public static async fromSource(parsingContext: ParsingContext, objectSelector: AttributeReferenceLocalObjectSelector, attributeName: string, builtin: boolean): Promise<AttributeReferenceLocal> {
+    public static async findLocalAttribute(parsingContext: ParsingContext, objectSelector: AttributeReferenceLocalObjectSelector, attributeName: string, builtin: boolean): Promise<Attribute> {
 
         // Verify object selector is valid for a local reference
         if (!attributeReferenceLocalObjectSelectors.includes(objectSelector))
@@ -55,7 +55,21 @@ export class AttributeReferenceLocal extends AttributeReference {
         if (attribute === undefined)
             throw new UnpackingError(`Could not find attribute 'local:${objectSelector}.${builtin ? builtinAttributePrefix : ''}${attributeName}' defined at '${parsingContext.currentPath}'. No such attribute exists on that object.`,
                 parsingContext.currentFile);
+        
+        return attribute;
+    }
 
+    /**
+     * Factory function to generate AttributeReferenceLocal from JSON scenario data
+     *
+     * @param    parsingContext Context for resolving objects and values when an event is triggered
+     * @param    objectSelector Object selector part of attribute reference string
+     * @param    attributeName  Name of attribute to reference
+     * @param    builtin        Whether or not this attribute reference refers to a built-in value or a user defined
+     * @returns                 Created AttributeReferenceLocal object
+     */
+    public static async fromSource(parsingContext: ParsingContext, objectSelector: AttributeReferenceLocalObjectSelector, attributeName: string, builtin: boolean): Promise<AttributeReferenceLocal> {
+        const attribute = await this.findLocalAttribute(parsingContext, objectSelector, attributeName, builtin);
         return new AttributeReferenceLocal(attribute);
     }
 

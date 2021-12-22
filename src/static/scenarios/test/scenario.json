@@ -11,5 +11,6 @@
   "turnOrdering": "team",
   "maxTurnTime": 120,
   "attributes": {},
+  "attributeListeners": [],
   "actions": {}
 }

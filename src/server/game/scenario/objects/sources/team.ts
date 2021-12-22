@@ -1,25 +1,24 @@
-import Joi                         from 'joi';
-import { actionSchema }            from '../actions/sources/action';
-import { attributeHolderSchema }   from '../attributes/sources/attribute-holder';
-import { colorSchema }             from '../common/sources/color';
-import { descriptorSchema }        from '../common/sources/descriptor';
-import { genericNameSchema }       from '../common/sources/generic-name';
-import { teamEventInfo }           from '../events/team-events';
-import type { ActionSource }       from '../actions/sources/action';
-import type { AttributeMapSource } from '../attributes/i-attribute-holder';
-import type { IDescriptorSource }  from '../common/sources/descriptor';
-import type { TeamEvent }          from '../events/team-events';
+import Joi                             from 'joi';
+import { actionSchema }                from '../actions/sources/action';
+import { attributeHolderSchema }       from '../attributes/sources/attribute-holder';
+import { colorSchema }                 from '../common/sources/color';
+import { descriptorSchema }            from '../common/sources/descriptor';
+import { genericNameSchema }           from '../common/sources/generic-name';
+import { teamEventInfo }               from '../events/team-events';
+import type { ActionSource }           from '../actions/sources/action';
+import type { IAttributeHolderSource } from '../attributes/sources/attribute-holder';
+import type { IDescriptorSource }      from '../common/sources/descriptor';
+import type { TeamEvent }              from '../events/team-events';
 
 /**
  * JSON source interface reflecting schema
  */
-export interface ITeamSource {
+export interface ITeamSource extends IAttributeHolderSource {
     descriptor: IDescriptorSource,
     color: string,
     highlightColor: string,
     playerConfigs: IPlayerConfig[][],
-    actions: { [event in TeamEvent]: ActionSource[] },
-    attributes: AttributeMapSource
+    actions: { [event in TeamEvent]: ActionSource[] }
 }
 
 /**

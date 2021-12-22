@@ -8,9 +8,9 @@ import type { ValueSource }            from '../../values/sources/value';
  * JSON source interface reflecting schema
  */
 export interface IAttributeSource {
-    initialValue: ValueSource;
-    constraints: IValueConstraintSource[];
-    readonly: boolean;
+    initialValue: ValueSource,
+    constraints: IValueConstraintSource[],
+    readonly: boolean
 }
 
 /**

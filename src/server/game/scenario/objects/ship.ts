@@ -4,6 +4,7 @@ import { checkAgainstSchema }                                                   
 import { getJSONFromEntry, UnpackingError }                                       from '../unpacker';
 import { buildAbility }                                                           from './abilities/ability-builder';
 import { eventListenersFromActionSource }                                         from './actions/action-getter';
+import { getAttributeListeners }                                                  from './attribute-listeners/attribute-listener-getter';
 import { getAttributes }                                                          from './attributes/attribute-getter';
 import { AttributeSpecial }                                                       from './attributes/attribute-special';
 import { Descriptor }                                                             from './common/descriptor';
@@ -13,6 +14,7 @@ import { shipSchema }                                                           
 import type { ParsingContext }                                                    from '../parsing-context';
 import type { Ability }                                                           from './abilities/ability';
 import type { AbilitySource }                                                     from './abilities/sources/ability';
+import type { AttributeListener }                                                 from './attribute-listeners/attribute-listener';
 import type { IAttributeHolder, ISpecialAttributeHolder, SpecialAttributeRecord } from './attributes/attribute-holder';
 import type { AttributeMap }                                                      from './attributes/i-attribute-holder';
 import type { Board }                                                             from './board';
@@ -41,15 +43,16 @@ export class Ship implements IAttributeHolder, ISpecialAttributeHolder<'ship'> {
     /**
      * Ship constructor
      *
-     * @param  owner             Owner of this ship
-     * @param  board             Board that this ship belongs to
-     * @param  descriptor        Descriptor for ship
-     * @param  _pattern          Pattern describing shape of ship
-     * @param  visibilityPattern Pattern describing cells from which this ship is visible
-     * @param  abilities         Dictionary of abilities available to the ship
-     * @param  eventRegistrar    Registrar of all ship event listeners
-     * @param  attributes        Attributes for the ship
-     * @param  specialAttributes Special attributes for the ship
+     * @param  owner              Owner of this ship
+     * @param  board              Board that this ship belongs to
+     * @param  descriptor         Descriptor for ship
+     * @param  _pattern           Pattern describing shape of ship
+     * @param  visibilityPattern  Pattern describing cells from which this ship is visible
+     * @param  abilities          Dictionary of abilities available to the ship
+     * @param  eventRegistrar     Registrar of all ship event listeners
+     * @param  attributes         Attributes for the ship
+     * @param  specialAttributes  Special attributes for the ship
+     * @param  attributeListeners Attribute listeners for the ship
      */
     public constructor(public readonly owner: Player,
                        public readonly board: Board,
@@ -59,7 +62,8 @@ export class Ship implements IAttributeHolder, ISpecialAttributeHolder<'ship'> {
                        public readonly abilities: Ability[],
                        public readonly eventRegistrar: EventRegistrar<ShipEventInfo, ShipEvent>,
                        public readonly attributes: AttributeMap,
-                       public readonly specialAttributes: SpecialAttributeRecord<'ship'>) {
+                       public readonly specialAttributes: SpecialAttributeRecord<'ship'>,
+                       private readonly attributeListeners: AttributeListener[]) {
     }
 
     /**
@@ -96,6 +100,9 @@ export class Ship implements IAttributeHolder, ISpecialAttributeHolder<'ship'> {
         const attributes: AttributeMap = await getAttributes(parsingContext.withExtendedPath('.attributes'), shipSource.attributes, 'ship');
         const specialAttributes = Ship.generateSpecialAttributes(shipPartial as Ship);
         parsingContext.localAttributes.ship = [attributes, specialAttributes];
+        parsingContext.reducePath();
+
+        const attributeListeners = await getAttributeListeners(parsingContext.withExtendedPath('.attributeListeners'), shipSource.attributeListeners);
         parsingContext.reducePath();
 
         // Get component elements from source
@@ -136,9 +143,19 @@ export class Ship implements IAttributeHolder, ISpecialAttributeHolder<'ship'> {
         parsingContext.localAttributes.ship = undefined;
         parsingContext.shipPartial = undefined;
         const eventRegistrar = new EventRegistrar(eventListeners, subRegistrars);
-        Ship.call(shipPartial, parsingContext.playerPartial as Player, parsingContext.board!, descriptor, pattern, visibilityPattern, abilities, eventRegistrar, attributes, specialAttributes);
+        Ship.call(shipPartial, parsingContext.playerPartial as Player, parsingContext.board!, descriptor, pattern, visibilityPattern, abilities, eventRegistrar, attributes, specialAttributes, attributeListeners);
         (shipPartial as any).__proto__ = Ship.prototype;
         return shipPartial as Ship;
+    }
+
+    /**
+     * Registers all attribute listeners for this object and all sub-objects
+     */
+    public registerAttributeListeners(): void {
+        for (const attributeListener of this.attributeListeners)
+            attributeListener.register();
+        for (const ability of this.abilities)
+            ability.registerAttributeListeners();
     }
 
     /**

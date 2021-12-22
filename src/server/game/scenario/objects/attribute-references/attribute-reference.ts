@@ -1,10 +1,10 @@
-import { attributeReferenceRegex }                          from './sources/attribute-reference';
-import type { ECA, ECF, EventContext, GenericEventContext } from '../../events/event-context';
+import { attributeReferenceRegex }  from './sources/attribute-reference';
+import type { GenericEventContext } from '../../events/event-context';
 import type {
     AttributeReferenceObjectSelector,
     AttributeReferenceSource,
     AttributeReferenceType
-    , AttributeReferenceForeignObjectSelector }             from './sources/attribute-reference';
+}                                   from './sources/attribute-reference';
 
 /**
  * AttributeReference - Server Version
@@ -19,12 +19,13 @@ export abstract class AttributeReference {
      * @param    attributeReferenceSource Source string
      * @returns                           Array containing sections of string
      */
-    protected static deconstructReferenceString(attributeReferenceSource: AttributeReferenceSource): [AttributeReferenceType, AttributeReferenceObjectSelector, string] {
+    public static deconstructReferenceString(attributeReferenceSource: AttributeReferenceSource): [AttributeReferenceType, AttributeReferenceObjectSelector, boolean, string] {
         const matches = attributeReferenceRegex.exec(attributeReferenceSource)!;
         const referenceType = matches[1] as AttributeReferenceType;
         const objectSelector = matches[2] as AttributeReferenceObjectSelector;
-        const attributeName = matches[3];
-        return [referenceType, objectSelector, attributeName];
+        const builtin = matches[3] !== undefined;
+        const attributeName = matches[4];
+        return [referenceType, objectSelector, builtin, attributeName];
     }
 
     /**

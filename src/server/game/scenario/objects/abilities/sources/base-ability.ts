@@ -1,23 +1,22 @@
-import Joi                         from 'joi';
-import { baseEventInfo }           from '../../../events/base-events';
-import { actionSchema }            from '../../actions/sources/action';
-import { attributeHolderSchema }   from '../../attributes/sources/attribute-holder';
-import { descriptorSchema }        from '../../common/sources/descriptor';
-import { conditionSchema }         from '../../conditions/sources/condition';
-import type { ActionSource }       from '../../actions/sources/action';
-import type { AttributeMapSource } from '../../attributes/i-attribute-holder';
-import type { IDescriptorSource }  from '../../common/sources/descriptor';
-import type { ConditionSource }    from '../../conditions/sources/condition';
-import type { AbilityEvent }       from '../events/ability-events';
+import Joi                             from 'joi';
+import { baseEventInfo }               from '../../../events/base-events';
+import { actionSchema }                from '../../actions/sources/action';
+import { attributeHolderSchema }       from '../../attributes/sources/attribute-holder';
+import { descriptorSchema }            from '../../common/sources/descriptor';
+import { conditionSchema }             from '../../conditions/sources/condition';
+import type { ActionSource }           from '../../actions/sources/action';
+import type { IAttributeHolderSource } from '../../attributes/sources/attribute-holder';
+import type { IDescriptorSource }      from '../../common/sources/descriptor';
+import type { ConditionSource }        from '../../conditions/sources/condition';
+import type { AbilityEvent }           from '../events/ability-events';
 
 /**
  * JSON source interface reflecting base ability schema
  */
-export interface IBaseAbilitySource {
+export interface IBaseAbilitySource extends IAttributeHolderSource {
     descriptor: IDescriptorSource,
     condition: ConditionSource,
-    actions: { [event in AbilityEvent]: ActionSource[] },
-    attributes: AttributeMapSource
+    actions: { [event in AbilityEvent]: ActionSource[] }
 }
 
 /**
