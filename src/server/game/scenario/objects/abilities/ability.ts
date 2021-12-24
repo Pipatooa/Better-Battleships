@@ -41,6 +41,15 @@ export abstract class Ability implements IAttributeHolder, BuiltinAttributeRecor
     }
 
     /**
+     * Allows this object to be discarded
+     */
+    public deconstruct(): void {
+        for (const attributeListener of this.attributeListeners)
+            attributeListener.unregister();
+        this.eventRegistrar.detach();
+    }
+
+    /**
      * Registers all attribute listeners for this object and all sub-objects
      */
     public registerAttributeListeners(): void {

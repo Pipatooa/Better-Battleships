@@ -9,7 +9,7 @@ import type { IActionLoseSource }   from './sources/action-lose';
 /**
  * ActionLose - Server Version
  *
- * Action which causes the current team to win the game
+ * Action which causes the current team to lose the game
  */
 export class ActionLose extends Action {
 

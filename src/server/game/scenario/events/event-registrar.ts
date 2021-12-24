@@ -17,7 +17,7 @@ export class EventRegistrar<T extends Record<S, EventInfoEntry>, S extends strin
      * @param  subRegistrars  Array of registrars to pass events onto when triggered
      */
     public constructor(private readonly eventListeners: EventListeners<T, S>,
-                       private readonly subRegistrars: EventRegistrar<T, S>[]) {
+                       private subRegistrars: EventRegistrar<T, S>[]) {
         
         for (const subRegistrar of subRegistrars)
             subRegistrar.parentRegistrar = this;
@@ -45,6 +45,23 @@ export class EventRegistrar<T extends Record<S, EventInfoEntry>, S extends strin
     public addSubRegistrar(subRegistrar: EventRegistrar<T, S>): void {
         this.subRegistrars.push(subRegistrar);
         subRegistrar.parentRegistrar = this;
+    }
+
+    /**
+     * Removes a registrar to no longer pass events onto when triggered
+     *
+     * @param  subRegistrar Registrar to no longer pass events onto
+     */
+    public removeSubRegistrar(subRegistrar: EventRegistrar<T, S>): void {
+        this.subRegistrars = this.subRegistrars.filter(r => r !== subRegistrar);
+        subRegistrar.parentRegistrar = undefined;
+    }
+
+    /**
+     * Removes this registrar as a sub registrar of its current parent registrar
+     */
+    public detach(): void {
+        this.parentRegistrar?.removeSubRegistrar(this);
     }
 
     /**

@@ -8,7 +8,7 @@ import type { AttributeListener }   from '../attribute-listeners/attribute-liste
  */
 export abstract class Attribute {
 
-    private readonly attributeListeners: AttributeListener[] = [];
+    private attributeListeners: AttributeListener[] = [];
 
     /**
      * Register an attribute listener for this attribute
@@ -17,6 +17,15 @@ export abstract class Attribute {
      */
     public registerAttributeListener(attributeListener: AttributeListener): void {
         this.attributeListeners.push(attributeListener);
+    }
+
+    /**
+     * Unregisters an attribute listeners attached to this attribute
+     *
+     * @param  attributeListener Attribute listeners to unregister
+     */
+    public unregisterAttributeListener(attributeListener: AttributeListener): void {
+        this.attributeListeners = this.attributeListeners.filter(l => l !== attributeListener);
     }
 
     /**

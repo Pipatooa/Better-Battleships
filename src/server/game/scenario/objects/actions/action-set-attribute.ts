@@ -1,15 +1,15 @@
-import { checkAgainstSchema }                               from '../../schema-checker';
-import { buildAttributeReference }                          from '../attribute-references/attribute-reference-builder';
-import { buildCondition }                                   from '../conditions/condition-builder';
-import { buildValue }                                       from '../values/value-builder';
-import { Action }                                           from './action';
-import { actionWinSchema }                                  from './sources/action-win';
-import type { ECA, ECF, EventContext, GenericEventContext } from '../../events/event-context';
-import type { ParsingContext }                              from '../../parsing-context';
-import type { AttributeReference }                          from '../attribute-references/attribute-reference';
-import type { Condition }                                   from '../conditions/condition';
-import type { Value }                                       from '../values/value';
-import type { IActionSetAttributeSource }                   from './sources/action-set-attribute';
+import { checkAgainstSchema }             from '../../schema-checker';
+import { buildAttributeReference }        from '../attribute-references/attribute-reference-builder';
+import { buildCondition }                 from '../conditions/condition-builder';
+import { buildValue }                     from '../values/value-builder';
+import { Action }                         from './action';
+import { actionWinSchema }                from './sources/action-win';
+import type { GenericEventContext }       from '../../events/event-context';
+import type { ParsingContext }            from '../../parsing-context';
+import type { AttributeReference }        from '../attribute-references/attribute-reference';
+import type { Condition }                 from '../conditions/condition';
+import type { Value }                     from '../values/value';
+import type { IActionSetAttributeSource } from './sources/action-set-attribute';
 
 /**
  * ActionSetAttribute - Server Version

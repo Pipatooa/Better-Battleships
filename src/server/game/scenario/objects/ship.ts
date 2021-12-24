@@ -67,6 +67,27 @@ export class Ship implements IAttributeHolder, IBuiltinAttributeHolder<'ship'> {
     }
 
     /**
+     * Allows this object to be discarded
+     */
+    public deconstruct(): void {
+        for (const attributeListener of this.attributeListeners)
+            attributeListener.unregister();
+        for (const ability of this.abilities)
+            ability.deconstruct();
+        this.eventRegistrar.detach();
+
+        for (const [team, trackingID] of this.knownTo) {
+            team.broadcastEvent({
+                event: 'shipDestroyed',
+                trackingID: trackingID
+            });
+        }
+
+        this.unSpot();
+        this.board.removeShip(this);
+    }
+
+    /**
      * Generates built-in attributes for Ship object
      *
      * @param    object Object to generate built-in attributes for

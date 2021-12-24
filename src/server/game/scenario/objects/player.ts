@@ -45,7 +45,7 @@ export class Player implements IAttributeHolder, IBuiltinAttributeHolder<'player
                        public readonly spawnRegionID: string,
                        public readonly color: string,
                        public readonly highlightColor: string,
-                       public readonly ships: Ship[],
+                       public readonly ships: (Ship | undefined)[],
                        public readonly eventRegistrar: EventRegistrar<PlayerEventInfo, PlayerEvent>,
                        public readonly attributes: AttributeMap,
                        public readonly builtinAttributes: BuiltinAttributeRecord<'player'>,
@@ -60,7 +60,14 @@ export class Player implements IAttributeHolder, IBuiltinAttributeHolder<'player
      */
     private static generateBuiltinAttributes(object: Player): BuiltinAttributeRecord<'player'> {
         return {
-            shipCount: new AttributeCodeControlled(() => object.ships.length)
+            shipCount: new AttributeCodeControlled(() => {
+                let count = 0;
+                for (const ship of object.ships) {
+                    if (ship !== undefined)
+                        count++;
+                }
+                return count;
+            })
         };
     }
 
@@ -106,8 +113,8 @@ export class Player implements IAttributeHolder, IBuiltinAttributeHolder<'player
             // Unpack ship data
             const shipSource: IShipSource = await getJSONFromEntry(parsingContext.shipEntries[shipName]) as unknown as IShipSource;
             const ship = await Ship.fromSource(parsingContext.withFile(`ships/${shipName}.json`), shipSource, true);
-            subRegistrars.push(ship.eventRegistrar);
             parsingContext.reduceFileStack();
+            subRegistrars.push(ship.eventRegistrar);
             ships.push(ship);
         }
 
@@ -130,7 +137,7 @@ export class Player implements IAttributeHolder, IBuiltinAttributeHolder<'player
         for (const attributeListener of this.attributeListeners)
             attributeListener.register();
         for (const ship of this.ships)
-            ship.registerAttributeListeners();
+            ship?.registerAttributeListeners();
     }
 
     /**
@@ -142,8 +149,13 @@ export class Player implements IAttributeHolder, IBuiltinAttributeHolder<'player
      */
     public makeTransportable(): IPlayerInfo {
         return {
-            ships: this.ships.map(s => s.makeTransportable(true)),
+            ships: this.ships.map(s => s?.makeTransportable(true)),
             spawnRegion: this.spawnRegionID
         };
+    }
+
+    public removeShip(ship: Ship): void {
+        const index = this.ships.indexOf(ship);
+        this.ships[index] = undefined;
     }
 }

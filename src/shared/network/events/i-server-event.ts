@@ -8,6 +8,7 @@ import type { IPlayerLeaveEvent }       from './i-player-leave';
 import type { IPlayerReadyEvent }       from './i-player-ready';
 import type { ISetupInfoEvent }         from './i-setup-info';
 import type { IShipAppearEvent }        from './i-ship-appear';
+import type { IShipDestroyedEvent }     from './i-ship-destroyed';
 import type { IShipDisappearEvent }     from './i-ship-disappear';
 import type { IShipMoveEvent }          from './i-ship-move';
 import type { IShipRotateEvent }        from './i-ship-rotate';
@@ -39,6 +40,7 @@ export type IServerEvent =
     IShipDisappearEvent |
     IShipMoveEvent |
     IShipRotateEvent |
+    IShipDestroyedEvent |
     ITurnAdvancement;
 
 

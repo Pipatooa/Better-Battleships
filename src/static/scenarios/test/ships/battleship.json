@@ -50,8 +50,9 @@
       },
       "actions": [
         {
-          "type": "lose",
-          "condition": {}
+          "type": "destroyShip",
+          "condition": {},
+          "ship": "local"
         }
       ],
       "triggerType": "once"

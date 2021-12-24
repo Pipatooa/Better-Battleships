@@ -37,10 +37,10 @@ export async function handleSetupInfo(setupInfoEvent: ISetupInfoEvent): Promise<
     const ships: Ship[] = [];
     for (let shipIndex = 0; shipIndex < setupInfoEvent.playerInfo.ships.length; shipIndex++) {
         const shipInfo = setupInfoEvent.playerInfo.ships[shipIndex];
-        const pattern = RotatablePattern.fromSource(shipInfo.pattern);
+        const pattern = RotatablePattern.fromSource(shipInfo!.pattern);
         const abilities: Ability[] = [];
-        for (let abilityIndex = 0; abilityIndex < shipInfo.abilities.length; abilityIndex++) {
-            const abilityInfo = shipInfo.abilities[abilityIndex];
+        for (let abilityIndex = 0; abilityIndex < shipInfo!.abilities.length; abilityIndex++) {
+            const abilityInfo = shipInfo!.abilities[abilityIndex];
             let ability: Ability;
             switch (abilityInfo.type) {
                 case 'move':
@@ -56,7 +56,7 @@ export async function handleSetupInfo(setupInfoEvent: ISetupInfoEvent): Promise<
             abilities.push(ability);
         }
 
-        const ship = new Ship(shipIndex, undefined, undefined, shipInfo.descriptor, pattern, selfPlayer, abilities);
+        const ship = new Ship(shipIndex, undefined, undefined, shipInfo!.descriptor, pattern, selfPlayer, abilities);
         ships.push(ship);
     }
 

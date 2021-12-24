@@ -8,6 +8,7 @@ import { handlePlayerLeave }                from './event-handlers/player-leave'
 import { handlePlayerReady }                from './event-handlers/player-ready';
 import { handleSetupInfo }                  from './event-handlers/setup-info';
 import { handleShipAppear }                 from './event-handlers/ship-appear';
+import { handleShipDestroyed }              from './event-handlers/ship-destroyed';
 import { handleShipDisappear }              from './event-handlers/ship-disappear';
 import { handleShipMove }                   from './event-handlers/ship-movement';
 import { handleShipRotate }                 from './event-handlers/ship-rotate';
@@ -59,5 +60,6 @@ const handlers: Record<ServerEventID, (event: any) => void> = {
     shipDisappear: handleShipDisappear,
     shipMove: handleShipMove,
     shipRotate: handleShipRotate,
+    shipDestroyed: handleShipDestroyed,
     turnAdvancement: handleTurnAdvancement
 };

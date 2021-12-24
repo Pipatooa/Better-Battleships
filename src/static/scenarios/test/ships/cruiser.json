@@ -25,5 +25,20 @@
     }
   },
   "actions": {},
-  "attributeListeners": []
+  "attributeListeners": [
+    {
+      "attribute": "local:ship.health",
+      "constraint": {
+        "exactly": 0
+      },
+      "actions": [
+        {
+          "type": "destroyShip",
+          "condition": {},
+          "ship": "local"
+        }
+      ],
+      "triggerType": "once"
+    }
+  ]
 }

@@ -29,7 +29,7 @@ export async function handleShipPlacementRequest(client: Client, shipPlacementRe
         const [x, y, rotation] = shipPlacementRequest.shipPlacements[i];
         const ship = client.player!.ships[i];
         const region = client.game.scenario.board.regions[client.player!.spawnRegionID];
-        const placementOK = client.game.scenario.board.checkPlacement(ship, rotation, x, y, region);
+        const placementOK = client.game.scenario.board.checkPlacement(ship!, rotation, x, y, region);
 
         // Undo ship placements if any placement is invalid
         if (!placementOK) {
@@ -39,8 +39,8 @@ export async function handleShipPlacementRequest(client: Client, shipPlacementRe
             return;
         }
 
-        ship.place(x, y);
-        shipsPlaced.push(ship);
+        ship!.place(x, y);
+        shipsPlaced.push(ship!);
     }
 
     client.shipsPlaced = true;

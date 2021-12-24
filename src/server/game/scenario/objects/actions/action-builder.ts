@@ -1,5 +1,6 @@
 import { checkAgainstSchema }  from '../../schema-checker';
 import { ActionAdvanceTurn }   from './action-advance-turn';
+import { ActionDestroyShip }   from './action-destroy-ship';
 import { ActionLose }          from './action-lose';
 import { ActionSetAttribute }  from './action-set-attribute';
 import { ActionWin }           from './action-win';
@@ -30,6 +31,9 @@ export async function buildAction(parsingContext: ParsingContext, actionSource: 
             break;
         case 'advanceTurn':
             action = await ActionAdvanceTurn.fromSource(parsingContext, actionSource, false);
+            break;
+        case 'destroyShip':
+            action = await ActionDestroyShip.fromSource(parsingContext, actionSource, false);
             break;
         case 'win':
             action = await ActionWin.fromSource(parsingContext, actionSource, false);

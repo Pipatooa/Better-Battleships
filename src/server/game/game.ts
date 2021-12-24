@@ -248,8 +248,8 @@ export class Game {
         // Update spotting status of all ships and usability of abilities
         for (const client of this.clients) {
             for (const ship of client.player!.ships) {
-                ship.spotInitial();
-                for (const ability of ship.abilities)
+                ship!.spotInitial();
+                for (const ability of ship!.abilities)
                     ability.checkUsable({
                         builtinAttributes: {}
                     });

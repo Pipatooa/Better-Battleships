@@ -81,6 +81,13 @@ export class AttributeListener {
     }
 
     /**
+     * Unregisters this attribute listener from its assigned attribute
+     */
+    public unregister(): void {
+        this.attribute.unregisterAttributeListener(this);
+    }
+
+    /**
      * Called when the value of the attribute that this listener is attached to updates
      *
      * @param  eventContext Context for resolving objects and values when an event is triggered
