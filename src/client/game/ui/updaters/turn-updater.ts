@@ -78,9 +78,14 @@ export function updateTurnButton(): void {
  * Advances the current player's turn on the turn indicator
  */
 export function advanceTurnIndicator(): void {
-    const oldPlayer = playerTurns[currentTurn++];
-    currentTurn %= playerTurns.length;
-    const currentPlayer = playerTurns[currentTurn];
+    const oldPlayer = playerTurns[currentTurn];
+    let currentPlayer: Player;
+
+    do {
+        currentTurn += 1;
+        currentTurn %= playerTurns.length;
+        currentPlayer = playerTurns[currentTurn];
+    } while (currentPlayer !== oldPlayer && !currentPlayer.lost);
 
     oldPlayer.turnIndicatorElement!.removeClass('turn-indicator-active');
     currentPlayer.turnIndicatorElement!.addClass('turn-indicator-active');

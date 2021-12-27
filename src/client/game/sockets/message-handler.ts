@@ -2,9 +2,11 @@ import { handleConnectionInfo }             from './event-handlers/connection-in
 import { handleEnterSetupFailure }          from './event-handlers/enter-setup-failure';
 import { handleEnteringSetup }              from './event-handlers/entering-setup';
 import { handleGameInfo }                   from './event-handlers/game-info';
+import { handleGameOver }                   from './event-handlers/game-over';
 import { handleGameStart }                  from './event-handlers/game-start';
 import { handlePlayerJoin }                 from './event-handlers/player-join';
 import { handlePlayerLeave }                from './event-handlers/player-leave';
+import { handlePlayerLost }                 from './event-handlers/player-lost';
 import { handlePlayerReady }                from './event-handlers/player-ready';
 import { handleSetupInfo }                  from './event-handlers/setup-info';
 import { handleShipAppear }                 from './event-handlers/ship-appear';
@@ -61,5 +63,7 @@ const handlers: Record<ServerEventID, (event: any) => void> = {
     shipMove: handleShipMove,
     shipRotate: handleShipRotate,
     shipDestroyed: handleShipDestroyed,
-    turnAdvancement: handleTurnAdvancement
+    turnAdvancement: handleTurnAdvancement,
+    playerLost: handlePlayerLost,
+    gameOver: handleGameOver
 };

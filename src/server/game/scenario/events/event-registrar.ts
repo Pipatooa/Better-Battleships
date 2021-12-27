@@ -1,5 +1,6 @@
-import type { EventInfoEntry }                       from './base-events';
-import type { EventContextForEvent, EventListeners } from './event-context';
+import type { EventInfoEntry }                from './base-events';
+import type { EventContextForEvent }          from './event-context';
+import type { EventListener, EventListeners } from './event-listener';
 
 /**
  * EventRegistrar - Server Version
@@ -26,15 +27,12 @@ export class EventRegistrar<T extends Record<S, EventInfoEntry>, S extends strin
     /**
      * Adds a listener for an event
      *
-     * @param  event      Event name
-     * @param  listener   Listener function
-     * @param  prioritise Whether to put event listener at start of event listener array
+     * @param  event    Event to register listener for
+     * @param  listener Event listener
      */
-    public addEventListener<X extends S>(event: X, listener: (eventContext: EventContextForEvent<T, S, X>) => void, prioritise: boolean): void {
-        if (prioritise)
-            this.eventListeners[event].unshift(listener);
-        else
-            this.eventListeners[event].push(listener);
+    public addEventListener<X extends S>(event: X, listener: EventListener<T, S, X>): void {
+        this.eventListeners[event].push(listener);
+        this.eventListeners[event].sort((f, s) => s[0] - f[0]);
     }
 
     /**
@@ -71,10 +69,8 @@ export class EventRegistrar<T extends Record<S, EventInfoEntry>, S extends strin
      * @param  eventContext Context for resolving objects and values when an event is triggered
      */
     public triggerEvent<X extends S>(event: X, eventContext: EventContextForEvent<T, S, X>): void {
-        for (const listener of this.eventListeners[event]) {
-            console.log(`${event}: Called gaming ${listener}`);
-            listener(eventContext);
-        }
+        for (const [, callback] of this.eventListeners[event])
+            callback(eventContext);
         for (const subRegistrar of this.subRegistrars)
             subRegistrar.triggerEvent(event, eventContext);
     }

@@ -4,7 +4,11 @@ import { baseEventInfo } from '../../events/base-events';
  * Record describing all team events
  */
 export const teamEventInfo = {
-    ...baseEventInfo
+    ...baseEventInfo,
+    onPlayerLostFriendly: [['player'], []],
+    onPlayerLostUnfriendly: [['team', 'player'], []],
+    onTeamLostLocal: [[], []],
+    onTeamLostForeign: [['team'], []]
 } as const;
 
 /**

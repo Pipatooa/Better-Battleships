@@ -1,18 +1,32 @@
-import { checkAgainstSchema }       from '../../schema-checker';
-import { buildCondition }           from '../conditions/condition-builder';
-import { Action }                   from './action';
-import { actionLoseSchema }         from './sources/action-lose';
-import type { GenericEventContext } from '../../events/event-context';
-import type { ParsingContext }      from '../../parsing-context';
-import type { IActionLoseSource }   from './sources/action-lose';
+import { checkAgainstSchema }                          from '../../schema-checker';
+import { UnpackingError }                              from '../../unpacker';
+import { buildCondition }                              from '../conditions/condition-builder';
+import { Action }                                      from './action';
+import { actionLoseSchema }                            from './sources/action-lose';
+import type { ECA, EventContext, GenericEventContext } from '../../events/event-context';
+import type { ParsingContext }                         from '../../parsing-context';
+import type { Condition }                              from '../conditions/condition';
+import type { Player }                                 from '../player';
+import type { IActionLoseSource }                      from './sources/action-lose';
 
 /**
  * ActionLose - Server Version
  *
- * Action which causes the current team to lose the game
+ * Action which causes the current player to lose the game
  */
 export class ActionLose extends Action {
 
+    /**
+     * ActionLose constructor
+     *
+     * @param  player    Player to cause to lose. If undefined, will use player found in event context
+     * @param  condition Condition that must hold true for this action to execute.
+     */
+    private constructor(private readonly player: Player | undefined,
+                        condition: Condition) {
+        super(condition);
+    }
+    
     /**
      * Factory function to generate ActionLose from JSON scenario data
      *
@@ -31,8 +45,22 @@ export class ActionLose extends Action {
         const condition = await buildCondition(parsingContext.withExtendedPath('.condition'), actionLoseSource.condition, false);
         parsingContext.reducePath();
 
+        let player: Player | undefined;
+        switch (actionLoseSource.player) {
+            case 'local':
+                player = parsingContext.playerPartial as Player;
+                break;
+            case 'foreign':
+                if (parsingContext.currentEventInfo === undefined || !parsingContext.currentEventInfo[0].includes('player'))
+                    throw new UnpackingError(`The 'lose' action defined at '${parsingContext.currentPath}' is invalid. No foreign player to refer to.`,
+                        parsingContext);
+
+                player = undefined;
+                break;
+        }
+        
         // Return created ActionLose object
-        return new ActionLose(condition);
+        return new ActionLose(player, condition);
     }
 
     /**
@@ -41,10 +69,10 @@ export class ActionLose extends Action {
      * @param  eventContext Context for resolving objects and values when an event is triggered
      */
     public execute(eventContext: GenericEventContext): void {
-
         if (!this.condition.check(eventContext))
             return;
 
-        // TODO: Implement losing
+        const player = this.player ?? (eventContext as EventContext<'player', ECA>).foreignPlayer;
+        player.lose(true);
     }
 }

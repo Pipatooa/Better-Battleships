@@ -22,6 +22,8 @@ export class Player {
     private readonly _lobbyElement: JQuery;
     private _turnIndicatorElement: JQuery | undefined;
 
+    private _lost = false;
+
     /**
      * Player constructor
      *
@@ -107,6 +109,13 @@ export class Player {
     }
 
     /**
+     * Marks this player as eliminated from the game
+     */
+    public lose(): void {
+        this._lost = true;
+    }
+
+    /**
      * Getters and setters
      */
 
@@ -116,5 +125,9 @@ export class Player {
     
     public get turnIndicatorElement(): JQuery | undefined {
         return this._turnIndicatorElement;
+    }
+
+    public get lost(): boolean {
+        return this._lost;
     }
 }

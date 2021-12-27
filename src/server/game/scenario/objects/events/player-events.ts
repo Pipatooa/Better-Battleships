@@ -6,7 +6,8 @@ import { teamEventInfo } from './team-events';
 export const playerEventInfo = {
     ...teamEventInfo,
     onTurnStart: [[], []],
-    onTurnEnd: [[], []]
+    onTurnEnd: [[], []],
+    onPlayerLostLocal: [[], []]
 } as const;
 
 /**

@@ -21,6 +21,7 @@ import type { IBoardSource }                                                    
 import type { IScenarioSource }                                                   from './sources/scenario';
 import type { ITeamSource }                                                       from './sources/team';
 import type { FileJSON }                                                          from 'formidable';
+import type { Game }                                                              from 'server/game/game';
 import type { IScenarioInfo }                                                     from 'shared/network/scenario/i-scenario-info';
 import type { ITeamInfo }                                                         from 'shared/network/scenario/i-team-info';
 
@@ -30,6 +31,8 @@ import type { ITeamInfo }                                                       
  * Stores all information about the scenario and is the container object for most other objects in the scenario
  */
 export class Scenario implements IAttributeHolder, IBuiltinAttributeHolder<'scenario'> {
+
+    public game: Game | undefined;
 
     public constructor(public readonly fileJSON: FileJSON,
                        public readonly author: string,
@@ -157,5 +160,24 @@ export class Scenario implements IAttributeHolder, IBuiltinAttributeHolder<'scen
             teams: teamInfo
         };
     }
-}
 
+    /**
+     * Checks whether this game is over
+     *
+     * @returns  Whether this game is over
+     */
+    public checkGameOver(): boolean {
+        let winningTeam: Team | undefined;
+        for (const team of Object.values(this.teams)) {
+            if (!team.lost) {
+                if (winningTeam === undefined)
+                    winningTeam = team;
+                else
+                    return false;
+            }
+        }
+
+        this.game!.endGame(winningTeam!.id);
+        return true;
+    }
+}

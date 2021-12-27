@@ -2,9 +2,11 @@ import type { IConnectionInfoEvent }    from './i-connection-info';
 import type { IEnterSetupFailureEvent } from './i-enter-setup-failure';
 import type { IEnteringSetupEvent }     from './i-entering-setup';
 import type { IGameInfoEvent }          from './i-game-info';
+import type { IGameOverEvent }          from './i-game-over';
 import type { IGameStartEvent }         from './i-game-start';
 import type { IPlayerJoinEvent }        from './i-player-join';
 import type { IPlayerLeaveEvent }       from './i-player-leave';
+import type { IPlayerLostEvent }        from './i-player-lost';
 import type { IPlayerReadyEvent }       from './i-player-ready';
 import type { ISetupInfoEvent }         from './i-setup-info';
 import type { IShipAppearEvent }        from './i-ship-appear';
@@ -41,7 +43,9 @@ export type IServerEvent =
     IShipMoveEvent |
     IShipRotateEvent |
     IShipDestroyedEvent |
-    ITurnAdvancement;
+    ITurnAdvancement |
+    IPlayerLostEvent |
+    IGameOverEvent;
 
 
 /**

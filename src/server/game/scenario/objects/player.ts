@@ -27,6 +27,7 @@ import type { IPlayerInfo }                                                     
 export class Player implements IAttributeHolder, IBuiltinAttributeHolder<'player'> {
     
     public client: Client | undefined;
+    protected _lost = false;
 
     /**
      * Player constructor
@@ -157,5 +158,60 @@ export class Player implements IAttributeHolder, IBuiltinAttributeHolder<'player
     public removeShip(ship: Ship): void {
         const index = this.ships.indexOf(ship);
         this.ships[index] = undefined;
+    }
+
+    /**
+     * Eliminates this player from the game
+     *
+     * @param  propagateUp Whether or not to cause team to check if it has lost
+     */
+    public lose(propagateUp: boolean): void {
+        if (this._lost)
+            return;
+        this._lost = true;
+
+        if (propagateUp)
+            this.team.checkLost();
+
+        this.client!.game.broadcastEvent({
+            event: 'playerLost',
+            playerIdentity: this.client!.identity
+        });
+
+        this.eventRegistrar.triggerEvent('onPlayerLostLocal', {
+            builtinAttributes: {}
+        });
+
+        this.team.eventRegistrar.triggerEvent('onPlayerLostFriendly', {
+            builtinAttributes: {},
+            foreignPlayer: this
+        });
+
+        for (const team of Object.values(this.team.scenario.teams)) {
+            if (team === this.team)
+                continue;
+            team.eventRegistrar.triggerEvent('onPlayerLostUnfriendly', {
+                builtinAttributes: {},
+                foreignTeam: this.team,
+                foreignPlayer: this
+            });
+        }
+
+        this.eventRegistrar.triggerEventFromRoot('onPlayerLostGeneric', {
+            builtinAttributes: {},
+            foreignTeam: this.team,
+            foreignPlayer: this
+        });
+
+        if (this.team.scenario.turnManager.currentTurn === this)
+            this.team.scenario.turnManager.advanceTurn();
+    }
+
+    /**
+     * Getters and setters
+     */
+
+    public get lost(): boolean {
+        return this._lost;
     }
 }

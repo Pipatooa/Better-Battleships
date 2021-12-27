@@ -1,4 +1,5 @@
 import { checkAgainstSchema }                          from '../../schema-checker';
+import { UnpackingError }                              from '../../unpacker';
 import { buildCondition }                              from '../conditions/condition-builder';
 import { Action }                                      from './action';
 import { actionDestroyShipSchema }                     from './sources/action-destroy-ship';
@@ -50,6 +51,10 @@ export class ActionDestroyShip extends Action {
                 ship = parsingContext.shipPartial as Ship;
                 break;
             case 'foreign':
+                if (parsingContext.currentEventInfo === undefined || !parsingContext.currentEventInfo[0].includes('ship'))
+                    throw new UnpackingError(`The 'destroyShip' action defined at '${parsingContext.currentPath}' is invalid. No foreign ship to refer to.`,
+                        parsingContext);
+
                 ship = undefined;
                 break;
         }

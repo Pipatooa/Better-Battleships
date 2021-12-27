@@ -1,4 +1,5 @@
 import { TimeoutManager } from 'shared/timeout-manager';
+import type { Player }    from './objects/player';
 import type { Team }      from './objects/team';
 
 /**
@@ -8,7 +9,7 @@ import type { Team }      from './objects/team';
  */
 export class TurnManager {
 
-    private _turnOrder: string[] | undefined = undefined;
+    private _turnOrder: Player[] | undefined = undefined;
     private turnIndex = 0;
     private readonly turnsGenerated = false;
 
@@ -51,7 +52,7 @@ export class TurnManager {
 
                 for (const team of this.teams) {
                     for (const player of team.players) {
-                        this._turnOrder.push(player.client!.identity);
+                        this._turnOrder.push(player);
                     }
                 }
                 break;
@@ -66,7 +67,7 @@ export class TurnManager {
                     for (const team of this.teams) {
                         const player = team.players[i];
                         if (player !== undefined) {
-                            this._turnOrder.push(player.client!.identity);
+                            this._turnOrder.push(player);
                             c = true;
                         }
                     }
@@ -80,10 +81,13 @@ export class TurnManager {
      * Advances which player's turn is currently in session
      */
     public advanceTurn(): void {
-        this.turnIndex += 1;
-        this.turnIndex %= this._turnOrder!.length;
-        this.timeoutManager.startTimeout('turnTimeout');
+        const startIndex = this.turnIndex++;
+        while (this.turnIndex !== startIndex && !this._turnOrder![this.turnIndex].lost) {
+            this.turnIndex += 1;
+            this.turnIndex %= this._turnOrder!.length;
+        }
 
+        this.timeoutManager.startTimeout('turnTimeout');
         if (this.turnAdvancementCallback !== undefined)
             this.turnAdvancementCallback();
     }
@@ -92,11 +96,11 @@ export class TurnManager {
      * Getters and setters
      */
 
-    public get turnOrder(): string[] {
+    public get turnOrder(): Player[] {
         return this._turnOrder!;
     }
 
-    public get currentTurn(): string {
+    public get currentTurn(): Player {
         return this._turnOrder![this.turnIndex];
     }
 }

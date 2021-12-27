@@ -15,6 +15,7 @@ import type { ParsingContext }                                                  
 import type { IAttributeHolder, IBuiltinAttributeHolder, BuiltinAttributeRecord } from './attributes/attribute-holder';
 import type { AttributeMap }                                                      from './attributes/i-attribute-holder';
 import type { TeamEventInfo, TeamEvent }                                          from './events/team-events';
+import type { Scenario }                                                          from './scenario';
 import type { IPlayerSource }                                                     from './sources/player';
 import type { IPlayerConfig, ITeamSource }                                        from './sources/team';
 import type { ITeamInfo }                                                         from 'shared/network/scenario/i-team-info';
@@ -27,10 +28,12 @@ import type { ITeamInfo }                                                       
 export class Team implements IAttributeHolder, IBuiltinAttributeHolder<'team'> {
 
     private _players: Player[] = [];
+    protected _lost = false;
 
     /**
      * Team constructor
      *
+     * @param  scenario          Scenario that this player belongs to
      * @param  id                ID for team
      * @param  descriptor        Descriptor for team
      * @param  _playerPrototypes Array of potential players for the team
@@ -40,7 +43,8 @@ export class Team implements IAttributeHolder, IBuiltinAttributeHolder<'team'> {
      * @param  attributes        Attributes for the team
      * @param  builtinAttributes Built-in attributes for the team
      */
-    public constructor(public readonly id: string,
+    public constructor(public readonly scenario: Scenario,
+                       public readonly id: string,
                        public readonly descriptor: Descriptor,
                        protected _playerPrototypes: Player[][],
                        public readonly color: string,
@@ -161,7 +165,7 @@ export class Team implements IAttributeHolder, IBuiltinAttributeHolder<'team'> {
         parsingContext.localAttributes.team = undefined;
         parsingContext.teamPartial = undefined;
         const eventRegistrar = new EventRegistrar(eventListeners, []);
-        Team.call(teamPartial, id, descriptor, playerPrototypes, teamSource.color, teamSource.highlightColor, eventRegistrar, attributes, builtinAttributes);
+        Team.call(teamPartial, parsingContext.scenarioPartial as Scenario, id, descriptor, playerPrototypes, teamSource.color, teamSource.highlightColor, eventRegistrar, attributes, builtinAttributes);
         (teamPartial as any).__proto__ = Team.prototype;
         return teamPartial as Team;
     }
@@ -194,6 +198,52 @@ export class Team implements IAttributeHolder, IBuiltinAttributeHolder<'team'> {
     }
 
     /**
+     * Checks whether all players on this team have lost
+     */
+    public checkLost(): void {
+        for (const player of this.players)
+            if (!player.lost)
+                return;
+        this.lose(false);
+    }
+
+    /**
+     * Eliminates all players on this team from the game
+     *
+     * @param  propagateDown Whether or not to update player's lost status
+     */
+    public lose(propagateDown: boolean): void {
+        if (this._lost)
+            return;
+        this._lost = true;
+
+        if (this.scenario.checkGameOver())
+            return;
+
+        if (propagateDown)
+            for (const player of this._players)
+                player.lose(false);
+
+        this.eventRegistrar.triggerEvent('onTeamLostLocal', {
+            builtinAttributes: {}
+        });
+
+        for (const team of Object.values(this.scenario.teams)) {
+            if (team === this)
+                continue;
+            team.eventRegistrar.triggerEvent('onTeamLostForeign', {
+                builtinAttributes: {},
+                foreignTeam: this
+            });
+        }
+
+        this.eventRegistrar.triggerEventFromRoot('onTeamLostGeneric', {
+            builtinAttributes: {},
+            foreignTeam: this
+        });
+    }
+
+    /**
      * Getters and setters
      */
 
@@ -203,5 +253,9 @@ export class Team implements IAttributeHolder, IBuiltinAttributeHolder<'team'> {
 
     public get players(): Player[] {
         return this._players;
+    }
+
+    public get lost(): boolean {
+        return this._lost;
     }
 }

@@ -20,7 +20,7 @@ import type { FileJSON }                         from 'formidable';
 export class ParsingContext {
 
     private readonly fileStack: string[] = [];
-    private readonly pathSegments: string[] = [];
+    private readonly pathSegmentStack: string[] = [];
 
     public board: Board | undefined;
     public scenarioPartial: Partial<Scenario> | undefined;
@@ -64,13 +64,12 @@ export class ParsingContext {
     }
 
     public withExtendedPath(pathSegment: string): this {
-        this.pathSegments.push(pathSegment);
+        this.pathSegmentStack.push(pathSegment);
         return this;
     }
 
     public reducePath(): void {
-        if (this.pathSegments.length > 0)
-            this.pathSegments.pop();
+        this.pathSegmentStack.pop();
     }
 
     /**
@@ -82,13 +81,13 @@ export class ParsingContext {
     }
 
     public get currentPath(): string {
-        return this.pathSegments.join('').replace(/^\./, '');
+        return this.pathSegmentStack.join('').replace(/^\./, '');
     }
 
     public get currentPathPrefix(): string {
-        return this.pathSegments.length === 0
+        return this.pathSegmentStack.length === 0
             ? ''
-            : this.pathSegments.join('') + '.';
+            : this.pathSegmentStack.join('') + '.';
     }
 
     public get attributeContextName(): AttributeReferenceObjectSelector {

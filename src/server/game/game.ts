@@ -219,7 +219,7 @@ export class Game {
                 boardInfo: this.scenario.board.makeTransportable(),
                 playerInfo: client.player!.makeTransportable(),
                 playerColors: playerColors,
-                turnOrder: this.scenario.turnManager.turnOrder,
+                turnOrder: this.scenario.turnManager.turnOrder.map(p => p.client!.identity),
                 maxTurnTime: this.scenario.turnManager.turnTimeout
             });
         }
@@ -267,6 +267,19 @@ export class Game {
     }
 
     /**
+     * Ends the game
+     *
+     * @param  winningTeamID
+     */
+    public endGame(winningTeamID: string): void {
+        this._gamePhase = GamePhase.Finished;
+        this.broadcastEvent({
+            event: 'gameOver',
+            winningTeam: winningTeamID
+        });
+    }
+
+    /**
      * Broadcasts a server event to all connected clients
      *
      * @param  serverEvent Event to broadcast
@@ -286,6 +299,9 @@ export class Game {
     }
 }
 
+/**
+ * Enum describing different phases that the game can be in
+ */
 export const enum GamePhase {
     Lobby,
     EnteringSetup,

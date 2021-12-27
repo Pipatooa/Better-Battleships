@@ -37,7 +37,8 @@ export abstract class Ability implements IAttributeHolder, BuiltinAttributeRecor
                        public readonly builtinAttributes: BuiltinAttributeRecord<'ability'>,
                        private readonly attributeListeners: AttributeListener[]) {
 
-        this.eventRegistrar.addEventListener('onAbilityUsed', (eventContext: EventContextForEvent<AbilityEventInfo, AbilityEvent, 'onAbilityUsed'>) => this.checkUsable(eventContext), true);
+        const listenerCallback = (eventContext: EventContextForEvent<AbilityEventInfo, AbilityEvent, 'onAbilityUsed'>): void => this.checkUsable(eventContext);
+        this.eventRegistrar.addEventListener('onAbilityUsed', [10, listenerCallback]);
     }
 
     /**
@@ -73,9 +74,8 @@ export abstract class Ability implements IAttributeHolder, BuiltinAttributeRecor
      * @param    eventContext Context for resolving objects and values when an event is triggered
      * @returns               Whether or not this ability is usable
      */
-    public checkUsable(eventContext: GenericEventContext): boolean {
+    public checkUsable(eventContext: GenericEventContext): void {
         this.usable = this.condition.check(eventContext);
-        return this.usable;
     }
 
     /**

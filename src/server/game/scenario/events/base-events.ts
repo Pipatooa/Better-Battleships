@@ -11,7 +11,9 @@ export type EventInfoEntry = readonly [readonly AttributeReferenceForeignObjectS
 export const baseEventInfo = {
     onGameStart: [[], []],
     onTurnAdvancement: [['team', 'player'], []],
-    onAbilityUsed: [['team', 'player', 'ship', 'ability'], []]
+    onAbilityUsed: [['team', 'player', 'ship', 'ability'], []],
+    onPlayerLostGeneric: [['team', 'player'], []],
+    onTeamLostGeneric: [['team'], []]
 } as const;
 
 /**
@@ -27,4 +29,4 @@ export type BaseEvent = keyof BaseEventInfo;
 /**
  * Type matching all built-in attributes names for a specific event
  */
-export type EventbuiltinAttributes<T extends Record<S, EventInfoEntry>, S extends string, X extends S> = T[X][1][number];
+export type EventBuiltinAttributes<T extends Record<S, EventInfoEntry>, S extends string, X extends S> = T[X][1][number];

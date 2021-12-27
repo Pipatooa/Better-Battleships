@@ -1,12 +1,9 @@
-import { buildAction }         from './action-builder';
-import type { EventInfoEntry } from '../../events/base-events';
-import type {
-    EventContextForEvent,
-    EventListeners,
-    GenericEventContext
-}                              from '../../events/event-context';
-import type { ParsingContext } from '../../parsing-context';
-import type { ActionSource }   from './sources/action';
+import { buildAction }                                    from './action-builder';
+import type { EventInfoEntry }                            from '../../events/base-events';
+import type { EventContextForEvent, GenericEventContext } from '../../events/event-context';
+import type { EventListeners }                            from '../../events/event-listener';
+import type { ParsingContext }                            from '../../parsing-context';
+import type { ActionSource }                              from './sources/action';
 
 /**
  * Gets a dictionary of event listeners for actions tied to events from a dictionary of action sources
@@ -34,7 +31,8 @@ export async function eventListenersFromActionSource<T extends Record<S, EventIn
             const actionSource = actionSources[i];
             const action = await buildAction(parsingContext.withExtendedPath(`.${eventName}[${i}]`), actionSource, false);
             parsingContext.reducePath();
-            eventListeners[eventName].push((eventContext: EventContextForEvent<T, S, S>) => action.execute(eventContext as unknown as GenericEventContext));
+            const listenerCallback = (eventContext: EventContextForEvent<T, S, S>): void => action.execute(eventContext as unknown as GenericEventContext);
+            eventListeners[eventName].push([0, listenerCallback]);
         }
     }
 

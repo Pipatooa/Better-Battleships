@@ -1,10 +1,12 @@
-import type { Ability }                                 from '../objects/abilities/ability';
-import type { AttributeReferenceForeignObjectSelector } from '../objects/attribute-references/sources/attribute-reference';
-import type { AttributeCodeControlled }                 from '../objects/attributes/attribute-code-controlled';
-import type { Player }                                  from '../objects/player';
-import type { Ship }                                    from '../objects/ship';
-import type { Team }                                    from '../objects/team';
-import type { EventInfoEntry }                          from './base-events';
+import type { Ability }                        from '../objects/abilities/ability';
+import type {
+    AttributeReferenceForeignObjectSelector
+}                                       from '../objects/attribute-references/sources/attribute-reference';
+import type { AttributeCodeControlled } from '../objects/attributes/attribute-code-controlled';
+import type { Player }                  from '../objects/player';
+import type { Ship }                    from '../objects/ship';
+import type { Team }                    from '../objects/team';
+import type { EventInfoEntry }          from './base-events';
 
 /**
  * Type alias for event context A type
@@ -66,12 +68,6 @@ interface IEventContextForeignShipObjects {
 interface IEventContextForeignAbilityObjects {
     foreignAbility: Ability
 }
-
-/**
- * Type matching a dictionary of event names to arrays of event listeners
- */
-export type EventListeners<T extends Record<S, EventInfoEntry>, S extends string>
-    = { [X in S]: ((eventContext: EventContextForEvent<T, S, X>) => void)[] };
 
 /**
  * Type matching an event context for a particular event entry

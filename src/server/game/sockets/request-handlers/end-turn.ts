@@ -14,7 +14,7 @@ export async function handleEndTurnRequest(client: Client, endTurnRequest: IEndT
     if (client.game.gamePhase !== GamePhase.InProgress)
         return;
 
-    if (client.game.scenario.turnManager.currentTurn !== client.identity)
+    if (client.game.scenario.turnManager.currentTurn !== client.player)
         return;
 
     client.game.scenario.turnManager.advanceTurn();
