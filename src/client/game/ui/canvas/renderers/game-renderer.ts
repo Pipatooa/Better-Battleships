@@ -1,4 +1,4 @@
-import { game }                   from '../../game';
+import { game }                   from '../../../game';
 import { BoardInfoGenerator }     from '../board-info-generator';
 import { ColorAtlas }             from '../color-atlas';
 import { BoardProgram }           from '../model-programs/board-program';

@@ -1,9 +1,9 @@
-import { game }                  from '../game';
+import { game }                  from '../../game';
 import { ColorAtlas }            from './color-atlas';
 import { AbilityRenderer }       from './renderers/ability-renderer';
 import { GameRenderer }          from './renderers/game-renderer';
 import { ShipSelectionRenderer } from './renderers/ship-selection-renderer';
-import type { Ship }             from '../scenario/ship';
+import type { Ship }             from '../../scenario/ship';
 
 /**
  * Initiates all game renderers

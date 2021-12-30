@@ -1,7 +1,7 @@
 import { Region }                  from './region';
 import { TileType }                from './tiletype';
-import type { BoardInfoGenerator } from '../canvas/board-info-generator';
-import type { BoardRenderer }      from '../canvas/renderers/board-renderer';
+import type { BoardInfoGenerator } from '../ui/canvas/board-info-generator';
+import type { BoardRenderer }      from '../ui/canvas/renderers/board-renderer';
 import type { Ship }               from './ship';
 import type { IBoardInfo }         from 'shared/network/scenario/i-board-info';
 

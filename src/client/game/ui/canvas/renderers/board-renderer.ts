@@ -1,5 +1,5 @@
 import { Renderer }                    from './renderer';
-import type { Board }                  from '../../scenario/board';
+import type { Board }                  from '../../../scenario/board';
 import type { BoardInfoGenerator }     from '../board-info-generator';
 import type { SelectionInfoGenerator } from '../selection-info-generator';
 

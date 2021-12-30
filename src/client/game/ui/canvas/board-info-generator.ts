@@ -1,7 +1,7 @@
 import { ColorAtlas }                         from './color-atlas';
 import { getGLTextureLocation, TextureIndex } from './texture-index';
-import type { Board, Tile }                   from '../scenario/board';
-import type { Pattern }                       from '../scenario/pattern';
+import type { Board, Tile }                   from '../../scenario/board';
+import type { Pattern }                       from '../../scenario/pattern';
 import type { ModelProgram }                  from './model-programs/model-program';
 
 /**

@@ -1,10 +1,10 @@
-import { initiateRenderers }      from '../../canvas/initiate';
 import { game }                   from '../../game';
 import { allPlayers, selfPlayer } from '../../player';
 import { getAbilities }           from '../../scenario/abilities/ability-getter';
 import { Board }                  from '../../scenario/board';
 import { RotatablePattern }       from '../../scenario/rotatable-pattern';
 import { Ship }                   from '../../scenario/ship';
+import { initiateRenderers }      from '../../ui/canvas/initiate';
 import { initiateGameSetupUI }    from '../../ui/initiate';
 import { setupTurnIndicator }     from '../../ui/updaters/turn-updater';
 import type { ISetupInfoEvent }   from 'shared/network/events/i-setup-info';

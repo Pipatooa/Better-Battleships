@@ -1,15 +1,15 @@
-import { game }                   from '../../game';
-import { AbilityMove }            from '../../scenario/abilities/ability-move';
-import { Board }                  from '../../scenario/board';
-import { TileType }               from '../../scenario/tiletype';
+import { game }                   from '../../../game';
+import { AbilityMove }            from '../../../scenario/abilities/ability-move';
+import { Board }                  from '../../../scenario/board';
+import { TileType }               from '../../../scenario/tiletype';
 import { BoardInfoGenerator }     from '../board-info-generator';
 import { BoardProgram }           from '../model-programs/board-program';
 import { SelectionInfoGenerator } from '../selection-info-generator';
 import { ViewportHandler }        from '../viewport-handler';
 import { BoardRenderer }          from './board-renderer';
 import { Renderer }               from './renderer';
-import type { Ability }           from '../../scenario/abilities/ability';
-import type { Tile }              from '../../scenario/board';
+import type { Ability }           from '../../../scenario/abilities/ability';
+import type { Tile }              from '../../../scenario/board';
 import type { ColorAtlas }        from '../color-atlas';
 
 /**

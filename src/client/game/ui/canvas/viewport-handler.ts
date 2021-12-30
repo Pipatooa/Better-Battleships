@@ -1,5 +1,5 @@
 import { clamp }             from 'shared/utility';
-import type { Board }        from '../scenario/board';
+import type { Board }        from '../../scenario/board';
 import type { ModelProgram } from './model-programs/model-program';
 
 export class ViewportHandler {

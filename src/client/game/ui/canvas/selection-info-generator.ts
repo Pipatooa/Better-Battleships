@@ -1,6 +1,6 @@
-import { Pattern }                            from '../scenario/pattern';
+import { Pattern }                            from '../../scenario/pattern';
 import { getGLTextureLocation, TextureIndex } from './texture-index';
-import type { Ship }                          from '../scenario/ship';
+import type { Ship }                          from '../../scenario/ship';
 import type { ModelProgram }                  from './model-programs/model-program';
 
 /**

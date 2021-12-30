@@ -25,13 +25,23 @@ export class ShipPlacer extends UIManager {
         document.removeEventListener('keypress', this.keyPressListener);
     }
 
+    /**
+     * Updates the location of the current selection
+     *
+     * @param  ev Pointer movement event
+     */
     protected updateSelection(ev: PointerEvent): void {
         super.updateSelection(ev);
+        game.shipSelectionRenderer!.updateSelectionLocation(ev);
+        if (ev.target === game.gameRenderer!.viewportHandler.canvas)
+            this.checkPlacementValid();
+    }
 
-        // Update info text if hovering over the main board with a ship
-        if (this.mainCanvasCoordinates !== undefined && this._heldShip !== undefined
-                && ev.target === game.gameRenderer!.viewportHandler.canvas) {
-
+    /**
+     * Checks whether the current ship's placement is valid
+     */
+    private checkPlacementValid(): void {
+        if (this.mainCanvasCoordinates !== undefined && this._heldShip !== undefined) {
             const shipX = Math.floor(this.mainCanvasCoordinates[0] - this._heldShip.pattern.center[0]);
             const shipY = Math.floor(this.mainCanvasCoordinates[1] - this._heldShip.pattern.center[1]);
             const [ placementValid, invalidReason ] = this._heldShip.checkPlacementValid(shipX, shipY, game.board!);
@@ -92,6 +102,8 @@ export class ShipPlacer extends UIManager {
             const rotation = ev.key === 'R' ? Rotation.Clockwise270 : Rotation.Clockwise90;
             this._heldShip.rotate(rotation);
             this.heldShip = this._heldShip;
+            this.checkPlacementValid();
+            this.updateTooltip();
         }
     }
 

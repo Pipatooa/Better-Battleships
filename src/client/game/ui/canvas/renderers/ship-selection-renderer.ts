@@ -1,20 +1,20 @@
-import { game }                      from '../../game';
-import { Board }                     from '../../scenario/board';
-import { sendRequest }               from '../../sockets/opener';
-import { initiateGameMainUI }        from '../../ui/initiate';
-import { ShipPlacer }                from '../../ui/managers/ship-placer';
-import { UIManager }                 from '../../ui/managers/ui-manager';
-import { VariableVisibilityElement } from '../../ui/variable-visibility-element';
+import { game }                      from '../../../game';
+import { Board }                     from '../../../scenario/board';
+import { sendRequest }               from '../../../sockets/opener';
+import { initiateGameMainUI }        from '../../initiate';
+import { ShipPlacer }                from '../../managers/ship-placer';
+import { UIManager }                 from '../../managers/ui-manager';
+import { VariableVisibilityElement } from '../../variable-visibility-element';
 import { BoardInfoGenerator }        from '../board-info-generator';
 import { BoardProgram }              from '../model-programs/board-program';
 import { SelectionInfoGenerator }    from '../selection-info-generator';
 import { ViewportHandler }           from '../viewport-handler';
 import { BoardRenderer }             from './board-renderer';
 import { Renderer }                  from './renderer';
-import type { Rotation }             from '../../../../shared/scenario/objects/common/rotation';
-import type { Tile }                 from '../../scenario/board';
-import type { Ship }                 from '../../scenario/ship';
+import type { Tile }                 from '../../../scenario/board';
+import type { Ship }                 from '../../../scenario/ship';
 import type { ColorAtlas }           from '../color-atlas';
+import type { Rotation }             from 'shared/scenario/objects/common/rotation';
 
 /**
  * ShipSelectionRenderer - Client Version

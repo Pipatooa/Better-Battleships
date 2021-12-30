@@ -1,7 +1,7 @@
-import { game }                               from '../game';
-import { allPlayers }                         from '../player';
+import { game }                               from '../../game';
+import { allPlayers }                         from '../../player';
 import { getGLTextureLocation, TextureIndex } from './texture-index';
-import type { TileType }                      from '../scenario/tiletype';
+import type { TileType }                      from '../../scenario/tiletype';
 import type { ModelProgram }                  from './model-programs/model-program';
 
 export class ColorAtlas<C extends string> {

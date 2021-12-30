@@ -1,9 +1,9 @@
-import type { AbilityRenderer }       from './canvas/renderers/ability-renderer';
-import type { GameRenderer }          from './canvas/renderers/game-renderer';
-import type { ShipSelectionRenderer } from './canvas/renderers/ship-selection-renderer';
 import type { Board }                 from './scenario/board';
 import type { Region }                from './scenario/region';
 import type { Team }                  from './team';
+import type { AbilityRenderer }       from './ui/canvas/renderers/ability-renderer';
+import type { GameRenderer }          from './ui/canvas/renderers/game-renderer';
+import type { ShipSelectionRenderer } from './ui/canvas/renderers/ship-selection-renderer';
 
 export let game: Game;
 
