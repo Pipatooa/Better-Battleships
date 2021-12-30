@@ -15,7 +15,7 @@ import type { ParsingContext }                                                  
 import type { Ability }                                                           from './abilities/ability';
 import type { AbilitySource }                                                     from './abilities/sources/ability';
 import type { AttributeListener }                                                 from './attribute-listeners/attribute-listener';
-import type { IAttributeHolder, IBuiltinAttributeHolder, BuiltinAttributeRecord } from './attributes/attribute-holder';
+import type { BuiltinAttributeRecord, IAttributeHolder, IBuiltinAttributeHolder } from './attributes/attribute-holder';
 import type { AttributeMap }                                                      from './attributes/i-attribute-holder';
 import type { Board }                                                             from './board';
 import type { ShipEvent, ShipEventInfo }                                          from './events/ship-events';
@@ -36,10 +36,12 @@ export class Ship implements IAttributeHolder, IBuiltinAttributeHolder<'ship'> {
     protected _x = 0;
     protected _y = 0;
 
-    protected spottedBy: Ship[] = [];
-    protected spotting: Ship[] = [];
-    protected knownTo: [team: Team, trackingID: string, newlyAppeared: boolean][] = [];
+    public readonly teamTrackingID: string = v4();
 
+    protected spottedBy: Ship[] = [];
+    protected needsSpottingUpdate: Ship[] = [];
+    protected knownTo: [team: Team, trackingID: string, newlyAppeared: boolean][] = [];
+    
     /**
      * Ship constructor
      *
@@ -47,7 +49,7 @@ export class Ship implements IAttributeHolder, IBuiltinAttributeHolder<'ship'> {
      * @param  board              Board that this ship belongs to
      * @param  descriptor         Descriptor for ship
      * @param  _pattern           Pattern describing shape of ship
-     * @param  visibilityPattern  Pattern describing cells from which this ship is visible
+     * @param  _visibilityPattern Pattern describing cells from which this ship is visible
      * @param  abilities          Dictionary of abilities available to the ship
      * @param  eventRegistrar     Registrar of all ship event listeners
      * @param  attributes         Attributes for the ship
@@ -58,7 +60,7 @@ export class Ship implements IAttributeHolder, IBuiltinAttributeHolder<'ship'> {
                        public readonly board: Board,
                        public readonly descriptor: Descriptor,
                        protected _pattern: RotatablePattern,
-                       protected visibilityPattern: RotatablePattern,
+                       protected _visibilityPattern: RotatablePattern,
                        public readonly abilities: Ability[],
                        public readonly eventRegistrar: EventRegistrar<ShipEventInfo, ShipEvent>,
                        public readonly attributes: AttributeMap,
@@ -83,7 +85,8 @@ export class Ship implements IAttributeHolder, IBuiltinAttributeHolder<'ship'> {
             });
         }
 
-        this.unSpot();
+        this.unSpotOthers();
+        this.updateOthers();
         this.board.removeShip(this);
     }
 
@@ -114,7 +117,7 @@ export class Ship implements IAttributeHolder, IBuiltinAttributeHolder<'ship'> {
             shipSource = await checkAgainstSchema(shipSource, shipSchema, parsingContext);
 
         // Ship partial refers to future ship object
-        const shipPartial: Partial<Ship> = {};
+        const shipPartial: Partial<Ship> = Object.create(Ship.prototype);
         parsingContext.shipPartial = shipPartial;
         
         // Get attributes
@@ -165,7 +168,6 @@ export class Ship implements IAttributeHolder, IBuiltinAttributeHolder<'ship'> {
         parsingContext.shipPartial = undefined;
         const eventRegistrar = new EventRegistrar(eventListeners, subRegistrars);
         Ship.call(shipPartial, parsingContext.playerPartial as Player, parsingContext.board!, descriptor, pattern, visibilityPattern, abilities, eventRegistrar, attributes, builtinAttributes, attributeListeners);
-        (shipPartial as any).__proto__ = Ship.prototype;
         return shipPartial as Ship;
     }
 
@@ -197,7 +199,7 @@ export class Ship implements IAttributeHolder, IBuiltinAttributeHolder<'ship'> {
         const prototypeInfo: IShipPrototypeInfo = {
             descriptor: this.descriptor.makeTransportable(),
             pattern: this._pattern.makeTransportable(false),
-            visibilityPattern: this.visibilityPattern.makeTransportable(false),
+            visibilityPattern: this._visibilityPattern.makeTransportable(false),
             abilities: abilityInfo
         };
 
@@ -215,12 +217,14 @@ export class Ship implements IAttributeHolder, IBuiltinAttributeHolder<'ship'> {
     /**
      * Places this ship onto the board
      *
-     * @param  x Destination X coordinate
-     * @param  y Destination Y coordinate
+     * @param  x        Destination X coordinate
+     * @param  y        Destination Y coordinate
+     * @param  rotation Rotation of the ship
      */
-    public place(x: number, y: number): void {
+    public place(x: number, y: number, rotation: Rotation): void {
         this._x = x;
         this._y = y;
+        this._pattern = this._pattern.rotated(rotation);
         this.board.addShip(this);
     }
 
@@ -228,98 +232,133 @@ export class Ship implements IAttributeHolder, IBuiltinAttributeHolder<'ship'> {
      * Sets initial spotting status of this ship
      */
     public spotInitial(): void {
-        this.spot();
+        this.spotOthers();
         this.updateKnown();
+
+        this.owner.team.broadcastEvent({
+            event: 'shipAppear',
+            trackingID: this.teamTrackingID,
+            shipInfo: this.makeTransportable(false)
+        }, this.owner);
     }
 
     /**
-     * Makes this ship visible to all other ships within its current visibility radius
+     * Spots other ships which are visible to this ship
      */
-    private spot(): void {
-        for (const [dx, dy] of this.visibilityPattern.patternEntries) {
+    private spotOthers(): void {
+
+        // Spot other ships
+        for (const [ dx, dy ] of this._pattern.patternEntries) {
+            const tile = this.board.tiles[this._y + dy][this._x + dx];
+            for (const ship of tile[3])
+                if (ship !== this && !ship.spottedBy.includes(this)) {
+                    ship.spottedBy.push(this);
+                    if (!this.needsSpottingUpdate.includes(ship))
+                        this.needsSpottingUpdate.push(ship);
+                }
+        }
+
+        // Get spotted by other ships
+        for (const [dx, dy] of this._visibilityPattern.patternEntries) {
             const tile = this.board.tiles[this._y + dy]?.[this._x + dx];
             const ship = tile?.[2];
-            if (ship === undefined || ship.spotting.includes(this))
+            if (ship === undefined || ship === this)
                 continue;
-
-            ship.spotting.push(this);
-            this.spottedBy.push(ship);
+            if (!this.spottedBy.includes(ship))
+                this.spottedBy.push(ship);
         }
     }
 
     /**
-     * Makes this ship invisible to all other ships within its current visibility radius
+     * Un-spots other ships which are visible to this ship
      */
-    private unSpot(): void {
-        const alreadyRemoved: Ship[] = [];
-        for (const [dx, dy] of this.visibilityPattern.patternEntries) {
-            const tile = this.board.tiles[this._y + dy]?.[this._x + dx];
-            const ship = tile?.[2];
-            if (ship === undefined || alreadyRemoved.includes(ship))
-                continue;
+    private unSpotOthers(): void {
 
-            ship.spotting = ship.spotting.filter(s => s !== this);
-            this.spottedBy = this.spottedBy.filter(s => s !== ship);
-            alreadyRemoved.push(ship);
+        // Un-spot other ships
+        for (const [ dx, dy ] of this._pattern.patternEntries) {
+            const tile = this.board.tiles[this._y + dy][this._x + dx];
+            for (const ship of tile[3])
+                if (ship !== this && ship.spottedBy.includes(this)) {
+                    ship.spottedBy = ship.spottedBy.filter(s => s !== this);
+                    if (!this.needsSpottingUpdate.includes(ship))
+                        this.needsSpottingUpdate.push(ship);
+                }
         }
+
+        // Get un-spotted by other ships
+        this.spottedBy = [];
     }
 
     /**
-     * Updates the list of who knows about the location of this ship
+     * Updates the array of teams who know about the location of this ship
      */
     private updateKnown(): void {
 
-        // Create a dictionary of team IDs to existing ship tracking IDs
-        const oldKnownEntries: { [id: string]: string } = {};
+        // Convert old known entries to dictionary for tracking ID lookup
+        const oldKnownEntries: { [id: string]: [Team, string] } = {};
         for (const [team, trackingID] of this.knownTo) {
-            oldKnownEntries[team.id] = trackingID;
+            oldKnownEntries[team.id] = [team, trackingID];
         }
 
         // Create a new array of [team, trackingID, newlyAppeared] entries
-        this.knownTo = [];
-        const alreadyIncluded: Team[] = [];
+        this.knownTo = [[this.owner.team, this.teamTrackingID, false]];
+        const knownToTeams: Team[] = [this.owner.team];
         for (const ship of this.spottedBy) {
             const team = ship.owner.team;
             const previousEntry = oldKnownEntries[team.id];
 
-            if (alreadyIncluded.includes(team))
+            if (knownToTeams.includes(team))
                 continue;
 
-            let trackingID: string;
             const newlyAppeared = previousEntry === undefined;
+            const trackingID = newlyAppeared ? v4() : previousEntry[1];
 
-            if (newlyAppeared) {
-                trackingID = v4();
+            if (newlyAppeared)
                 team.broadcastEvent({
                     event: 'shipAppear',
                     trackingID: trackingID,
                     shipInfo: this.makeTransportable(false)
                 });
-            } else {
-                trackingID = previousEntry;
-            }
 
             this.knownTo.push([team, trackingID, newlyAppeared]);
-            alreadyIncluded.push(team);
+            knownToTeams.push(team);
+        }
+
+        for (const [team, trackingID] of Object.values(oldKnownEntries)) {
+            if (!knownToTeams.includes(team))
+                team.broadcastEvent({
+                    event: 'shipDisappear',
+                    trackingID: trackingID
+                });
         }
     }
 
     /**
-     * Moves the ship to a destination coordinate on the board
+     * Updates known state of surrounding ships after a ship movement or rotation
+     */
+    private updateOthers(): void {
+        for (const ship of this.needsSpottingUpdate)
+            ship.updateKnown();
+        this.needsSpottingUpdate = [];
+    }
+
+    /**
+     * Moves the ship to a new location on the board
      *
      * @param  x Destination X coordinate
      * @param  y Destination Y coordinate
      */
     public moveTo(x: number, y: number): void {
-        this.unSpot();
+        this.unSpotOthers();
         this.board.removeShip(this);
         this._x = x;
         this._y = y;
         this.board.addShip(this);
-        this.spot();
+        this.spotOthers();
         this.updateKnown();
+        this.updateOthers();
 
-        // Broadcast movement to teams which know of this ship
+        // Broadcast movement to other teams which know of this ship
         for (const [team, trackingID, newlyAppeared] of this.knownTo) {
             if (!newlyAppeared)
                 team.broadcastEvent({
@@ -332,6 +371,20 @@ export class Ship implements IAttributeHolder, IBuiltinAttributeHolder<'ship'> {
     }
 
     /**
+     * Tries to move the ship to a new location on the board
+     *
+     * @param    x Destination X coordinate
+     * @param    y Destination Y coordinate
+     * @returns    Whether the movement was successful
+     */
+    public tryMoveTo(x: number, y: number): boolean {
+        const movementAllowed = this.board.checkMovement(this, x, y);
+        if (movementAllowed)
+            this.moveTo(x, y);
+        return movementAllowed;
+    }
+
+    /**
      * Moves the ship by an offset
      *
      * @param  dx Horizontal distance to move ship by
@@ -340,22 +393,34 @@ export class Ship implements IAttributeHolder, IBuiltinAttributeHolder<'ship'> {
     public moveBy(dx: number, dy: number): void {
         this.moveTo(this._x + dx, this._y + dy);
     }
+    
+    /**
+     * Tries to move the ship by an offset
+     *
+     * @param    x Horizontal distance to move ship by
+     * @param    y Vertical distance to move ship by
+     * @returns    Whether the movement was successful
+     */
+    public tryMoveBy(x: number, y: number): boolean {
+        return this.tryMoveTo(this._x + x, this._y + y);
+    }
 
     /**
      * Rotates the ship in place
      *
      * @param  rotation Amount to rotate ship by
      */
-    public rotate(rotation: Rotation): void {
-        this.unSpot();
+    public rotateBy(rotation: Rotation): void {
+        this.unSpotOthers();
         this.board.removeShip(this);
         this._pattern = this._pattern.rotated(rotation);
-        this.visibilityPattern = this.visibilityPattern.rotated(rotation);
+        this._visibilityPattern = this._visibilityPattern.rotated(rotation);
         this.board.addShip(this);
-        this.spot();
+        this.spotOthers();
         this.updateKnown();
+        this.updateOthers();
 
-        // Broadcast rotation to teams which know of this ship
+        // Broadcast rotation to other teams which know of this ship
         for (const [team, trackingID, newlyAppeared] of this.knownTo) {
             if (!newlyAppeared)
                 team.broadcastEvent({
@@ -364,6 +429,19 @@ export class Ship implements IAttributeHolder, IBuiltinAttributeHolder<'ship'> {
                     rotation: rotation
                 });
         }
+    }
+
+    /**
+     * Tries to rotate the ship in place
+     *
+     * @param    rotation Amount to rotate ship by
+     * @returns           Whether the rotation was successful
+     */
+    public tryRotateBy(rotation: Rotation): boolean {
+        const rotationAllowed = this.board.checkRotation(this, rotation);
+        if (rotationAllowed)
+            this.rotateBy(rotation);
+        return rotationAllowed;
     }
 
     /**
@@ -380,5 +458,9 @@ export class Ship implements IAttributeHolder, IBuiltinAttributeHolder<'ship'> {
 
     public get pattern(): RotatablePattern {
         return this._pattern;
+    }
+
+    public get visibilityPattern(): RotatablePattern {
+        return this._visibilityPattern;
     }
 }

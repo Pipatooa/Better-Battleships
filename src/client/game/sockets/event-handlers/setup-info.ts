@@ -1,15 +1,12 @@
 import { initiateRenderers }      from '../../canvas/initiate';
 import { game }                   from '../../game';
 import { allPlayers, selfPlayer } from '../../player';
-import { AbilityFire }            from '../../scenario/abilities/ability-fire';
-import { AbilityMove }            from '../../scenario/abilities/ability-move';
-import { AbilityRotate }          from '../../scenario/abilities/ability-rotate';
+import { getAbilities }           from '../../scenario/abilities/ability-getter';
 import { Board }                  from '../../scenario/board';
 import { RotatablePattern }       from '../../scenario/rotatable-pattern';
 import { Ship }                   from '../../scenario/ship';
 import { initiateGameSetupUI }    from '../../ui/initiate';
 import { setupTurnIndicator }     from '../../ui/updaters/turn-updater';
-import type { Ability }           from '../../scenario/abilities/ability';
 import type { ISetupInfoEvent }   from 'shared/network/events/i-setup-info';
 
 /**
@@ -25,7 +22,7 @@ export async function handleSetupInfo(setupInfoEvent: ISetupInfoEvent): Promise<
 
     // Unpack board data
     game.board = await Board.fromSource(setupInfoEvent.boardInfo);
-    game.spawnRegionID = setupInfoEvent.playerInfo.spawnRegion;
+    game.spawnRegion = game.board.regions[setupInfoEvent.playerInfo.spawnRegion];
 
     // Unpack player colors
     for (const [playerIdentity, color] of Object.entries(setupInfoEvent.playerColors)) {
@@ -35,29 +32,17 @@ export async function handleSetupInfo(setupInfoEvent: ISetupInfoEvent): Promise<
 
     // Unpack player info
     const ships: Ship[] = [];
-    for (let shipIndex = 0; shipIndex < setupInfoEvent.playerInfo.ships.length; shipIndex++) {
-        const shipInfo = setupInfoEvent.playerInfo.ships[shipIndex];
-        const pattern = RotatablePattern.fromSource(shipInfo!.pattern);
-        const abilities: Ability[] = [];
-        for (let abilityIndex = 0; abilityIndex < shipInfo!.abilities.length; abilityIndex++) {
-            const abilityInfo = shipInfo!.abilities[abilityIndex];
-            let ability: Ability;
-            switch (abilityInfo.type) {
-                case 'move':
-                    ability = AbilityMove.fromSource(abilityInfo, shipIndex, abilityIndex);
-                    break;
-                case 'rotate':
-                    ability = AbilityRotate.fromSource(abilityInfo, shipIndex, abilityIndex);
-                    break;
-                case 'fire':
-                    ability = AbilityFire.fromSource(abilityInfo, shipIndex, abilityIndex);
-                    break;
-            }
-            abilities.push(ability);
-        }
+    for (const [trackingID, shipInfo] of setupInfoEvent.playerInfo.ships) {
+        const pattern = RotatablePattern.fromSource(shipInfo.pattern);
 
-        const ship = new Ship(shipIndex, undefined, undefined, shipInfo!.descriptor, pattern, selfPlayer, abilities);
-        ships.push(ship);
+        // Ship partial refers to future ship object
+        const shipPartial: Partial<Ship> = Object.create(Ship.prototype);
+
+        const abilities = getAbilities(shipPartial as Ship, shipInfo.abilities);
+
+        Ship.call(shipPartial, trackingID, undefined, undefined, shipInfo.descriptor, pattern, selfPlayer, abilities);
+        console.log(shipPartial);
+        ships.push(shipPartial as Ship);
     }
 
     setupTurnIndicator(setupInfoEvent.turnOrder, setupInfoEvent.maxTurnTime);

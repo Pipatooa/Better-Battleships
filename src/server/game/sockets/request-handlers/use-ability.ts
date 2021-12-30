@@ -23,15 +23,12 @@ import type {
  */
 export async function handleUseAbilityRequest(client: Client, useAbilityRequest: IUseAbilityRequest): Promise<void> {
 
-    console.log(client.game.scenario.turnManager.currentTurn, client.identity);
-
     // Check if it is the player's turn
     if (client.game.scenario.turnManager.currentTurn !== client.player)
         return;
 
     const ship = client.player.ships[useAbilityRequest.ship];
     const ability = ship?.abilities[useAbilityRequest.ability];
-    console.log(ship !== undefined, ability !== undefined, useAbilityRequest);
     if (ability === undefined)
         return;
 
@@ -68,7 +65,7 @@ export async function handleUseAbilityRequest(client: Client, useAbilityRequest:
  */
 export const baseUseAbilityRequestSchema = baseRequestSchema.keys({
     request: 'useAbility',
-    ship: Joi.number().integer().required(),
+    ship: Joi.string().required(),
     ability: Joi.number().integer().required()
 });
 

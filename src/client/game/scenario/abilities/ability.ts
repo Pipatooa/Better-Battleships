@@ -1,4 +1,5 @@
 import type { Descriptor } from '../descriptor';
+import type { Ship }       from '../ship';
 
 /**
  * Ability - Client Version
@@ -12,11 +13,11 @@ export abstract class Ability {
     /**
      * Ability constructor
      *
-     * @param  shipIndex  Index of the ship that this ability belongs to
+     * @param  ship       Ship that this ability belongs to
      * @param  index      Index of this ability in ship's ability list
      * @param  descriptor Descriptor for ability
      */
-    public constructor(protected readonly shipIndex: number,
+    public constructor(protected readonly ship: Ship,
                        protected readonly index: number,
                        public readonly descriptor: Descriptor) {
 

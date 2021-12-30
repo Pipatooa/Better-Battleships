@@ -8,6 +8,7 @@ import { getAttributes }                                                        
 import { playerEventInfo }                                                        from './events/player-events';
 import { Ship }                                                                   from './ship';
 import { playerSchema }                                                           from './sources/player';
+import type { IShipPrototypeInfo }                                                from '../../../../shared/network/scenario/i-ship-prototype-info';
 import type { Client }                                                            from '../../sockets/client';
 import type { ParsingContext }                                                    from '../parsing-context';
 import type { AttributeListener }                                                 from './attribute-listeners/attribute-listener';
@@ -29,6 +30,8 @@ export class Player implements IAttributeHolder, IBuiltinAttributeHolder<'player
     public client: Client | undefined;
     protected _lost = false;
 
+    public readonly ships: { [trackingID: string]: Ship };
+
     /**
      * Player constructor
      *
@@ -36,7 +39,7 @@ export class Player implements IAttributeHolder, IBuiltinAttributeHolder<'player
      * @param  spawnRegionID      Region that the player should first be allowed to place ships in
      * @param  color              Color for the player
      * @param  highlightColor     Color for the player when highlighted
-     * @param  ships              List of ships that belong to the player
+     * @param  ships              Array of ships that belong to the player
      * @param  eventRegistrar     Registrar of all player event listeners
      * @param  attributes         Attributes for the player
      * @param  builtinAttributes  Built-in attributes for the player
@@ -46,11 +49,15 @@ export class Player implements IAttributeHolder, IBuiltinAttributeHolder<'player
                        public readonly spawnRegionID: string,
                        public readonly color: string,
                        public readonly highlightColor: string,
-                       public readonly ships: (Ship | undefined)[],
+                       ships: Ship[],
                        public readonly eventRegistrar: EventRegistrar<PlayerEventInfo, PlayerEvent>,
                        public readonly attributes: AttributeMap,
                        public readonly builtinAttributes: BuiltinAttributeRecord<'player'>,
                        private readonly attributeListeners: AttributeListener[]) {
+
+        this.ships = {};
+        for (const ship of ships)
+            this.ships[ship.teamTrackingID] = ship;
     }
 
     /**
@@ -61,14 +68,7 @@ export class Player implements IAttributeHolder, IBuiltinAttributeHolder<'player
      */
     private static generateBuiltinAttributes(object: Player): BuiltinAttributeRecord<'player'> {
         return {
-            shipCount: new AttributeCodeControlled(() => {
-                let count = 0;
-                for (const ship of object.ships) {
-                    if (ship !== undefined)
-                        count++;
-                }
-                return count;
-            })
+            shipCount: new AttributeCodeControlled(() => Object.values(object.ships).length)
         };
     }
 
@@ -90,7 +90,7 @@ export class Player implements IAttributeHolder, IBuiltinAttributeHolder<'player
             playerSource = await checkAgainstSchema(playerSource, playerSchema, parsingContext);
 
         // Player partial refers to future player object
-        const playerPartial: Partial<Player> = {};
+        const playerPartial: Partial<Player> = Object.create(Player.prototype);
         parsingContext.playerPartial = playerPartial;
         
         // Get attributes and update parsing context
@@ -127,7 +127,6 @@ export class Player implements IAttributeHolder, IBuiltinAttributeHolder<'player
         parsingContext.playerPartial = undefined;
         const eventRegistrar = new EventRegistrar(eventListeners, subRegistrars);
         Player.call(playerPartial, parsingContext.teamPartial as Team, spawnRegion, color, highlightColor, ships, eventRegistrar, attributes, builtinAttributes, attributeListeners);
-        (playerPartial as any).__proto__ = Player.prototype;
         return playerPartial as Player;
     }
 
@@ -137,8 +136,8 @@ export class Player implements IAttributeHolder, IBuiltinAttributeHolder<'player
     public registerAttributeListeners(): void {
         for (const attributeListener of this.attributeListeners)
             attributeListener.register();
-        for (const ship of this.ships)
-            ship?.registerAttributeListeners();
+        for (const ship of Object.values(this.ships))
+            ship.registerAttributeListeners();
     }
 
     /**
@@ -149,15 +148,23 @@ export class Player implements IAttributeHolder, IBuiltinAttributeHolder<'player
      * @returns  Created IPlayerInfo object
      */
     public makeTransportable(): IPlayerInfo {
+        const ships: [string, IShipPrototypeInfo][] = [];
+        for (const ship of Object.values(this.ships))
+            ships.push([ship.teamTrackingID, ship.makeTransportable(true)]);
+
         return {
-            ships: this.ships.map(s => s?.makeTransportable(true)),
+            ships: ships,
             spawnRegion: this.spawnRegionID
         };
     }
 
+    /**
+     * Removes a ship from this player's ownership
+     *
+     * @param  ship Ship to remove
+     */
     public removeShip(ship: Ship): void {
-        const index = this.ships.indexOf(ship);
-        this.ships[index] = undefined;
+        delete this.ships[ship.teamTrackingID];
     }
 
     /**

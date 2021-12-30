@@ -110,7 +110,7 @@ export class Team implements IAttributeHolder, IBuiltinAttributeHolder<'team'> {
             teamSource = await checkAgainstSchema(teamSource, teamSchema, parsingContext);
 
         // Team partial refers to future team object
-        const teamPartial: Partial<Team> = {};
+        const teamPartial: Partial<Team> = Object.create(Team.prototype);
         parsingContext.teamPartial = teamPartial;
 
         // Get attributes and update parsing context
@@ -166,7 +166,6 @@ export class Team implements IAttributeHolder, IBuiltinAttributeHolder<'team'> {
         parsingContext.teamPartial = undefined;
         const eventRegistrar = new EventRegistrar(eventListeners, []);
         Team.call(teamPartial, parsingContext.scenarioPartial as Scenario, id, descriptor, playerPrototypes, teamSource.color, teamSource.highlightColor, eventRegistrar, attributes, builtinAttributes);
-        (teamPartial as any).__proto__ = Team.prototype;
         return teamPartial as Team;
     }
 
@@ -189,11 +188,14 @@ export class Team implements IAttributeHolder, IBuiltinAttributeHolder<'team'> {
     /**
      * Broadcasts a server event to all players of this team
      *
-     * @param  serverEvent Event to broadcast
+     * @param  serverEvent   Event to broadcast
+     * @param  excludePlayer Player to exclude from the broadcast
      */
-    public broadcastEvent(serverEvent: IServerEvent): void {
+    public broadcastEvent(serverEvent: IServerEvent, excludePlayer?: Player): void {
         for (const player of this._players) {
-            player.client?.sendEvent(serverEvent);
+            if (player === excludePlayer)
+                continue;
+            player.client!.sendEvent(serverEvent);
         }
     }
 

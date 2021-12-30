@@ -271,9 +271,9 @@ export class ShipSelectionRenderer extends BoardRenderer {
         this.placementDoneButton.element.text('Waiting for other players...');
         this.placementDoneButton.element.attr('disabled', true as any);
 
-        const shipPlacements: [number, number, Rotation][] = [];
+        const shipPlacements: { [trackingID: string]: [number, number, Rotation] } = {};
         for (const ship of this.allShips)
-            shipPlacements.push([ship.x!, ship.y!, ship.rotation]);
+            shipPlacements[ship.trackingID] = [ship.x!, ship.y!, ship.rotation];
 
         sendRequest({
             request: 'shipPlacement',

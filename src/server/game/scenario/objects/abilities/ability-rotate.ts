@@ -69,7 +69,7 @@ export class AbilityRotate extends IndexedAbility {
             abilityRotateSource = await checkAgainstSchema(abilityRotateSource, abilityRotateSchema, parsingContext);
         
         // Ability partial refers to future Ability object
-        const abilityPartial: Partial<Ability> = {};
+        const abilityPartial: Partial<Ability> = Object.create(AbilityRotate.prototype);
         
         // Get attributes and update parsing context
         const attributes: AttributeMap = await getAttributes(parsingContext.withExtendedPath('.attributes'), abilityRotateSource.attributes, 'ability');
@@ -92,7 +92,6 @@ export class AbilityRotate extends IndexedAbility {
         parsingContext.localAttributes.ability = undefined;
         const eventRegistrar = new EventRegistrar(eventListeners, []);
         AbilityRotate.call(abilityPartial, parsingContext.shipPartial as Ship, descriptor, abilityRotateSource.rot90, abilityRotateSource.rot180, abilityRotateSource.rot270, condition, eventRegistrar, attributes, builtinAttributes, attributeListeners);
-        (abilityPartial as any).__proto__ = AbilityRotate.prototype;
         return abilityPartial as AbilityRotate;
     }
 
@@ -106,9 +105,16 @@ export class AbilityRotate extends IndexedAbility {
         if (!this.usable!)
             return;
 
-        if (rotation === Rotation.Clockwise90 && this.rot90allowed) this.ship.rotate(rotation);
-        else if (rotation === Rotation.Clockwise180 && this.rot180allowed) this.ship.rotate(rotation);
-        else if (rotation === Rotation.Clockwise270 && this.rot270allowed) this.ship.rotate(rotation);
+        const rotationAllowed =
+            rotation === Rotation.Clockwise90 && this.rot90allowed ||
+            rotation === Rotation.Clockwise180 && this.rot180allowed ||
+            rotation === Rotation.Clockwise270 && this.rot270allowed;
+
+        if (!rotationAllowed)
+            return;
+
+        if (!this.ship.tryRotateBy(rotation))
+            return;
 
         this.eventRegistrar.triggerEvent('onUse', {
             builtinAttributes: {},

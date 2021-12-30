@@ -1,3 +1,4 @@
+import { trackedShips }             from '../../scenario/ship';
 import type { IShipDestroyedEvent } from '../../../../shared/network/events/i-ship-destroyed';
 
 /**
@@ -6,5 +7,5 @@ import type { IShipDestroyedEvent } from '../../../../shared/network/events/i-sh
  * @param  shipDestroyedEvent Event object to handle
  */
 export function handleShipDestroyed(shipDestroyedEvent: IShipDestroyedEvent): void {
-    
+    trackedShips[shipDestroyedEvent.trackingID].deconstruct();
 }

@@ -85,7 +85,7 @@ export function advanceTurnIndicator(): void {
         currentTurn += 1;
         currentTurn %= playerTurns.length;
         currentPlayer = playerTurns[currentTurn];
-    } while (currentPlayer !== oldPlayer && !currentPlayer.lost);
+    } while (currentPlayer !== oldPlayer && currentPlayer.lost);
 
     oldPlayer.turnIndicatorElement!.removeClass('turn-indicator-active');
     currentPlayer.turnIndicatorElement!.addClass('turn-indicator-active');

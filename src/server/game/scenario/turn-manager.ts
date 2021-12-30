@@ -81,11 +81,12 @@ export class TurnManager {
      * Advances which player's turn is currently in session
      */
     public advanceTurn(): void {
-        const startIndex = this.turnIndex++;
-        while (this.turnIndex !== startIndex && !this._turnOrder![this.turnIndex].lost) {
+        const startIndex = this.turnIndex;
+
+        do {
             this.turnIndex += 1;
             this.turnIndex %= this._turnOrder!.length;
-        }
+        } while (this.turnIndex !== startIndex && this._turnOrder![this.turnIndex].lost);
 
         this.timeoutManager.startTimeout('turnTimeout');
         if (this.turnAdvancementCallback !== undefined)

@@ -163,6 +163,7 @@ export class BoardInfoGenerator {
      * @param  tile Optionally prefetched tile
      */
     public updateTile(x: number, y: number, tile?: Tile): void {
+        console.log(x, y);
         tile = tile ?? this.board.tiles[y][x];
 
         const dataStart = this.getDataStart(x, y);

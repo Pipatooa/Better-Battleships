@@ -247,9 +247,9 @@ export class Game {
 
         // Update spotting status of all ships and usability of abilities
         for (const client of this.clients) {
-            for (const ship of client.player!.ships) {
-                ship!.spotInitial();
-                for (const ability of ship!.abilities)
+            for (const ship of Object.values(client.player!.ships)) {
+                ship.spotInitial();
+                for (const ability of ship.abilities)
                     ability.checkUsable({
                         builtinAttributes: {}
                     });
@@ -269,7 +269,7 @@ export class Game {
     /**
      * Ends the game
      *
-     * @param  winningTeamID
+     * @param  winningTeamID Team that is declaring as having won the game
      */
     public endGame(winningTeamID: string): void {
         this._gamePhase = GamePhase.Finished;

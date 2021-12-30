@@ -17,19 +17,17 @@ export async function handleShipPlacementRequest(client: Client, shipPlacementRe
     if (client.shipsPlaced || client.game.gamePhase !== GamePhase.Setup)
         return;
 
-    // Check that ship data provided matches the number of ships for the player
-    if (shipPlacementRequest.shipPlacements.length !== client.player!.ships.length) {
-        client.ws.close(1002, 'Ship placement data did not match number of ships that the player has');
-        return;
-    }
-
     // Place player's ships onto the board
     const shipsPlaced: Ship[] = [];
-    for (let i = 0; i < shipPlacementRequest.shipPlacements.length; i++) {
-        const [x, y, rotation] = shipPlacementRequest.shipPlacements[i];
-        const ship = client.player!.ships[i];
-        const region = client.game.scenario.board.regions[client.player!.spawnRegionID];
-        const placementOK = client.game.scenario.board.checkPlacement(ship!, rotation, x, y, region);
+    for (const [trackingID, placementInfo] of Object.entries(shipPlacementRequest.shipPlacements)) {
+        const [x, y, rotation] = placementInfo;
+        const ship = client.player!.ships[trackingID];
+
+        let placementOK = false;
+        if (ship !== undefined) {
+            const region = client.game.scenario.board.regions[client.player!.spawnRegionID];
+            placementOK = client.game.scenario.board.checkPlacement(ship, rotation, x, y, region);
+        }
 
         // Undo ship placements if any placement is invalid
         if (!placementOK) {
@@ -39,8 +37,8 @@ export async function handleShipPlacementRequest(client: Client, shipPlacementRe
             return;
         }
 
-        ship!.place(x, y);
-        shipsPlaced.push(ship!);
+        ship.place(x, y, rotation);
+        shipsPlaced.push(ship);
     }
 
     client.shipsPlaced = true;
@@ -52,7 +50,7 @@ export async function handleShipPlacementRequest(client: Client, shipPlacementRe
  */
 export const shipPlacementRequestSchema = baseRequestSchema.keys({
     request: 'shipPlacement',
-    shipPlacements: Joi.array().items(
+    shipPlacements: Joi.object().pattern(Joi.string(),
         Joi.array().items(Joi.number(), Joi.number(), Joi.number().valid(Rotation.NoChange, Rotation.Clockwise90, Rotation.Clockwise180, Rotation.Clockwise270)).required()
     ).required()
 });

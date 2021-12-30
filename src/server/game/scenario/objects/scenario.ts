@@ -72,8 +72,8 @@ export class Scenario implements IAttributeHolder, IBuiltinAttributeHolder<'scen
             scenarioSource = await checkAgainstSchema(scenarioSource, scenarioSchema, parsingContext);
 
         // Scenario and TurnManager partials refer to future Scenario and TurnManager objects
-        const scenarioPartial: Partial<Scenario> = {};
-        const turnManagerPartial: Partial<TurnManager> = {};
+        const scenarioPartial: Partial<Scenario> = Object.create(Scenario.prototype);
+        const turnManagerPartial: Partial<TurnManager> = Object.create(TurnManager.prototype);
         parsingContext.scenarioPartial = scenarioPartial;
         parsingContext.turnManagerPartial = turnManagerPartial;
 
@@ -124,7 +124,6 @@ export class Scenario implements IAttributeHolder, IBuiltinAttributeHolder<'scen
 
         // Create turn manager
         TurnManager.call(turnManagerPartial, scenarioSource.turnOrdering, teamsList, scenarioSource.maxTurnTime);
-        (turnManagerPartial as any).__proto__ = TurnManager.prototype;
 
         const eventListeners = await eventListenersFromActionSource(parsingContext.withExtendedPath('.actions'), baseEventInfo, scenarioSource.actions);
         parsingContext.reducePath();

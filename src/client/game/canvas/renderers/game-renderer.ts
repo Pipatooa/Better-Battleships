@@ -24,7 +24,7 @@ export class GameRenderer extends BoardRenderer {
         this.viewportHandler = new ViewportHandler(canvas, this.gl, this.modelPrograms[0], true);
         this.viewportHandler.updateCallback = () => this.renderNext();
         this.boardInfoGenerator = new BoardInfoGenerator(this.gl, this.modelPrograms[0], game.board!);
-        this.boardInfoGenerator.highlightRegion(game.spawnRegionID!);
+        this.boardInfoGenerator.highlightRegion(game.spawnRegion!.id);
         this.boardInfoGenerator.push();
         this.selectionInfoGenerator = new SelectionInfoGenerator(this.gl, this.modelPrograms[0]);
         this.selectionInfoGenerator.push();

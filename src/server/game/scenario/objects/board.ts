@@ -104,7 +104,7 @@ export class Board {
                 const tileRegions: Region[] = [];
                 for (const regionID of regionPalette[regionChar])
                     tileRegions.push(regions[regionID]);
-                tiles[y][x] = [tileType, tileRegions, undefined];
+                tiles[y][x] = [tileType, tileRegions, undefined, []];
             }
         }
 
@@ -167,10 +167,16 @@ export class Board {
      */
     public addShip(ship: Ship): void {
         for (const [dx, dy] of ship.pattern.patternEntries) {
-            const x = ship.x + dx;
-            const y = ship.y + dy;
-            const tile = this.tiles[y][x];
+            const tile = this.tiles[ship.y + dy][ship.x + dx];
             tile[2] = ship;
+        }
+        for (const [dx, dy] of ship.visibilityPattern.patternEntries) {
+            const tile = this.tiles[ship.y + dy]?.[ship.x + dx];
+            if (tile === undefined)
+                continue;
+            const visibleShips = tile[3];
+            if (!visibleShips.includes(ship))
+                visibleShips.push(ship);
         }
     }
 
@@ -181,10 +187,14 @@ export class Board {
      */
     public removeShip(ship: Ship): void {
         for (const [dx, dy] of ship.pattern.patternEntries) {
-            const x = ship.x + dx;
-            const y = ship.y + dy;
-            const tile = this.tiles[y][x];
+            const tile = this.tiles[ship.y + dy][ship.x + dx];
             tile[2] = undefined;
+        }
+        for (const [dx, dy] of ship.visibilityPattern.patternEntries) {
+            const tile = this.tiles[ship.y + dy]?.[ship.x + dx];
+            if (tile === undefined)
+                continue;
+            tile[3] = tile[3].filter(s => s !== ship);
         }
     }
 
@@ -198,13 +208,36 @@ export class Board {
      * @param    validRegion Region within which the ship's placement is valid
      * @returns              Whether or not the ship can be placed at that location
      */
-    public checkPlacement(ship: Ship, rotation: Rotation, x: number, y: number, validRegion: Region): boolean {
+    public checkPlacement(ship: Ship, rotation: Rotation, x: number, y: number, validRegion: Region | undefined): boolean {
         const pattern = ship.pattern.rotated(rotation);
         for (const [dx, dy] of pattern.patternEntries) {
             const tile = this.tiles[y + dy]?.[x + dx];
-            if (!tile?.[1].includes(validRegion))
+            if (tile === undefined)
+                return false;
+            if (validRegion !== undefined && !tile[1].includes(validRegion))
                 return false;
             if (tile[2] !== undefined)
+                return false;
+        }
+        return true;
+    }
+
+    /**
+     * Checks whether a ship can move to a location successfully
+     *
+     * @param    ship Ship to move
+     * @param    x    New X coordinate of ship
+     * @param    y    New Y coordinate of ship
+     * @returns       Whether the ship can move to the target location
+     */
+    public checkMovement(ship: Ship, x: number, y: number): boolean {
+        for (const [dx, dy] of ship.pattern.patternEntries) {
+            const tile = this.tiles[y + dy]?.[x + dx];
+            if (tile === undefined)
+                return false;
+            if (!tile[0].traversable)
+                return false;
+            if (tile[2] !== undefined && tile[2] !== ship)
                 return false;
         }
         return true;
@@ -215,13 +248,15 @@ export class Board {
      *
      * @param    ship     Ship to rotate
      * @param    rotation Rotation to apply
-     * @returns           Whether or not ship can be rotated
+     * @returns           Whether the ship can be rotated
      */
     public checkRotation(ship: Ship, rotation: Rotation): boolean {
         const rotatedPattern = ship.pattern.rotated(rotation);
         for (const [dx, dy] of rotatedPattern.patternEntries) {
             const tile = this.tiles[ship.y + dy]?.[ship.x + dx];
-            if (!tile[0]?.traversable)
+            if (tile === undefined)
+                return false;
+            if (!tile[0].traversable)
                 return false;
             if (tile[2] !== undefined && tile[2] !== ship)
                 return false;
@@ -241,4 +276,4 @@ export class Board {
 /**
  * Type describing an entry for a single tile
  */
-export type Tile = [TileType, Region[], Ship | undefined];
+export type Tile = [TileType, Region[], Ship | undefined, Ship[]];

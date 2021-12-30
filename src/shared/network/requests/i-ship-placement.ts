@@ -6,5 +6,5 @@ import type { IBaseClientRequest } from './i-client-request';
  */
 export interface IShipPlacementRequest extends IBaseClientRequest {
     request: 'shipPlacement',
-    shipPlacements: [number, number, Rotation][]
+    shipPlacements: { [trackingID: string]: [x: number, y: number, rotation: Rotation] }
 }

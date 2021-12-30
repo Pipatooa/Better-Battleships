@@ -141,9 +141,8 @@ export class Pattern {
         const patternEntryMap: { [char: string]: number } = {};
         for (const [x, y] of this.patternEntries) {
             for (let dx = -radius; dx <= radius; dx++) {
-                for (let dy = -radius; dy <= radius; dy++) {
-                    if (Math.abs(dx) + Math.abs(dy) > radius)
-                        continue;
+                const subRadius = radius - Math.abs(dx);
+                for (let dy = -subRadius; dy <= subRadius; dy++) {
                     const key = `${x + dx},${y + dy}`;
                     patternEntryMap[key] = 1;
                 }

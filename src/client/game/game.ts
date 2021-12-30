@@ -2,6 +2,7 @@ import type { AbilityRenderer }       from './canvas/renderers/ability-renderer'
 import type { GameRenderer }          from './canvas/renderers/game-renderer';
 import type { ShipSelectionRenderer } from './canvas/renderers/ship-selection-renderer';
 import type { Board }                 from './scenario/board';
+import type { Region }                from './scenario/region';
 import type { Team }                  from './team';
 
 export let game: Game;
@@ -14,7 +15,7 @@ export let game: Game;
 export class Game {
 
     public board: Board | undefined;
-    public spawnRegionID: string | undefined;
+    public spawnRegion: Region | undefined;
 
     public gameRenderer: GameRenderer | undefined;
     public shipSelectionRenderer: ShipSelectionRenderer | undefined;

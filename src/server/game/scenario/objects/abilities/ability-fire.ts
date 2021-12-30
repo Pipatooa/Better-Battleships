@@ -74,7 +74,7 @@ export class AbilityFire extends PositionedAbility {
             abilityFireSource = await checkAgainstSchema(abilityFireSource, abilityFireSchema, parsingContext);
 
         // Ability partial refers to future Ability object
-        const abilityPartial: Partial<Ability> = {};
+        const abilityPartial: Partial<Ability> = Object.create(AbilityFire.prototype);
 
         // Get attributes and update parsing context
         const attributes: AttributeMap = await getAttributes(parsingContext.withExtendedPath('.attributes'), abilityFireSource.attributes, 'ability');
@@ -101,7 +101,6 @@ export class AbilityFire extends PositionedAbility {
         parsingContext.localAttributes.ability = undefined;
         const eventRegistrar = new EventRegistrar(eventListeners, []);
         AbilityFire.call(abilityPartial, parsingContext.shipPartial as Ship, descriptor, selectionPattern, effectPattern, abilityFireSource.displayEffectPatternValues, condition, eventRegistrar, attributes, builtinAttributes, attributeListeners);
-        (abilityPartial as any).__proto__ = AbilityFire.prototype;
         return abilityPartial as AbilityFire;
     }
 

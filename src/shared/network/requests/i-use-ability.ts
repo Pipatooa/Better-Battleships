@@ -6,7 +6,7 @@ export type IUseAbilityRequest =
 
 export interface IBaseUseAbilityRequest extends IBaseClientRequest {
     request: 'useAbility',
-    ship: number,
+    ship: string,
     ability: number
 }
 

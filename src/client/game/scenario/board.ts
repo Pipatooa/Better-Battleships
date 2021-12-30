@@ -15,6 +15,8 @@ export class Board {
     public readonly size: [number, number];
     protected _ships: Ship[] = [];
 
+    public readonly regions: { [id: string]: Region };
+
     public renderer: BoardRenderer | undefined;
     public informationGenerator: BoardInfoGenerator | undefined;
 
@@ -29,6 +31,16 @@ export class Board {
                        public readonly tileTypes: TileType[],
                        public readonly primaryTileType: TileType) {
         this.size = [this.tiles[0].length, this.tiles.length];
+
+        this.regions = {};
+        for (const row of this.tiles) {
+            for (const tile of row) {
+                for (const region of tile[1]) {
+                    if (this.regions[region.id] === undefined)
+                        this.regions[region.id] = region;
+                }
+            }
+        }
     }
 
     /**

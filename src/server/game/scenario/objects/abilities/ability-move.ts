@@ -65,7 +65,7 @@ export class AbilityMove extends PositionedAbility {
             abilityMoveSource = await checkAgainstSchema(abilityMoveSource, abilityMoveSchema, parsingContext);
 
         // Ability partial refers to future Ability object
-        const abilityPartial: Partial<Ability> = {};
+        const abilityPartial: Partial<Ability> = Object.create(AbilityMove.prototype);
 
         // Get attributes and update parsing context
         const attributes: AttributeMap = await getAttributes(parsingContext.withExtendedPath('.attributes'), abilityMoveSource.attributes, 'ability');
@@ -90,7 +90,6 @@ export class AbilityMove extends PositionedAbility {
         parsingContext.localAttributes.ability = undefined;
         const eventRegistrar = new EventRegistrar(eventListeners, []);
         AbilityMove.call(abilityPartial, parsingContext.shipPartial as Ship, descriptor, pattern, condition, eventRegistrar, attributes, builtinAttributes, attributeListeners);
-        (abilityPartial as any).__proto__ = AbilityMove.prototype;
         return abilityPartial as AbilityMove;
     }
 
@@ -111,7 +110,9 @@ export class AbilityMove extends PositionedAbility {
         if (this.pattern.query(patternX, patternY) === 0)
             return;
 
-        this.ship.moveBy(dx, dy);
+        if (!this.ship.tryMoveBy(dx, dy))
+            return;
+
         this.eventRegistrar.triggerEvent('onUse', {
             builtinAttributes: {}
         });

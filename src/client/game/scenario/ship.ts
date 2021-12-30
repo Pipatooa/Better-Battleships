@@ -7,6 +7,11 @@ import type { Descriptor }       from './descriptor';
 import type { RotatablePattern } from './rotatable-pattern';
 
 /**
+ * Dictionary of ships being tracked by the client
+ */
+export const trackedShips: { [trackingID: string]: Ship } = {};
+
+/**
  * Ship - Client Version
  *
  * Movable object that exists on the board
@@ -21,21 +26,24 @@ export class Ship {
     /**
      * Ship constructor
      *
-     * @param  index      Index of this ship in player's ship list
-     * @param  _x         X coordinate of ship
-     * @param  _y         Y coordinate of ship
-     * @param  descriptor Descriptor for ship
-     * @param  _pattern   Pattern describing shape of ship
-     * @param  player     Player that this ship belongs to
-     * @param  abilities  Dictionary of abilities available for this ship
+     * @param  _trackingID Tracking ID used to keep track of this ship
+     * @param  _x          X coordinate of ship
+     * @param  _y          Y coordinate of ship
+     * @param  descriptor  Descriptor for ship
+     * @param  _pattern    Pattern describing shape of ship
+     * @param  player      Player that this ship belongs to
+     * @param  abilities   Dictionary of abilities available for this ship
      */
-    public constructor(public readonly index: number | undefined,
+    public constructor(private _trackingID: string | undefined,
                        protected _x: number | undefined,
                        protected _y: number | undefined,
                        public readonly descriptor: Descriptor,
                        protected _pattern: RotatablePattern,
                        public readonly player: Player,
                        public readonly abilities: Ability[]) {
+        
+        if (this._trackingID !== undefined)
+            trackedShips[this._trackingID] = this;
     }
 
     /**
@@ -43,6 +51,7 @@ export class Ship {
      */
     public deconstruct(): void {
         this.board?.removeShip(this, true);
+        delete trackedShips[this._trackingID!];
     }
 
     /**
@@ -88,7 +97,7 @@ export class Ship {
             const tileY = y + dy;
             const tile = board.tiles[tileY]?.[tileX];
 
-            if (!tile?.[1].map(r => r.id).includes(game.spawnRegionID!))
+            if (!tile?.[1].includes(game.spawnRegion!))
                 return [false, 'Ship must be placed within spawn region'];
 
             if (tile[2] !== undefined)
@@ -116,6 +125,15 @@ export class Ship {
     /**
      * Getters and setters
      */
+    
+    public get trackingID(): string {
+        return this._trackingID!;
+    }
+    
+    public set trackingID(trackingID: string) {
+        this._trackingID = trackingID;
+        trackedShips[this._trackingID] = this;
+    }
 
     public get x(): number | undefined {
         return this._x;
