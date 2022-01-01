@@ -1,8 +1,8 @@
-import { GenericEventContext }              from '../../events/event-context';
 import { checkAgainstSchema }               from '../../schema-checker';
 import { buildValue }                       from '../values/value-builder';
 import { valueEqualConstraintSchema }       from './sources/value-equal-constraint';
 import { ValueConstraint }                  from './value-constaint';
+import type { GenericEventContext }         from '../../events/event-context';
 import type { ParsingContext }              from '../../parsing-context';
 import type { Value }                       from '../values/value';
 import type { IValueEqualConstraintSource } from './sources/value-equal-constraint';
@@ -47,7 +47,7 @@ export class ValueEqualConstraint extends ValueConstraint {
     }
 
     /**
-     * Checks whether or not a value meets this constraint
+     * Checks whether a value meets this constraint
      *
      * @param    eventContext Context for resolving objects and values when an event is triggered
      * @param    value        Value to check

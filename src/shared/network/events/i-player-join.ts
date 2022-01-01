@@ -1,11 +1,10 @@
-import type { IBaseServerEvent } from './i-server-event';
+import type { IPlayerUpdateEvent } from './i-player-update';
 
 /**
  * Event sent when another client joins the lobby
  */
-export interface IPlayerJoinEvent extends IBaseServerEvent {
+export interface IPlayerJoinEvent extends IPlayerUpdateEvent {
     event: 'playerJoin',
-    playerIdentity: string,
     team: string | undefined,
     ready: boolean
 }

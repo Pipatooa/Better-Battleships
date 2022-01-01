@@ -22,8 +22,8 @@
     "size": [3, 3],
     "values": {
       ".": 0,
-      "#": 3,
-      "=": 5
+      "#": -3,
+      "=": -5
     },
     "pattern": [
       ".#.",
@@ -46,37 +46,42 @@
     "onTurnStart": [
       {
         "type": "setAttribute",
+        "priority": 0,
+        "condition": {},
         "attribute": "local:ability.cooldown",
         "value": {
           "type": "sum",
           "values": [
             {
               "type": "attributeReference",
-              "attribute": "local:ship.health"
+              "attribute": "local:ability.cooldown"
             },
             -1
           ]
-        },
-        "condition": {}
+        }
       }
     ],
     "onUse": [
       {
         "type": "setAttribute",
+        "priority": 0,
+        "condition": {},
         "attribute": "local:ability.cooldown",
-        "value": 3,
-        "condition": {}
+        "value": 3
       }
     ],
     "onHit": [
       {
         "type": "setAttribute",
+        "priority": 0,
+        "condition": {},
         "attribute": "local:ability.cooldown",
-        "value": 5,
-        "condition": {}
+        "value": 5
       },
       {
         "type": "setAttribute",
+        "priority": 0,
+        "condition": {},
         "attribute": "foreign:ship.health",
         "value": {
           "type": "sum",
@@ -85,15 +90,21 @@
               "type": "attributeReference",
               "attribute": "foreign:ship.health"
             },
-            -5
+            {
+              "type": "attributeReference",
+              "attribute": "local:event.@patternValue"
+            }
           ]
-        },
-        "condition": {}
+        }
       }
     ]
   },
   "attributes": {
     "cooldown": {
+      "descriptor": {
+        "name": "Cooldown",
+        "description": "Number of turns until this ability can be used again"
+      },
       "initialValue": 0,
       "constraints": [
         {

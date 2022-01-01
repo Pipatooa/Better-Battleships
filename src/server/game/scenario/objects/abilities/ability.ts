@@ -1,13 +1,13 @@
-import type { AbilityInfo }                               from '../../../../../shared/network/scenario/ability-info';
-import type { EventContextForEvent, GenericEventContext } from '../../events/event-context';
-import type { EventRegistrar }                            from '../../events/event-registrar';
-import type { AttributeListener }                         from '../attribute-listeners/attribute-listener';
-import type { IAttributeHolder, BuiltinAttributeRecord }  from '../attributes/attribute-holder';
-import type { AttributeMap }                              from '../attributes/i-attribute-holder';
-import type { Descriptor }                                from '../common/descriptor';
-import type { Condition }                                 from '../conditions/condition';
-import type { Ship }                                      from '../ship';
-import type { AbilityEvent, AbilityEventInfo }            from './events/ability-events';
+import { AttributeWatcher }                              from '../attributes/attribute-watcher';
+import type { EventRegistrar }                           from '../../events/event-registrar';
+import type { AttributeListener }                        from '../attribute-listeners/attribute-listener';
+import type { IAttributeHolder, BuiltinAttributeRecord } from '../attributes/attribute-holder';
+import type { AttributeMap }                             from '../attributes/i-attribute-holder';
+import type { Descriptor }                               from '../common/descriptor';
+import type { Condition }                                from '../conditions/condition';
+import type { Ship }                                     from '../ship';
+import type { AbilityEvent, AbilityEventInfo }           from './events/ability-events';
+import type { AbilityInfo }                              from 'shared/network/scenario/ability-info';
 
 /**
  * Ability - Server Version
@@ -16,7 +16,8 @@ import type { AbilityEvent, AbilityEventInfo }            from './events/ability
  */
 export abstract class Ability implements IAttributeHolder, BuiltinAttributeRecord<'ability'> {
 
-    protected usable: boolean | undefined;
+    protected usable = false;
+    public readonly attributeWatcher: AttributeWatcher;
 
     /**
      * Ability constructor
@@ -37,8 +38,7 @@ export abstract class Ability implements IAttributeHolder, BuiltinAttributeRecor
                        public readonly builtinAttributes: BuiltinAttributeRecord<'ability'>,
                        private readonly attributeListeners: AttributeListener[]) {
 
-        const listenerCallback = (eventContext: EventContextForEvent<AbilityEventInfo, AbilityEvent, 'onAbilityUsed'>): void => this.checkUsable(eventContext);
-        this.eventRegistrar.addEventListener('onAbilityUsed', [10, listenerCallback]);
+        this.attributeWatcher = new AttributeWatcher(this.attributes, this.builtinAttributes);
     }
 
     /**
@@ -47,7 +47,7 @@ export abstract class Ability implements IAttributeHolder, BuiltinAttributeRecor
     public deconstruct(): void {
         for (const attributeListener of this.attributeListeners)
             attributeListener.unregister();
-        this.eventRegistrar.detach();
+        this.eventRegistrar.deactivate();
     }
 
     /**
@@ -69,13 +69,16 @@ export abstract class Ability implements IAttributeHolder, BuiltinAttributeRecor
     }
 
     /**
-     * Checks whether or not this ability is usable
+     * Checks whether this ability is usable
      *
-     * @param    eventContext Context for resolving objects and values when an event is triggered
-     * @returns               Whether or not this ability is usable
+     * @returns  [usable, oldUsability]
      */
-    public checkUsable(eventContext: GenericEventContext): void {
-        this.usable = this.condition.check(eventContext);
+    public checkUsable(): [boolean, boolean] {
+        const oldUsability = this.usable;
+        this.usable = this.condition.check({
+            builtinAttributes: {}
+        });
+        return [this.usable, oldUsability];
     }
 
     /**

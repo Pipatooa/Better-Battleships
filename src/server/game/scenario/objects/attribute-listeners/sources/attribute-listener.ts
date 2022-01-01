@@ -25,6 +25,7 @@ export type AttributeListenerTriggerType = typeof attributeListenerTriggerTypes[
  */
 export interface IAttributeListenerSource {
     attribute: AttributeReferenceSource,
+    priority: number,
     constraint: IValueConstraintSource,
     actions: ActionSource[],
     triggerType: AttributeListenerTriggerType
@@ -35,6 +36,7 @@ export interface IAttributeListenerSource {
  */
 export const attributeListenerSchema = Joi.object({
     attribute: attributeReferenceSchema.required(),
+    priority: Joi.number().required(),
     constraint: valueConstraintSchema.required(),
     actions: Joi.array().items(actionSchema).min(1).required(),
     triggerType: Joi.valid(...attributeListenerTriggerTypes).required()

@@ -30,5 +30,7 @@ export const shipSchema = Joi.object({
     pattern: patternSchema.required(),
     visibility: Joi.number().integer().min(1).required(),
     abilities: Joi.array().items(genericNameSchema).required(),
-    actions: Joi.object().pattern(Joi.valid(...Object.keys(shipEventInfo)), Joi.array().items(actionSchema)).required()
+    actions: Joi.object().pattern(Joi.valid(...Object.keys(shipEventInfo)), Joi.array().items(actionSchema.keys({
+        priority: Joi.number().required()
+    }))).required()
 }).concat(attributeHolderSchema);

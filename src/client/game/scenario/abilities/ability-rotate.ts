@@ -16,9 +16,9 @@ export class AbilityRotate extends Ability {
      * @param  ship          Ship that this ability belongs to
      * @param  index         Index of this ability in ship's ability list
      * @param  descriptor    Descriptor for ability
-     * @param  rot90allowed  Whether or not a rotation by 90 degrees is allowed
-     * @param  rot180allowed Whether or not a rotation by 180 degrees is allowed
-     * @param  rot270allowed Whether or not a rotation by 270 degrees is allowed
+     * @param  rot90allowed  Whether a rotation by 90 degrees is allowed
+     * @param  rot180allowed Whether a rotation by 180 degrees is allowed
+     * @param  rot270allowed Whether a rotation by 270 degrees is allowed
      */
     public constructor(ship: Ship,
                        index: number,

@@ -1,4 +1,4 @@
-import type { IShipUpdateEvent } from './i-ship-update-event';
+import type { IShipUpdateEvent } from './i-ship-update';
 import type { Rotation }         from 'shared/scenario/objects/common/rotation';
 
 /**

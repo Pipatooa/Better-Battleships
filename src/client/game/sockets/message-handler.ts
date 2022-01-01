@@ -4,17 +4,21 @@ import { handleEnteringSetup }              from './event-handlers/entering-setu
 import { handleGameInfo }                   from './event-handlers/game-info';
 import { handleGameOver }                   from './event-handlers/game-over';
 import { handleGameStart }                  from './event-handlers/game-start';
+import { handlePlayerAttributeUpdate }      from './event-handlers/player-attribute-update';
 import { handlePlayerJoin }                 from './event-handlers/player-join';
 import { handlePlayerLeave }                from './event-handlers/player-leave';
 import { handlePlayerLost }                 from './event-handlers/player-lost';
 import { handlePlayerReady }                from './event-handlers/player-ready';
 import { handleSetupInfo }                  from './event-handlers/setup-info';
+import { handleShipAbilityUpdate }          from './event-handlers/ship-ability-update';
 import { handleShipAppear }                 from './event-handlers/ship-appear';
+import { handleShipAttributeUpdate }        from './event-handlers/ship-attribute-update';
 import { handleShipDestroyed }              from './event-handlers/ship-destroyed';
 import { handleShipDisappear }              from './event-handlers/ship-disappear';
 import { handleShipMove }                   from './event-handlers/ship-movement';
 import { handleShipRotate }                 from './event-handlers/ship-rotate';
-import { handleTeamAssignment }             from './event-handlers/team-assignment';
+import { handlePlayerTeamAssignment }       from './event-handlers/team-assignment';
+import { handleTeamAttributeUpdate }        from './event-handlers/team-attribute-update';
 import { handleTurnAdvancement }            from './event-handlers/turn-advancement';
 import type { MessageEvent }                from 'isomorphic-ws';
 import type { IServerEvent, ServerEventID } from 'shared/network/events/i-server-event';
@@ -49,21 +53,25 @@ export function handleMessage(e: MessageEvent): void {
  */
 const handlers: Record<ServerEventID, (event: any) => void> = {
     connectionInfo: handleConnectionInfo,
-    gameInfo: handleGameInfo,
-    playerJoin: handlePlayerJoin,
-    playerLeave: handlePlayerLeave,
-    teamAssignment: handleTeamAssignment,
-    playerReady: handlePlayerReady,
     enterSetupFailure: handleEnterSetupFailure,
     enteringSetup: handleEnteringSetup,
-    setupInfo: handleSetupInfo,
+    gameInfo: handleGameInfo,
+    gameOver: handleGameOver,
     gameStart: handleGameStart,
+    playerAttributeUpdate: handlePlayerAttributeUpdate,
+    playerJoin: handlePlayerJoin,
+    playerLeave: handlePlayerLeave,
+    playerLost: handlePlayerLost,
+    playerReady: handlePlayerReady,
+    playerTeamAssignment: handlePlayerTeamAssignment,
+    setupInfo: handleSetupInfo,
+    shipAbilityUpdate: handleShipAbilityUpdate,
     shipAppear: handleShipAppear,
+    shipAttributeUpdate: handleShipAttributeUpdate,
+    shipDestroyed: handleShipDestroyed,
     shipDisappear: handleShipDisappear,
     shipMove: handleShipMove,
     shipRotate: handleShipRotate,
-    shipDestroyed: handleShipDestroyed,
-    turnAdvancement: handleTurnAdvancement,
-    playerLost: handlePlayerLost,
-    gameOver: handleGameOver
+    teamAttributeUpdate: handleTeamAttributeUpdate,
+    turnAdvancement: handleTurnAdvancement
 };

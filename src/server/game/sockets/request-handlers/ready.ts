@@ -31,7 +31,7 @@ export async function handleReadyRequest(client: Client, readyRequest: IReadyReq
     for (const existingClient of client.game.clients) {
         existingClient.sendEvent({
             event: 'playerReady',
-            playerIdentity: client.identity,
+            player: client.identity,
             ready: client.ready
         });
     }

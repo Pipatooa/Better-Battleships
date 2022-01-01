@@ -7,6 +7,6 @@ import type { IPlayerLostEvent } from 'shared/network/events/i-player-lost';
  * @param  playerLostEvent Event object to handle
  */
 export function handlePlayerLost(playerLostEvent: IPlayerLostEvent): void {
-    const player = allPlayers[playerLostEvent.playerIdentity];
+    const player = allPlayers[playerLostEvent.player];
     player.lose();
 }

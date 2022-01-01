@@ -1,8 +1,9 @@
+import { UnpackingError }                                                         from '../errors/unpacking-error';
 import { baseEventInfo }                                                          from '../events/base-events';
 import { EventRegistrar }                                                         from '../events/event-registrar';
 import { checkAgainstSchema }                                                     from '../schema-checker';
 import { TurnManager }                                                            from '../turn-manager';
-import { getJSONFromEntry, UnpackingError }                                       from '../unpacker';
+import { getJSONFromEntry }                                                       from '../unpacker';
 import { eventListenersFromActionSource }                                         from './actions/action-getter';
 import { getAttributeListeners }                                                  from './attribute-listeners/attribute-listener-getter';
 import { ForeignAttributeRegistry }                                               from './attribute-references/foreign-attribute-registry';
@@ -123,7 +124,7 @@ export class Scenario implements IAttributeHolder, IBuiltinAttributeHolder<'scen
         }
 
         // Create turn manager
-        TurnManager.call(turnManagerPartial, scenarioSource.turnOrdering, teamsList, scenarioSource.maxTurnTime);
+        TurnManager.call(turnManagerPartial, scenarioPartial as Scenario, scenarioSource.turnOrdering, teamsList, scenarioSource.maxTurnTime);
 
         const eventListeners = await eventListenersFromActionSource(parsingContext.withExtendedPath('.actions'), baseEventInfo, scenarioSource.actions);
         parsingContext.reducePath();
@@ -134,7 +135,8 @@ export class Scenario implements IAttributeHolder, IBuiltinAttributeHolder<'scen
         parsingContext.board = undefined;
         parsingContext.foreignAttributeRegistry = undefined;
         const eventRegistrar = new EventRegistrar(eventListeners, subRegistrars);
-        return new Scenario(parsingContext.scenarioFile, scenarioSource.author, descriptor, board, teams, turnManagerPartial as TurnManager, eventRegistrar, attributes, builtinAttributes);
+        Scenario.call(scenarioPartial, parsingContext.scenarioFile, scenarioSource.author, descriptor, board, teams, turnManagerPartial as TurnManager, eventRegistrar, attributes, builtinAttributes);
+        return scenarioPartial as Scenario;
     }
 
     /**

@@ -1,14 +1,14 @@
-import console                        from 'console';
-import { checkRequestAuth }           from '../../auth/request-handler';
-import { GamePhase }                  from '../game';
-import { queryGame }                  from '../game-manager';
-import { Client }                     from './client';
-import { handleMessage }              from './message-handler';
-import type http                from 'http';
-import type { IncomingMessage } from 'http';
-import type WebSocket from 'isomorphic-ws';
-import type { Data } from 'isomorphic-ws';
-import type { Socket }                from 'net';
+import console                      from 'console';
+import { checkRequestAuth }         from '../../auth/request-handler';
+import { GamePhase }                from '../game';
+import { queryGame }                from '../game-manager';
+import { Client }                   from './client';
+import { handleRequestFromMessage } from './message-handler';
+import type http                    from 'http';
+import type { IncomingMessage }     from 'http';
+import type WebSocket               from 'isomorphic-ws';
+import type { Data }                from 'isomorphic-ws';
+import type { Socket }              from 'net';
 
 const connectionLimit = 64;
 let currentConnections = 0;
@@ -81,7 +81,7 @@ export default function register(server: http.Server, wss: WebSocket.Server): vo
             game.joinClient(client);
 
             // Increment connection count
-            currentConnections += 1;
+            currentConnections++;
 
             // Broadcast connection event for connection handler
             wss.emit('connection', ws, req, client);
@@ -96,10 +96,10 @@ export default function register(server: http.Server, wss: WebSocket.Server): vo
 
         // Register handlers
         ws.on('message', async (msg: Data) => {
-            await handleMessage(client, msg);
+            await handleRequestFromMessage(client, msg);
         });
         ws.on('close', () => {
-            currentConnections -= 1;
+            currentConnections--;
         });
     });
 }

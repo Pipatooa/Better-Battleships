@@ -13,6 +13,8 @@ export class Config {
     public readonly gameJoinTimeout: number;
     public readonly gameStartWaitDuration: number;
 
+    public readonly evaluationActionLimit: number;
+
     public readonly sqlHost: string;
     public readonly sqlUser: string;
     public readonly sqlPassword: string;
@@ -30,7 +32,6 @@ export class Config {
      *
      * @param  configRaw Parsed JSON config
      */
-    // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
     public constructor(configRaw: any) {
 
         this.configRaw = configRaw;
@@ -41,6 +42,10 @@ export class Config {
         this.gameIDLength = this.getFromConfig('number', 'game.idLength');
         this.gameJoinTimeout = this.getFromConfig('number', 'game.joinTimeout');
         this.gameStartWaitDuration = this.getFromConfig('number', 'game.startWaitDuration');
+
+        // Evaluation section
+        assert.deepStrictEqual(typeof configRaw.evaluation, 'object', 'Config: could not find evaluation section');
+        this.evaluationActionLimit = this.getFromConfig('number', 'evaluation.actionLimit');
 
         // Sql section
         assert.deepStrictEqual(typeof configRaw.sql, 'object', 'Config: could not find section sql');
@@ -89,6 +94,9 @@ limit = 8
 idLength = 6
 joinTimeout = 5000
 startWaitDuration = 5000
+
+[evaluation]
+actionLimit = 50
 
 [sql]
 host = ""

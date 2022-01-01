@@ -37,7 +37,7 @@ export class AbilityFire extends PositionedAbility {
      * @param  descriptor                 Descriptor for ability
      * @param  selectionPattern           Pattern determining which cell can be selected to apply the affect pattern around
      * @param  effectPattern              Pattern determining which cells around the selected cell are affected
-     * @param  displayEffectPatternValues Whether or not effect pattern values should be displayed to the client when using the ability
+     * @param  displayEffectPatternValues Whether effect pattern values should be displayed to the client when using the ability
      * @param  condition                  Condition which must hold true to be able to use this action
      * @param  eventRegistrar             Registrar of all ability event listeners
      * @param  attributes                 Attributes for the ability
@@ -111,8 +111,7 @@ export class AbilityFire extends PositionedAbility {
      * @param  y Y coordinate of effect pattern
      */
     public use(x: number, y: number): void {
-
-        if (!this.usable!)
+        if (!this.usable)
             return;
 
         const selectionPatternX = x - this.selectionPattern.center[0];
@@ -121,40 +120,46 @@ export class AbilityFire extends PositionedAbility {
         if (this.selectionPattern.query(selectionPatternX, selectionPatternY) === 0)
             return;
 
-        this.eventRegistrar.triggerEvent('onUse', {
+        this.eventRegistrar.queueEvent('onUse', {
             builtinAttributes: {}
         });
 
-        let hit = false;
+        const hitCountContainer = {
+            hitCount: 0
+        };
+
         for (const [dx, dy, v] of this.effectPattern.patternEntries) {
             const tile = this.ship.board.tiles[y + dy]?.[x + dx];
             const ship = tile?.[2];
             if (ship !== undefined) {
-                this.eventRegistrar.triggerEvent('onHit', {
+                this.eventRegistrar.queueEvent('onHit', {
                     builtinAttributes: {
-                        patternValue: new AttributeCodeControlled(() => v)
+                        patternValue: new AttributeCodeControlled(() => v),
+                        hitCount: new AttributeCodeControlled(() => hitCountContainer.hitCount)
                     },
                     foreignTeam: ship.owner.team,
                     foreignPlayer: ship.owner,
                     foreignShip: ship
                 });
-                hit = true;
+                hitCountContainer.hitCount++;
             }
         }
 
-        if (!hit) {
-            this.eventRegistrar.triggerEvent('onMiss', {
+        if (hitCountContainer.hitCount === 0) {
+            this.eventRegistrar.queueEvent('onMiss', {
                 builtinAttributes: {}
             });
         }
 
-        this.eventRegistrar.triggerEvent('onAbilityUsed', {
+        this.eventRegistrar.rootRegistrar.queueEvent('onAbilityUsed', {
             builtinAttributes: {},
             foreignTeam: this.ship.owner.team,
             foreignPlayer: this.ship.owner,
             foreignShip: this.ship,
             foreignAbility: this
         });
+
+        this.eventRegistrar.evaluateEvents();
     }
 
     /**
@@ -169,7 +174,8 @@ export class AbilityFire extends PositionedAbility {
             type: 'fire',
             descriptor: this.descriptor.makeTransportable(),
             selectionPattern: this.selectionPattern.makeTransportable(false),
-            effectPattern: this.effectPattern.makeTransportable(this.displayEffectPatternValues)
+            effectPattern: this.effectPattern.makeTransportable(this.displayEffectPatternValues),
+            attributes: this.attributeWatcher.exportAttributeInfo()
         };
     }
 }

@@ -1,6 +1,7 @@
 import console               from 'console';
 import { TimeoutManager }    from 'shared/timeout-manager';
 import config                from '../config';
+import type { Player }       from './scenario/objects/player';
 import type { Scenario }     from './scenario/objects/scenario';
 import type { Client }       from './sockets/client';
 import type { IServerEvent } from 'shared/network/events/i-server-event';
@@ -36,8 +37,9 @@ export class Game {
         });
 
         // Set callback for turn advancements to notify clients
-        this.scenario.turnManager.turnAdvancementCallback = () => this.broadcastEvent({
-            event: 'turnAdvancement'
+        this.scenario.turnManager.turnAdvancementCallback = (player: Player) => this.broadcastEvent({
+            event: 'turnAdvancement',
+            player: player.client!.identity
         });
     }
 
@@ -68,7 +70,7 @@ export class Game {
             for (const existingClient of this.clients) {
                 existingClient.sendEvent({
                     event: 'playerLeave',
-                    playerIdentity: client.identity
+                    player: client.identity
                 });
             }
 
@@ -101,7 +103,7 @@ export class Game {
 
             existingClient.sendEvent({
                 event: 'playerJoin',
-                playerIdentity: client.identity,
+                player: client.identity,
                 team: client.team?.id,
                 ready: client.ready
             });
@@ -243,24 +245,13 @@ export class Game {
      * Starts the game
      */
     public startGame(): void {
-        this._gamePhase = GamePhase.InProgress;
-
-        // Update spotting status of all ships and usability of abilities
-        for (const client of this.clients) {
-            for (const ship of Object.values(client.player!.ships)) {
-                ship.spotInitial();
-                for (const ability of ship.abilities)
-                    ability.checkUsable({
-                        builtinAttributes: {}
-                    });
-            }
-        }
-
-        this.scenario.eventRegistrar.triggerEvent('onGameStart', {
+        this.scenario.eventRegistrar.queueEvent('onGameStart', {
             builtinAttributes: {}
         });
         this.scenario.turnManager.start();
+        this.scenario.eventRegistrar.evaluateEvents();
 
+        this._gamePhase = GamePhase.InProgress;
         this.broadcastEvent({
             event: 'gameStart'
         });

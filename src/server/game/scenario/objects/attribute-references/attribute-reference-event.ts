@@ -1,8 +1,9 @@
-import { UnpackingError }           from '../../unpacker';
-import { builtinAttributePrefix }   from '../attributes/sources/builtin-attributes';
-import { AttributeReference }       from './attribute-reference';
-import type { GenericEventContext } from '../../events/event-context';
-import type { ParsingContext }      from '../../parsing-context';
+import { UnpackingError }            from '../../errors/unpacking-error';
+import { builtinAttributePrefix }    from '../attributes/sources/builtin-attributes';
+import { AttributeReference }        from './attribute-reference';
+import type { GenericEventContext }  from '../../events/event-context';
+import type { EventEvaluationState } from '../../events/event-evaluation-state';
+import type { ParsingContext }       from '../../parsing-context';
 
 /**
  * AttributeReferenceEvent - Server Version
@@ -25,7 +26,7 @@ export class AttributeReferenceEvent extends AttributeReference {
      *
      * @param    parsingContext Context for resolving objects and values when an event is triggered
      * @param    attributeName  Name of attribute to reference
-     * @param    builtin        Whether or not this attribute reference refers to a built-in value or a user defined
+     * @param    builtin        Whether this attribute reference refers to a built-in value or a user defined
      * @returns                 Created AttributeReferenceEvent object
      */
     public static async fromSource(parsingContext: ParsingContext, attributeName: string, builtin: boolean): Promise<AttributeReferenceEvent> {
@@ -56,10 +57,11 @@ export class AttributeReferenceEvent extends AttributeReference {
     /**
      * Set the value of the referenced attribute
      *
-     * @param  eventContext Context for resolving objects and values when an event is triggered
-     * @param  value        New value to assign to referenced attribute
+     * @param  eventEvaluationState Current state of event evaluation
+     * @param  eventContext         Context for resolving objects and values when an event is triggered
+     * @param  value                New value to assign to referenced attribute
      */
-    public setValue(eventContext: GenericEventContext, value: number): void {
-        eventContext.builtinAttributes[this.attributeName].setValue(eventContext, value);
+    public setValue(eventEvaluationState: EventEvaluationState, eventContext: GenericEventContext, value: number): void {
+        eventContext.builtinAttributes[this.attributeName].setValue(eventEvaluationState, eventContext, value);
     }
 }

@@ -15,7 +15,7 @@ import type { ClientRequestID, IClientRequest }                   from 'shared/n
  * @param  client Client that made the request
  * @param  msg    Request data to handle
  */
-export async function handleMessage(client: Client, msg: Data): Promise<void> {
+export async function handleRequestFromMessage(client: Client, msg: Data): Promise<void> {
 
     let request: IClientRequest;
 

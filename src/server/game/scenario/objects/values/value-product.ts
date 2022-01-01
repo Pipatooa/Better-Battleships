@@ -1,7 +1,7 @@
-import { GenericEventContext }      from '../../events/event-context';
 import { checkAgainstSchema }       from '../../schema-checker';
 import { valueProductSchema }       from './sources/value-product';
 import { ValueMultiple }            from './value-multiple';
+import type { GenericEventContext } from '../../events/event-context';
 import type { ParsingContext }      from '../../parsing-context';
 import type { IValueProductSource } from './sources/value-product';
 import type { Value }               from './value';

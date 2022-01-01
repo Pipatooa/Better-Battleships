@@ -121,7 +121,7 @@ export class RotatablePattern extends Pattern {
      *
      * May not include all details of the object. Just those that the client needs to know.
      *
-     * @param    includeValue Whether or not to include the value for each pattern entry
+     * @param    includeValue Whether to include the value for each pattern entry
      * @returns               Created IRotatablePatternInfo object
      */
     public makeTransportable(includeValue: boolean): IRotatablePatternInfo {

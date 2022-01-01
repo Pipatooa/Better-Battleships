@@ -1,8 +1,9 @@
-import { UnpackingError }                             from '../../unpacker';
+import { UnpackingError }                             from '../../errors/unpacking-error';
 import { builtinAttributePrefix }                     from '../attributes/sources/builtin-attributes';
 import { AttributeReference }                         from './attribute-reference';
 import { attributeReferenceLocalObjectSelectors }     from './sources/attribute-reference';
 import type { GenericEventContext }                   from '../../events/event-context';
+import type { EventEvaluationState }                  from '../../events/event-evaluation-state';
 import type { ParsingContext }                        from '../../parsing-context';
 import type { Attribute }                             from '../attributes/attribute';
 import type { AttributeReferenceLocalObjectSelector } from './sources/attribute-reference';
@@ -29,7 +30,7 @@ export class AttributeReferenceLocal extends AttributeReference {
      * @param    parsingContext Context for resolving objects and values when an event is triggered
      * @param    objectSelector Object selector part of attribute reference string
      * @param    attributeName  Name of attribute to reference
-     * @param    builtin        Whether or not this attribute reference refers to a built-in value or a user defined
+     * @param    builtin        Whether this attribute reference refers to a built-in value or a user defined
      * @returns                 Found Attribute object
      */
     public static async findLocalAttribute(parsingContext: ParsingContext, objectSelector: AttributeReferenceLocalObjectSelector, attributeName: string, builtin: boolean): Promise<Attribute> {
@@ -65,7 +66,7 @@ export class AttributeReferenceLocal extends AttributeReference {
      * @param    parsingContext Context for resolving objects and values when an event is triggered
      * @param    objectSelector Object selector part of attribute reference string
      * @param    attributeName  Name of attribute to reference
-     * @param    builtin        Whether or not this attribute reference refers to a built-in value or a user defined
+     * @param    builtin        Whether this attribute reference refers to a built-in value or a user defined
      * @returns                 Created AttributeReferenceLocal object
      */
     public static async fromSource(parsingContext: ParsingContext, objectSelector: AttributeReferenceLocalObjectSelector, attributeName: string, builtin: boolean): Promise<AttributeReferenceLocal> {
@@ -85,10 +86,11 @@ export class AttributeReferenceLocal extends AttributeReference {
     /**
      * Set the value of the referenced attribute
      *
-     * @param  eventContext Context for resolving objects and values when an event is triggered
-     * @param  value        New value to assign to referenced attribute
+     * @param  eventEvaluationState Current state of event evaluation
+     * @param  eventContext         Context for resolving objects and values when an event is triggered
+     * @param  value                New value to assign to referenced attribute
      */
-    public setValue(eventContext: GenericEventContext, value: number): void {
-        this.attribute.setValue(eventContext, value);
+    public setValue(eventEvaluationState: EventEvaluationState, eventContext: GenericEventContext, value: number): void {
+        this.attribute.setValue(eventEvaluationState, eventContext, value);
     }
 }

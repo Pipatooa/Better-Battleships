@@ -1,9 +1,10 @@
+import { UnpackingError }                              from '../../errors/unpacking-error';
 import { checkAgainstSchema }                          from '../../schema-checker';
-import { UnpackingError }                              from '../../unpacker';
 import { buildCondition }                              from '../conditions/condition-builder';
 import { Action }                                      from './action';
 import { actionWinSchema }                             from './sources/action-win';
 import type { ECA, EventContext, GenericEventContext } from '../../events/event-context';
+import type { EventEvaluationState }                   from '../../events/event-evaluation-state';
 import type { ParsingContext }                         from '../../parsing-context';
 import type { Condition }                              from '../conditions/condition';
 import type { Team }                                   from '../team';
@@ -20,11 +21,13 @@ export class ActionWin extends Action {
      * ActionWin constructor
      *
      * @param  team      Team to trigger win for. If undefined, will use team found in event context
+     * @param  priority  Priority to use for event listener created for this action
      * @param  condition Condition that must hold true for this action to execute.
      */
     private constructor(private readonly team: Team | undefined,
+                        priority: number,
                         condition: Condition) {
-        super(condition);
+        super(priority, condition);
     }
 
     /**
@@ -48,6 +51,9 @@ export class ActionWin extends Action {
         let team: Team | undefined;
         switch (actionWinSource.team) {
             case 'local':
+                if (parsingContext.teamPartial === undefined)
+                    throw new UnpackingError(`The 'win' action defined at '${parsingContext.currentPath}' is invalid. No team to cause to win.`,
+                        parsingContext);
                 team = parsingContext.teamPartial as Team;
                 break;
             case 'foreign':
@@ -60,15 +66,18 @@ export class ActionWin extends Action {
         }
 
         // Return created ActionWin object
-        return new ActionWin(team, condition);
+        return new ActionWin(team, actionWinSource.priority ?? 0, condition);
     }
 
     /**
      * Executes this action's logic if action condition holds true
+     * Current state of the evaluation
      *
-     * @param  eventContext Context for resolving objects and values when an event is triggered
+     * @param  eventEvaluationState Current state of event evaluation
+     * @param  eventContext         Context for resolving objects and values when an event is triggered
      */
-    public execute(eventContext: GenericEventContext): void {
+    public execute(eventEvaluationState: EventEvaluationState, eventContext: GenericEventContext): void {
+        super.execute(eventEvaluationState, eventContext);
         if (!this.condition.check(eventContext))
             return;
 

@@ -1,4 +1,4 @@
-import { UnpackingError }                        from '../../unpacker';
+import { UnpackingError }                        from '../../errors/unpacking-error';
 import { AttributeUserControlled }               from './attribute-user-controlled';
 import type { ParsingContext }                   from '../../parsing-context';
 import type { AttributeReferenceObjectSelector } from '../attribute-references/sources/attribute-reference';

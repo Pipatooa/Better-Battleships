@@ -7,6 +7,7 @@ import type { ConditionSource } from '../../conditions/sources/condition';
  */
 export interface IBaseActionSource {
     type: string,
+    priority: number | undefined,
     condition: ConditionSource;
 }
 

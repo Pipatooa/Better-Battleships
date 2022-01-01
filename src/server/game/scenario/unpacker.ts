@@ -1,10 +1,10 @@
 import AdmZip                   from 'adm-zip';
+import { UnpackingError }       from './errors/unpacking-error';
 import { Scenario }             from './objects/scenario';
 import { ParsingContext }       from './parsing-context';
 import type { IScenarioSource } from './objects/sources/scenario';
 import type { IZipEntry }       from 'adm-zip';
 import type { FileJSON }        from 'formidable';
-import type Joi                 from 'joi';
 
 export type ZipEntryMap = { [name: string]: IZipEntry };
 
@@ -112,37 +112,4 @@ export async function getJSONFromEntry(zipEntry: IZipEntry): Promise<JSON> {
             resolve(json);
         });
     });
-}
-
-/**
- * UnpackingError - Server Version
- *
- * Thrown when an error is encountered during the scenario unpacking process
- */
-export class UnpackingError extends Error {
-    public readonly context: string;
-
-    public constructor(message: string, context: string | ParsingContext) {
-        super(message);
-
-        if (context instanceof ParsingContext)
-            this.context = `An error occurred whilst parsing '${context.currentFile}'`;
-        else
-            this.context = `An error occurred whilst parsing '${context}'`;
-
-        Object.setPrototypeOf(this, UnpackingError.prototype);
-    }
-
-    /**
-     * Factory function to generate UnpackingError based on `Joi.ValidationError`
-     *
-     * Useful for Joi validation
-     *
-     * @param    err            Joi validation error
-     * @param    parsingContext Parsing context to use for context
-     * @returns                 Created UnpackingError
-     */
-    public static fromJoiValidationError(err: Joi.ValidationError, parsingContext: ParsingContext): UnpackingError {
-        return new UnpackingError(err.message.toString(), parsingContext);
-    }
 }

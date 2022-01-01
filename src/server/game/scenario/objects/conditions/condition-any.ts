@@ -1,7 +1,7 @@
-import { GenericEventContext }      from '../../events/event-context';
 import { checkAgainstSchema }       from '../../schema-checker';
 import { ConditionMultiple }        from './condition-multiple';
 import { conditionAnySchema }       from './sources/condition-any';
+import type { GenericEventContext } from '../../events/event-context';
 import type { ParsingContext }      from '../../parsing-context';
 import type { Condition }           from './condition';
 import type { IConditionAnySource } from './sources/condition-any';
@@ -16,10 +16,10 @@ import type { IConditionAnySource } from './sources/condition-any';
 export class ConditionAny extends ConditionMultiple {
 
     /**
-     * Checks whether or not this condition holds true
+     * Checks whether this condition holds true
      *
      * @param    eventContext Context for resolving objects and values when an event is triggered
-     * @returns               Whether or not this condition holds true
+     * @returns               Whether this condition holds true
      */
     public check(eventContext: GenericEventContext): boolean {
 

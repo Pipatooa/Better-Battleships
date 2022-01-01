@@ -26,5 +26,7 @@ export const baseAbilitySchema = Joi.object({
     type: Joi.string().required(),
     descriptor: descriptorSchema.required(),
     condition: conditionSchema.required(),
-    actions: Joi.object().pattern(Joi.valid(...Object.keys(baseEventInfo)), Joi.array().items(actionSchema)).required()
+    actions: Joi.object().pattern(Joi.valid(...Object.keys(baseEventInfo)), Joi.array().items(actionSchema.keys({
+        priority: Joi.number().required()
+    }))).required()
 }).concat(attributeHolderSchema);

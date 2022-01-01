@@ -5,7 +5,7 @@ import { abilityEventInfo } from './ability-events';
  */
 export const fireAbilityEventInfo = {
     ...abilityEventInfo,
-    onHit: [['team', 'player', 'ship'], ['patternValue']],
+    onHit: [['team', 'player', 'ship'], ['patternValue', 'hitCount']],
     onMiss: [[], []]
 } as const;
 

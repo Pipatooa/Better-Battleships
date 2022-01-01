@@ -1,3 +1,4 @@
+import type { IAttributeInfo }     from './i-attribute-info';
 import type { IShipPrototypeInfo } from './i-ship-prototype-info';
 
 /**
@@ -5,5 +6,6 @@ import type { IShipPrototypeInfo } from './i-ship-prototype-info';
  */
 export interface IPlayerInfo {
     ships: [string, IShipPrototypeInfo][],
-    spawnRegion: string
+    spawnRegion: string,
+    attributes: { [name: string]: IAttributeInfo }
 }

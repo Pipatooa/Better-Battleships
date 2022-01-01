@@ -9,6 +9,7 @@ import type { Ship }       from '../ship';
 export abstract class Ability {
 
     protected _gameElement: JQuery | undefined;
+    private _usable = false;
 
     /**
      * Ability constructor
@@ -31,6 +32,8 @@ export abstract class Ability {
      */
     public createGameElement(container: JQuery): JQuery {
         this._gameElement = $('<div class="ability border border-2 border-dark"></div>');
+        if (!this._usable)
+            this._gameElement.addClass('ability-unavailable');
         container.append(this._gameElement);
         return this._gameElement;
     }
@@ -41,5 +44,18 @@ export abstract class Ability {
 
     public get gameElement(): JQuery | undefined {
         return this._gameElement;
+    }
+
+    public get usable(): boolean {
+        return this._usable;
+    }
+
+    public set usable(usable: boolean) {
+        this._usable = usable;
+
+        if (usable)
+            this._gameElement?.addClass('ability-unavailable');
+        else
+            this._gameElement?.removeClass('ability-unavailable');
     }
 }

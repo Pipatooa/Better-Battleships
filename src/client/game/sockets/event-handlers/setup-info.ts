@@ -41,7 +41,6 @@ export async function handleSetupInfo(setupInfoEvent: ISetupInfoEvent): Promise<
         const abilities = getAbilities(shipPartial as Ship, shipInfo.abilities);
 
         Ship.call(shipPartial, trackingID, undefined, undefined, shipInfo.descriptor, pattern, selfPlayer, abilities);
-        console.log(shipPartial);
         ships.push(shipPartial as Ship);
     }
 

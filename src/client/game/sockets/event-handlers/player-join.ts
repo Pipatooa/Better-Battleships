@@ -10,12 +10,12 @@ import type { IPlayerJoinEvent } from 'shared/network/events/i-player-join';
 export function handlePlayerJoin(playerJoin: IPlayerJoinEvent): void {
 
     // Create a new player using the player's identity
-    new Player(playerJoin.playerIdentity, false);
+    new Player(playerJoin.player, false);
 
     // Pass player readiness onto player ready handler
     handlePlayerReady({
         event: 'playerReady',
-        playerIdentity: playerJoin.playerIdentity,
+        player: playerJoin.player,
         ready: playerJoin.ready
     });
 }

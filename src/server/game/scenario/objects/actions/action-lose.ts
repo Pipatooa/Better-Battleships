@@ -1,9 +1,10 @@
+import { UnpackingError }                              from '../../errors/unpacking-error';
 import { checkAgainstSchema }                          from '../../schema-checker';
-import { UnpackingError }                              from '../../unpacker';
 import { buildCondition }                              from '../conditions/condition-builder';
 import { Action }                                      from './action';
 import { actionLoseSchema }                            from './sources/action-lose';
 import type { ECA, EventContext, GenericEventContext } from '../../events/event-context';
+import type { EventEvaluationState }                   from '../../events/event-evaluation-state';
 import type { ParsingContext }                         from '../../parsing-context';
 import type { Condition }                              from '../conditions/condition';
 import type { Player }                                 from '../player';
@@ -20,11 +21,13 @@ export class ActionLose extends Action {
      * ActionLose constructor
      *
      * @param  player    Player to cause to lose. If undefined, will use player found in event context
+     * @param  priority  Priority to use for event listener created for this action
      * @param  condition Condition that must hold true for this action to execute.
      */
     private constructor(private readonly player: Player | undefined,
+                        priority: number,
                         condition: Condition) {
-        super(condition);
+        super(priority, condition);
     }
     
     /**
@@ -48,6 +51,9 @@ export class ActionLose extends Action {
         let player: Player | undefined;
         switch (actionLoseSource.player) {
             case 'local':
+                if (parsingContext.playerPartial === undefined)
+                    throw new UnpackingError(`The 'lose' action defined at '${parsingContext.currentPath}' is invalid. No player to cause to lose.`,
+                        parsingContext);
                 player = parsingContext.playerPartial as Player;
                 break;
             case 'foreign':
@@ -60,19 +66,21 @@ export class ActionLose extends Action {
         }
         
         // Return created ActionLose object
-        return new ActionLose(player, condition);
+        return new ActionLose(player, actionLoseSource.priority ?? 0, condition);
     }
 
     /**
      * Executes this action's logic if action condition holds true
      *
-     * @param  eventContext Context for resolving objects and values when an event is triggered
+     * @param  eventEvaluationState Current state of event evaluation
+     * @param  eventContext         Context for resolving objects and values when an event is triggered
      */
-    public execute(eventContext: GenericEventContext): void {
+    public execute(eventEvaluationState: EventEvaluationState, eventContext: GenericEventContext): void {
+        super.execute(eventEvaluationState, eventContext);
         if (!this.condition.check(eventContext))
             return;
 
         const player = this.player ?? (eventContext as EventContext<'player', ECA>).foreignPlayer;
-        player.lose(true);
+        player.lose( true);
     }
 }

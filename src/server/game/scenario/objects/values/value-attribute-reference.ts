@@ -1,8 +1,8 @@
-import { GenericEventContext }                 from '../../events/event-context';
 import { checkAgainstSchema }                  from '../../schema-checker';
 import { buildAttributeReference }             from '../attribute-references/attribute-reference-builder';
 import { valueAttributeReferenceSchema }       from './sources/value-attribute-reference';
 import { Value }                               from './value';
+import type { GenericEventContext }            from '../../events/event-context';
 import type { ParsingContext }                 from '../../parsing-context';
 import type { AttributeReference }             from '../attribute-references/attribute-reference';
 import type { IValueAttributeReferenceSource } from './sources/value-attribute-reference';

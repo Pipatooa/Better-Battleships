@@ -1,5 +1,5 @@
 import { trackedShips }             from '../../scenario/ship';
-import type { IShipDestroyedEvent } from '../../../../shared/network/events/i-ship-destroyed';
+import type { IShipDestroyedEvent } from 'shared/network/events/i-ship-destroyed';
 
 /**
  * Handles a ship destroyed event from the server 

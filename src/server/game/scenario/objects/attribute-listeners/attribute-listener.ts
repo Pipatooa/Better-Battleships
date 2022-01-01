@@ -1,5 +1,5 @@
+import { UnpackingError }                             from '../../errors/unpacking-error';
 import { checkAgainstSchema }                         from '../../schema-checker';
-import { UnpackingError }                             from '../../unpacker';
 import { buildAction }                                from '../actions/action-builder';
 import { AttributeReference }                         from '../attribute-references/attribute-reference';
 import { AttributeReferenceLocal }                    from '../attribute-references/attribute-reference-local';
@@ -7,6 +7,7 @@ import { buildValueConstraint }                       from '../constraints/value
 import { attributeListenerEventInfo }                 from './events/attribute-listener';
 import { attributeListenerSchema }                    from './sources/attribute-listener';
 import type { EventContextForEvent }                  from '../../events/event-context';
+import type { EventEvaluationState }                  from '../../events/event-evaluation-state';
 import type { ParsingContext }                        from '../../parsing-context';
 import type { Action }                                from '../actions/action';
 import type { AttributeReferenceLocalObjectSelector } from '../attribute-references/sources/attribute-reference';
@@ -27,6 +28,7 @@ export class AttributeListener {
     private previouslyMetConstraint = false;
 
     private constructor(private readonly attribute: Attribute,
+                        public readonly priority: number,
                         private readonly constraint: ValueConstraint,
                         private readonly actions: Action[],
                         private readonly triggerType: AttributeListenerTriggerType) {
@@ -56,7 +58,6 @@ export class AttributeListener {
 
         const attribute = await AttributeReferenceLocal.findLocalAttribute(parsingContext.withExtendedPath('.attribute'), objectSelector as AttributeReferenceLocalObjectSelector, attributeName, builtin);
         parsingContext.reducePath();
-
         const valueConstraint = await buildValueConstraint(parsingContext.withExtendedPath('.constraint'), attributeListenerSource.constraint, false);
         parsingContext.reducePath();
 
@@ -70,7 +71,7 @@ export class AttributeListener {
         }
         parsingContext.currentEventInfo = undefined;
 
-        return new AttributeListener(attribute, valueConstraint, actions, attributeListenerSource.triggerType);
+        return new AttributeListener(attribute, attributeListenerSource.priority, valueConstraint, actions, attributeListenerSource.triggerType);
     }
 
     /**
@@ -90,10 +91,11 @@ export class AttributeListener {
     /**
      * Called when the value of the attribute that this listener is attached to updates
      *
-     * @param  eventContext Context for resolving objects and values when an event is triggered
-     * @param  value        New value of the attribute
+     * @param  eventEvaluationState Current state of event evaluation
+     * @param  eventContext         Context for resolving objects and values when an event is triggered
+     * @param  value                New value of the attribute
      */
-    public onAttributeValueUpdate(eventContext: EventContextForEvent<AttributeListenerEventInfo, AttributeListenerEvent, 'onAttributeUpdate'>, value: number): void {
+    public onAttributeValueUpdate(eventEvaluationState: EventEvaluationState, eventContext: EventContextForEvent<AttributeListenerEventInfo, AttributeListenerEvent, 'onAttributeUpdate'>, value: number): void {
         const meetsConstraint = this.constraint.check(eventContext, value);
         let shouldExecute: boolean;
 
@@ -113,7 +115,7 @@ export class AttributeListener {
 
         if (shouldExecute) {
             for (const action of this.actions)
-                action.execute(eventContext);
+                action.execute(eventEvaluationState, eventContext);
         }
     }
 }

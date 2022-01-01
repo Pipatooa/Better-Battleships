@@ -5,6 +5,10 @@
   ],
   "attributes": {
     "test": {
+      "descriptor": {
+        "name": "Test",
+        "description": "This is a test attribute"
+      },
       "initialValue": 2,
       "constraints": [],
       "readonly": false
@@ -13,6 +17,7 @@
   "attributeListeners": [
     {
       "attribute": "local:player.@shipCount",
+      "priority": 0,
       "constraint": {
         "exactly": 0
       },

@@ -59,7 +59,7 @@ export class Ship {
      *
      * @param    x New X coordinate of ship
      * @param    y New y coordinate of ship
-     * @returns    Whether or not the ship was moved
+     * @returns    Whether the ship was moved
      */
     public moveTo(x: number | undefined, y: number | undefined): boolean {
         if (x == this._x && y == this._y)
@@ -82,7 +82,7 @@ export class Ship {
     }
 
     /**
-     * Checks whether or not this ship's placement is valid
+     * Checks whether this ship's placement is valid
      *
      * @param    x     Suggested X coordinate of ship placement
      * @param    y     Suggested Y coordinate of ship placement

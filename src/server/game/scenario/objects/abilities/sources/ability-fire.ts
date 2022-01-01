@@ -27,5 +27,7 @@ export const abilityFireSchema = baseAbilitySchema.keys({
     selectionPattern: patternSchema.required(),
     effectPattern: patternSchema.required(),
     displayEffectPatternValues: Joi.boolean().required(),
-    actions: Joi.object().pattern(Joi.valid(...Object.keys(fireAbilityEventInfo)), Joi.array().items(actionSchema)).required()
+    actions: Joi.object().pattern(Joi.valid(...Object.keys(fireAbilityEventInfo)), Joi.array().items(actionSchema.keys({
+        priority: Joi.number().required()
+    }))).required()
 });

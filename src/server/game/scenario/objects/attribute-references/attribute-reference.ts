@@ -1,5 +1,6 @@
-import { attributeReferenceRegex }  from './sources/attribute-reference';
-import type { GenericEventContext } from '../../events/event-context';
+import { attributeReferenceRegex }   from './sources/attribute-reference';
+import type { GenericEventContext }  from '../../events/event-context';
+import type { EventEvaluationState } from '../../events/event-evaluation-state';
 import type {
     AttributeReferenceObjectSelector,
     AttributeReferenceSource,
@@ -39,9 +40,10 @@ export abstract class AttributeReference {
     /**
      * Set the value of the referenced attribute
      *
-     * @param  eventContext Context for resolving objects and values when an event is triggered
-     * @param  value        New value to assign to referenced attribute
+     * @param  eventEvaluationState Current state of event evaluation
+     * @param  eventContext         Context for resolving objects and values when an event is triggered
+     * @param  value                New value to assign to referenced attribute
      */
-    public abstract setValue(eventContext: GenericEventContext, value: number): void;
+    public abstract setValue(eventEvaluationState: EventEvaluationState, eventContext: GenericEventContext, value: number): void;
 
 }

@@ -19,6 +19,10 @@
   "abilities": [],
   "attributes": {
     "health": {
+      "descriptor": {
+        "name": "Health",
+        "description": "Health of this ship"
+      },
       "initialValue": 4,
       "constraints": [],
       "readonly": false
@@ -28,6 +32,7 @@
   "attributeListeners": [
     {
       "attribute": "local:ship.health",
+      "priority": 0,
       "constraint": {
         "exactly": 0
       },

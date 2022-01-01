@@ -34,8 +34,7 @@ export class CharacterMapGenerator<T> {
         let char: string;
         let index = 0;
         do {
-            char = String.fromCharCode(index);
-            index += 1;
+            char = String.fromCharCode(index++);
         } while (this.map[char] !== undefined);
         return char;
     }

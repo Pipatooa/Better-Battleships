@@ -1,17 +1,17 @@
 import { CharacterMapGenerator } from 'shared/character-map-generator';
 import { arraysEqual }           from 'shared/utility';
+import { UnpackingError }        from '../errors/unpacking-error';
 import { checkAgainstSchema }    from '../schema-checker';
-import { UnpackingError }        from '../unpacker';
 import { Region }                from './region';
 import { boardSchema }           from './sources/board';
 import { TileType }              from './tiletype';
-import type { Rotation }         from '../../../../shared/scenario/objects/common/rotation';
 import type { ParsingContext }   from '../parsing-context';
 import type { Ship }             from './ship';
 import type { IBoardSource }     from './sources/board';
 import type { TileGenerator }    from './tile-generator';
 import type { IBoardInfo }       from 'shared/network/scenario/i-board-info';
 import type { ITileTypeInfo }    from 'shared/network/scenario/i-tiletype-info';
+import type { Rotation }         from 'shared/scenario/objects/common/rotation';
 
 /**
  * Board - Server Version
@@ -206,7 +206,7 @@ export class Board {
      * @param    x           X coordinate of placement
      * @param    y           Y coordinate of placement
      * @param    validRegion Region within which the ship's placement is valid
-     * @returns              Whether or not the ship can be placed at that location
+     * @returns              Whether the ship can be placed at that location
      */
     public checkPlacement(ship: Ship, rotation: Rotation, x: number, y: number, validRegion: Region | undefined): boolean {
         const pattern = ship.pattern.rotated(rotation);

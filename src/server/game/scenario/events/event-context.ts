@@ -1,12 +1,10 @@
-import type { Ability }                        from '../objects/abilities/ability';
-import type {
-    AttributeReferenceForeignObjectSelector
-}                                       from '../objects/attribute-references/sources/attribute-reference';
-import type { AttributeCodeControlled } from '../objects/attributes/attribute-code-controlled';
-import type { Player }                  from '../objects/player';
-import type { Ship }                    from '../objects/ship';
-import type { Team }                    from '../objects/team';
-import type { EventInfoEntry }          from './base-events';
+import type { Ability }                                 from '../objects/abilities/ability';
+import type { AttributeReferenceForeignObjectSelector } from '../objects/attribute-references/sources/attribute-reference';
+import type { AttributeCodeControlled }                 from '../objects/attributes/attribute-code-controlled';
+import type { Player }                                  from '../objects/player';
+import type { Ship }                                    from '../objects/ship';
+import type { Team }                                    from '../objects/team';
+import type { EventInfoEntry }                          from './base-events';
 
 /**
  * Type alias for event context A type

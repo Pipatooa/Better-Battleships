@@ -1,15 +1,16 @@
+import { UnpackingError }                                                         from '../errors/unpacking-error';
 import { EventRegistrar }                                                         from '../events/event-registrar';
 import { checkAgainstSchema }                                                     from '../schema-checker';
-import { getJSONFromEntry, UnpackingError }                                       from '../unpacker';
+import { getJSONFromEntry }                                                       from '../unpacker';
 import { eventListenersFromActionSource }                                         from './actions/action-getter';
 import { getAttributeListeners }                                                  from './attribute-listeners/attribute-listener-getter';
 import { AttributeCodeControlled }                                                from './attributes/attribute-code-controlled';
 import { getAttributes }                                                          from './attributes/attribute-getter';
+import { AttributeWatcher }                                                       from './attributes/attribute-watcher';
 import { Descriptor }                                                             from './common/descriptor';
 import { teamEventInfo }                                                          from './events/team-events';
 import { Player }                                                                 from './player';
 import { teamSchema }                                                             from './sources/team';
-import type { IServerEvent }                                                      from '../../../../shared/network/events/i-server-event';
 import type { Client }                                                            from '../../sockets/client';
 import type { ParsingContext }                                                    from '../parsing-context';
 import type { IAttributeHolder, IBuiltinAttributeHolder, BuiltinAttributeRecord } from './attributes/attribute-holder';
@@ -18,6 +19,7 @@ import type { TeamEventInfo, TeamEvent }                                        
 import type { Scenario }                                                          from './scenario';
 import type { IPlayerSource }                                                     from './sources/player';
 import type { IPlayerConfig, ITeamSource }                                        from './sources/team';
+import type { IServerEvent }                                                      from 'shared/network/events/i-server-event';
 import type { ITeamInfo }                                                         from 'shared/network/scenario/i-team-info';
 
 /**
@@ -29,6 +31,8 @@ export class Team implements IAttributeHolder, IBuiltinAttributeHolder<'team'> {
 
     private _players: Player[] = [];
     protected _lost = false;
+
+    private readonly attributeWatcher: AttributeWatcher;
 
     /**
      * Team constructor
@@ -52,7 +56,13 @@ export class Team implements IAttributeHolder, IBuiltinAttributeHolder<'team'> {
                        public readonly eventRegistrar: EventRegistrar<TeamEventInfo, TeamEvent>,
                        public readonly attributes: AttributeMap,
                        public readonly builtinAttributes: BuiltinAttributeRecord<'team'>) {
-        
+
+        this.attributeWatcher = new AttributeWatcher(this.attributes, this.builtinAttributes);
+        this.eventRegistrar.eventEvaluationCompleteCallback = (listenersProcessed: number) => {
+            if (listenersProcessed === 0)
+                return;
+            this.exportAttributeUpdates();
+        };
     }
 
     /**
@@ -65,33 +75,6 @@ export class Team implements IAttributeHolder, IBuiltinAttributeHolder<'team'> {
         return {
             playerCount: new AttributeCodeControlled(() => object._players.length)
         };
-    }
-
-    /**
-     * Initiates list of players from the player prototypes list
-     *
-     * @param  clients Clients to assign to player objects
-     */
-    public setPlayers(clients: Client[]): void {
-
-        // Get player prototypes for this number of players
-        const playerPrototypes = this._playerPrototypes[clients.length];
-
-        // Copy player prototype list into player list
-        for (let i = 0; i < clients.length; i++) {
-            const player = playerPrototypes[i];
-            this._players[i] = player;
-
-            // Link client and player objects
-            player.client = clients[i];
-            clients[i].player = player;
-
-            this.eventRegistrar.addSubRegistrar(player.eventRegistrar);
-            player.registerAttributeListeners();
-        }
-
-        // Clear player prototypes list
-        this._playerPrototypes = [];
     }
 
     /**
@@ -181,8 +164,36 @@ export class Team implements IAttributeHolder, IBuiltinAttributeHolder<'team'> {
             descriptor: this.descriptor.makeTransportable(),
             maxPlayers: this._playerPrototypes.length,
             color: this.color,
-            highlightColor: this.highlightColor
+            highlightColor: this.highlightColor,
+            attributes: this.attributeWatcher.exportAttributeInfo()
         };
+    }
+
+    /**
+     * Initiates list of players from the player prototypes list
+     *
+     * @param  clients Clients to assign to player objects
+     */
+    public setPlayers(clients: Client[]): void {
+
+        // Get player prototypes for this number of players
+        const playerPrototypes = this._playerPrototypes[clients.length];
+
+        // Copy player prototype list into player list
+        for (let i = 0; i < clients.length; i++) {
+            const player = playerPrototypes[i];
+            this._players[i] = player;
+
+            // Link client and player objects
+            player.client = clients[i];
+            clients[i].player = player;
+
+            this.eventRegistrar.addSubRegistrar(player.eventRegistrar);
+            player.registerAttributeListeners();
+        }
+
+        // Clear player prototypes list
+        this._playerPrototypes = [];
     }
 
     /**
@@ -200,6 +211,20 @@ export class Team implements IAttributeHolder, IBuiltinAttributeHolder<'team'> {
     }
 
     /**
+     * Notifies clients of any attribute updates which have occurred on this team
+     */
+    public exportAttributeUpdates(): void {
+        if (!this.attributeWatcher.updatesAvailable)
+            return;
+
+        this.scenario.game!.broadcastEvent({
+            event: 'teamAttributeUpdate',
+            team: this.id,
+            attributes: this.attributeWatcher.exportUpdates()
+        });
+    }
+
+    /**
      * Checks whether all players on this team have lost
      */
     public checkLost(): void {
@@ -212,7 +237,7 @@ export class Team implements IAttributeHolder, IBuiltinAttributeHolder<'team'> {
     /**
      * Eliminates all players on this team from the game
      *
-     * @param  propagateDown Whether or not to update player's lost status
+     * @param  propagateDown Whether to update player's lost status
      */
     public lose(propagateDown: boolean): void {
         if (this._lost)
@@ -222,27 +247,30 @@ export class Team implements IAttributeHolder, IBuiltinAttributeHolder<'team'> {
         if (this.scenario.checkGameOver())
             return;
 
-        if (propagateDown)
-            for (const player of this._players)
-                player.lose(false);
-
-        this.eventRegistrar.triggerEvent('onTeamLostLocal', {
+        this.eventRegistrar.queueEvent('onTeamLostLocal',  {
             builtinAttributes: {}
         });
 
         for (const team of Object.values(this.scenario.teams)) {
             if (team === this)
                 continue;
-            team.eventRegistrar.triggerEvent('onTeamLostForeign', {
+            team.eventRegistrar.queueEvent('onTeamLostForeign', {
                 builtinAttributes: {},
                 foreignTeam: this
             });
         }
 
-        this.eventRegistrar.triggerEventFromRoot('onTeamLostGeneric', {
+        this.eventRegistrar.queueEvent('onTeamLostGeneric',  {
             builtinAttributes: {},
             foreignTeam: this
         });
+
+        if (propagateDown)
+            for (const player of this._players)
+                player.lose(false);
+
+        if (propagateDown)
+            this.eventRegistrar.evaluateEvents();
     }
 
     /**

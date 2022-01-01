@@ -1,8 +1,9 @@
-import { UnpackingError }                                 from '../../unpacker';
+import { UnpackingError }                                 from '../../errors/unpacking-error';
 import { builtinAttributePrefix }                         from '../attributes/sources/builtin-attributes';
 import { AttributeReference }                             from './attribute-reference';
 import { attributeReferenceForeignObjectSelectors }       from './sources/attribute-reference';
 import type { ECA, EventContext, GenericEventContext }    from '../../events/event-context';
+import type { EventEvaluationState }                      from '../../events/event-evaluation-state';
 import type { ParsingContext }                            from '../../parsing-context';
 import type { Attribute }                                 from '../attributes/attribute';
 import type { IAttributeHolder, IBuiltinAttributeHolder } from '../attributes/attribute-holder';
@@ -20,7 +21,7 @@ export class AttributeReferenceForeign extends AttributeReference {
      *
      * @param  objectSelector Object selector part of attribute reference string
      * @param  attributeName  Name of referenced attribute
-     * @param  special        Whether or not this attribute reference refers to a built-in value or a user defined value
+     * @param  special        Whether this attribute reference refers to a built-in value or a user defined value
      */
     public constructor(protected readonly objectSelector: AttributeReferenceForeignObjectSelector,
                        protected readonly attributeName: string,
@@ -34,7 +35,7 @@ export class AttributeReferenceForeign extends AttributeReference {
      * @param    parsingContext Context for resolving objects and values when an event is triggered
      * @param    objectSelector Object selector part of attribute reference string
      * @param    attributeName  Name of attribute to reference
-     * @param    builtin        Whether or not this attribute reference refers to a built-in value or a user defined value
+     * @param    builtin        Whether this attribute reference refers to a built-in value or a user defined value
      * @returns                 Created AttributeReferenceForeign object
      */
     public static async fromSource(parsingContext: ParsingContext, objectSelector: AttributeReferenceForeignObjectSelector, attributeName: string, builtin: boolean): Promise<AttributeReferenceForeign> {
@@ -100,10 +101,11 @@ export class AttributeReferenceForeign extends AttributeReference {
     /**
      * Set the value of the referenced attribute
      *
-     * @param  eventContext Context for resolving objects and values when an event is triggered
-     * @param  value        New value to assign to referenced attribute
+     * @param  eventEvaluationState Current state of event evaluation
+     * @param  eventContext         Context for resolving objects and values when an event is triggered
+     * @param  value                New value to assign to referenced attribute
      */
-    public setValue(eventContext: GenericEventContext, value: number): void {
-        this.getAttribute(eventContext).setValue(eventContext, value);
+    public setValue(eventEvaluationState: EventEvaluationState, eventContext: GenericEventContext, value: number): void {
+        this.getAttribute(eventContext).setValue(eventEvaluationState, eventContext, value);
     }
 }

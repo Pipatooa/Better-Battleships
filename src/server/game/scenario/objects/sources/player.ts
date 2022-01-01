@@ -20,5 +20,7 @@ export interface IPlayerSource extends IAttributeHolderSource {
  */
 export const playerSchema = Joi.object({
     ships: Joi.array().items(genericNameSchema).min(1).required(),
-    actions: Joi.object().pattern(Joi.valid(...Object.keys(playerEventInfo)), Joi.array().items(actionSchema)).required()
+    actions: Joi.object().pattern(Joi.valid(...Object.keys(playerEventInfo)), Joi.array().items(actionSchema.keys({
+        priority: Joi.number().required()
+    }))).required()
 }).concat(attributeHolderSchema);

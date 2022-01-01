@@ -1,6 +1,8 @@
+import { EventListenerPrimaryPriority }                   from '../../events/event-listener';
 import { buildAction }                                    from './action-builder';
 import type { EventInfoEntry }                            from '../../events/base-events';
 import type { EventContextForEvent, GenericEventContext } from '../../events/event-context';
+import type { EventEvaluationState }                      from '../../events/event-evaluation-state';
 import type { EventListeners }                            from '../../events/event-listener';
 import type { ParsingContext }                            from '../../parsing-context';
 import type { ActionSource }                              from './sources/action';
@@ -31,8 +33,9 @@ export async function eventListenersFromActionSource<T extends Record<S, EventIn
             const actionSource = actionSources[i];
             const action = await buildAction(parsingContext.withExtendedPath(`.${eventName}[${i}]`), actionSource, false);
             parsingContext.reducePath();
-            const listenerCallback = (eventContext: EventContextForEvent<T, S, S>): void => action.execute(eventContext as unknown as GenericEventContext);
-            eventListeners[eventName].push([0, listenerCallback]);
+            const listenerCallback = (eventEvaluationState: EventEvaluationState, eventContext: EventContextForEvent<T, S, S>): void =>
+                action.execute(eventEvaluationState, eventContext as unknown as GenericEventContext);
+            eventListeners[eventName].push([EventListenerPrimaryPriority.ActionDefault, action.priority, listenerCallback]);
         }
     }
 

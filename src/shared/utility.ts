@@ -11,7 +11,7 @@ export function clamp(value: number, minimum: number, maximum: number): number {
 }
 
 /**
- * Checks, by element, whether or not two arrays contain the same elements
+ * Checks, by element, whether two arrays contain the same elements
  *
  * @param    arr1               First array to compare
  * @param    arr2               Second array to compare

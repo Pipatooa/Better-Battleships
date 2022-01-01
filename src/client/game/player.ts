@@ -30,7 +30,7 @@ export class Player {
      * Also adds new player to dictionary of all players
      *
      * @param  identity Identity string for the player
-     * @param  ready    Whether or not the player is ready
+     * @param  ready    Whether the player is ready
      */
     public constructor(public readonly identity: string,
                        ready: boolean) {

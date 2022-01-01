@@ -1,4 +1,4 @@
-import type { IGameOverEvent } from '../../../../shared/network/events/i-game-over';
+import type { IGameOverEvent } from 'shared/network/events/i-game-over';
 
 /**
  * Handles a game over event from the server

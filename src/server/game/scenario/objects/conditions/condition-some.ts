@@ -1,8 +1,8 @@
-import { GenericEventContext }       from '../../events/event-context';
 import { checkAgainstSchema }        from '../../schema-checker';
 import { buildValueConstraint }      from '../constraints/value-constraint-builder';
 import { ConditionMultiple }         from './condition-multiple';
 import { conditionSomeSchema }       from './sources/condition-some';
+import type { GenericEventContext }  from '../../events/event-context';
 import type { ParsingContext }       from '../../parsing-context';
 import type { ValueConstraint }      from '../constraints/value-constaint';
 import type { Condition }            from './condition';
@@ -23,7 +23,7 @@ export class ConditionSome extends ConditionMultiple {
      * @param  subConditions   List of sub conditions to check
      * @param  valueConstraint Value constraint defining the number of sub conditions
      *                         that must hold true for the condition as a whole to hold true
-     * @param  inverted        Whether or not the condition result will be inverted before it is returned
+     * @param  inverted        Whether the condition result will be inverted before it is returned
      */
     public constructor(subConditions: Condition[],
                        public readonly valueConstraint: ValueConstraint,
@@ -32,10 +32,10 @@ export class ConditionSome extends ConditionMultiple {
     }
 
     /**
-     * Checks whether or not this condition holds true
+     * Checks whether this condition holds true
      *
      * @param    eventContext Context for resolving objects and values when an event is triggered
-     * @returns               Whether or not this condition holds true
+     * @returns               Whether this condition holds true
      */
     public check(eventContext: GenericEventContext): boolean {
 

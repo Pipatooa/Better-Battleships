@@ -1,5 +1,5 @@
+import { UnpackingError }      from '../../errors/unpacking-error';
 import { checkAgainstSchema }  from '../../schema-checker';
-import { UnpackingError }      from '../../unpacker';
 import { patternSchema }       from './sources/pattern';
 import type { ParsingContext } from '../../parsing-context';
 import type { IPatternSource } from './sources/pattern';
@@ -163,7 +163,7 @@ export class Pattern {
      *
      * May not include all details of the object. Just those that the client needs to know.
      *
-     * @param    includeValue Whether or not to include the value for each pattern entry
+     * @param    includeValue Whether to include the value for each pattern entry
      * @returns               Created IPatternInfo object
      */
     public makeTransportable(includeValue: boolean): IPatternInfo {

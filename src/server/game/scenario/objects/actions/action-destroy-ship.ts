@@ -1,9 +1,10 @@
+import { UnpackingError }                              from '../../errors/unpacking-error';
 import { checkAgainstSchema }                          from '../../schema-checker';
-import { UnpackingError }                              from '../../unpacker';
 import { buildCondition }                              from '../conditions/condition-builder';
 import { Action }                                      from './action';
 import { actionDestroyShipSchema }                     from './sources/action-destroy-ship';
 import type { ECA, EventContext, GenericEventContext } from '../../events/event-context';
+import type { EventEvaluationState }                   from '../../events/event-evaluation-state';
 import type { ParsingContext }                         from '../../parsing-context';
 import type { Condition }                              from '../conditions/condition';
 import type { Ship }                                   from '../ship';
@@ -20,11 +21,13 @@ export class ActionDestroyShip extends Action {
      * ActionDestroyShip constructor
      *
      * @param  ship      Ship to destroy. If undefined, will use ship found in event context
+     * @param  priority  Priority to use for event listener created for this action
      * @param  condition Condition that must hold true for this action to execute
      */
     private constructor(private readonly ship: Ship | undefined,
+                        priority: number,
                         condition: Condition) {
-        super(condition);
+        super(priority, condition);
     }
 
     /**
@@ -48,6 +51,9 @@ export class ActionDestroyShip extends Action {
         let ship: Ship | undefined;
         switch (actionDestroyShipSource.ship) {
             case 'local':
+                if (parsingContext.shipPartial === undefined)
+                    throw new UnpackingError(`The 'destroyShip' action defined at '${parsingContext.currentPath}' is invalid. No ship to destroy.`,
+                        parsingContext);
                 ship = parsingContext.shipPartial as Ship;
                 break;
             case 'foreign':
@@ -59,16 +65,18 @@ export class ActionDestroyShip extends Action {
                 break;
         }
 
-        return new ActionDestroyShip(ship, condition);
+        return new ActionDestroyShip(ship, actionDestroyShipSource.priority ?? 0, condition);
     }
 
     /**
      * Executes this action's logic if action condition holds true
+     * Current state of the evaluation
      *
-     * @param  eventContext Context for resolving objects and values when an event is triggered
+     * @param  eventEvaluationState Current state of event evaluation
+     * @param  eventContext         Context for resolving objects and values when an event is triggered
      */
-    public execute(eventContext: GenericEventContext): void {
-
+    public execute(eventEvaluationState: EventEvaluationState, eventContext: GenericEventContext): void {
+        super.execute(eventEvaluationState, eventContext);
         if (!this.condition.check(eventContext))
             return;
 

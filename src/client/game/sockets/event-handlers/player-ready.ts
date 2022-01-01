@@ -11,11 +11,11 @@ import type { IPlayerReadyEvent } from 'shared/network/events/i-player-ready';
 export function handlePlayerReady(playerReadyEvent: IPlayerReadyEvent): void {
 
     // Get player element using identity provided
-    const player = allPlayers[playerReadyEvent.playerIdentity];
+    const player = allPlayers[playerReadyEvent.player];
     player.ready(playerReadyEvent.ready);
 
     // If player that is ready is us
-    if (playerReadyEvent.playerIdentity === selfIdentity) {
+    if (playerReadyEvent.player === selfIdentity) {
 
         // Re-register button event handler and update button text
         $('#ready-button').off('click').on('click', () => ready(!playerReadyEvent.ready))

@@ -1,4 +1,5 @@
 import type { AbilityInfo }           from './ability-info';
+import type { IAttributeInfo }        from './i-attribute-info';
 import type { IDescriptorInfo }       from './i-descriptor-info';
 import type { IRotatablePatternInfo } from './i-rotatable-pattern-info';
 
@@ -9,7 +10,8 @@ export interface IShipPrototypeInfo {
     descriptor: IDescriptorInfo,
     pattern: IRotatablePatternInfo,
     visibilityPattern: IRotatablePatternInfo,
-    abilities: AbilityInfo[]
+    abilities: AbilityInfo[],
+    attributes: { [name: string]: IAttributeInfo }
 }
 
 /**

@@ -10,7 +10,6 @@ import { Ability }                             from './ability';
 import { abilityEventInfo }                    from './events/ability-events';
 import { IndexedAbility }                      from './indexed-ability';
 import { abilityRotateSchema }                 from './sources/ability-rotate';
-import type { IAbilityRotateInfo }             from '../../../../../shared/network/scenario/ability-info';
 import type { ParsingContext }                 from '../../parsing-context';
 import type { AttributeListener }              from '../attribute-listeners/attribute-listener';
 import type { BuiltinAttributeRecord }         from '../attributes/attribute-holder';
@@ -19,6 +18,7 @@ import type { Condition }                      from '../conditions/condition';
 import type { Ship }                           from '../ship';
 import type { AbilityEvent, AbilityEventInfo } from './events/ability-events';
 import type { IAbilityRotateSource }           from './sources/ability-rotate';
+import type { IAbilityRotateInfo }             from 'shared/network/scenario/ability-info';
 
 /**
  * AbilityFire - Server Version
@@ -32,9 +32,9 @@ export class AbilityRotate extends IndexedAbility {
      *
      * @param  ship               Parent ship which this ability belongs to
      * @param  descriptor         Descriptor for ability
-     * @param  rot90allowed       Whether or not a rotation by 90 degrees is allowed
-     * @param  rot180allowed      Whether or not a rotation by 180 degrees is allowed
-     * @param  rot270allowed      Whether or not a rotation by 270 degrees is allowed
+     * @param  rot90allowed       Whether a rotation by 90 degrees is allowed
+     * @param  rot180allowed      Whether a rotation by 180 degrees is allowed
+     * @param  rot270allowed      Whether a rotation by 270 degrees is allowed
      * @param  condition          Condition which must hold true to be able to use this action
      * @param  eventRegistrar     Registrar of all ability event listeners
      * @param  attributes         Attributes for the ability
@@ -101,8 +101,7 @@ export class AbilityRotate extends IndexedAbility {
      * @param  rotation Rotation to apply to ship
      */
     public use(rotation: Rotation): void {
-
-        if (!this.usable!)
+        if (!this.usable)
             return;
 
         const rotationAllowed =
@@ -116,13 +115,19 @@ export class AbilityRotate extends IndexedAbility {
         if (!this.ship.tryRotateBy(rotation))
             return;
 
-        this.eventRegistrar.triggerEvent('onUse', {
+        this.eventRegistrar.queueEvent('onUse', {
+            builtinAttributes: {}
+        });
+
+        this.eventRegistrar.rootRegistrar.queueEvent('onAbilityUsed', {
             builtinAttributes: {},
             foreignTeam: this.ship.owner.team,
             foreignPlayer: this.ship.owner,
             foreignShip: this.ship,
             foreignAbility: this
         });
+
+        this.eventRegistrar.evaluateEvents();
     }
 
     /**
@@ -138,7 +143,8 @@ export class AbilityRotate extends IndexedAbility {
             descriptor: this.descriptor.makeTransportable(),
             rot90: this.rot90allowed,
             rot180: this.rot180allowed,
-            rot270: this.rot270allowed
+            rot270: this.rot270allowed,
+            attributes: this.attributeWatcher.exportAttributeInfo()
         };
     }
 }

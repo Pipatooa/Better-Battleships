@@ -32,5 +32,7 @@ export const scenarioSchema = Joi.object({
     teams: Joi.array().items(genericNameSchema).min(2).max(8).required(),
     turnOrdering: Joi.valid(...turnOrderings).required(),
     maxTurnTime: Joi.number().integer().min(5),
-    actions: Joi.object().pattern(Joi.valid(...Object.keys(baseEventInfo)), Joi.array().items(actionSchema)).required()
+    actions: Joi.object().pattern(Joi.valid(...Object.keys(baseEventInfo)), Joi.array().items(actionSchema.keys({
+        priority: Joi.number().required()
+    }))).required()
 }).concat(attributeHolderSchema);

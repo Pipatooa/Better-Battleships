@@ -1,10 +1,9 @@
-import type { IBaseServerEvent } from './i-server-event';
+import type { IPlayerUpdateEvent } from './i-player-update';
 
 /**
  * Event sent when a client changes their ready status
  */
-export interface IPlayerReadyEvent extends IBaseServerEvent {
+export interface IPlayerReadyEvent extends IPlayerUpdateEvent {
     event: 'playerReady',
-    playerIdentity: string,
     ready: boolean
 }

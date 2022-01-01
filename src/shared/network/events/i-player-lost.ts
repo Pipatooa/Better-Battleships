@@ -1,9 +1,8 @@
-import type { IBaseServerEvent } from './i-server-event';
+import type { IPlayerUpdateEvent } from './i-player-update';
 
 /**
  * Event sent when another client is eliminated from the game
  */
-export interface IPlayerLostEvent extends IBaseServerEvent {
-    event: 'playerLost',
-    playerIdentity: string
+export interface IPlayerLostEvent extends IPlayerUpdateEvent {
+    event: 'playerLost'
 }

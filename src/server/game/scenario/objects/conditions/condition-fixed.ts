@@ -22,9 +22,9 @@ export class ConditionFixed extends Condition {
     }
 
     /**
-     * Checks whether or not this condition holds true
+     * Checks whether this condition holds true
      *
-     * @returns  Whether or not this condition holds true
+     * @returns  Whether this condition holds true
      */
     public check(): boolean {
         return this.result;

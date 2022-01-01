@@ -1,14 +1,16 @@
+import { UnpackingError }                                                         from '../errors/unpacking-error';
 import { EventRegistrar }                                                         from '../events/event-registrar';
 import { checkAgainstSchema }                                                     from '../schema-checker';
-import { getJSONFromEntry, UnpackingError }                                       from '../unpacker';
+import { getJSONFromEntry }                                                       from '../unpacker';
 import { eventListenersFromActionSource }                                         from './actions/action-getter';
 import { getAttributeListeners }                                                  from './attribute-listeners/attribute-listener-getter';
 import { AttributeCodeControlled }                                                from './attributes/attribute-code-controlled';
 import { getAttributes }                                                          from './attributes/attribute-getter';
+import { AttributeWatcher }                                                       from './attributes/attribute-watcher';
+import { Descriptor }                                                             from './common/descriptor';
 import { playerEventInfo }                                                        from './events/player-events';
 import { Ship }                                                                   from './ship';
 import { playerSchema }                                                           from './sources/player';
-import type { IShipPrototypeInfo }                                                from '../../../../shared/network/scenario/i-ship-prototype-info';
 import type { Client }                                                            from '../../sockets/client';
 import type { ParsingContext }                                                    from '../parsing-context';
 import type { AttributeListener }                                                 from './attribute-listeners/attribute-listener';
@@ -19,6 +21,7 @@ import type { IPlayerSource }                                                   
 import type { IShipSource }                                                       from './sources/ship';
 import type { Team }                                                              from './team';
 import type { IPlayerInfo }                                                       from 'shared/network/scenario/i-player-info';
+import type { IShipPrototypeInfo }                                                from 'shared/network/scenario/i-ship-prototype-info';
 
 /**
  * Player - Server Version
@@ -31,6 +34,8 @@ export class Player implements IAttributeHolder, IBuiltinAttributeHolder<'player
     protected _lost = false;
 
     public readonly ships: { [trackingID: string]: Ship };
+
+    private readonly attributeWatcher: AttributeWatcher;
 
     /**
      * Player constructor
@@ -58,6 +63,13 @@ export class Player implements IAttributeHolder, IBuiltinAttributeHolder<'player
         this.ships = {};
         for (const ship of ships)
             this.ships[ship.teamTrackingID] = ship;
+
+        this.attributeWatcher = new AttributeWatcher(this.attributes, this.builtinAttributes);
+        this.eventRegistrar.eventEvaluationCompleteCallback = (listenersProcessed: number): void => {
+            if (listenersProcessed === 0)
+                return;
+            this.exportAttributeUpdates();
+        };
     }
 
     /**
@@ -68,7 +80,8 @@ export class Player implements IAttributeHolder, IBuiltinAttributeHolder<'player
      */
     private static generateBuiltinAttributes(object: Player): BuiltinAttributeRecord<'player'> {
         return {
-            shipCount: new AttributeCodeControlled(() => Object.values(object.ships).length)
+            shipCount: new AttributeCodeControlled(() => Object.values(object.ships).length, undefined,
+                new Descriptor('Ships', 'Number of ships this player owns'))
         };
     }
 
@@ -154,7 +167,8 @@ export class Player implements IAttributeHolder, IBuiltinAttributeHolder<'player
 
         return {
             ships: ships,
-            spawnRegion: this.spawnRegionID
+            spawnRegion: this.spawnRegionID,
+            attributes: this.attributeWatcher.exportAttributeInfo()
         };
     }
 
@@ -168,28 +182,38 @@ export class Player implements IAttributeHolder, IBuiltinAttributeHolder<'player
     }
 
     /**
+     * Notifies clients of any attribute updates which have occurred on this player
+     */
+    public exportAttributeUpdates(): void {
+        if (!this.attributeWatcher.updatesAvailable)
+            return;
+
+        this.team.scenario.game!.broadcastEvent({
+            event: 'playerAttributeUpdate',
+            player: this.client!.identity,
+            attributes: this.attributeWatcher.exportUpdates()
+        });
+    }
+
+    /**
      * Eliminates this player from the game
      *
-     * @param  propagateUp Whether or not to cause team to check if it has lost
+     * @param  propagateUp Whether to cause team to check if it has lost
      */
     public lose(propagateUp: boolean): void {
         if (this._lost)
             return;
         this._lost = true;
 
-        if (propagateUp)
-            this.team.checkLost();
-
         this.client!.game.broadcastEvent({
             event: 'playerLost',
-            playerIdentity: this.client!.identity
+            player: this.client!.identity
         });
 
-        this.eventRegistrar.triggerEvent('onPlayerLostLocal', {
+        this.eventRegistrar.queueEvent('onPlayerLostLocal', {
             builtinAttributes: {}
         });
-
-        this.team.eventRegistrar.triggerEvent('onPlayerLostFriendly', {
+        this.eventRegistrar.queueEvent('onPlayerLostFriendly', {
             builtinAttributes: {},
             foreignPlayer: this
         });
@@ -197,21 +221,27 @@ export class Player implements IAttributeHolder, IBuiltinAttributeHolder<'player
         for (const team of Object.values(this.team.scenario.teams)) {
             if (team === this.team)
                 continue;
-            team.eventRegistrar.triggerEvent('onPlayerLostUnfriendly', {
+            this.eventRegistrar.queueEvent('onPlayerLostUnfriendly', {
                 builtinAttributes: {},
                 foreignTeam: this.team,
                 foreignPlayer: this
             });
         }
 
-        this.eventRegistrar.triggerEventFromRoot('onPlayerLostGeneric', {
+        this.eventRegistrar.rootRegistrar.queueEvent('onPlayerLostGeneric', {
             builtinAttributes: {},
             foreignTeam: this.team,
             foreignPlayer: this
         });
 
+        if (propagateUp)
+            this.team.checkLost();
+
         if (this.team.scenario.turnManager.currentTurn === this)
-            this.team.scenario.turnManager.advanceTurn();
+            this.team.scenario.turnManager.advanceTurn(false);
+
+        if (propagateUp)
+            this.eventRegistrar.evaluateEvents();
     }
 
     /**

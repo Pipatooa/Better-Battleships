@@ -58,7 +58,7 @@ export async function createGame(scenario: Scenario): Promise<Game> {
     const game = new Game(gameInternalID, gameID, scenario);
 
     games[gameID] = game;
-    numGames += 1;
+    numGames++;
 
     // Set game timeout function and start timeout
     game.timeoutManager.setTimeoutFunction('gameJoinTimeout', () => removeGame(gameID, 'Timed out'), config.gameJoinTimeout, false);
@@ -81,7 +81,7 @@ export function removeGame(gameID: string, reason: string): void {
 
     // Remove the game and decrement number of concurrent games
     delete games[gameID];
-    numGames -= 1;
+    numGames--;
 
     // Debug
     console.log(`Removed game with id '${gameID}' (${reason}). Current games: ${numGames}`);

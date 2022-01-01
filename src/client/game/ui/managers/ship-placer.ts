@@ -1,4 +1,4 @@
-import { Rotation }  from '../../../../shared/scenario/objects/common/rotation';
+import { Rotation }  from 'shared/scenario/objects/common/rotation';
 import { game }      from '../../game';
 import { UIManager } from './ui-manager';
 import type { Ship } from '../../scenario/ship';

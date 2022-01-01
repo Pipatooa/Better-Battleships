@@ -1,5 +1,5 @@
-import { GenericEventContext } from '../../events/event-context';
-import { ValueConstraint }     from './value-constaint';
+import { ValueConstraint }          from './value-constaint';
+import type { GenericEventContext } from '../../events/event-context';
 
 /**
  * EmptyValueConstraint - Server Version
@@ -11,7 +11,7 @@ import { ValueConstraint }     from './value-constaint';
 export class EmptyValueConstraint extends ValueConstraint {
 
     /**
-     * Checks whether or not a value meets this constraint
+     * Checks whether a value meets this constraint
      *
      * @returns  Values will always meet this constraint
      */

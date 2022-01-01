@@ -1,4 +1,4 @@
-import { TimeoutManager }  from '../../../../shared/timeout-manager';
+import { TimeoutManager }  from 'shared/timeout-manager';
 import { allPlayers }      from '../../player';
 import { selfIdentity }    from '../../sockets/event-handlers/connection-info';
 import { sendRequest }     from '../../sockets/opener';
@@ -6,7 +6,7 @@ import { SidebarElements } from '../element-cache';
 import type { Player }     from '../../player';
 
 const playerTurns: Player[] = [];
-let currentTurn = 0;
+let currentPlayer: Player;
 export let ourTurn = false;
 
 let turnStartTime = 0;
@@ -33,6 +33,7 @@ export function setupTurnIndicator(identities: string[], turnLength: number): vo
         if (i === 0)
             player.turnIndicatorElement!.addClass('turn-indicator-active');
     }
+    currentPlayer = playerTurns[0];
 
     // Register event listeners
     SidebarElements.turnButton.get(0).addEventListener('click', () => sendRequest({
@@ -68,7 +69,6 @@ export function updateTurnTimer(): void {
  * Updates the text within the turn button
  */
 export function updateTurnButton(): void {
-    const currentPlayer = playerTurns[currentTurn];
     ourTurn = currentPlayer.identity === selfIdentity;
     SidebarElements.turnButton.attr('disabled', !ourTurn as any);
     SidebarElements.turnText.text(ourTurn ? 'End Turn' : `Waiting for ${currentPlayer.name}`);
@@ -76,19 +76,12 @@ export function updateTurnButton(): void {
 
 /**
  * Advances the current player's turn on the turn indicator
+ *
+ * @param  player Player which the turn has passed to
  */
-export function advanceTurnIndicator(): void {
-    const oldPlayer = playerTurns[currentTurn];
-    let currentPlayer: Player;
-
-    do {
-        currentTurn += 1;
-        currentTurn %= playerTurns.length;
-        currentPlayer = playerTurns[currentTurn];
-    } while (currentPlayer !== oldPlayer && currentPlayer.lost);
-
-    oldPlayer.turnIndicatorElement!.removeClass('turn-indicator-active');
-    currentPlayer.turnIndicatorElement!.addClass('turn-indicator-active');
-
+export function advanceTurnIndicator(player: Player): void {
+    currentPlayer.turnIndicatorElement!.removeClass('turn-indicator-active');
+    player.turnIndicatorElement!.addClass('turn-indicator-active');
+    currentPlayer = player;
     startTurnTimer();
 }

@@ -1,5 +1,5 @@
 import Joi                     from 'joi';
-import { UnpackingError }      from './unpacker';
+import { UnpackingError }      from './errors/unpacking-error';
 import type { ParsingContext } from './parsing-context';
 
 /**

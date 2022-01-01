@@ -25,6 +25,10 @@ export async function buildCondition(parsingContext: ParsingContext, conditionSo
 
     let condition: Condition;
 
+    // Empty condition
+    if (Object.entries(conditionSource).length === 0)
+        condition = await ConditionFixed.fromSource(parsingContext, true, false);
+
     // Call appropriate factory function based on condition type
     switch (conditionSource.type) {
         case 'none':

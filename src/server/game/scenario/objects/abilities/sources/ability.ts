@@ -43,7 +43,11 @@ export const abilitySchema = baseAbilitySchema.keys({
     actions: Joi.when('type',
         {
             is: 'fire',
-            then: Joi.object().pattern(Joi.valid(...Object.keys(fireAbilityEventInfo)), Joi.array().items(actionSchema)).required(),
-            otherwise: Joi.object().pattern(Joi.valid(...Object.keys(abilityEventInfo)), Joi.array().items(actionSchema)).required()
+            then: Joi.object().pattern(Joi.valid(...Object.keys(fireAbilityEventInfo)), Joi.array().items(actionSchema.keys({
+                priority: Joi.number().required()
+            }))).required(),
+            otherwise: Joi.object().pattern(Joi.valid(...Object.keys(abilityEventInfo)), Joi.array().items(actionSchema.keys({
+                priority: Joi.number().required()
+            }))).required()
         })
 }).concat(attributeHolderSchema);

@@ -1,13 +1,16 @@
-import { checkAgainstSchema }       from '../../schema-checker';
-import { buildValueConstraint }     from '../constraints/value-constraint-builder';
-import { buildValue }               from '../values/value-builder';
-import { Attribute }                from './attribute';
-import { attributeSchema }          from './sources/attribute';
-import type { GenericEventContext } from '../../events/event-context';
-import type { ParsingContext }      from '../../parsing-context';
-import type { ValueConstraint }     from '../constraints/value-constaint';
-import type { Value }               from '../values/value';
-import type { IAttributeSource }    from './sources/attribute';
+import { checkAgainstSchema }        from '../../schema-checker';
+import { Descriptor }                from '../common/descriptor';
+import { buildValueConstraint }      from '../constraints/value-constraint-builder';
+import { buildValue }                from '../values/value-builder';
+import { Attribute }                 from './attribute';
+import { attributeSchema }           from './sources/attribute';
+import type { GenericEventContext }  from '../../events/event-context';
+import type { EventEvaluationState } from '../../events/event-evaluation-state';
+import type { ParsingContext }       from '../../parsing-context';
+import type { IDescriptorSource }    from '../common/sources/descriptor';
+import type { ValueConstraint }      from '../constraints/value-constaint';
+import type { Value }                from '../values/value';
+import type { IAttributeSource }     from './sources/attribute';
 
 /**
  * Attribute - Server Version
@@ -21,14 +24,16 @@ export class AttributeUserControlled extends Attribute {
     /**
      * AttributeUserControlled constructor
      *
+     * @param  descriptor   Optional descriptor for this attribute
      * @param  initialValue Initial value for this attribute
      * @param  constraints  Constraints to apply to held value. Will be applied in order
      * @param  readonly     Whether this value should be readonly
      */
-    public constructor(protected readonly initialValue: Value,
+    public constructor(descriptor: Descriptor | undefined,
+                       protected readonly initialValue: Value,
                        protected readonly constraints: ValueConstraint[],
                        public readonly readonly: boolean) {
-        super();
+        super(descriptor);
     }
 
     /**
@@ -45,7 +50,12 @@ export class AttributeUserControlled extends Attribute {
         if (checkSchema)
             attributeSource = await checkAgainstSchema(attributeSource, attributeSchema, parsingContext);
 
-        // Get initial value
+        let descriptor: Descriptor | undefined;
+        if (Object.entries(attributeSource.descriptor).length !== 0) {
+            descriptor = await Descriptor.fromSource(parsingContext.withExtendedPath('.descriptor'), attributeSource.descriptor as IDescriptorSource, false);
+            parsingContext.reducePath();
+        }
+
         const initialValue = await buildValue(parsingContext.withExtendedPath('.initialValue'), attributeSource.initialValue, false);
         parsingContext.reducePath();
 
@@ -59,7 +69,7 @@ export class AttributeUserControlled extends Attribute {
         }
 
         // Return created Attribute object
-        return new AttributeUserControlled(initialValue, constraints, attributeSource.readonly);
+        return new AttributeUserControlled(descriptor, initialValue, constraints, attributeSource.readonly);
     }
 
     /**
@@ -81,10 +91,11 @@ export class AttributeUserControlled extends Attribute {
      * Will constrain given value to meet all held value constraints.
      * If attribute is readonly, new value will be ignored
      *
-     * @param  eventContext Context for resolving objects and values when an event is triggered
-     * @param  value        New value
+     * @param  eventEvaluationState Current state of event evaluation
+     * @param  eventContext         Context for resolving objects and values when an event is triggered
+     * @param  value                New value
      */
-    public setValue(eventContext: GenericEventContext, value: number): void {
+    public setValue(eventEvaluationState: EventEvaluationState, eventContext: GenericEventContext, value: number): void {
         // If value is readonly, ignore new value
         if (this.readonly)
             return;
@@ -96,6 +107,6 @@ export class AttributeUserControlled extends Attribute {
 
         // Set value as new constrained value
         this.value = value;
-        super.setValue(eventContext, value);
+        super.setValue(eventEvaluationState, eventContext, value);
     }
 }

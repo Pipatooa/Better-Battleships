@@ -47,7 +47,7 @@ export class ViewportHandler {
     /**
      * Resizes canvas to match screen size and updates GL viewport accordingly
      *
-     * @param  callUpdateCallback Whether or not to call the update callback
+     * @param  callUpdateCallback Whether to call the update callback
      */
     public updateViewport(callUpdateCallback: boolean): void {
 

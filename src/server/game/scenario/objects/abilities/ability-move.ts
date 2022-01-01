@@ -100,8 +100,7 @@ export class AbilityMove extends PositionedAbility {
      * @param  dy Vertical amount to move
      */
     public use(dx: number, dy: number): void {
-
-        if (!this.usable!)
+        if (!this.usable)
             return;
 
         // Check that the movement is allowed
@@ -113,17 +112,19 @@ export class AbilityMove extends PositionedAbility {
         if (!this.ship.tryMoveBy(dx, dy))
             return;
 
-        this.eventRegistrar.triggerEvent('onUse', {
+        this.eventRegistrar.queueEvent('onUse', {
             builtinAttributes: {}
         });
 
-        this.eventRegistrar.triggerEventFromRoot('onAbilityUsed', {
+        this.eventRegistrar.rootRegistrar.queueEvent('onAbilityUsed', {
             builtinAttributes: {},
             foreignTeam: this.ship.owner.team,
             foreignPlayer: this.ship.owner,
             foreignShip: this.ship,
             foreignAbility: this
         });
+
+        this.eventRegistrar.evaluateEvents();
     }
 
     /**
@@ -137,7 +138,8 @@ export class AbilityMove extends PositionedAbility {
         return {
             type: 'move',
             descriptor: this.descriptor.makeTransportable(),
-            pattern: this.pattern.makeTransportable(false)
+            pattern: this.pattern.makeTransportable(false),
+            attributes: this.attributeWatcher.exportAttributeInfo()
         };
     }
 }

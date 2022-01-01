@@ -1,5 +1,6 @@
-import type { GenericEventContext } from '../../events/event-context';
-import type { Condition }           from '../conditions/condition';
+import type { GenericEventContext }  from '../../events/event-context';
+import type { EventEvaluationState } from '../../events/event-evaluation-state';
+import type { Condition }            from '../conditions/condition';
 
 /**
  * Action - Server Version
@@ -11,15 +12,20 @@ export abstract class Action {
     /**
      * Action constructor
      *
+     * @param  priority  Priority to use for event listener created for this action
      * @param  condition Condition that must hold true for this action to execute
      */
-    protected constructor(public readonly condition: Condition) {
+    protected constructor(public readonly priority: number,
+                          public readonly condition: Condition) {
     }
 
     /**
      * Executes this action's logic if action condition holds true
      *
-     * @param  eventContext Context for resolving objects and values when an event is triggered
+     * @param  eventEvaluationState Current state of event evaluation
+     * @param  eventContext         Context for resolving objects and values when an event is triggered
      */
-    public abstract execute(eventContext: GenericEventContext): void;
+    public execute(eventEvaluationState: EventEvaluationState, eventContext: GenericEventContext): void {
+        eventEvaluationState.bumpActionCount();
+    }
 }

@@ -1,5 +1,6 @@
 import { TimeoutManager } from 'shared/timeout-manager';
 import type { Player }    from './objects/player';
+import type { Scenario }  from './objects/scenario';
 import type { Team }      from './objects/team';
 
 /**
@@ -11,24 +12,25 @@ export class TurnManager {
 
     private _turnOrder: Player[] | undefined = undefined;
     private turnIndex = 0;
-    private readonly turnsGenerated = false;
 
     private readonly timeoutManager: TimeoutManager<'turnTimeout'>;
-    public turnAdvancementCallback: (() => any) | undefined = undefined;
+    public turnAdvancementCallback: ((player: Player) => any) | undefined;
 
     /**
      * TurnManager constructor
      *
+     * @param  scenario     Scenario that this turn manager belongs to
      * @param  turnOrdering Definition of how turns should be grouped
      * @param  teams        List of teams to generate player turns for
      * @param  turnTimeout  Time given to each player before their turn is automatically advanced
      */
-    public constructor(public readonly turnOrdering: TurnOrdering,
+    public constructor(public readonly scenario: Scenario,
+                       public readonly turnOrdering: TurnOrdering,
                        public readonly teams: Team[],
                        public readonly turnTimeout: number) {
 
         this.timeoutManager = new TimeoutManager({
-            turnTimeout: [() => this.advanceTurn(), this.turnTimeout * 1000, false]
+            turnTimeout: [() => this.advanceTurn(true), this.turnTimeout * 1000, false]
         });
     }
 
@@ -37,6 +39,9 @@ export class TurnManager {
      */
     public start(): void {
         this.timeoutManager.startTimeout('turnTimeout');
+        this._turnOrder![this.turnIndex].eventRegistrar.queueEvent('onTurnStart', {
+            builtinAttributes: {}
+        });
     }
 
     /**
@@ -49,48 +54,66 @@ export class TurnManager {
             // Group player turns by team
             // 1st team, 1st player, 1st team, 2nd player, 2nd team, 1st player...
             case 'team':
-
-                for (const team of this.teams) {
-                    for (const player of team.players) {
+                for (const team of this.teams)
+                    for (const player of team.players)
                         this._turnOrder.push(player);
-                    }
-                }
                 break;
 
             // Do not group player turns by team
             // 1st team, 1st player, 2nd team, 1st player, 1st team, 2nd player...
             case 'player': {
                 let i = 0;
-                let c = true;
-                while (c) {
-                    c = false;
+                let playersLeft: boolean;
+                do {
+                    playersLeft = false;
                     for (const team of this.teams) {
                         const player = team.players[i];
                         if (player !== undefined) {
                             this._turnOrder.push(player);
-                            c = true;
+                            playersLeft = true;
                         }
                     }
-                    i += 1;
-                }
+                    i++;
+                } while (playersLeft);
             }
         }
     }
 
     /**
      * Advances which player's turn is currently in session
+     *
+     * @param  evaluateEvents Whether to evaluate turn related events immediately
      */
-    public advanceTurn(): void {
+    public advanceTurn(evaluateEvents: boolean): void {
         const startIndex = this.turnIndex;
+        const oldPlayer = this._turnOrder![this.turnIndex];
+        let newPlayer: Player;
 
         do {
-            this.turnIndex += 1;
+            this.turnIndex++;
             this.turnIndex %= this._turnOrder!.length;
-        } while (this.turnIndex !== startIndex && this._turnOrder![this.turnIndex].lost);
+            newPlayer = this._turnOrder![this.turnIndex];
+        } while (this.turnIndex !== startIndex && newPlayer.lost);
+
+        oldPlayer.eventRegistrar.queueEvent('onTurnEnd',  {
+            builtinAttributes: {}
+        });
+        newPlayer.eventRegistrar.queueEvent('onTurnStart',  {
+            builtinAttributes: {}
+        });
+
+        this.scenario.eventRegistrar.queueEvent('onTurnAdvancement', {
+            builtinAttributes: {},
+            foreignTeam: newPlayer.team,
+            foreignPlayer: newPlayer
+        });
+
+        if (evaluateEvents)
+            this.scenario.eventRegistrar.evaluateEvents();
 
         this.timeoutManager.startTimeout('turnTimeout');
         if (this.turnAdvancementCallback !== undefined)
-            this.turnAdvancementCallback();
+            this.turnAdvancementCallback(newPlayer);
     }
 
     /**

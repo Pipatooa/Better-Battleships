@@ -5,6 +5,7 @@ import { buildValue }                     from '../values/value-builder';
 import { Action }                         from './action';
 import { actionWinSchema }                from './sources/action-win';
 import type { GenericEventContext }       from '../../events/event-context';
+import type { EventEvaluationState }      from '../../events/event-evaluation-state';
 import type { ParsingContext }            from '../../parsing-context';
 import type { AttributeReference }        from '../attribute-references/attribute-reference';
 import type { Condition }                 from '../conditions/condition';
@@ -23,12 +24,14 @@ export class ActionSetAttribute extends Action {
      *
      * @param  attributeReference Reference to attribute to update
      * @param  value              New value to assign to the attribute
+     * @param  priority           Priority to use for event listener created for this action
      * @param  condition          Condition that must hold true for this action to execute
      */
     public constructor(public readonly attributeReference: AttributeReference,
                        public readonly value: Value,
+                       priority: number,
                        condition: Condition) {
-        super(condition);
+        super(priority, condition);
     }
 
     /**
@@ -54,19 +57,20 @@ export class ActionSetAttribute extends Action {
         parsingContext.reducePath();
 
         // Return created ActionSetAttribute object
-        return new ActionSetAttribute(attribute, value, condition);
+        return new ActionSetAttribute(attribute, value, actionSetAttributeSource.priority ?? 0, condition);
     }
 
     /**
      * Executes this action's logic if action condition holds true
      *
-     * @param  eventContext Context for resolving objects and values when an event is triggered
+     * @param  eventEvaluationState Current state of event evaluation
+     * @param  eventContext         Context for resolving objects and values when an event is triggered
      */
-    public execute(eventContext: GenericEventContext): void {
-
+    public execute(eventEvaluationState: EventEvaluationState, eventContext: GenericEventContext): void {
+        super.execute(eventEvaluationState, eventContext);
         if (!this.condition.check(eventContext))
             return;
 
-        this.attributeReference.setValue(eventContext, this.value.evaluate(eventContext));
+        this.attributeReference.setValue(eventEvaluationState, eventContext, this.value.evaluate(eventContext));
     }
 }

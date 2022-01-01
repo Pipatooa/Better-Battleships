@@ -44,5 +44,7 @@ export const teamSchema = Joi.object({
         color: colorSchema.required(),
         highlightColor: colorSchema.required()
     })).min(1)).min(1).max(8).required(),
-    actions: Joi.object().pattern(Joi.valid(...Object.keys(teamEventInfo)), Joi.array().items(actionSchema)).required()
+    actions: Joi.object().pattern(Joi.valid(...Object.keys(teamEventInfo)), Joi.array().items(actionSchema.keys({
+        priority: Joi.number().required()
+    }))).required()
 }).concat(attributeHolderSchema);

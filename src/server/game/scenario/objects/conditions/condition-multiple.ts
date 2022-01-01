@@ -14,7 +14,7 @@ export abstract class ConditionMultiple extends Condition {
      * ConditionMultiple constructor
      *
      * @param  subConditions List of sub conditions to check
-     * @param  inverted      Whether or not the condition result will be inverted before it is returned
+     * @param  inverted      Whether the condition result will be inverted before it is returned
      */
     protected constructor(public readonly subConditions: Condition[],
                           inverted: boolean) {

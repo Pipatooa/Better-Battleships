@@ -1,3 +1,4 @@
+import type { IAttributeInfo }  from './i-attribute-info';
 import type { IDescriptorInfo } from './i-descriptor-info';
 import type { IPatternInfo }    from './i-pattern-info';
 
@@ -14,7 +15,8 @@ export type AbilityInfo =
  */
 export interface IBaseAbilityInfo {
     type: string,
-    descriptor: IDescriptorInfo
+    descriptor: IDescriptorInfo,
+    attributes: { [name: string]: IAttributeInfo }
 }
 
 /**

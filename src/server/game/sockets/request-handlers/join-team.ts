@@ -33,8 +33,8 @@ export async function handleJoinTeamRequest(client: Client, joinTeamRequest: IJo
     // Broadcast team assignment to existing clients
     for (const existingClient of client.game.clients) {
         existingClient.sendEvent({
-            event: 'teamAssignment',
-            playerIdentity: client.identity,
+            event: 'playerTeamAssignment',
+            player: client.identity,
             team: joinTeamRequest.team
         });
     }

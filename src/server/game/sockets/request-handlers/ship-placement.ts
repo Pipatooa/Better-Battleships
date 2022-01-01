@@ -1,6 +1,6 @@
 import Joi                            from 'joi';
 import { baseRequestSchema }          from 'shared/network/requests/i-client-request';
-import { Rotation }                   from '../../../../shared/scenario/objects/common/rotation';
+import { Rotation }                   from 'shared/scenario/objects/common/rotation';
 import { GamePhase }                  from '../../game';
 import type { Ship }                  from '../../scenario/objects/ship';
 import type { Client }                from '../client';

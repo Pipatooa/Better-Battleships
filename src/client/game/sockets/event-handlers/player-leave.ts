@@ -9,6 +9,6 @@ import type { IPlayerLeaveEvent } from 'shared/network/events/i-player-leave';
 export function handlePlayerLeave(playerLeave: IPlayerLeaveEvent): void {
 
     // Deconstruct player
-    const player = allPlayers[playerLeave.playerIdentity];
+    const player = allPlayers[playerLeave.player];
     player.deconstruct();
 }

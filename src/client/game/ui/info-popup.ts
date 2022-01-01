@@ -17,7 +17,7 @@ export function registerInfoPopupHandlers(): void {
  *
  * @param  title   Title for popup window
  * @param  content Content for popup window. Line breaks will be converted to paragraphs.
- * @param  show    Whether or not to show the popup window
+ * @param  show    Whether to show the popup window
  */
 export function setInfoPopupContent(title: string, content: string, show: boolean): void {
 

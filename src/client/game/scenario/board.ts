@@ -97,7 +97,7 @@ export class Board {
      * Adds a ship to the board
      *
      * @param  ship       Ship to add to the board
-     * @param  updateList Whether or not to update list of ships on the board
+     * @param  updateList Whether to update list of ships on the board
      */
     public addShip(ship: Ship, updateList: boolean): void {
         if (updateList) {
@@ -123,7 +123,7 @@ export class Board {
      * Removes a ship from the board
      *
      * @param  ship       Ship to remove
-     * @param  updateList Whether or not to update list of ships on the board
+     * @param  updateList Whether to update list of ships on the board
      */
     public removeShip(ship: Ship, updateList: boolean): void {
         if (updateList) {
