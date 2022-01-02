@@ -10,6 +10,6 @@ export const builtinAttributes = {
     scenario: ['teamCount'],
     team: ['playerCount'],
     player: ['shipCount'],
-    ship: ['abilityCount', 'visibility', 'spottedBy'],
+    ship: ['size', 'abilityCount', 'visibility', 'spottedBy'],
     ability: []
 } as const;

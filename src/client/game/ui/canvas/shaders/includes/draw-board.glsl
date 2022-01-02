@@ -11,14 +11,14 @@ void drawBoard(float x, float y)
     vec4 tileSample = texture(tileTexture, vec2(x, y));
     fragColor = mix(primaryColor, borderColor, tileSample.x);
 
-    if (globalRenderFlags == 1) {
+    if (highlightMultiplier != 1.0) {
         if (tileInfo.w != 1.0 / 255.0) {
-            fragColor.xyz *= 0.25;
-            primaryColor.xyz *= 0.25;
-            secondaryColor.xyz *= 0.25;
+            fragColor.xyz *= highlightMultiplier;
+            primaryColor.xyz *= highlightMultiplier;
+            secondaryColor.xyz *= highlightMultiplier;
         }
         else if (fract(x) < borderRatio || fract(y) < borderRatio) {
-            fragColor.xyz *= 0.25;
+            fragColor.xyz *= highlightMultiplier;
         }
     }
 

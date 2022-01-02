@@ -3,12 +3,15 @@ import { UIManager }    from './ui-manager';
 import type { Player }  from '../../player';
 import type { Ability } from '../../scenario/abilities/ability';
 
+/**
+ * MainUIManager - Client Version
+ *
+ * Responsible for updating UI elements during gameplay
+ */
 export class MainUIManager extends UIManager {
     
     public static turnOrder: Player[] = [];
     public static currentTurnIndex = 0;
-    
-    private static readonly sidebarTurnContainerElement = $('#sidebar-turn-container');
 
     private oldHighlightRegionID: string | undefined;
 
@@ -39,13 +42,11 @@ export class MainUIManager extends UIManager {
 
     /**
      * Called when the ability canvas is clicked on
-     *
-     * @param  ev
      */
     protected onAbilityCanvasClick(): void {
         const [x, y] = this.abilityCanvasCoordinates!;
         const tile = game.abilityRenderer!.board?.tiles[Math.floor(y)]?.[Math.floor(x)];
-        const abilityCallback = tile![3];
+        const abilityCallback = tile?.[3];
         abilityCallback?.();
     }
 

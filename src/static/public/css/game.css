@@ -1,12 +1,19 @@
 :root {
     --canvas-background-color: #32628c;
+    --view-normal-color: #ddd;
+    --view-normal-text-color: var(--bs-dark);
+    --view-hovered-color: #bbb;
+    --view-hovered-text-color: var(--bs-dark);
+    --view-active-color: var(--bs-green);
+    --view-active-text-color: var(--bs-dark);
     --player-ready-color: var(--bs-success);
     --player-not-ready-color: var(--bs-danger);
     --turn-indicator-color: var(--bs-gray);
     --turn-indicator-active-color: var(--bs-success);
     --ability-color: #ddd;
-    --selected-ability-color: var(--bs-success);
     --ability-unavailable-color: var(--bs-gray);
+    --selected-ability-color: var(--bs-success);
+    --selected-ability-unavailable-color: var(--bs-gray-dark);
 }
 
 .player:not(.player-ready) {
@@ -44,6 +51,34 @@
     pointer-events: none;
 }
 
+#view-panel {
+    position: absolute;
+    z-index: 500;
+
+    width: min-content;
+    height: inherit;
+
+    bottom: 0;
+    left: 0;
+}
+
+.view {
+    cursor: pointer;
+
+    background: var(--view-normal-color);
+    color: var(--view-normal-text-color);
+}
+
+.view:hover {
+    background: var(--view-hovered-color);
+    color: var(--view-hovered-text-color);
+}
+
+.view.view-active {
+    background: var(--view-active-color);
+    color: var(--view-active-text-color);
+}
+
 #sidebar-ship-section {
     overflow-y: auto;
 }
@@ -60,17 +95,23 @@
 .ability {
     width: 2em;
     height: 2em;
-    background-image: url("https://cdn0.iconfinder.com/data/icons/basic-arrows-1/80/Arrow_four_way-512.png");
-    background-size: contain;
-    background-color: var(--ability-color);
-}
 
-.ability.selected-ability {
-    background-color: var(--selected-ability-color);
+    background-origin: content-box;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-color: var(--ability-color);
 }
 
 .ability.ability-unavailable {
     background-color: var(--ability-unavailable-color);
+}
+
+.ability.selected-ability, .ability:hover {
+    background-color: var(--selected-ability-color);
+}
+
+.ability.selected-ability.ability-unavailable, .ability.ability-unavailable:hover {
+    background-color: var(--selected-ability-unavailable-color);
 }
 
 .attribute-list {

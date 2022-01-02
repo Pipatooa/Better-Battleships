@@ -11,12 +11,15 @@ import type { IAbilityRotateInfo } from 'shared/network/scenario/ability-info';
  */
 export class AbilityRotate extends Ability {
 
+    protected readonly abilityClass = 'ability-rotate';
+
     /**
      * AbilityFire constructor
      *
      * @param  ship                Ship that this ability belongs to
      * @param  index               Index of this ability in ship's ability list
      * @param  descriptor          Descriptor for ability
+     * @param  icon                Url to icon for this ability
      * @param  rot90allowed        Whether a rotation by 90 degrees is allowed
      * @param  rot180allowed       Whether a rotation by 180 degrees is allowed
      * @param  rot270allowed       Whether a rotation by 270 degrees is allowed
@@ -26,12 +29,13 @@ export class AbilityRotate extends Ability {
     public constructor(ship: Ship,
                        index: number,
                        descriptor: Descriptor,
+                       icon: string,
                        public readonly rot90allowed: boolean,
                        public readonly rot180allowed: boolean,
                        public readonly rot270allowed: boolean,
                        attributeCollection: AttributeCollection,
                        usable: boolean) {
-        super(ship, index, descriptor, attributeCollection, usable);
+        super(ship, index, descriptor, icon, attributeCollection, usable);
     }
 
     /**
@@ -45,7 +49,7 @@ export class AbilityRotate extends Ability {
     public static fromInfo(abilityRotateInfo: IAbilityRotateInfo, ship: Ship, index: number): AbilityRotate {
         const descriptor = Descriptor.fromInfo(abilityRotateInfo.descriptor);
         const attributeCollection = new AttributeCollection(abilityRotateInfo.attributes);
-        return new AbilityRotate(ship, index, descriptor, abilityRotateInfo.rot90, abilityRotateInfo.rot180, abilityRotateInfo.rot270, attributeCollection, abilityRotateInfo.usable);
+        return new AbilityRotate(ship, index, descriptor, abilityRotateInfo.icon, abilityRotateInfo.rot90, abilityRotateInfo.rot180, abilityRotateInfo.rot270, attributeCollection, abilityRotateInfo.usable);
     }
     
     /**

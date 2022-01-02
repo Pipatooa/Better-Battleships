@@ -25,8 +25,11 @@ export class Ship {
 
     public board: Board | undefined;
     private _selected = false;
-    
+
+    protected _visibilityPattern: RotatablePattern;
     protected _rotation = Rotation.NoChange;
+
+    public lastSelectedAbility: number | undefined;
 
     /**
      * Ship constructor
@@ -36,7 +39,7 @@ export class Ship {
      * @param  _y                  Y coordinate of ship
      * @param  descriptor          Descriptor for ship
      * @param  _pattern            Pattern describing shape of ship
-     * @param  _visibilityPattern  Pattern describing set of cells from which this ship is visible
+     * @param  visibility          Range from which this ship is visible
      * @param  player              Player that this ship belongs to
      * @param  abilities           Dictionary of abilities available for this ship
      * @param  attributeCollection Attributes for this ship
@@ -46,10 +49,12 @@ export class Ship {
                        protected _y: number | undefined,
                        public readonly descriptor: Descriptor,
                        protected _pattern: RotatablePattern,
-                       protected _visibilityPattern: RotatablePattern,
+                       visibility: number,
                        public readonly player: Player,
                        public readonly abilities: Ability[],
                        public readonly attributeCollection: AttributeCollection) {
+        
+        this._visibilityPattern = this._pattern.getExtendedPattern(visibility);
         
         if (this._trackingID !== undefined)
             trackedShips[this._trackingID] = this;
@@ -75,7 +80,6 @@ export class Ship {
         const descriptor = Descriptor.fromInfo(shipInfo.descriptor);
         const pattern = RotatablePattern.fromInfo(shipInfo.pattern);
         const visibility = shipInfo.attributes[`${builtinAttributePrefix}visibility`].value;
-        const visibilityPattern = pattern.getExtendedPattern(visibility);
         const abilities = getAbilities(shipPartial as Ship, shipInfo.abilities);
         const attributeCollection = new AttributeCollection(shipInfo.attributes);
 
@@ -90,7 +94,7 @@ export class Ship {
         } else
             player = selfPlayer;
 
-        Ship.call(shipPartial, trackingID, x, y, descriptor, pattern, visibilityPattern, player, abilities, attributeCollection);
+        Ship.call(shipPartial, trackingID, x, y, descriptor, pattern, visibility, player, abilities, attributeCollection);
         return shipPartial as Ship;
     }
 

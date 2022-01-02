@@ -1,0 +1,6 @@
+[submodule "src/static/bootstrap"]
+	path = src/static/bootstrap
+	url = https://github.com/twbs/bootstrap
+[submodule "src/static/icons"]
+	path = src/static/icons
+	url = https://github.com/twbs/icons

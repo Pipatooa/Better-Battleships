@@ -16,6 +16,7 @@ export class BoardInfoGenerator {
     private static readonly secondaryBorderRatio = 0.03;
     private static readonly tileTextureSize = 64;
     private static readonly borderColor = new Float32Array([...ColorAtlas.colorFromHex('#161a6b').map(v => v / 255), 1]);
+    private static readonly highlightMultiplier = 0.25;
 
     // Generated tile textures
     private static texturesGenerated = false;
@@ -25,7 +26,7 @@ export class BoardInfoGenerator {
 
     // WebGL uniforms
     private readonly boardInfoUniform: WebGLTexture;
-    private globalRenderFlagsUniform = 0;
+    private highlightMultiplierUniform = 1.0;
 
     // Generated board texture
     private textureData: Uint8Array;
@@ -36,7 +37,7 @@ export class BoardInfoGenerator {
     private _highlightedRegion: string | undefined;
 
     public constructor(private readonly gl: WebGL2RenderingContext,
-                       private readonly modelProgram: ModelProgram<never, 'tileTexture' | 'borderRatio' | 'borderColor' | 'borderTextureArray' | 'boardInfo' | 'boardInfoSize' | 'boardSize' | 'globalRenderFlags'>,
+                       private readonly modelProgram: ModelProgram<never, 'tileTexture' | 'borderRatio' | 'borderColor' | 'borderTextureArray' | 'boardInfo' | 'boardInfoSize' | 'boardSize' | 'highlightMultiplier'>,
                        board: Board) {
 
         if (!BoardInfoGenerator.texturesGenerated) {
@@ -203,18 +204,6 @@ export class BoardInfoGenerator {
     }
 
     /**
-     * Sets a global render flag
-     *
-     * @param  flag  Flag to set
-     * @param  value Boolean value to set flag to
-     */
-    private setGlobalRenderFlag(flag: GlobalRenderFlag, value: boolean): void {
-        this.globalRenderFlagsUniform |= flag;
-        if (!value)
-            this.globalRenderFlagsUniform ^= flag;
-    }
-
-    /**
      * Sets a render flag for a given tile
      *
      * @param  dataStart Location of first byte of pixel data
@@ -242,7 +231,7 @@ export class BoardInfoGenerator {
                 this.setRenderFlag(this.getDataStart(x, y), RenderFlag.Highlighted, highlighted);
             }
         }
-        this.setGlobalRenderFlag(GlobalRenderFlag.HighlightMode, true);
+        this.highlightMultiplierUniform = BoardInfoGenerator.highlightMultiplier;
     }
 
     /**
@@ -255,7 +244,7 @@ export class BoardInfoGenerator {
     public highlightPattern(x: number, y: number, pattern: Pattern): void {
         for (const [dx, dy] of pattern.patternEntries)
             this.setRenderFlag(this.getDataStart(x + dx, y + dy), RenderFlag.Highlighted, true);
-        this.setGlobalRenderFlag(GlobalRenderFlag.HighlightMode, true);
+        this.highlightMultiplierUniform = BoardInfoGenerator.highlightMultiplier;
     }
 
     /**
@@ -268,7 +257,7 @@ export class BoardInfoGenerator {
                 this.setRenderFlag(this.getDataStart(x, y), RenderFlag.Highlighted, false);
             }
         }
-        this.setGlobalRenderFlag(GlobalRenderFlag.HighlightMode, false);
+        this.highlightMultiplierUniform = 1.0;
     }
 
     /**
@@ -308,7 +297,7 @@ export class BoardInfoGenerator {
         this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.textureSize, this.textureSize, 0, this.gl.RGBA, this.gl.UNSIGNED_BYTE, this.textureData);
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST);
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST);
-        this.gl.uniform1i(this.modelProgram.uniformLocations.globalRenderFlags, this.globalRenderFlagsUniform);
+        this.gl.uniform1f(this.modelProgram.uniformLocations.highlightMultiplier, this.highlightMultiplierUniform);
     }
 
     /**
@@ -354,13 +343,6 @@ export class BoardInfoGenerator {
     public get highlightedRegion(): string | undefined {
         return this._highlightedRegion;
     }
-}
-
-/**
- * Render flags applying to entire board
- */
-enum GlobalRenderFlag {
-    HighlightMode = 1
 }
 
 /**

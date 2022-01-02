@@ -19,12 +19,14 @@ export abstract class Ability {
      * @param  ship                Ship that this ability belongs to
      * @param  index               Index of this ability in ship's ability list
      * @param  descriptor          Descriptor for ability
+     * @param  icon                Url to icon for this ability
      * @param  attributeCollection Attributes for this ability
      * @param  _usable             Whether this ability is usable
      */
     public constructor(protected readonly ship: Ship,
                        protected readonly index: number,
                        public readonly descriptor: Descriptor,
+                       private readonly icon: string,
                        public readonly attributeCollection: AttributeCollection,
                        protected _usable: boolean) {
 
@@ -37,9 +39,10 @@ export abstract class Ability {
      * @returns            Created element
      */
     public createGameElement(container: JQuery): JQuery {
-        this._gameElement = $('<div class="ability border border-2 border-dark"></div>');
+        this._gameElement = $('<div class="ability p-1 border border-2 border-dark"></div>');
         if (!this._usable)
             this._gameElement.addClass('ability-unavailable');
+        this._gameElement.css('background-image', `url(${this.icon})`);
         container.append(this._gameElement);
         return this._gameElement;
     }

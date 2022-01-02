@@ -8,6 +8,7 @@ import { Pattern }                             from '../common/pattern';
 import { buildCondition }                      from '../conditions/condition-builder';
 import { Ability }                             from './ability';
 import { abilityEventInfo }                    from './events/ability-events';
+import { getIconUrlFromSource }                from './icons';
 import { PositionedAbility }                   from './positioned-ability';
 import { abilityMoveSchema }                   from './sources/ability-move';
 import type { ParsingContext }                 from '../../parsing-context';
@@ -32,6 +33,7 @@ export class AbilityMove extends PositionedAbility {
      *
      * @param  ship               Parent ship which this ability belongs to
      * @param  descriptor         Descriptor for ability
+     * @param  icon               Url to icon for this ability
      * @param  pattern            Pattern describing possible movements
      * @param  condition          Condition which must hold true to be able to use this action
      * @param  eventRegistrar     Registrar of all ability event listeners
@@ -41,13 +43,14 @@ export class AbilityMove extends PositionedAbility {
      */
     public constructor(ship: Ship,
                        descriptor: Descriptor,
+                       icon: string,
                        public readonly pattern: Pattern,
                        condition: Condition,
                        eventRegistrar: EventRegistrar<AbilityEventInfo, AbilityEvent>,
                        attributes: AttributeMap,
                        builtinAttributes: BuiltinAttributeRecord<'ability'>,
                        attributeListeners: AttributeListener[]) {
-        super(ship, descriptor, condition, eventRegistrar, attributes, builtinAttributes, attributeListeners);
+        super(ship, descriptor, icon, condition, eventRegistrar, attributes, builtinAttributes, attributeListeners);
     }
 
     /**
@@ -80,6 +83,8 @@ export class AbilityMove extends PositionedAbility {
         // Get component elements from source
         const descriptor = await Descriptor.fromSource(parsingContext.withExtendedPath('.descriptor'), abilityMoveSource.descriptor, false);
         parsingContext.reducePath();
+        const icon = getIconUrlFromSource(parsingContext.withExtendedPath('.icon'), abilityMoveSource.icon);
+        parsingContext.reducePath();
         const pattern = await Pattern.fromSource(parsingContext.withExtendedPath('.pattern'), abilityMoveSource.pattern, false);
         parsingContext.reducePath();
         const condition = await buildCondition(parsingContext.withExtendedPath('.condition'), abilityMoveSource.condition, false);
@@ -90,7 +95,7 @@ export class AbilityMove extends PositionedAbility {
         // Return created AbilityMove object
         parsingContext.localAttributes.ability = undefined;
         EventRegistrar.call(eventRegistrarPartial, eventListeners, []);
-        AbilityMove.call(abilityPartial, parsingContext.shipPartial as Ship, descriptor, pattern, condition, eventRegistrarPartial, attributes, builtinAttributes, attributeListeners);
+        AbilityMove.call(abilityPartial, parsingContext.shipPartial as Ship, descriptor, icon, pattern, condition, eventRegistrarPartial, attributes, builtinAttributes, attributeListeners);
         return abilityPartial as AbilityMove;
     }
 
@@ -143,6 +148,7 @@ export class AbilityMove extends PositionedAbility {
         return {
             type: 'move',
             descriptor: this.descriptor.makeTransportable(),
+            icon: this.icon,
             pattern: this.pattern.makeTransportable(false),
             attributes: this.attributeWatcher.exportAttributeInfo(),
             usable: this.usable

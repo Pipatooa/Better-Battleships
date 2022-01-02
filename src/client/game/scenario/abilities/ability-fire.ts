@@ -18,6 +18,7 @@ export class AbilityFire extends Ability {
      * @param  ship                Ship that this ability belongs to
      * @param  index               Index of this ability in ship's ability list
      * @param  descriptor          Descriptor for ability
+     * @param  icon                Url to icon for this ability
      * @param  selectionPattern    Pattern determining which cell can be selected to apply the affect pattern around
      * @param  effectPattern       Pattern determining which cells around the selected cell are affected
      * @param  attributeCollection Attribute for this ability
@@ -26,11 +27,12 @@ export class AbilityFire extends Ability {
     public constructor(ship: Ship,
                        index: number,
                        descriptor: Descriptor,
+                       icon: string,
                        public readonly selectionPattern: Pattern,
                        public readonly effectPattern: Pattern,
                        attributeCollection: AttributeCollection,
                        usable: boolean) {
-        super(ship, index, descriptor, attributeCollection, usable);
+        super(ship, index, descriptor, icon, attributeCollection, usable);
     }
 
     /**
@@ -46,7 +48,7 @@ export class AbilityFire extends Ability {
         const selectionPattern = Pattern.fromInfo(abilityFireInfo.selectionPattern);
         const effectPattern = Pattern.fromInfo(abilityFireInfo.effectPattern);
         const attributeCollection = new AttributeCollection(abilityFireInfo.attributes);
-        return new AbilityFire(ship, index, descriptor, selectionPattern, effectPattern, attributeCollection, abilityFireInfo.usable);
+        return new AbilityFire(ship, index, descriptor, abilityFireInfo.icon, selectionPattern, effectPattern, attributeCollection, abilityFireInfo.usable);
     }
 
     /**

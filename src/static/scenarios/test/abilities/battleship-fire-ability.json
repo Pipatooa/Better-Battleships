@@ -4,6 +4,7 @@
     "name": "Broadside Fire",
     "description": "The Battleship's broadside fire deals 3-5 damage across multiple cells. Cooldown of 3 turns. On hit, cooldown of 5 turns."
   },
+  "icon": "exclamation-diamond",
   "selectionPattern": {
     "size": [9, 5],
     "values": {

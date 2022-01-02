@@ -4,6 +4,7 @@
     "name": "Basic Move",
     "description": "Basic Movement"
   },
+  "icon": "arrows-move",
   "condition": {
     "type": "none"
   },

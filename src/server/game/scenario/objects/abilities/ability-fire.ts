@@ -9,6 +9,7 @@ import { Pattern }                                     from '../common/pattern';
 import { buildCondition }                              from '../conditions/condition-builder';
 import { Ability }                                     from './ability';
 import { fireAbilityEventInfo }                        from './events/fire-ability-event';
+import { getIconUrlFromSource }                        from './icons';
 import { PositionedAbility }                           from './positioned-ability';
 import { abilityFireSchema }                           from './sources/ability-fire';
 import type { ParsingContext }                         from '../../parsing-context';
@@ -35,6 +36,7 @@ export class AbilityFire extends PositionedAbility {
      *
      * @param  ship                       Parent ship which this ability belongs to
      * @param  descriptor                 Descriptor for ability
+     * @param  icon                       Url to icon for this ability
      * @param  selectionPattern           Pattern determining which cell can be selected to apply the affect pattern around
      * @param  effectPattern              Pattern determining which cells around the selected cell are affected
      * @param  displayEffectPatternValues Whether effect pattern values should be displayed to the client when using the ability
@@ -46,6 +48,7 @@ export class AbilityFire extends PositionedAbility {
      */
     public constructor(ship: Ship,
                        descriptor: Descriptor,
+                       icon: string,
                        public readonly selectionPattern: Pattern,
                        public readonly effectPattern: Pattern,
                        public readonly displayEffectPatternValues: boolean,
@@ -55,7 +58,7 @@ export class AbilityFire extends PositionedAbility {
                        builtinAttributes: BuiltinAttributeRecord<'ability'>,
                        attributeListeners: AttributeListener[]) {
 
-        super(ship, descriptor, condition, eventRegistrar, attributes, builtinAttributes, attributeListeners);
+        super(ship, descriptor, icon, condition, eventRegistrar, attributes, builtinAttributes, attributeListeners);
         this.eventRegistrar = eventRegistrar;
     }
 
@@ -89,6 +92,8 @@ export class AbilityFire extends PositionedAbility {
         // Get component elements from source
         const descriptor = await Descriptor.fromSource(parsingContext.withExtendedPath('.descriptor'), abilityFireSource.descriptor, false);
         parsingContext.reducePath();
+        const icon = getIconUrlFromSource(parsingContext.withExtendedPath('.icon'), abilityFireSource.icon);
+        parsingContext.reducePath();
         const selectionPattern = await Pattern.fromSource(parsingContext.withExtendedPath('.selectionPattern'), abilityFireSource.selectionPattern, false);
         parsingContext.reducePath();
         const effectPattern = await Pattern.fromSource(parsingContext.withExtendedPath('.effectPattern'), abilityFireSource.effectPattern, false);
@@ -101,7 +106,7 @@ export class AbilityFire extends PositionedAbility {
         // Return created AbilityFire object
         parsingContext.localAttributes.ability = undefined;
         EventRegistrar.call(eventRegistrarPartial, eventListeners, []);
-        AbilityFire.call(abilityPartial, parsingContext.shipPartial as Ship, descriptor, selectionPattern, effectPattern, abilityFireSource.displayEffectPatternValues, condition, eventRegistrarPartial, attributes, builtinAttributes, attributeListeners);
+        AbilityFire.call(abilityPartial, parsingContext.shipPartial as Ship, descriptor, icon, selectionPattern, effectPattern, abilityFireSource.displayEffectPatternValues, condition, eventRegistrarPartial, attributes, builtinAttributes, attributeListeners);
         return abilityPartial as AbilityFire;
     }
 
@@ -174,6 +179,7 @@ export class AbilityFire extends PositionedAbility {
         return {
             type: 'fire',
             descriptor: this.descriptor.makeTransportable(),
+            icon: this.icon,
             selectionPattern: this.selectionPattern.makeTransportable(false),
             effectPattern: this.effectPattern.makeTransportable(this.displayEffectPatternValues),
             attributes: this.attributeWatcher.exportAttributeInfo(),

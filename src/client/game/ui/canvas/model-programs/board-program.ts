@@ -35,7 +35,7 @@ const uniformNames = [
     'borderTextureArray',
     'boardInfo', 'boardInfoSize', 'boardSize',
     'selectionInfo', 'selectionInfoSize', 'selectionSize', 'selectionOffset',
-    'globalRenderFlags'
+    'highlightMultiplier'
 ] as const;
 
 /**

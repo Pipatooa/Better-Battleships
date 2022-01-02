@@ -27,7 +27,7 @@ uniform float selectionInfoSize;
 uniform vec2 selectionSize;
 uniform vec2 selectionOffset;
 
-uniform int globalRenderFlags;
+uniform float highlightMultiplier;
 
 out vec4 fragColor;
 
@@ -49,8 +49,8 @@ void main()
     // Main board rendering
     if (textureCoord.x >= 0.0 && textureCoord.x <= 1.0 && textureCoord.y >= 0.0 && textureCoord.y <= 1.0)
         drawBoard(x, y);
-    else if (globalRenderFlags == 1)
-        fragColor.xyz *= 0.25;
+    else
+        fragColor.xyz *= highlightMultiplier;
 
     // Selection rendering
     if (selectionInfoX >= 0.0 && selectionInfoX <= 1.0 && selectionInfoY >= 0.0 && selectionInfoY <= 1.0)

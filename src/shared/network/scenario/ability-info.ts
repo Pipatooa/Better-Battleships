@@ -16,6 +16,7 @@ export type AbilityInfo =
 export interface IBaseAbilityInfo {
     type: string,
     descriptor: IDescriptorInfo,
+    icon: string,
     attributes: MultipleAttributeInfo,
     usable: boolean
 }

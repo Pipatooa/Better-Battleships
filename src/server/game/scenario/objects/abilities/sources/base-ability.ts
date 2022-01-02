@@ -14,7 +14,9 @@ import type { AbilityEvent }           from '../events/ability-events';
  * JSON source interface reflecting base ability schema
  */
 export interface IBaseAbilitySource extends IAttributeHolderSource {
+    type: string,
     descriptor: IDescriptorSource,
+    icon: string,
     condition: ConditionSource,
     actions: { [event in AbilityEvent]: ActionSource[] }
 }
@@ -25,6 +27,7 @@ export interface IBaseAbilitySource extends IAttributeHolderSource {
 export const baseAbilitySchema = Joi.object({
     type: Joi.string().required(),
     descriptor: descriptorSchema.required(),
+    icon: Joi.string().required(),
     condition: conditionSchema.required(),
     actions: Joi.object().pattern(Joi.valid(...Object.keys(baseEventInfo)), Joi.array().items(actionSchema.keys({
         priority: Joi.number().required()

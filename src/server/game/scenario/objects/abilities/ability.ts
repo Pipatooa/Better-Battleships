@@ -24,6 +24,7 @@ export abstract class Ability implements IAttributeHolder, BuiltinAttributeRecor
      *
      * @param  ship               Parent ship which this ability belongs to
      * @param  descriptor         Descriptor for ability
+     * @param  icon               Url to icon for this ability
      * @param  condition          Condition which must hold true to be able to use this ability
      * @param  eventRegistrar     Registrar of all team event listeners
      * @param  attributes         Attributes for the ability
@@ -32,6 +33,7 @@ export abstract class Ability implements IAttributeHolder, BuiltinAttributeRecor
      */
     public constructor(public readonly ship: Ship,
                        public readonly descriptor: Descriptor,
+                       protected readonly icon: string,
                        public readonly condition: Condition,
                        public readonly eventRegistrar: EventRegistrar<AbilityEventInfo, AbilityEvent>,
                        public readonly attributes: AttributeMap,

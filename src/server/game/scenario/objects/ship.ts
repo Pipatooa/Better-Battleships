@@ -134,6 +134,7 @@ export class Ship implements IAttributeHolder, IBuiltinAttributeHolder<'ship'> {
      */
     private static generateBuiltinAttributes(object: Ship): BuiltinAttributeRecord<'ship'> {
         return {
+            size: new AttributeCodeControlled(() => object._pattern.patternEntries.length, () => {}, true),
             abilityCount: new AttributeCodeControlled(() => object.abilities.length, () => {}, true),
             visibility: new AttributeCodeControlled(
                 () => object._visibility,

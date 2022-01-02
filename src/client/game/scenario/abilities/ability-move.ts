@@ -18,6 +18,8 @@ import type { IAbilityMoveInfo } from 'shared/network/scenario/ability-info';
  */
 export class AbilityMove extends Ability {
 
+    protected readonly abilityClass = 'ability-move';
+
     public static readonly moveValidTileType = new TileType({
         name: 'Valid Move',
         description: 'This ship is allowed to move here'
@@ -33,6 +35,7 @@ export class AbilityMove extends Ability {
      * @param  ship                Ship that this ability belongs to
      * @param  index               Index of this ability in ship's ability list
      * @param  descriptor          Descriptor for ability
+     * @param  icon                Url to icon for this ability
      * @param  pattern             Pattern describing possible movements
      * @param  attributeCollection Attributes for this ability
      * @param  usable              Whether this ability is usable
@@ -40,10 +43,11 @@ export class AbilityMove extends Ability {
     public constructor(ship: Ship,
                        index: number,
                        descriptor: Descriptor,
+                       icon: string,
                        public readonly pattern: Pattern,
                        attributeCollection: AttributeCollection,
                        usable: boolean) {
-        super(ship, index, descriptor, attributeCollection, usable);
+        super(ship, index, descriptor, icon, attributeCollection, usable);
     }
 
     /**
@@ -58,7 +62,7 @@ export class AbilityMove extends Ability {
         const descriptor = Descriptor.fromInfo(abilityMoveInfo.descriptor);
         const pattern = Pattern.fromInfo(abilityMoveInfo.pattern);
         const attributeCollection = new AttributeCollection(abilityMoveInfo.attributes);
-        return new AbilityMove(ship, index, descriptor, pattern, attributeCollection, abilityMoveInfo.usable);
+        return new AbilityMove(ship, index, descriptor, abilityMoveInfo.icon, pattern, attributeCollection, abilityMoveInfo.usable);
     }
 
     /**

@@ -150,6 +150,14 @@ const webConfig = {
                     from: 'src/static/db-scripts',
                     to: 'db-scripts'
                 },
+                {
+                    from: 'src/static/bootstrap/dist',
+                    to: 'public/bootstrap'
+                },
+                {
+                    from: 'src/static/icons/icons',
+                    to: 'public/icons'
+                },
                 ...scenarioPatternEntries
             ]
         }),

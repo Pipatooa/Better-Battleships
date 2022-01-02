@@ -8,6 +8,7 @@ import { Descriptor }                          from '../common/descriptor';
 import { buildCondition }                      from '../conditions/condition-builder';
 import { Ability }                             from './ability';
 import { abilityEventInfo }                    from './events/ability-events';
+import { getIconUrlFromSource }                from './icons';
 import { IndexedAbility }                      from './indexed-ability';
 import { abilityRotateSchema }                 from './sources/ability-rotate';
 import type { ParsingContext }                 from '../../parsing-context';
@@ -32,6 +33,7 @@ export class AbilityRotate extends IndexedAbility {
      *
      * @param  ship               Parent ship which this ability belongs to
      * @param  descriptor         Descriptor for ability
+     * @param  icon               Url to icon for this ability
      * @param  rot90allowed       Whether a rotation by 90 degrees is allowed
      * @param  rot180allowed      Whether a rotation by 180 degrees is allowed
      * @param  rot270allowed      Whether a rotation by 270 degrees is allowed
@@ -43,6 +45,7 @@ export class AbilityRotate extends IndexedAbility {
      */
     public constructor(ship: Ship,
                        descriptor: Descriptor,
+                       icon: string,
                        public readonly rot90allowed: boolean,
                        public readonly rot180allowed: boolean,
                        public readonly rot270allowed: boolean,
@@ -51,7 +54,7 @@ export class AbilityRotate extends IndexedAbility {
                        attributes: AttributeMap,
                        builtinAttributes: BuiltinAttributeRecord<'ability'>,
                        attributeListeners: AttributeListener[]) {
-        super(ship, descriptor, condition, eventRegistrar, attributes, builtinAttributes, attributeListeners);
+        super(ship, descriptor, icon, condition, eventRegistrar, attributes, builtinAttributes, attributeListeners);
     }
 
     /**
@@ -84,6 +87,8 @@ export class AbilityRotate extends IndexedAbility {
         // Get component elements from source
         const descriptor = await Descriptor.fromSource(parsingContext.withExtendedPath('.descriptor'), abilityRotateSource.descriptor, false);
         parsingContext.reducePath();
+        const icon = getIconUrlFromSource(parsingContext.withExtendedPath('.icon'), abilityRotateSource.icon);
+        parsingContext.reducePath();
         const condition = await buildCondition(parsingContext.withExtendedPath('.condition'), abilityRotateSource.condition, false);
         parsingContext.reducePath();
         const eventListeners = await eventListenersFromActionSource(parsingContext.withExtendedPath('.actions'), abilityEventInfo, abilityRotateSource.actions);
@@ -92,7 +97,7 @@ export class AbilityRotate extends IndexedAbility {
         // Return created AbilityFire object
         parsingContext.localAttributes.ability = undefined;
         EventRegistrar.call(eventRegistrarPartial, eventListeners, []);
-        AbilityRotate.call(abilityPartial, parsingContext.shipPartial as Ship, descriptor, abilityRotateSource.rot90, abilityRotateSource.rot180, abilityRotateSource.rot270, condition, eventRegistrarPartial, attributes, builtinAttributes, attributeListeners);
+        AbilityRotate.call(abilityPartial, parsingContext.shipPartial as Ship, descriptor, icon, abilityRotateSource.rot90, abilityRotateSource.rot180, abilityRotateSource.rot270, condition, eventRegistrarPartial, attributes, builtinAttributes, attributeListeners);
         return abilityPartial as AbilityRotate;
     }
 
@@ -142,6 +147,7 @@ export class AbilityRotate extends IndexedAbility {
         return {
             type: 'rotate',
             descriptor: this.descriptor.makeTransportable(),
+            icon: this.icon,
             rot90: this.rot90allowed,
             rot180: this.rot180allowed,
             rot270: this.rot270allowed,
