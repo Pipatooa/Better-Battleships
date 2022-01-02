@@ -2,6 +2,8 @@ import { TooltipElements } from '../element-cache';
 import type { Tile }       from '../../scenario/board';
 import type { Ship }       from '../../scenario/ship';
 
+let previouslyDisplayedShip: Ship | undefined;
+
 /**
  * Updates the visibility and contents of the game tooltip
  *
@@ -38,8 +40,19 @@ export function updateTooltip(infoText: [string, string] | undefined, tileInfo: 
 
     // Ship section
     TooltipElements.shipSection.setVisibility(shipSectionVisible);
-    if (shipSectionVisible) {
+    if (shipSectionVisible && ship !== previouslyDisplayedShip) {
+
+        // Main ship section
         TooltipElements.shipName.text(ship!.descriptor.name);
         TooltipElements.shipOwner.text(ship!.player.name);
+
+        // Attribute section
+        const shipAttributeSectionVisible = ship!.attributeCollection.shouldDisplay;
+        TooltipElements.shipAttributeSection.setVisibility(shipAttributeSectionVisible);
+        previouslyDisplayedShip?.attributeCollection.doNotDisplayInContainer(TooltipElements.shipAttributeList);
+        if (shipAttributeSectionVisible)
+            ship!.attributeCollection.displayInContainer(TooltipElements.shipAttributeList);
+
+        previouslyDisplayedShip = ship;
     }
 }

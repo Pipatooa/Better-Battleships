@@ -1,4 +1,3 @@
-import type { IAttributeInfo }  from './i-attribute-info';
 import type { IDescriptorInfo } from './i-descriptor-info';
 
 /**
@@ -8,6 +7,5 @@ export interface ITeamInfo {
     descriptor: IDescriptorInfo,
     maxPlayers: number,
     color: string,
-    highlightColor: string,
-    attributes: { [name: string]: IAttributeInfo }
+    highlightColor: string
 }

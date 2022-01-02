@@ -17,8 +17,8 @@ export class Pattern {
     /**
      * Pattern constructor
      *
-     * @param  _patternEntries List of pattern entries for pattern
-     * @param  center          Center of the pattern about which rotations happen
+     * @param  _patternEntries Array of pattern entries for pattern
+     * @param  center          Center of the pattern
      */
     protected constructor(protected readonly _patternEntries: PatternEntry[],
                           public readonly center: [number, number]) {

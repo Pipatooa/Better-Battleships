@@ -73,8 +73,9 @@ export class AbilityFire extends PositionedAbility {
         if (checkSchema)
             abilityFireSource = await checkAgainstSchema(abilityFireSource, abilityFireSchema, parsingContext);
 
-        // Ability partial refers to future Ability object
+        // Ability and EventRegistrar partials refer to future Ability and EventRegistrar objects
         const abilityPartial: Partial<Ability> = Object.create(AbilityFire.prototype);
+        const eventRegistrarPartial = Object.create(EventRegistrar.prototype) as EventRegistrar<FireAbilityEventInfo, FireAbilityEvent>;
 
         // Get attributes and update parsing context
         const attributes: AttributeMap = await getAttributes(parsingContext.withExtendedPath('.attributes'), abilityFireSource.attributes, 'ability');
@@ -82,7 +83,7 @@ export class AbilityFire extends PositionedAbility {
         parsingContext.localAttributes.ability = [attributes, builtinAttributes];
         parsingContext.reducePath();
 
-        const attributeListeners = await getAttributeListeners(parsingContext.withExtendedPath('.attributeListeners'), abilityFireSource.attributeListeners);
+        const attributeListeners = await getAttributeListeners(parsingContext.withExtendedPath('.attributeListeners'), abilityFireSource.attributeListeners, eventRegistrarPartial);
         parsingContext.reducePath();
 
         // Get component elements from source
@@ -99,8 +100,8 @@ export class AbilityFire extends PositionedAbility {
 
         // Return created AbilityFire object
         parsingContext.localAttributes.ability = undefined;
-        const eventRegistrar = new EventRegistrar(eventListeners, []);
-        AbilityFire.call(abilityPartial, parsingContext.shipPartial as Ship, descriptor, selectionPattern, effectPattern, abilityFireSource.displayEffectPatternValues, condition, eventRegistrar, attributes, builtinAttributes, attributeListeners);
+        EventRegistrar.call(eventRegistrarPartial, eventListeners, []);
+        AbilityFire.call(abilityPartial, parsingContext.shipPartial as Ship, descriptor, selectionPattern, effectPattern, abilityFireSource.displayEffectPatternValues, condition, eventRegistrarPartial, attributes, builtinAttributes, attributeListeners);
         return abilityPartial as AbilityFire;
     }
 
@@ -134,8 +135,8 @@ export class AbilityFire extends PositionedAbility {
             if (ship !== undefined) {
                 this.eventRegistrar.queueEvent('onHit', {
                     builtinAttributes: {
-                        patternValue: new AttributeCodeControlled(() => v),
-                        hitCount: new AttributeCodeControlled(() => hitCountContainer.hitCount)
+                        patternValue: new AttributeCodeControlled(() => v, () => {}, true),
+                        hitCount: new AttributeCodeControlled(() => hitCountContainer.hitCount, () => {}, true)
                     },
                     foreignTeam: ship.owner.team,
                     foreignPlayer: ship.owner,
@@ -175,7 +176,8 @@ export class AbilityFire extends PositionedAbility {
             descriptor: this.descriptor.makeTransportable(),
             selectionPattern: this.selectionPattern.makeTransportable(false),
             effectPattern: this.effectPattern.makeTransportable(this.displayEffectPatternValues),
-            attributes: this.attributeWatcher.exportAttributeInfo()
+            attributes: this.attributeWatcher.exportAttributeInfo(),
+            usable: this.usable
         };
     }
 }

@@ -1,21 +1,26 @@
-import { v4 }                                                                     from 'uuid';
-import { UnpackingError }                                                         from '../errors/unpacking-error';
-import { EventListenerPrimaryPriority }                                           from '../events/event-listener';
-import { EventRegistrar }                                                         from '../events/event-registrar';
-import { checkAgainstSchema }                                                     from '../schema-checker';
-import { getJSONFromEntry }                                                       from '../unpacker';
-import { buildAbility }                                                           from './abilities/ability-builder';
-import { eventListenersFromActionSource }                                         from './actions/action-getter';
-import { getAttributeListeners }                                                  from './attribute-listeners/attribute-listener-getter';
-import { AttributeCodeControlled }                                                from './attributes/attribute-code-controlled';
+import {
+    Rotation
+}                                                                                 from 'shared/scenario/objects/common/rotation';
+import { v4 }                             from 'uuid';
+import { UnpackingError }                 from '../errors/unpacking-error';
+import { EventListenerPrimaryPriority }   from '../events/event-listener';
+import { EventRegistrar }                 from '../events/event-registrar';
+import { checkAgainstSchema }             from '../schema-checker';
+import { getJSONFromEntry }               from '../unpacker';
+import { buildAbility }                   from './abilities/ability-builder';
+import { eventListenersFromActionSource } from './actions/action-getter';
+import {
+    getAttributeListeners
+}                                                                                 from './attribute-listeners/attribute-listener-getter';
+import {
+    AttributeCodeControlled
+}                                                                                 from './attributes/attribute-code-controlled';
 import { getAttributes }                                                          from './attributes/attribute-getter';
 import { AttributeWatcher }                                                       from './attributes/attribute-watcher';
 import { Descriptor }                                                             from './common/descriptor';
 import { RotatablePattern }                                                       from './common/rotatable-pattern';
 import { shipEventInfo }                                                          from './events/ship-events';
 import { shipSchema }                                                             from './sources/ship';
-import type { GenericEventContext }                                               from '../events/event-context';
-import type { EventEvaluationState }                                              from '../events/event-evaluation-state';
 import type { ParsingContext }                                                    from '../parsing-context';
 import type { Ability }                                                           from './abilities/ability';
 import type { AbilitySource }                                                     from './abilities/sources/ability';
@@ -28,8 +33,11 @@ import type { Player }                                                          
 import type { IShipSource }                                                       from './sources/ship';
 import type { Team }                                                              from './team';
 import type { AbilityInfo }                                                       from 'shared/network/scenario/ability-info';
-import type { IShipInfo, IShipPrototypeInfo }                                     from 'shared/network/scenario/i-ship-prototype-info';
-import type { Rotation }                                                          from 'shared/scenario/objects/common/rotation';
+import type { AttributeUpdates }                                                  from 'shared/network/scenario/i-attribute-info';
+import type {
+    IShipInfo,
+    IShipPrototypeInfo
+}                                                                                 from 'shared/network/scenario/i-ship-prototype-info';
 
 /**
  * Ship - Server Version
@@ -40,16 +48,22 @@ export class Ship implements IAttributeHolder, IBuiltinAttributeHolder<'ship'> {
 
     protected _x = 0;
     protected _y = 0;
-    
+
     protected _visibilityPattern: RotatablePattern;
 
     public readonly teamTrackingID: string = v4();
 
     protected spottedBy: Ship[] = [];
+    private spottedByCount = 0;
+
     protected needsSpottingUpdate: Ship[] = [];
-    protected knownTo: [team: Team, trackingID: string, newlyAppeared: boolean][] = [];
+
+    protected oldKnownTo: { [id: string]: [team: Team, trackingID: string] } = {};
+    protected knownTo: { [id: string]: [team: Team, trackingID: string] } = {};
 
     private readonly attributeWatcher: AttributeWatcher;
+    private hasMoved = false;
+    private rotatedBy: Rotation = Rotation.NoChange;
     
     /**
      * Ship constructor
@@ -58,7 +72,7 @@ export class Ship implements IAttributeHolder, IBuiltinAttributeHolder<'ship'> {
      * @param  board              Board that this ship belongs to
      * @param  descriptor         Descriptor for ship
      * @param  _pattern           Pattern describing shape of ship
-     * @param  _visibility        Initial visibility of this ship
+     * @param  _visibility        Range from which this ship is visible
      * @param  abilities          Dictionary of abilities available to the ship
      * @param  eventRegistrar     Registrar of all ship event listeners
      * @param  attributes         Attributes for the ship
@@ -77,17 +91,18 @@ export class Ship implements IAttributeHolder, IBuiltinAttributeHolder<'ship'> {
                        private readonly attributeListeners: AttributeListener[]) {
         
         this._visibilityPattern = this._pattern.getExtendedPattern(this._visibility);
-        
         this.attributeWatcher = new AttributeWatcher(this.attributes, this.builtinAttributes);
-        this.eventRegistrar.eventEvaluationCompleteCallback = (listenersProcessed: number): void => {
-            if (listenersProcessed === 0)
-                return;
+
+        this.eventRegistrar.eventEvaluationCompleteCallback = () => {
             this.updateAbilities();
-            this.exportAttributeUpdates();
+            this.exportChanges();
         };
 
         this.eventRegistrar.addEventListener('onGameStart',
-            [EventListenerPrimaryPriority.PostAction, 0, () => this.spotInitial()]);
+            [EventListenerPrimaryPriority.PostAction, 0, () => {
+                this.spot();
+                this.updateKnown();
+            }]);
     }
 
     /**
@@ -100,15 +115,14 @@ export class Ship implements IAttributeHolder, IBuiltinAttributeHolder<'ship'> {
             ability.deconstruct();
         this.eventRegistrar.deactivate();
 
-        for (const [team, trackingID] of this.knownTo) {
+        for (const [team, trackingID] of Object.values(this.knownTo)) {
             team.broadcastEvent({
                 event: 'shipDestroyed',
                 trackingID: trackingID
             });
         }
 
-        this.unSpotOthers();
-        this.updateOthers();
+        this.unSpot();
         this.board.removeShip(this);
     }
 
@@ -120,14 +134,26 @@ export class Ship implements IAttributeHolder, IBuiltinAttributeHolder<'ship'> {
      */
     private static generateBuiltinAttributes(object: Ship): BuiltinAttributeRecord<'ship'> {
         return {
-            abilityCount: new AttributeCodeControlled(() => object.abilities.length),
+            abilityCount: new AttributeCodeControlled(() => object.abilities.length, () => {}, true),
             visibility: new AttributeCodeControlled(
-                () => object._visibility, 
-                (eventEvaluationState: EventEvaluationState, eventContext: GenericEventContext, value: number) => {
-                    value = Math.round(Math.abs(value));
+                () => object._visibility,
+                (value: number) => {
+                    value = Math.min(Math.round(Math.abs(value)), 15);
                     object._visibility = value;
+                    object.unSpot();
                     object._visibilityPattern = object._pattern.getExtendedPattern(value);
-                }, new Descriptor('Visibility', 'Number of tiles from which this ship is visible to other teams'))        
+                    object.spot();
+                    object.updateKnown();
+                    object.updateOthers();
+                },
+                false,
+                new Descriptor('Visibility', 'Number of tiles from which this ship is visible to other teams')),
+            spottedBy: new AttributeCodeControlled(
+                () => object.spottedByCount,
+                (newValue) => object.spottedByCount = newValue,
+                true,
+                new Descriptor('Spotted By', 'Number of ships which can see this ship')
+            )
         };
     }
 
@@ -147,6 +173,7 @@ export class Ship implements IAttributeHolder, IBuiltinAttributeHolder<'ship'> {
 
         // Ship partial refers to future ship object
         const shipPartial: Partial<Ship> = Object.create(Ship.prototype);
+        const eventRegistrarPartial = Object.create(EventRegistrar.prototype) as EventRegistrar<ShipEventInfo, ShipEvent>;
         parsingContext.shipPartial = shipPartial;
         
         // Get attributes
@@ -155,7 +182,7 @@ export class Ship implements IAttributeHolder, IBuiltinAttributeHolder<'ship'> {
         parsingContext.localAttributes.ship = [attributes, builtinAttributes];
         parsingContext.reducePath();
 
-        const attributeListeners = await getAttributeListeners(parsingContext.withExtendedPath('.attributeListeners'), shipSource.attributeListeners);
+        const attributeListeners = await getAttributeListeners(parsingContext.withExtendedPath('.attributeListeners'), shipSource.attributeListeners, eventRegistrarPartial);
         parsingContext.reducePath();
 
         // Get component elements from source
@@ -192,8 +219,8 @@ export class Ship implements IAttributeHolder, IBuiltinAttributeHolder<'ship'> {
         // Return created Ship object
         parsingContext.localAttributes.ship = undefined;
         parsingContext.shipPartial = undefined;
-        const eventRegistrar = new EventRegistrar(eventListeners, subRegistrars);
-        Ship.call(shipPartial, parsingContext.playerPartial as Player, parsingContext.board!, descriptor, pattern, shipSource.visibility, abilities, eventRegistrar, attributes, builtinAttributes, attributeListeners);
+        EventRegistrar.call(eventRegistrarPartial, eventListeners, subRegistrars);
+        Ship.call(shipPartial, parsingContext.playerPartial as Player, parsingContext.board!, descriptor, pattern, shipSource.visibility, abilities, eventRegistrarPartial, attributes, builtinAttributes, attributeListeners);
         return shipPartial as Ship;
     }
 
@@ -225,7 +252,6 @@ export class Ship implements IAttributeHolder, IBuiltinAttributeHolder<'ship'> {
         const prototypeInfo: IShipPrototypeInfo = {
             descriptor: this.descriptor.makeTransportable(),
             pattern: this._pattern.makeTransportable(false),
-            visibilityPattern: this._visibilityPattern.makeTransportable(false),
             abilities: abilityInfo,
             attributes: this.attributeWatcher.exportAttributeInfo()
         };
@@ -256,23 +282,9 @@ export class Ship implements IAttributeHolder, IBuiltinAttributeHolder<'ship'> {
     }
 
     /**
-     * Sets initial spotting status of this ship
+     * Spots ships which are visible to this ship and causes other ships to spot this ship
      */
-    public spotInitial(): void {
-        this.spotOthers();
-        this.updateKnown();
-
-        this.owner.team.broadcastEvent({
-            event: 'shipAppear',
-            trackingID: this.teamTrackingID,
-            shipInfo: this.makeTransportable(false)
-        }, this.owner);
-    }
-
-    /**
-     * Spots other ships which are visible to this ship
-     */
-    private spotOthers(): void {
+    private spot(): void {
 
         // Spot other ships
         for (const [ dx, dy ] of this._pattern.patternEntries) {
@@ -297,9 +309,9 @@ export class Ship implements IAttributeHolder, IBuiltinAttributeHolder<'ship'> {
     }
 
     /**
-     * Un-spots other ships which are visible to this ship
+     * Un-spots ships which are visible to this ship and stops other ships spotting this ship
      */
-    private unSpotOthers(): void {
+    private unSpot(): void {
 
         // Un-spot other ships
         for (const [ dx, dy ] of this._pattern.patternEntries) {
@@ -317,51 +329,35 @@ export class Ship implements IAttributeHolder, IBuiltinAttributeHolder<'ship'> {
     }
 
     /**
-     * Updates the array of teams who know about the location of this ship
+     * Updates the array of teams who know about this ship
      */
     private updateKnown(): void {
 
-        // Convert old known entries to dictionary for tracking ID lookup
-        const oldKnownEntries: { [id: string]: [Team, string] } = {};
-        for (const [team, trackingID] of this.knownTo) {
-            oldKnownEntries[team.id] = [team, trackingID];
-        }
-
         // Create a new array of [team, trackingID, newlyAppeared] entries
-        this.knownTo = [[this.owner.team, this.teamTrackingID, false]];
-        const knownToTeams: Team[] = [this.owner.team];
+        const oldKnownEntries = this.knownTo;
+        this.knownTo = { [this.owner.team.id]: [this.owner.team, this.teamTrackingID] };
+        let spottedByCount = 0;
         for (const ship of this.spottedBy) {
             const team = ship.owner.team;
             const previousEntry = oldKnownEntries[team.id];
 
-            if (knownToTeams.includes(team))
+            if (team !== this.owner.team)
+                spottedByCount++;
+
+            if (this.knownTo[team.id] !== undefined)
                 continue;
 
-            const newlyAppeared = previousEntry === undefined;
-            const trackingID = newlyAppeared ? v4() : previousEntry[1];
-
-            if (newlyAppeared)
-                team.broadcastEvent({
-                    event: 'shipAppear',
-                    trackingID: trackingID,
-                    shipInfo: this.makeTransportable(false)
-                });
-
-            this.knownTo.push([team, trackingID, newlyAppeared]);
-            knownToTeams.push(team);
+            if (previousEntry === undefined)
+                this.knownTo[team.id] = [team, v4()];
+            else
+                this.knownTo[team.id] = previousEntry;
         }
 
-        for (const [team, trackingID] of Object.values(oldKnownEntries)) {
-            if (!knownToTeams.includes(team))
-                team.broadcastEvent({
-                    event: 'shipDisappear',
-                    trackingID: trackingID
-                });
-        }
+        this.builtinAttributes.spottedBy.forceSetValue(spottedByCount);
     }
 
     /**
-     * Updates known state of surrounding ships after a ship movement or rotation
+     * Updates known status of surrounding ships
      */
     private updateOthers(): void {
         for (const ship of this.needsSpottingUpdate)
@@ -376,25 +372,16 @@ export class Ship implements IAttributeHolder, IBuiltinAttributeHolder<'ship'> {
      * @param  y Destination Y coordinate
      */
     public moveTo(x: number, y: number): void {
-        this.unSpotOthers();
+        this.unSpot();
         this.board.removeShip(this);
         this._x = x;
         this._y = y;
         this.board.addShip(this);
-        this.spotOthers();
+        this.spot();
         this.updateKnown();
         this.updateOthers();
-
-        // Broadcast movement to other teams which know of this ship
-        for (const [team, trackingID, newlyAppeared] of this.knownTo) {
-            if (!newlyAppeared)
-                team.broadcastEvent({
-                    event: 'shipMove',
-                    trackingID: trackingID,
-                    x: this._x,
-                    y: this._y
-                });
-        }
+        
+        this.hasMoved = true;
     }
 
     /**
@@ -438,24 +425,17 @@ export class Ship implements IAttributeHolder, IBuiltinAttributeHolder<'ship'> {
      * @param  rotation Amount to rotate ship by
      */
     public rotateBy(rotation: Rotation): void {
-        this.unSpotOthers();
+        this.unSpot();
         this.board.removeShip(this);
         this._pattern = this._pattern.rotated(rotation);
         this._visibilityPattern = this._visibilityPattern.rotated(rotation);
         this.board.addShip(this);
-        this.spotOthers();
+        this.spot();
         this.updateKnown();
         this.updateOthers();
 
-        // Broadcast rotation to other teams which know of this ship
-        for (const [team, trackingID, newlyAppeared] of this.knownTo) {
-            if (!newlyAppeared)
-                team.broadcastEvent({
-                    event: 'shipRotate',
-                    trackingID: trackingID,
-                    rotation: rotation
-                });
-        }
+        this.rotatedBy += rotation;
+        this.rotatedBy %= Rotation.FullRotation;
     }
 
     /**
@@ -488,7 +468,7 @@ export class Ship implements IAttributeHolder, IBuiltinAttributeHolder<'ship'> {
         }
 
         if (sendUpdate)
-            for (const [team, trackingID] of this.knownTo)
+            for (const [team, trackingID] of Object.values(this.knownTo))
                 team.broadcastEvent({
                     event: 'shipAbilityUpdate',
                     trackingID: trackingID,
@@ -499,11 +479,22 @@ export class Ship implements IAttributeHolder, IBuiltinAttributeHolder<'ship'> {
     /**
      * Notifies clients of any attribute updates which have occurred on this ship
      */
-    private exportAttributeUpdates(): void {
+    private exportChanges(): void {
+
+        console.log('Exporting changes...');
+
+        // Publish ship disappearance
+        for (const [team, trackingID] of Object.values(this.oldKnownTo)) {
+            if (this.knownTo[team.id] === undefined)
+                team.broadcastEvent({
+                    event: 'shipDisappear',
+                    trackingID: trackingID
+                });
+        }
 
         // Fetch attribute updates for abilities
         let updatesAvailable = this.attributeWatcher.updatesAvailable;
-        const abilityAttributeUpdates: { [name: string]: number }[] = [];
+        const abilityAttributeUpdates: AttributeUpdates[] = [];
         for (const ability of this.abilities) {
             if (ability.attributeWatcher.updatesAvailable) {
                 abilityAttributeUpdates.push(ability.attributeWatcher.exportUpdates());
@@ -512,15 +503,51 @@ export class Ship implements IAttributeHolder, IBuiltinAttributeHolder<'ship'> {
                 abilityAttributeUpdates.push({});
         }
 
-        // Send updates to clients if available
-        if (updatesAvailable)
-            for (const [team, trackingID] of this.knownTo)
+        // Publish appearance or attribute changes depending on whether this ship was previously known
+        const attributeUpdates = this.attributeWatcher.exportUpdates();
+        let shipInfo: IShipInfo | undefined;
+        for (const knownEntry of Object.values(this.knownTo)) {
+            const [team, trackingID] = knownEntry;
+
+            // Ship appearance
+            if (this.oldKnownTo[team.id] === undefined && team !== this.owner.team) {
+                shipInfo ??= this.makeTransportable(false);
                 team.broadcastEvent({
-                    event: 'shipAttributeUpdate',
+                    event: 'shipAppear',
                     trackingID: trackingID,
-                    attributes: this.attributeWatcher.exportUpdates(),
-                    abilityAttributes: abilityAttributeUpdates
+                    shipInfo: shipInfo
                 });
+            } else {
+
+                // Attribute updates
+                if (updatesAvailable)
+                    team.broadcastEvent({
+                        event: 'shipAttributeUpdate',
+                        trackingID: trackingID,
+                        attributes: attributeUpdates,
+                        abilityAttributes: abilityAttributeUpdates
+                    });
+
+                if (this.hasMoved)
+                    team.broadcastEvent({
+                        event: 'shipMove',
+                        trackingID: trackingID,
+                        x: this._x,
+                        y: this._y
+                    });
+
+                if (this.rotatedBy !== Rotation.NoChange)
+                    team.broadcastEvent({
+                        event: 'shipRotate',
+                        trackingID: trackingID,
+                        rotation: this.rotatedBy
+                    });
+            }
+        }
+
+        this.hasMoved = false;
+        this.rotatedBy = Rotation.NoChange;
+        this.oldKnownTo = this.knownTo;
     }
 
     /**

@@ -12,12 +12,12 @@ export class Descriptor {
     }
 
     /**
-     * Factory function to generate Descriptor from JSON event data
+     * Factory function to generate Descriptor from transportable JSON
      *
-     * @param    descriptorSource JSON data from server
-     * @returns                   Created Descriptor object
+     * @param    descriptorInfo JSON data for Descriptor
+     * @returns                 Created Descriptor object
      */
-    public static fromSource(descriptorSource: IDescriptorInfo): Descriptor {
-        return new Descriptor(descriptorSource.name, descriptorSource.description);
+    public static fromInfo(descriptorInfo: IDescriptorInfo): Descriptor {
+        return new Descriptor(descriptorInfo.name, descriptorInfo.description);
     }
 }

@@ -1,9 +1,9 @@
-import { game }            from '../../game';
 import { SidebarElements } from '../element-cache';
 import type { Ability }    from '../../scenario/abilities/ability';
 import type { Ship }       from '../../scenario/ship';
 
-let lastDisplayedShip: Ship | undefined;
+let previouslyDisplayedShip: Ship | undefined;
+let previouslyDisplayedAbility: Ability | undefined;
 
 /**
  * Updates the contents of the ship section of the sidebar
@@ -24,7 +24,8 @@ export function updateSidebarShipSection(ship: Ship | undefined,
     const shipSectionVisible = ship !== undefined;
     SidebarElements.shipSection.setVisibility(shipSectionVisible);
     if (!shipSectionVisible) {
-        lastDisplayedShip = undefined;
+        previouslyDisplayedShip?.attributeCollection.doNotDisplayInContainer(SidebarElements.shipAttributeList);
+        previouslyDisplayedShip = undefined;
         return;
     }
 
@@ -36,7 +37,7 @@ export function updateSidebarShipSection(ship: Ship | undefined,
     // Ability section
     const abilitySectionVisible = ship!.abilities.length > 0;
     SidebarElements.shipAbilitySection.setVisibility(abilitySectionVisible);
-    if (abilitySectionVisible && ship !== lastDisplayedShip) {
+    if (abilitySectionVisible && ship !== previouslyDisplayedShip) {
         SidebarElements.shipAbilityContainer.children().remove();
         for (const ability of ship!.abilities) {
             ability.createGameElement(SidebarElements.shipAbilityContainer);
@@ -46,15 +47,29 @@ export function updateSidebarShipSection(ship: Ship | undefined,
         }
     }
 
-    // Ability Info Section
+    // Ability info section
     const abilityInfoSectionVisible = ability !== undefined;
     SidebarElements.shipAbilityInfoSection.setVisibility(abilityInfoSectionVisible);
-    if (abilityInfoSectionVisible) {
+    if (abilityInfoSectionVisible && ability !== previouslyDisplayedAbility) {
         SidebarElements.shipAbilityName.text(ability!.descriptor.name);
         SidebarElements.shipAbilityDescription.text(ability!.descriptor.description);
+
+        // Ability attribute section
+        const abilityAttributeSectionVisible = ability!.attributeCollection.shouldDisplay;
+        SidebarElements.shipAbilityAttributeSection.setVisibility(abilityAttributeSectionVisible);
+        previouslyDisplayedAbility?.attributeCollection.doNotDisplayInContainer(SidebarElements.shipAbilityAttributeList);
+        if (abilityAttributeSectionVisible)
+            ability!.attributeCollection.displayInContainer(SidebarElements.shipAbilityAttributeList);
+
+        previouslyDisplayedAbility = ability;
     }
-    if (SidebarElements.shipAbilityInfoSection.visibilityChanged)
-        game.abilityRenderer!.viewportHandler.updateViewport(true);
-    
-    lastDisplayedShip = ship;
+
+    // Attribute section
+    const shipAttributeSectionVisible = ship!.attributeCollection.shouldDisplay;
+    SidebarElements.shipAttributeSection.setVisibility(shipSectionVisible);
+    previouslyDisplayedShip?.attributeCollection.doNotDisplayInContainer(SidebarElements.shipAttributeList);
+    if (shipAttributeSectionVisible)
+        ship!.attributeCollection.displayInContainer(SidebarElements.shipAttributeList);
+
+    previouslyDisplayedShip = ship;
 }

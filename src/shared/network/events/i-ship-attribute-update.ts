@@ -1,3 +1,4 @@
+import type { AttributeUpdates }      from '../scenario/i-attribute-info';
 import type { IAttributeUpdateEvent } from './i-attribute-update';
 import type { IShipUpdateEvent }      from './i-ship-update';
 
@@ -6,5 +7,5 @@ import type { IShipUpdateEvent }      from './i-ship-update';
  */
 export interface IShipAttributeUpdate extends IShipUpdateEvent, IAttributeUpdateEvent {
     event: 'shipAttributeUpdate',
-    abilityAttributes: { [name: string]: number }[]
+    abilityAttributes: AttributeUpdates[]
 }

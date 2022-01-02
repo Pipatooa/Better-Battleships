@@ -12,9 +12,9 @@ export class Pattern {
     /**
      * Pattern constructor
      *
-     * @param  _patternEntries List of pattern entries for pattern
-     * @param  center          Center of the pattern about which rotations happen
-     * @param  patternEntryMap Optional pregenerated dictionary of positions to values
+     * @param  _patternEntries Array of pattern entries for pattern
+     * @param  center          Center of the pattern
+     * @param  patternEntryMap Optional pre-generated dictionary of positions to values
      */
     public constructor(protected readonly _patternEntries: PatternEntry[],
                        public readonly center: [number, number],
@@ -25,7 +25,7 @@ export class Pattern {
             this.patternEntryMap = patternEntryMap;
         else {
             this.patternEntryMap = {};
-            for (const [ x, y, value ] of _patternEntries) {
+            for (const [x, y, value] of _patternEntries) {
                 const key = `${x},${y}`;
                 this.patternEntryMap[key] = value ?? 1;
             }
@@ -38,7 +38,7 @@ export class Pattern {
      * @param    patternInfo JSON data for Pattern
      * @returns              Created Pattern object
      */
-    public static fromSource(patternInfo: IPatternInfo): Pattern {
+    public static fromInfo(patternInfo: IPatternInfo): Pattern {
         return new Pattern(patternInfo.tiles as PatternEntry[], patternInfo.center);
     }
 
@@ -86,14 +86,52 @@ export class Pattern {
     public getBorderFlags(x: number, y: number): number {
         let flags = 0;
         if (!this.query(x - 1, y - 1)) flags |= BorderFlag.NXNY;
-        if (!this.query(x, y - 1)) flags |= BorderFlag.NY;
+        if (!this.query(x, y - 1))     flags |= BorderFlag.NY;
         if (!this.query(x + 1, y - 1)) flags |= BorderFlag.PXNY;
-        if (!this.query(x - 1, y)) flags |= BorderFlag.NX;
-        if (!this.query(x + 1, y)) flags |= BorderFlag.PX;
+        if (!this.query(x - 1, y))     flags |= BorderFlag.NX;
+        if (!this.query(x + 1, y))     flags |= BorderFlag.PX;
         if (!this.query(x - 1, y + 1)) flags |= BorderFlag.NXPY;
-        if (!this.query(x, y + 1)) flags |= BorderFlag.PY;
+        if (!this.query(x, y + 1))     flags |= BorderFlag.PY;
         if (!this.query(x + 1, y + 1)) flags |= BorderFlag.PXPY;
         return flags;
+    }
+
+    /**
+     * Expands the pattern so that all cells within the radius of the pattern are included in a new pattern
+     *
+     * @param    radius Radius of cells around this pattern to include in new pattern
+     * @returns         Created pattern
+     */
+    public getExtendedPattern(radius: number): Pattern {
+        const patternEntries = this.getExtendedPatternEntries(radius);
+        return new Pattern(patternEntries, this.center);
+    }
+
+    /**
+     * Creates an expanded array of pattern entries so that all cells within the radius of the pattern are included
+     *
+     * @param    radius Radius of cells around this pattern to include in new pattern entry list
+     * @returns         Expanded array of pattern entries
+     */
+    protected getExtendedPatternEntries(radius: number): PatternEntry[] {
+        const patternEntryMap: { [char: string]: number } = {};
+        for (const [x, y] of this.patternEntries) {
+            for (let dx = -radius; dx <= radius; dx++) {
+                const subRadius = radius - Math.abs(dx);
+                for (let dy = -subRadius; dy <= subRadius; dy++) {
+                    const key = `${x + dx},${y + dy}`;
+                    patternEntryMap[key] = 1;
+                }
+            }
+        }
+
+        const patternEntries: PatternEntry[] = [];
+        for (const key of Object.keys(patternEntryMap)) {
+            const [x, y] = key.split(',');
+            patternEntries.push([parseInt(x), parseInt(y), 1]);
+        }
+
+        return patternEntries;
     }
 
     /**

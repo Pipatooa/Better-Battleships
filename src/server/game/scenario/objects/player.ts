@@ -21,7 +21,6 @@ import type { IPlayerSource }                                                   
 import type { IShipSource }                                                       from './sources/ship';
 import type { Team }                                                              from './team';
 import type { IPlayerInfo }                                                       from 'shared/network/scenario/i-player-info';
-import type { IShipPrototypeInfo }                                                from 'shared/network/scenario/i-ship-prototype-info';
 
 /**
  * Player - Server Version
@@ -65,11 +64,7 @@ export class Player implements IAttributeHolder, IBuiltinAttributeHolder<'player
             this.ships[ship.teamTrackingID] = ship;
 
         this.attributeWatcher = new AttributeWatcher(this.attributes, this.builtinAttributes);
-        this.eventRegistrar.eventEvaluationCompleteCallback = (listenersProcessed: number): void => {
-            if (listenersProcessed === 0)
-                return;
-            this.exportAttributeUpdates();
-        };
+        this.eventRegistrar.eventEvaluationCompleteCallback = () => this.exportAttributeUpdates();
     }
 
     /**
@@ -80,7 +75,7 @@ export class Player implements IAttributeHolder, IBuiltinAttributeHolder<'player
      */
     private static generateBuiltinAttributes(object: Player): BuiltinAttributeRecord<'player'> {
         return {
-            shipCount: new AttributeCodeControlled(() => Object.values(object.ships).length, undefined,
+            shipCount: new AttributeCodeControlled(() => Object.values(object.ships).length, () => {}, true,
                 new Descriptor('Ships', 'Number of ships this player owns'))
         };
     }
@@ -104,6 +99,7 @@ export class Player implements IAttributeHolder, IBuiltinAttributeHolder<'player
 
         // Player partial refers to future player object
         const playerPartial: Partial<Player> = Object.create(Player.prototype);
+        const eventRegistrarPartial = Object.create(EventRegistrar.prototype) as EventRegistrar<PlayerEventInfo, PlayerEvent>;
         parsingContext.playerPartial = playerPartial;
         
         // Get attributes and update parsing context
@@ -112,7 +108,7 @@ export class Player implements IAttributeHolder, IBuiltinAttributeHolder<'player
         parsingContext.localAttributes.player = [attributes, builtinAttributes];
         parsingContext.reducePath();
 
-        const attributeListeners = await getAttributeListeners(parsingContext.withExtendedPath('.attributeListeners'), playerSource.attributeListeners);
+        const attributeListeners = await getAttributeListeners(parsingContext.withExtendedPath('.attributeListeners'), playerSource.attributeListeners, eventRegistrarPartial);
         parsingContext.reducePath();
 
         // Get ships
@@ -138,8 +134,8 @@ export class Player implements IAttributeHolder, IBuiltinAttributeHolder<'player
         // Return created Player object
         parsingContext.localAttributes.player = undefined;
         parsingContext.playerPartial = undefined;
-        const eventRegistrar = new EventRegistrar(eventListeners, subRegistrars);
-        Player.call(playerPartial, parsingContext.teamPartial as Team, spawnRegion, color, highlightColor, ships, eventRegistrar, attributes, builtinAttributes, attributeListeners);
+        EventRegistrar.call(eventRegistrarPartial, eventListeners, subRegistrars);
+        Player.call(playerPartial, parsingContext.teamPartial as Team, spawnRegion, color, highlightColor, ships, eventRegistrarPartial, attributes, builtinAttributes, attributeListeners);
         return playerPartial as Player;
     }
 
@@ -161,13 +157,9 @@ export class Player implements IAttributeHolder, IBuiltinAttributeHolder<'player
      * @returns  Created IPlayerInfo object
      */
     public makeTransportable(): IPlayerInfo {
-        const ships: [string, IShipPrototypeInfo][] = [];
-        for (const ship of Object.values(this.ships))
-            ships.push([ship.teamTrackingID, ship.makeTransportable(true)]);
-
         return {
-            ships: ships,
-            spawnRegion: this.spawnRegionID,
+            color: this.color,
+            highlightColor: this.highlightColor,
             attributes: this.attributeWatcher.exportAttributeInfo()
         };
     }

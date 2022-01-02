@@ -1,10 +1,14 @@
-import console               from 'console';
-import { TimeoutManager }    from 'shared/timeout-manager';
-import config                from '../config';
-import type { Player }       from './scenario/objects/player';
-import type { Scenario }     from './scenario/objects/scenario';
-import type { Client }       from './sockets/client';
-import type { IServerEvent } from 'shared/network/events/i-server-event';
+import console                        from 'console';
+import { TimeoutManager }             from 'shared/timeout-manager';
+import config                         from '../config';
+import type { IBoardInfo }            from '../../shared/network/scenario/i-board-info';
+import type { IShipPrototypeInfo }    from '../../shared/network/scenario/i-ship-prototype-info';
+import type { Player }                from './scenario/objects/player';
+import type { Scenario }              from './scenario/objects/scenario';
+import type { Client }                from './sockets/client';
+import type { IServerEvent }          from 'shared/network/events/i-server-event';
+import type { MultipleAttributeInfo } from 'shared/network/scenario/i-attribute-info';
+import type { IPlayerInfo }           from 'shared/network/scenario/i-player-info';
 
 /**
  * Game - Server Version
@@ -29,6 +33,8 @@ export class Game {
     public constructor(public readonly internalID: number,
                        public readonly gameID: string,
                        public readonly scenario: Scenario) {
+
+        scenario.game = this;
 
         // Set timeout function for entering the setup phase of the game
         this.timeoutManager = new TimeoutManager({
@@ -188,11 +194,8 @@ export class Game {
         // Group players by their teams
         const teamGroups: { [name: string]: Client[] } = {};
         for (const client of this.clients) {
-
             const teamName = client.team!.id;
-
-            // If player is first on their team
-            if (!(teamName in teamGroups))
+            if (teamGroups[teamName] === undefined)
                 teamGroups[teamName] = [];
 
             // Add player to team group
@@ -214,14 +217,32 @@ export class Game {
         // Generate a sequence of turns
         this.scenario.turnManager.generateTurns();
 
-        // Broadcast game setup info
+        // Package setup info
+        const boardInfo: IBoardInfo = this.scenario.board.makeTransportable();
+        const turnOrder: string[] = this.scenario.turnManager.turnOrder.map(p => p.client!.identity);
+
+        const playerInfo: { [identity: string]: IPlayerInfo } = {};
+        for (const client of this.clients)
+            playerInfo[client.identity] = client.player!.makeTransportable();
+
+        const teamAttributes: { [id: string]: MultipleAttributeInfo } = {};
+        for (const [id, team] of Object.entries(this.scenario.teams))
+            teamAttributes[id] = team.attributeWatcher.exportAttributeInfo();
+
+        // Send setup info to clients
         for (const client of this.clients) {
+            const ships: { [trackingID: string]: IShipPrototypeInfo } = {};
+            for (const [trackingID, ship] of Object.entries(client.player!.ships))
+                ships[trackingID] = ship.makeTransportable(true);
+
             client.sendEvent({
                 event: 'setupInfo',
-                boardInfo: this.scenario.board.makeTransportable(),
-                playerInfo: client.player!.makeTransportable(),
-                playerColors: playerColors,
-                turnOrder: this.scenario.turnManager.turnOrder.map(p => p.client!.identity),
+                boardInfo: boardInfo,
+                playerInfo: playerInfo,
+                teamAttributes: teamAttributes,
+                spawnRegion: client.player!.spawnRegionID,
+                ships: ships,
+                turnOrder: turnOrder,
                 maxTurnTime: this.scenario.turnManager.turnTimeout
             });
         }

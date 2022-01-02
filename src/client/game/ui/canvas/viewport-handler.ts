@@ -11,8 +11,8 @@ export class ViewportHandler {
     private readonly offsetUniform: Float32Array;
     private readonly scaleUniform: Float32Array;
 
-    private readonly scaleLowerBound: number = 0.5;
-    private readonly scaleUpperBound: number = 2;
+    private readonly scaleLowerBound: number;
+    private readonly scaleUpperBound: number;
 
     private dragging = false;
     private lastPointerPosition: [number, number] = [0, 0];
@@ -26,9 +26,14 @@ export class ViewportHandler {
                        private readonly gl: WebGL2RenderingContext,
                        private readonly modelProgram: ModelProgram<never, 'offset' | 'scale'>,
                        private readonly allowPanning: boolean,
+                       scaleLowerBound?: number,
+                       scaleUpperBound?: number,
                        private readonly forcedAspect?: number,
                        initialOffset?: [number, number],
                        initialScale?: [number, number]) {
+
+        this.scaleLowerBound = scaleLowerBound ?? 0.25;
+        this.scaleUpperBound = scaleUpperBound ?? 3.0;
 
         this.offsetUniform = new Float32Array(initialOffset ?? [-0.5, -0.5]);
         this.scaleUniform = new Float32Array(initialScale ?? [1, 1]);
@@ -147,6 +152,7 @@ export class ViewportHandler {
         ev.preventDefault();
         this.offsetUniform[0] += (ev.clientX - this.lastPointerPosition[0]) / this.canvas.clientWidth / this.scaleUniform[0] * 2;
         this.offsetUniform[1] -= (ev.clientY - this.lastPointerPosition[1]) / this.canvas.clientHeight / this.scaleUniform[1] * 2;
+        this.constrainCanvasOffset();
         this.lastPointerPosition = [ev.clientX, ev.clientY];
         this._updateCallback?.();
     }
@@ -159,22 +165,24 @@ export class ViewportHandler {
     private onWheel(ev: WheelEvent): void {
         ev.preventDefault();
         const scaleFactor = Math.pow(this.scrollRatio, ev.deltaY * this.scrollSensitivity);
-        const deltaScaleFactor = 1 / scaleFactor - 1;
+        const oldScaleX = this.scaleUniform[0];
+        this.scaleUniform[0] = clamp(oldScaleX * scaleFactor, this.scaleLowerBound, this.scaleUpperBound);
+        this.scaleUniform[1] = this.scaleUniform[0] * this._canvasAspectRatio;
+        const deltaScaleFactor = oldScaleX / this.scaleUniform[0] - 1;
 
         const [x, y] = this.screenToCanvasCoordinates(ev.clientX, ev.clientY);
-        this.offsetUniform[0] += x / this.scaleUniform[0] * deltaScaleFactor;
-        this.offsetUniform[1] += y / this.scaleUniform[1] * deltaScaleFactor;
-        this.scaleUniform[0] *= scaleFactor;
-        this.scaleUniform[1] *= scaleFactor;
+        this.offsetUniform[0] += x / oldScaleX * deltaScaleFactor;
+        this.offsetUniform[1] += y / oldScaleX / this._canvasAspectRatio * deltaScaleFactor;
+        this.constrainCanvasOffset();
         this._updateCallback?.();
     }
 
     /**
-     * Constrains the scale uniform values to sensible values
+     * Constrains panning so that viewport stays in sensible location
      */
-    private constrainScale(): void {
-        this.scaleUniform[0] = clamp(this.scaleUniform[0], this.scaleLowerBound, this.scaleUpperBound);
-        this.scaleUniform[1] = this.scaleUniform[0] * this._canvasAspectRatio;
+    private constrainCanvasOffset(): void {
+        this.offsetUniform[0] = clamp(this.offsetUniform[0], -1 / this.scaleUniform[0] - 1, 1 / this.scaleUniform[0]);
+        this.offsetUniform[1] = clamp(this.offsetUniform[1], -1 / this.scaleUniform[1] - 1, 1 / this.scaleUniform[1]);
     }
 
     /**

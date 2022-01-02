@@ -91,6 +91,6 @@ export class AttributeReferenceLocal extends AttributeReference {
      * @param  value                New value to assign to referenced attribute
      */
     public setValue(eventEvaluationState: EventEvaluationState, eventContext: GenericEventContext, value: number): void {
-        this.attribute.setValue(eventEvaluationState, eventContext, value);
+        this.attribute.setValue(value);
     }
 }

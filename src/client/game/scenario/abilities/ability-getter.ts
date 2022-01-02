@@ -20,13 +20,13 @@ export function getAbilities(ship: Ship, abilityInfos: AbilityInfo[]): Ability[]
         let ability: Ability;
         switch (abilityInfo.type) {
             case 'move':
-                ability = AbilityMove.fromSource(abilityInfo, ship, abilityIndex);
+                ability = AbilityMove.fromInfo(abilityInfo, ship, abilityIndex);
                 break;
             case 'rotate':
-                ability = AbilityRotate.fromSource(abilityInfo, ship, abilityIndex);
+                ability = AbilityRotate.fromInfo(abilityInfo, ship, abilityIndex);
                 break;
             case 'fire':
-                ability = AbilityFire.fromSource(abilityInfo, ship, abilityIndex);
+                ability = AbilityFire.fromInfo(abilityInfo, ship, abilityIndex);
                 break;
         }
         abilities.push(ability);

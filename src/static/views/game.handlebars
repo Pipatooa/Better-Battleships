@@ -71,26 +71,30 @@
             <p class="mb-0">
                 <b id="game-tooltip-ship-name"></b>
                 <br>Owner: <span id="game-tooltip-ship-owner"></span>
-                <br>Attributes:
             </p>
-            <ul class="attribute-list" id="game-tooltip-ship-attribute-list">
-                <li><span>Health</span>: <span>5</span></li>
-            </ul>
+            <div class="mt-2" id="game-tooltip-ship-attribute-section">
+                <p class="mb-0"><b>Attributes:</b></p>
+                <ul class="attribute-list" id="game-tooltip-ship-attribute-list">
+                    <li><span>Health</span>: <span>5</span></li>
+                </ul>
+            </div>
         </div>
         <div class="mb-2 d-none" id="game-tooltip-player-section">
             <p class="mb-0">
                 <b><span id="game-tooltip-player-name">Player Name</span></b>
                 <br>Team: <span id="game-tooltip-player-team">Team Name</span>
-                <br>Attributes:
             </p>
-            <ul class="attribute-list" id="game-tooltip-player-attributes">
-                <li><span>Ships Remaining</span>: <span>3</span></li>
-            </ul>
+            <div id="game-tooltip-player-attribute-section">
+                <p class="mb-0">Attributes:</p>
+                <ul class="attribute-list" id="game-tooltip-player-attribute-list">
+                    <li><span>Ships Remaining</span>: <span>3</span></li>
+                </ul>
+            </div>
         </div>
     </div>
     <div class="row h-100 mx-0 p-0 border-top border-dark">
         <div class="col-10 p-0 border-end border-dark">
-            <div class="" id="info-popup">
+            <div id="info-popup">
                 <div class="row">
                     <div class="d-flex justify-content-center">
                         <div class="col-md-8">
@@ -141,7 +145,7 @@
                     </p>
                     <div id="sidebar-ship-attribute-section">
                         <h5 class="mb-0"><b>Attributes:</b></h5>
-                        <ul class="attribute-list" id="sidebar-ship-attribute-container">
+                        <ul class="attribute-list" id="sidebar-ship-attribute-list">
                             <li><span>Health</span>: <span>5</span></li>
                         </ul>
                     </div>
@@ -158,7 +162,13 @@
                                 <b id="sidebar-ship-ability-name">Ability Name</b>:
                                 <br><span id="sidebar-ship-ability-description">This is a description for the selected ability</span>
                             </p>
-                            <div class="canvas-wrapper w-100">
+                            <div id="sidebar-ship-ability-attribute-section">
+                                <p class="mb-0"><b>Attributes:</b></p>
+                                <ul class="attribute-list" id="sidebar-ship-ability-attribute-list">
+                                    <li><span>Health</span>: <span>5</span></li>
+                                </ul>
+                            </div>
+                            <div class="canvas-wrapper w-100" id="sidebar-ship-ability-canvas-wrapper">
                                 <canvas width="100" height="100" id="ability-canvas"></canvas>
                             </div>
                         </div>

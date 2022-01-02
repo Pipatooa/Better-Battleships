@@ -8,12 +8,19 @@ import type { IPatternSource }        from './sources/pattern';
 import type { IRotatablePatternInfo } from 'shared/network/scenario/i-rotatable-pattern-info';
 
 /**
- * Rotatable Pattern - Server Version
+ * RotatablePattern - Server Version
  *
  * Defines a pattern of values about a center tile which can be rotated around a central point
  */
 export class RotatablePattern extends Pattern {
-    
+
+    /**
+     * RotatablePattern constructor
+     *
+     * @param  _patternEntries  Array of pattern entries for pattern
+     * @param  center           Center of the pattern
+     * @param  rotationalCenter Point about which the pattern rotates
+     */
     protected constructor(_patternEntries: PatternEntry[],
                           center: [number, number],
                           private readonly rotationalCenter: number) {
@@ -50,6 +57,21 @@ export class RotatablePattern extends Pattern {
 
         // Return new created RotatablePattern object
         return new RotatablePattern(patternEntries, [ centerX, centerY ], rotationalCenter);
+    }
+
+    /**
+     * Returns network transportable form of this object.
+     *
+     * May not include all details of the object. Just those that the client needs to know.
+     *
+     * @param    includeValue Whether to include the value for each pattern entry
+     * @returns               Created IRotatablePatternInfo object
+     */
+    public makeTransportable(includeValue: boolean): IRotatablePatternInfo {
+        return {
+            ...super.makeTransportable(includeValue),
+            rotationCenter: this.rotationalCenter
+        };
     }
 
     /**
@@ -114,21 +136,6 @@ export class RotatablePattern extends Pattern {
         const newX = newDx + this.rotationalCenter;
         const newY = newDy + this.rotationalCenter;
         return [newX, newY];
-    }
-
-    /**
-     * Returns network transportable form of this object.
-     *
-     * May not include all details of the object. Just those that the client needs to know.
-     *
-     * @param    includeValue Whether to include the value for each pattern entry
-     * @returns               Created IRotatablePatternInfo object
-     */
-    public makeTransportable(includeValue: boolean): IRotatablePatternInfo {
-        return {
-            ...super.makeTransportable(includeValue),
-            rotationCenter: this.rotationalCenter
-        };
     }
 
     /**

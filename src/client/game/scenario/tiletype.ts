@@ -16,17 +16,13 @@ export class TileType {
     }
 
     /**
-     * Factory function to generate tile type from JSON event data
+     * Factory function to generate TileType from transportable JSON
      *
-     * @param    tileTypeSource JSON data from server
-     * @returns                 Created TileType object
+     * @param    tileTypeInfo JSON data for TileType
+     * @returns               Created TileType object
      */
-    public static async fromSource(tileTypeSource: ITileTypeInfo): Promise<TileType> {
-
-        // Create sub-objects
-        const descriptor = Descriptor.fromSource(tileTypeSource.descriptor);
-
-        // Return tile type object
-        return new TileType(descriptor, tileTypeSource.color, tileTypeSource.traversable);
+    public static async fromInfo(tileTypeInfo: ITileTypeInfo): Promise<TileType> {
+        const descriptor = Descriptor.fromInfo(tileTypeInfo.descriptor);
+        return new TileType(descriptor, tileTypeInfo.color, tileTypeInfo.traversable);
     }
 }

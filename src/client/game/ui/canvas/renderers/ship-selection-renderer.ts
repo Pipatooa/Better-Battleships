@@ -75,7 +75,7 @@ export class ShipSelectionRenderer extends BoardRenderer {
         this.sidebarShipSelectionRemainingCountElement = $('#sidebar-ship-selection-remaining-count');
 
         // Rendering initialisation
-        this.viewportHandler = new ViewportHandler(canvas, this.gl, this.modelPrograms[0], false, 1, [-0.5, -0.5], [2, 2]);
+        this.viewportHandler = new ViewportHandler(canvas, this.gl, this.modelPrograms[0], false, 1, 1, 1, [-0.5, -0.5], [2, 2]);
         this.viewportHandler.updateCallback = () => this.renderNext();
         this.boardInfoGenerator = new BoardInfoGenerator(this.gl, this.modelPrograms[0], this._board);
         this.boardInfoGenerator.push();

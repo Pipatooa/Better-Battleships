@@ -174,9 +174,8 @@ export abstract class UIManager {
         if (this.abilityCanvasCoordinates !== undefined && ev.target === game.abilityRenderer!.viewportHandler.canvas) {
             const [x, y] = this.abilityCanvasCoordinates;
             const tileType = game.abilityRenderer!.board?.tiles[Math.floor(y)]?.[Math.floor(x)][0];
-            if (tileType !== undefined) {
+            if (tileType !== undefined)
                 this.tooltipInfoText = [tileType.descriptor.name, tileType.descriptor.description];
-            }
         } else {
             this.tooltipInfoText = undefined;
         }

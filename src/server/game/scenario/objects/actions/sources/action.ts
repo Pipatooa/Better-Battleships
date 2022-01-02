@@ -30,5 +30,9 @@ export const actionSchema = baseActionSchema.keys({
     value: valueSchema.when('type',
         { is: 'setAttribute', then: Joi.required(), otherwise: Joi.forbidden() }),
     ship: Joi.valid('local', 'foreign').when('type',
-        { is: 'destroyShip', then: Joi.required(), otherwise: Joi.forbidden() })
+        { is: 'destroyShip', then: Joi.required(), otherwise: Joi.forbidden() }),
+    team: Joi.valid('local', 'foreign').when('type',
+        { is: 'win', then: Joi.required(), otherwise: Joi.forbidden() }),
+    player: Joi.valid('local', 'foreign').when('type',
+        { is: 'lose', then: Joi.required(), otherwise: Joi.forbidden() })
 });

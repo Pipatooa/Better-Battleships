@@ -18,6 +18,9 @@ export namespace TooltipElements {
     export const shipSection = new VariableVisibilityElement($('#game-tooltip-ship-section'));
     export const shipName = $('#game-tooltip-ship-name');
     export const shipOwner = $('#game-tooltip-ship-owner');
+
+    export const shipAttributeSection = new VariableVisibilityElement($('#game-tooltip-ship-attribute-section'));
+    export const shipAttributeList = $('#game-tooltip-ship-attribute-list');
 }
 
 /**
@@ -30,7 +33,7 @@ export namespace SidebarElements {
     export const shipDescription = $('#sidebar-ship-description');
 
     export const shipAttributeSection = new VariableVisibilityElement($('#sidebar-ship-attribute-section'));
-    export const shipAttributeContainer = $('#sidebar-ship-attribute-container');
+    export const shipAttributeList = $('#sidebar-ship-attribute-list');
 
     export const shipAbilitySection = new VariableVisibilityElement($('#sidebar-ship-ability-section'));
     export const shipAbilityContainer = $('#sidebar-ship-ability-container');
@@ -38,6 +41,9 @@ export namespace SidebarElements {
     export const shipAbilityName = $('#sidebar-ship-ability-name');
     export const shipAbilityDescription = $('#sidebar-ship-ability-description');
     export const shipAbilityHelpText = $('#sidebar-ship-ability-help-text');
+    export const shipAbilityAttributeSection = new VariableVisibilityElement($('#sidebar-ship-ability-attribute-section'));
+    export const shipAbilityAttributeList = $('#sidebar-ship-ability-attribute-list');
+    export const shipAbilityCanvasWrapper = new VariableVisibilityElement($('#sidebar-ship-ability-canvas-wrapper'));
 
     export const turnSection = $('#sidebar-turn-section');
     export const turnContainer = $('#sidebar-turn-container');

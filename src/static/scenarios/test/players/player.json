@@ -24,7 +24,8 @@
       "actions": [
         {
           "type": "lose",
-          "condition": {}
+          "condition": {},
+          "player": "local"
         }
       ],
       "triggerType": "once"

@@ -68,8 +68,9 @@ export class AbilityRotate extends IndexedAbility {
         if (checkSchema)
             abilityRotateSource = await checkAgainstSchema(abilityRotateSource, abilityRotateSchema, parsingContext);
         
-        // Ability partial refers to future Ability object
+        // Ability and EventRegistrar partials refer to future Ability and EventRegistrar objects
         const abilityPartial: Partial<Ability> = Object.create(AbilityRotate.prototype);
+        const eventRegistrarPartial = Object.create(EventRegistrar.prototype) as EventRegistrar<AbilityEventInfo, AbilityEvent>;
         
         // Get attributes and update parsing context
         const attributes: AttributeMap = await getAttributes(parsingContext.withExtendedPath('.attributes'), abilityRotateSource.attributes, 'ability');
@@ -77,7 +78,7 @@ export class AbilityRotate extends IndexedAbility {
         parsingContext.localAttributes.ability = [attributes, builtinAttributes];
         parsingContext.reducePath();
 
-        const attributeListeners = await getAttributeListeners(parsingContext.withExtendedPath('.attributeListeners'), abilityRotateSource.attributeListeners);
+        const attributeListeners = await getAttributeListeners(parsingContext.withExtendedPath('.attributeListeners'), abilityRotateSource.attributeListeners, eventRegistrarPartial);
         parsingContext.reducePath();
 
         // Get component elements from source
@@ -90,8 +91,8 @@ export class AbilityRotate extends IndexedAbility {
 
         // Return created AbilityFire object
         parsingContext.localAttributes.ability = undefined;
-        const eventRegistrar = new EventRegistrar(eventListeners, []);
-        AbilityRotate.call(abilityPartial, parsingContext.shipPartial as Ship, descriptor, abilityRotateSource.rot90, abilityRotateSource.rot180, abilityRotateSource.rot270, condition, eventRegistrar, attributes, builtinAttributes, attributeListeners);
+        EventRegistrar.call(eventRegistrarPartial, eventListeners, []);
+        AbilityRotate.call(abilityPartial, parsingContext.shipPartial as Ship, descriptor, abilityRotateSource.rot90, abilityRotateSource.rot180, abilityRotateSource.rot270, condition, eventRegistrarPartial, attributes, builtinAttributes, attributeListeners);
         return abilityPartial as AbilityRotate;
     }
 
@@ -144,7 +145,8 @@ export class AbilityRotate extends IndexedAbility {
             rot90: this.rot90allowed,
             rot180: this.rot180allowed,
             rot270: this.rot270allowed,
-            attributes: this.attributeWatcher.exportAttributeInfo()
+            attributes: this.attributeWatcher.exportAttributeInfo(),
+            usable: this.usable
         };
     }
 }

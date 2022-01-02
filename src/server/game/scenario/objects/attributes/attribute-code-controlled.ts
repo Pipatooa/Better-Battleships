@@ -1,7 +1,5 @@
-import { Attribute }                 from './attribute';
-import type { GenericEventContext }  from '../../events/event-context';
-import type { EventEvaluationState } from '../../events/event-evaluation-state';
-import type { Descriptor }           from '../common/descriptor';
+import { Attribute }       from './attribute';
+import type { Descriptor } from '../common/descriptor';
 
 /**
  * AttributeCodeControlled - Server Version
@@ -13,13 +11,37 @@ export class AttributeCodeControlled extends Attribute {
     /**
      * AttributeCodeControlled constructor
      *
-     * @param  getValue   Function to obtain the value of this attribute
-     * @param  setValue   Function to set the value of this attribute
-     * @param  descriptor Optional descriptor for this attribute
+     * @param  getValue         Function to obtain the value of this attribute
+     * @param  setValueFunction Function exposed to user to set the value of this attribute
+     * @param  readonly         Whether to allow the user to set the value of this attribute
+     * @param  descriptor       Optional descriptor for this attribute
      */
     public constructor(public readonly getValue: () => number,
-                       public readonly setValue: (eventEvaluationState: EventEvaluationState, eventContext: GenericEventContext, value: number) => void = () => {},
+                       private readonly setValueFunction: (value: number) => void,
+                       private readonly readonly: boolean,
                        descriptor?: Descriptor) {
         super(descriptor);
+    }
+
+    /**
+     * Set the value of this attribute
+     *
+     * @param  value New value
+     */
+    public setValue(value: number): void {
+        if (this.readonly)
+            return;
+        this.setValueFunction(value);
+        super.setValue(value);
+    }
+
+    /**
+     * Forcibly sets the value of this attribute even if it is readonly
+     *
+     * @param  value New value
+     */
+    public forceSetValue(value: number): void {
+        this.setValueFunction(value);
+        super.setValue(value);
     }
 }

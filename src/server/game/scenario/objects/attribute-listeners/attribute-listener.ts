@@ -1,21 +1,20 @@
-import { UnpackingError }                             from '../../errors/unpacking-error';
-import { checkAgainstSchema }                         from '../../schema-checker';
-import { buildAction }                                from '../actions/action-builder';
-import { AttributeReference }                         from '../attribute-references/attribute-reference';
-import { AttributeReferenceLocal }                    from '../attribute-references/attribute-reference-local';
-import { buildValueConstraint }                       from '../constraints/value-constraint-builder';
-import { attributeListenerEventInfo }                 from './events/attribute-listener';
-import { attributeListenerSchema }                    from './sources/attribute-listener';
-import type { EventContextForEvent }                  from '../../events/event-context';
-import type { EventEvaluationState }                  from '../../events/event-evaluation-state';
-import type { ParsingContext }                        from '../../parsing-context';
-import type { Action }                                from '../actions/action';
-import type { AttributeReferenceLocalObjectSelector } from '../attribute-references/sources/attribute-reference';
-import type { Attribute }                             from '../attributes/attribute';
-import type { ValueConstraint }                       from '../constraints/value-constaint';
-import type {
-    AttributeListenerEvent,
-    AttributeListenerEventInfo }                      from './events/attribute-listener';
+import { UnpackingError }                                              from '../../errors/unpacking-error';
+import { EventListenerPrimaryPriority }                                from '../../events/event-listener';
+import { checkAgainstSchema }                                          from '../../schema-checker';
+import { buildAction }                                                 from '../actions/action-builder';
+import { AttributeReference }                                          from '../attribute-references/attribute-reference';
+import { AttributeReferenceLocal }                                     from '../attribute-references/attribute-reference-local';
+import { buildValueConstraint }                                        from '../constraints/value-constraint-builder';
+import { attributeListenerSchema }                                     from './sources/attribute-listener';
+import type { GenericEventContext }                                    from '../../events/event-context';
+import type { EventEvaluationState }                                   from '../../events/event-evaluation-state';
+import type { EventListener }                                          from '../../events/event-listener';
+import type { EventRegistrar }                                         from '../../events/event-registrar';
+import type { ParsingContext }                                         from '../../parsing-context';
+import type { Action }                                                 from '../actions/action';
+import type { AttributeReferenceLocalObjectSelector }                  from '../attribute-references/sources/attribute-reference';
+import type { Attribute }                                              from '../attributes/attribute';
+import type { ValueConstraint }                                        from '../constraints/value-constaint';
 import type { IAttributeListenerSource, AttributeListenerTriggerType } from './sources/attribute-listener';
 
 /**
@@ -28,11 +27,12 @@ export class AttributeListener {
     private previouslyMetConstraint = false;
 
     private constructor(private readonly attribute: Attribute,
-                        public readonly priority: number,
+                        public readonly eventRegistrar: EventRegistrar<any, any>,
+                        private readonly priority: number,
                         private readonly constraint: ValueConstraint,
                         private readonly actions: Action[],
                         private readonly triggerType: AttributeListenerTriggerType) {
-        
+
     }
 
     /**
@@ -40,10 +40,11 @@ export class AttributeListener {
      *
      * @param    parsingContext          Context for resolving scenario data
      * @param    attributeListenerSource JSON data for AttributeListener
+     * @param    eventRegistrar          Event registrar to register internal listener under
      * @param    checkSchema             When true, validates source JSON data against schema
      * @returns                          Created AttributeListener object
      */
-    public static async fromSource(parsingContext: ParsingContext, attributeListenerSource: IAttributeListenerSource, checkSchema: boolean): Promise<AttributeListener> {
+    public static async fromSource(parsingContext: ParsingContext, attributeListenerSource: IAttributeListenerSource, eventRegistrar: EventRegistrar<any, string>, checkSchema: boolean): Promise<AttributeListener> {
 
         // Validate JSON data against schema
         if (checkSchema)
@@ -61,7 +62,6 @@ export class AttributeListener {
         const valueConstraint = await buildValueConstraint(parsingContext.withExtendedPath('.constraint'), attributeListenerSource.constraint, false);
         parsingContext.reducePath();
 
-        parsingContext.currentEventInfo = attributeListenerEventInfo.onAttributeUpdate;
         const actions: Action[] = [];
         for (let i = 0; i < attributeListenerSource.actions.length; i++) {
             const actionSource = attributeListenerSource.actions[i];
@@ -71,7 +71,7 @@ export class AttributeListener {
         }
         parsingContext.currentEventInfo = undefined;
 
-        return new AttributeListener(attribute, attributeListenerSource.priority, valueConstraint, actions, attributeListenerSource.triggerType);
+        return new AttributeListener(attribute, eventRegistrar, attributeListenerSource.priority, valueConstraint, actions, attributeListenerSource.triggerType);
     }
 
     /**
@@ -91,12 +91,23 @@ export class AttributeListener {
     /**
      * Called when the value of the attribute that this listener is attached to updates
      *
+     * @param  eventContext Context for resolving objects and values when an event is triggered
+     */
+    public onAttributeValueUpdate(eventContext: GenericEventContext & { value: number }): void {
+        const callback = (eventEvaluationState: EventEvaluationState, eventContext: GenericEventContext ): void =>
+            this.executeActions(eventEvaluationState, eventContext as GenericEventContext & { value: number });
+        const eventListener = [EventListenerPrimaryPriority.ActionDefault, this.priority, callback] as EventListener<any, string, string>;
+        this.eventRegistrar.preQueueEventListenerCall([eventListener, eventContext, this.eventRegistrar]);
+    }
+
+    /**
+     * Called when the event listener for this attribute listener is evaluated
+     *
      * @param  eventEvaluationState Current state of event evaluation
      * @param  eventContext         Context for resolving objects and values when an event is triggered
-     * @param  value                New value of the attribute
      */
-    public onAttributeValueUpdate(eventEvaluationState: EventEvaluationState, eventContext: EventContextForEvent<AttributeListenerEventInfo, AttributeListenerEvent, 'onAttributeUpdate'>, value: number): void {
-        const meetsConstraint = this.constraint.check(eventContext, value);
+    public executeActions(eventEvaluationState: EventEvaluationState, eventContext: GenericEventContext & { value: number } ): void {
+        const meetsConstraint = this.constraint.check(eventContext, eventContext.value);
         let shouldExecute: boolean;
 
         switch (this.triggerType) {

@@ -1,6 +1,6 @@
-import type { IAttributeInfo }  from './i-attribute-info';
-import type { IDescriptorInfo } from './i-descriptor-info';
-import type { IPatternInfo }    from './i-pattern-info';
+import type { MultipleAttributeInfo } from './i-attribute-info';
+import type { IDescriptorInfo }       from './i-descriptor-info';
+import type { IPatternInfo }          from './i-pattern-info';
 
 /**
  * Portable network version of generic Ability object
@@ -16,7 +16,8 @@ export type AbilityInfo =
 export interface IBaseAbilityInfo {
     type: string,
     descriptor: IDescriptorInfo,
-    attributes: { [name: string]: IAttributeInfo }
+    attributes: MultipleAttributeInfo,
+    usable: boolean
 }
 
 /**

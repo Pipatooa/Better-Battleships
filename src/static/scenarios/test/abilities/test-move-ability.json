@@ -19,7 +19,16 @@
       ".#."
     ]
   },
-  "actions": {},
+  "actions": {
+    "onUse": [
+      {
+        "type": "win",
+        "priority": 100,
+        "condition": {},
+        "team": "local"
+      }
+    ]
+  },
   "attributes": {},
   "attributeListeners": []
 }

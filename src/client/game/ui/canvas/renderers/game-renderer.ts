@@ -21,7 +21,8 @@ export class GameRenderer extends BoardRenderer {
         game.gameRenderer = this;
         this._board = game.board!;
 
-        this.viewportHandler = new ViewportHandler(canvas, this.gl, this.modelPrograms[0], true);
+        const scaleUpperBound = this._board.size[1] * 0.1;
+        this.viewportHandler = new ViewportHandler(canvas, this.gl, this.modelPrograms[0], true, undefined, scaleUpperBound);
         this.viewportHandler.updateCallback = () => this.renderNext();
         this.boardInfoGenerator = new BoardInfoGenerator(this.gl, this.modelPrograms[0], game.board!);
         this.boardInfoGenerator.highlightRegion(game.spawnRegion!.id);

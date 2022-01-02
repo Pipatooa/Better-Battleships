@@ -62,6 +62,6 @@ export class AttributeReferenceEvent extends AttributeReference {
      * @param  value                New value to assign to referenced attribute
      */
     public setValue(eventEvaluationState: EventEvaluationState, eventContext: GenericEventContext, value: number): void {
-        eventContext.builtinAttributes[this.attributeName].setValue(eventEvaluationState, eventContext, value);
+        eventContext.builtinAttributes[this.attributeName].setValue(value);
     }
 }

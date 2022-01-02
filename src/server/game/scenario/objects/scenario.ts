@@ -35,6 +35,19 @@ export class Scenario implements IAttributeHolder, IBuiltinAttributeHolder<'scen
 
     public game: Game | undefined;
 
+    /**
+     * Scenario constructor
+     *
+     * @param  fileJSON          Scenario file sent by client
+     * @param  author            Author of scenario
+     * @param  descriptor        Descriptor for scenario
+     * @param  board             Board for scenario
+     * @param  teams             Teams for scenario
+     * @param  turnManager       Turn manager for scenario
+     * @param  eventRegistrar    Event registrar for scenario
+     * @param  attributes        Attributes for scenario
+     * @param  builtinAttributes Built-in attributes for scenario
+     */
     public constructor(public readonly fileJSON: FileJSON,
                        public readonly author: string,
                        public readonly descriptor: Descriptor,
@@ -54,7 +67,7 @@ export class Scenario implements IAttributeHolder, IBuiltinAttributeHolder<'scen
      */
     private static generateBuiltinAttributes(object: Scenario): BuiltinAttributeRecord<'scenario'> {
         return {
-            teamCount: new AttributeCodeControlled(() => Object.entries(object.teams).length)
+            teamCount: new AttributeCodeControlled(() => Object.entries(object.teams).length, () => {}, true)
         };
     }
 
@@ -72,9 +85,10 @@ export class Scenario implements IAttributeHolder, IBuiltinAttributeHolder<'scen
         if (checkSchema)
             scenarioSource = await checkAgainstSchema(scenarioSource, scenarioSchema, parsingContext);
 
-        // Scenario and TurnManager partials refer to future Scenario and TurnManager objects
+        // Scenario, TurnManager and EventRegistrar partials refer to future Scenario, TurnManager and EventRegistrar objects
         const scenarioPartial: Partial<Scenario> = Object.create(Scenario.prototype);
         const turnManagerPartial: Partial<TurnManager> = Object.create(TurnManager.prototype);
+        const eventRegistrarPartial = Object.create(EventRegistrar.prototype) as EventRegistrar<BaseEventInfo, BaseEvent>;
         parsingContext.scenarioPartial = scenarioPartial;
         parsingContext.turnManagerPartial = turnManagerPartial;
 
@@ -89,7 +103,7 @@ export class Scenario implements IAttributeHolder, IBuiltinAttributeHolder<'scen
         parsingContext.localAttributes.scenario = [attributes, builtinAttributes];
         parsingContext.reducePath();
 
-        const attributeListeners = await getAttributeListeners(parsingContext.withExtendedPath('.attributeListeners'), scenarioSource.attributeListeners);
+        const attributeListeners = await getAttributeListeners(parsingContext.withExtendedPath('.attributeListeners'), scenarioSource.attributeListeners, eventRegistrarPartial);
         parsingContext.reducePath();
         for (const attributeListener of attributeListeners)
             attributeListener.register();
@@ -134,8 +148,8 @@ export class Scenario implements IAttributeHolder, IBuiltinAttributeHolder<'scen
         parsingContext.localAttributes.scenario = undefined;
         parsingContext.board = undefined;
         parsingContext.foreignAttributeRegistry = undefined;
-        const eventRegistrar = new EventRegistrar(eventListeners, subRegistrars);
-        Scenario.call(scenarioPartial, parsingContext.scenarioFile, scenarioSource.author, descriptor, board, teams, turnManagerPartial as TurnManager, eventRegistrar, attributes, builtinAttributes);
+        EventRegistrar.call(eventRegistrarPartial, eventListeners, subRegistrars);
+        Scenario.call(scenarioPartial, parsingContext.scenarioFile, scenarioSource.author, descriptor, board, teams, turnManagerPartial as TurnManager, eventRegistrarPartial, attributes, builtinAttributes);
         return scenarioPartial as Scenario;
     }
 
@@ -178,6 +192,7 @@ export class Scenario implements IAttributeHolder, IBuiltinAttributeHolder<'scen
             }
         }
 
+        this.eventRegistrar.eventEvaluationState!.terminate = true;
         this.game!.endGame(winningTeam!.id);
         return true;
     }

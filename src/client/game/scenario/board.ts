@@ -44,26 +44,26 @@ export class Board {
     }
 
     /**
-     * Factory function to generate Board from JSON event data
+     * Factory function to generate Board from transportable JSON
      *
-     * @param    boardSource JSON data from server
-     * @returns              Created Board object
+     * @param    boardInfo JSON data for Board
+     * @returns            Created Board object
      */
-    public static async fromSource(boardSource: IBoardInfo): Promise<Board> {
+    public static async fromInfo(boardInfo: IBoardInfo): Promise<Board> {
 
         // Unpack tile and region palettes
         let primaryTileType: TileType | undefined;
         const tileTypes: { [char: string]: TileType } = {};
-        for (const entry of Object.entries(boardSource.tilePalette)) {
+        for (const entry of Object.entries(boardInfo.tilePalette)) {
             const [ char, tileTypeInfo ] = entry;
-            const tileType = await TileType.fromSource(tileTypeInfo);
+            const tileType = await TileType.fromInfo(tileTypeInfo);
             tileTypes[char] = tileType;
             if (primaryTileType === undefined)
                 primaryTileType = tileType;
         }
 
         const regions: { [id: string]: Region } = {};
-        for (const regionIDs of Object.values(boardSource.regionPalette)) {
+        for (const regionIDs of Object.values(boardInfo.regionPalette)) {
             for (const regionID of regionIDs) {
                 if (regions[regionID] === undefined)
                     regions[regionID] = new Region(regionID);
@@ -72,20 +72,20 @@ export class Board {
 
         // Unpack tile data
         const tiles: Tile[][] = [];
-        for (let y = 0; y < boardSource.tiles.length; y++) {
-            const rowTileTypes: string = boardSource.tiles[y];
-            const rowRegions: string = boardSource.regions[y];
+        for (let y = 0; y < boardInfo.tiles.length; y++) {
+            const rowTileTypes: string = boardInfo.tiles[y];
+            const rowRegions: string = boardInfo.regions[y];
 
             // Create new tile row
             tiles[y] = [];
 
             // Iterate through each character, each representing a tile
-            for (let x = 0; x < boardSource.size[0]; x++) {
+            for (let x = 0; x < boardInfo.size[0]; x++) {
                 const tileTypeChar: string = rowTileTypes.charAt(x);
                 const regionChar: string = rowRegions.charAt(x);
 
                 const tileType: TileType = tileTypes[tileTypeChar];
-                const regionIDs: string[] = boardSource.regionPalette[regionChar];
+                const regionIDs: string[] = boardInfo.regionPalette[regionChar];
                 tiles[y][x] = [tileType, regionIDs.map(id => regions[id]), undefined, undefined];
             }
         }

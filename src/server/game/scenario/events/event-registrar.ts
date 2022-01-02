@@ -14,8 +14,10 @@ export class EventRegistrar<T extends Record<S, EventInfoEntry>, S extends strin
     private parentRegistrar: EventRegistrar<T, S> | undefined;
     private deactivated = false;
 
+    private preQueuedEventListenerCalls: GenericQueuedEventListenerCall[] = [];
     private queuedEventListenerCalls: GenericQueuedEventListenerCall[] = [];
-    private eventEvaluationState: EventEvaluationState | undefined;
+
+    private _eventEvaluationState: EventEvaluationState | undefined;
     private _eventEvaluationCompleteCallback: ((listenersProcessed: number, eventEvaluationState: EventEvaluationState) => void) | undefined;
 
     /**
@@ -45,6 +47,25 @@ export class EventRegistrar<T extends Record<S, EventInfoEntry>, S extends strin
     public addEventListener<X extends S>(event: X, listener: EventListener<T, S, X>): void {
         this.eventListeners[event].push(listener);
         this.eventListeners[event].sort((f, s) => f[0] === s[0] ? f[1] - s[1] : f[0] - s[0]);
+
+        const existingListeners = this.eventListeners[event];
+        const newEventListeners: EventListener<T, S, X>[] = [];
+
+        // Add attribute listeners from old array until priority is higher than priority of new attribute listener
+        let i = 0;
+        while (i < existingListeners.length) {
+            const oldEventListener = existingListeners[i++];
+            if (oldEventListener[0] > listener[0] || oldEventListener[0] === listener[0] && oldEventListener[1] > listener[1])
+                break;
+            newEventListeners.push(oldEventListener);
+        }
+
+        // Add new attribute listener to new array and add final elements of old array
+        newEventListeners.push(listener);
+        while (i < existingListeners.length)
+            newEventListeners.push(existingListeners[i++]);
+
+        this.eventListeners[event] = newEventListeners;
     }
 
     /**
@@ -91,17 +112,47 @@ export class EventRegistrar<T extends Record<S, EventInfoEntry>, S extends strin
      */
     public queueEvent<X extends S>(event: X, eventContext: EventContextForEvent<T, S, X>): void {
 
-        // Create array describing new event listener calls to be added to queue
+        // Add event listener calls for this event to the queue
         const newEventListenerCalls: QueuedEventListenerCall<T, S, X>[] = [];
         for (const eventListener of this.eventListeners[event])
             newEventListenerCalls.push([eventListener, eventContext, this]);
+        this.queueEventListenerCalls(newEventListenerCalls as GenericQueuedEventListenerCall[]);
 
+        // Merge sub-registrar events into event listener call queue
+        for (const subRegistrar of this.subRegistrars)
+            subRegistrar.queueEvent(event, eventContext);
+    }
+
+    /**
+     * Add an event listener call to a queue of event listener calls waiting to be queued
+     *
+     * @param  eventListenerCall Event listener call to be pre-queued
+     */
+    public preQueueEventListenerCall(eventListenerCall: GenericQueuedEventListenerCall): void {
+        this.preQueuedEventListenerCalls.push(eventListenerCall);
+    }
+
+    /**
+     * Moves pre-queued event listener calls to the main event listener call queue
+     */
+    public queuePreQueuedEventListenerCalls(): void {
+        this.preQueuedEventListenerCalls.sort((f, s) => f[0][0] === s[0][0] ? f[0][1] - s[0][1] : f[0][0] - s[0][0]);
+        this.queueEventListenerCalls(this.preQueuedEventListenerCalls);
+        this.preQueuedEventListenerCalls = [];
+    }
+
+    /**
+     * Adds an array of event listener calls to existing event listener call queue
+     *
+     * @param  newEventListenerCalls Array of new listener calls to add
+     */
+    public queueEventListenerCalls(newEventListenerCalls: GenericQueuedEventListenerCall[]): void {
         // Merge new event listener calls into existing queue, sorted by ascending priority
         const newQueue: GenericQueuedEventListenerCall[] = [];
         let i = 0, j = 0;
         while (i < this._rootRegistrar.queuedEventListenerCalls.length && j < newEventListenerCalls.length) {
             const left = this._rootRegistrar.queuedEventListenerCalls[i];
-            const right = newEventListenerCalls[j] as GenericQueuedEventListenerCall;
+            const right = newEventListenerCalls[j];
 
             // Compare primary priority
             if (left[0][0] < right[0][0]) {
@@ -111,7 +162,7 @@ export class EventRegistrar<T extends Record<S, EventInfoEntry>, S extends strin
                 newQueue.push(right);
                 j++;
 
-            // Compare secondary priority
+                // Compare secondary priority
             } else if (left[0][1] <= right[0][1]){
                 newQueue.push(left);
                 i++;
@@ -123,12 +174,8 @@ export class EventRegistrar<T extends Record<S, EventInfoEntry>, S extends strin
         while (i < this._rootRegistrar.queuedEventListenerCalls.length)
             newQueue.push(this._rootRegistrar.queuedEventListenerCalls[i++]);
         while (j < newEventListenerCalls.length)
-            newQueue.push(newEventListenerCalls[j++] as GenericQueuedEventListenerCall);
+            newQueue.push(newEventListenerCalls[j++]);
         this._rootRegistrar.queuedEventListenerCalls = newQueue;
-
-        // Merge sub-registrar events into event listener call queue
-        for (const subRegistrar of this.subRegistrars)
-            subRegistrar.queueEvent(event, eventContext);
     }
 
     /**
@@ -137,10 +184,10 @@ export class EventRegistrar<T extends Record<S, EventInfoEntry>, S extends strin
     public evaluateEvents(): void {
 
         // Create a new evaluation state if one does not exist for this queue
-        if (this._rootRegistrar.eventEvaluationState !== undefined)
+        if (this._rootRegistrar._eventEvaluationState !== undefined)
             return;
         const eventEvaluationState = new EventEvaluationState();
-        this._rootRegistrar.eventEvaluationState = eventEvaluationState;
+        this._rootRegistrar._eventEvaluationState = eventEvaluationState;
 
         // Process queue - More listeners may be added to queue during evaluation
         let listenersProcessed = 0;
@@ -148,17 +195,22 @@ export class EventRegistrar<T extends Record<S, EventInfoEntry>, S extends strin
             const [eventListener, eventContext, eventRegistrar] = this._rootRegistrar.queuedEventListenerCalls.pop()!;
             if (eventRegistrar.deactivated)
                 continue;
+            if (eventEvaluationState.terminate)
+                return;
             eventListener[2](eventEvaluationState, eventContext);
             listenersProcessed++;
         }
 
+        if (eventEvaluationState.terminate)
+            return;
+
         // Finish evaluation
-        this._rootRegistrar.eventEvaluationState = undefined;
+        this._rootRegistrar._eventEvaluationState = undefined;
         this._rootRegistrar.onEventEvaluationComplete(listenersProcessed, eventEvaluationState);
     }
 
     /**
-     * Called when an event evaluation has completed
+     * Called when an event evaluation has completed. Called immediately after completion.
      *
      * @param  listenersProcessed   Number of listeners which were processed during the evaluation
      * @param  eventEvaluationState Finishing event evaluation state
@@ -181,6 +233,10 @@ export class EventRegistrar<T extends Record<S, EventInfoEntry>, S extends strin
         this._rootRegistrar = registrar;
         for (const subRegistrar of this.subRegistrars)
             subRegistrar.rootRegistrar = registrar;
+    }
+
+    public get eventEvaluationState(): EventEvaluationState | undefined {
+        return this._eventEvaluationState;
     }
 
     public set eventEvaluationCompleteCallback(callback: (listenersProcessed: number, eventEvaluationState: EventEvaluationState) => void) {

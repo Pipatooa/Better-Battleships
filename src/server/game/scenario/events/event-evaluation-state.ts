@@ -9,14 +9,7 @@ import { EvaluationError } from '../errors/evaluation-error';
 export class EventEvaluationState {
 
     private actionCount = 0;
-    private _midEvaluation = false;
-
-    /**
-     * Marks evaluation as having started
-     */
-    public startEvaluation(): void {
-        this._midEvaluation = true;
-    }
+    public terminate = false;
 
     /**
      * Bumps current action count and raises error if limit exceeded
@@ -24,13 +17,5 @@ export class EventEvaluationState {
     public bumpActionCount(): void {
         if (++this.actionCount > config.evaluationActionLimit)
             throw new EvaluationError('Action evaluation count exceeded', `Tried to execute ${this.actionCount} actions within a single evaluation.`);
-    }
-
-    /**
-     * Getters and setters
-     */
-
-    public get midEvaluation(): boolean {
-        return this._midEvaluation;
     }
 }

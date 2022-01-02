@@ -1,10 +1,15 @@
-import { Rotation }              from 'shared/scenario/objects/common/rotation';
-import { game }                  from '../game';
-import type { Player }           from '../player';
-import type { Ability }          from './abilities/ability';
-import type { Board }            from './board';
-import type { Descriptor }       from './descriptor';
-import type { RotatablePattern } from './rotatable-pattern';
+import { Rotation }                           from 'shared/scenario/objects/common/rotation';
+import { builtinAttributePrefix }             from '../../../server/game/scenario/objects/attributes/sources/builtin-attributes';
+import { game }                               from '../game';
+import { allPlayers, selfPlayer }             from '../player';
+import { getAbilities }                       from './abilities/ability-getter';
+import { AttributeCollection }                from './attribute-collection';
+import { Descriptor }                         from './descriptor';
+import { RotatablePattern }                   from './rotatable-pattern';
+import type { IShipInfo, IShipPrototypeInfo } from '../../../shared/network/scenario/i-ship-prototype-info';
+import type { Player }                        from '../player';
+import type { Ability }                       from './abilities/ability';
+import type { Board }                         from './board';
 
 /**
  * Dictionary of ships being tracked by the client
@@ -26,21 +31,25 @@ export class Ship {
     /**
      * Ship constructor
      *
-     * @param  _trackingID Tracking ID used to keep track of this ship
-     * @param  _x          X coordinate of ship
-     * @param  _y          Y coordinate of ship
-     * @param  descriptor  Descriptor for ship
-     * @param  _pattern    Pattern describing shape of ship
-     * @param  player      Player that this ship belongs to
-     * @param  abilities   Dictionary of abilities available for this ship
+     * @param  _trackingID         Tracking ID used to keep track of this ship
+     * @param  _x                  X coordinate of ship
+     * @param  _y                  Y coordinate of ship
+     * @param  descriptor          Descriptor for ship
+     * @param  _pattern            Pattern describing shape of ship
+     * @param  _visibilityPattern  Pattern describing set of cells from which this ship is visible
+     * @param  player              Player that this ship belongs to
+     * @param  abilities           Dictionary of abilities available for this ship
+     * @param  attributeCollection Attributes for this ship
      */
     public constructor(private _trackingID: string | undefined,
                        protected _x: number | undefined,
                        protected _y: number | undefined,
                        public readonly descriptor: Descriptor,
                        protected _pattern: RotatablePattern,
+                       protected _visibilityPattern: RotatablePattern,
                        public readonly player: Player,
-                       public readonly abilities: Ability[]) {
+                       public readonly abilities: Ability[],
+                       public readonly attributeCollection: AttributeCollection) {
         
         if (this._trackingID !== undefined)
             trackedShips[this._trackingID] = this;
@@ -52,6 +61,37 @@ export class Ship {
     public deconstruct(): void {
         this.board?.removeShip(this, true);
         delete trackedShips[this._trackingID!];
+    }
+
+    /**
+     * Factory function to generate Ship from transportable JSON
+     *
+     * @param    shipInfo   JSON data for Ship
+     * @param    trackingID Tracking ID for this Ship
+     * @returns             Created Ship object
+     */
+    public static fromInfo(shipInfo: IShipPrototypeInfo | IShipInfo, trackingID: string): Ship {
+        const shipPartial: Partial<Ship> = Object.create(Ship.prototype);
+        const descriptor = Descriptor.fromInfo(shipInfo.descriptor);
+        const pattern = RotatablePattern.fromInfo(shipInfo.pattern);
+        const visibility = shipInfo.attributes[`${builtinAttributePrefix}visibility`].value;
+        const visibilityPattern = pattern.getExtendedPattern(visibility);
+        const abilities = getAbilities(shipPartial as Ship, shipInfo.abilities);
+        const attributeCollection = new AttributeCollection(shipInfo.attributes);
+
+        let player: Player;
+        let x: number | undefined;
+        let y: number | undefined;
+
+        if ((shipInfo as IShipInfo).owner !== undefined) {
+            player = allPlayers[(shipInfo as IShipInfo).owner];
+            x = (shipInfo as IShipInfo).x;
+            y = (shipInfo as IShipInfo).y;
+        } else
+            player = selfPlayer;
+
+        Ship.call(shipPartial, trackingID, x, y, descriptor, pattern, visibilityPattern, player, abilities, attributeCollection);
+        return shipPartial as Ship;
     }
 
     /**
@@ -99,10 +139,8 @@ export class Ship {
 
             if (!tile?.[1].includes(game.spawnRegion!))
                 return [false, 'Ship must be placed within spawn region'];
-
             if (tile[2] !== undefined)
                 return [false, 'Ships must not be overlapping'];
-
             if (!tile[0].traversable)
                 return [false, 'Ship must be placed on traversable tiles'];
         }

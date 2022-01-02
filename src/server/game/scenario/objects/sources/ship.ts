@@ -28,7 +28,7 @@ export interface IShipSource extends IAttributeHolderSource {
 export const shipSchema = Joi.object({
     descriptor: descriptorSchema.required(),
     pattern: patternSchema.required(),
-    visibility: Joi.number().integer().min(1).required(),
+    visibility: Joi.number().integer().min(0).max(15).required(),
     abilities: Joi.array().items(genericNameSchema).required(),
     actions: Joi.object().pattern(Joi.valid(...Object.keys(shipEventInfo)), Joi.array().items(actionSchema.keys({
         priority: Joi.number().required()

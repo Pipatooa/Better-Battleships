@@ -1,8 +1,7 @@
-import type { GenericEventContext }  from '../../events/event-context';
-import type { EventEvaluationState } from '../../events/event-evaluation-state';
-import type { AttributeListener }    from '../attribute-listeners/attribute-listener';
-import type { Descriptor }           from '../common/descriptor';
-import type { IAttributeInfo }       from 'shared/network/scenario/i-attribute-info';
+import type { GenericEventContext } from '../../events/event-context';
+import type { AttributeListener }   from '../attribute-listeners/attribute-listener';
+import type { Descriptor }          from '../common/descriptor';
+import type { IAttributeInfo }      from 'shared/network/scenario/i-attribute-info';
 
 /**
  * Attribute - Server Version
@@ -12,7 +11,7 @@ import type { IAttributeInfo }       from 'shared/network/scenario/i-attribute-i
 export abstract class Attribute {
 
     private attributeListeners: AttributeListener[] = [];
-    private _attributeUpdateCallback: ((newValue: number) => void) | undefined;
+    protected _attributeUpdateCallbacks: ((newValue: number) => void)[] = [];
 
     /**
      * Attribute Constructor
@@ -42,23 +41,7 @@ export abstract class Attribute {
      * @param  attributeListener Attribute listener to register
      */
     public registerAttributeListener(attributeListener: AttributeListener): void {
-        const newAttributeListeners: AttributeListener[] = [];
-
-        // Add attribute listeners from old array until priority is lower than priority of new attribute listener
-        let i = 0;
-        while (i < this.attributeListeners.length) {
-            const oldAttributeListener = this.attributeListeners[i++];
-            if (oldAttributeListener.priority < attributeListener.priority)
-                break;
-            newAttributeListeners.push(oldAttributeListener);
-        }
-
-        // Add new attribute listener to new array and add final elements of old array
-        newAttributeListeners.push(attributeListener);
-        while (i < this.attributeListeners.length)
-            newAttributeListeners.push(this.attributeListeners[i++]);
-
-        this.attributeListeners = newAttributeListeners;
+        this.attributeListeners.push(attributeListener);
     }
 
     /**
@@ -83,24 +66,35 @@ export abstract class Attribute {
      * Will constrain given value to meet all held value constraints.
      * If attribute is readonly, new value will be ignored
      *
-     * @param  eventEvaluationState Current state of event evaluation
-     * @param  eventContext         Context for resolving objects and values when an event is triggered
-     * @param  value                New value
+     * @param  value New value
      */
-    public setValue(eventEvaluationState: EventEvaluationState, eventContext: GenericEventContext, value: number): void {
-        this._attributeUpdateCallback?.(value);
-        for (const attributeListener of this.attributeListeners) {
-            attributeListener.onAttributeValueUpdate(eventEvaluationState, {
-                builtinAttributes: {}
-            }, value);
-        }
+    public setValue(value: number): void {
+        for (const callback of this._attributeUpdateCallbacks)
+            callback(value);
+
+        const eventContext: GenericEventContext & { value: number } = {
+            builtinAttributes: {},
+            value: value
+        };
+        for (const attributeListener of this.attributeListeners)
+            attributeListener.onAttributeValueUpdate(eventContext);
     }
 
     /**
-     * Getters and setters
+     * Adds a callback which is called when the value of this attribute updates
+     *
+     * @param  callback Callback to add
      */
+    public addAttributeUpdateCallback(callback: (newValue: number) => void): void {
+        this._attributeUpdateCallbacks.push(callback);
+    }
 
-    public set attributeUpdateCallback(callback: (newValue: number) => void) {
-        this._attributeUpdateCallback = callback;
+    /**
+     * Removes a callback which is called when the value of this attribute updates
+     *
+     * @param  callback Callback to remove
+     */
+    public removeAttributeUpdateCallback(callback: (newValue: number) => void): void {
+        this._attributeUpdateCallbacks = this._attributeUpdateCallbacks.filter(c => c !== callback);
     }
 }

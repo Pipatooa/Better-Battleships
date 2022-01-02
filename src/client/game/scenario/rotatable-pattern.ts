@@ -4,25 +4,32 @@ import type { PatternEntry }          from './pattern';
 import type { IRotatablePatternInfo } from 'shared/network/scenario/i-rotatable-pattern-info';
 
 /**
- * Rotatable Pattern - Client Version
+ * RotatablePattern - Client Version
  *
  * Defines a pattern of values about a center tile which can be rotated around a central point
  */
 export class RotatablePattern extends Pattern {
 
+    /**
+     * RotatablePattern constructor
+     *
+     * @param  _patternEntries  Array of pattern entries for pattern
+     * @param  center           Center of the pattern
+     * @param  rotationalCenter Point about which the pattern rotates
+     */
     protected constructor(_patternEntries: PatternEntry[],
                           center: [number, number],
-        private readonly rotationalCenter: number) {
+                          private readonly rotationalCenter: number) {
         super(_patternEntries, center);
     }
 
     /**
-     * Factory function to generate Pattern from transportable JSON
+     * Factory function to generate RotatablePattern from transportable JSON
      *
      * @param    rotatablePatternInfo JSON data for Pattern
      * @returns                       Created Pattern object
      */
-    public static fromSource(rotatablePatternInfo: IRotatablePatternInfo): RotatablePattern {
+    public static fromInfo(rotatablePatternInfo: IRotatablePatternInfo): RotatablePattern {
         return new RotatablePattern(rotatablePatternInfo.tiles as PatternEntry[], rotatablePatternInfo.center, rotatablePatternInfo.rotationCenter);
     }
 
@@ -51,7 +58,7 @@ export class RotatablePattern extends Pattern {
      * @param    rotation Rotation to apply to point
      * @returns           Transformed point
      */
-    protected rotatePoint(x: number, y: number, rotation: Rotation): [number, number] {
+    protected rotatePoint(x: number, y: number, rotation: Rotation): [ number, number ] {
 
         // Get dx and dy of pattern entry from pattern center
         const dx = x - this.rotationalCenter;
@@ -87,6 +94,17 @@ export class RotatablePattern extends Pattern {
         // Offset new dx and dy from pattern center
         const newX = newDx + this.rotationalCenter;
         const newY = newDy + this.rotationalCenter;
-        return [newX, newY];
+        return [ newX, newY ];
+    }
+
+    /**
+     * Expands the pattern so that all cells within the radius of the pattern are included in a new pattern
+     *
+     * @param    radius Radius of cells around this pattern to include in new pattern
+     * @returns         Created pattern
+     */
+    public getExtendedPattern(radius: number): RotatablePattern {
+        const patternEntries = this.getExtendedPatternEntries(radius);
+        return new RotatablePattern(patternEntries, this.center, this.rotationalCenter);
     }
 }

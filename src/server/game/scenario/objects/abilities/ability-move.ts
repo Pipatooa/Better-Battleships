@@ -64,8 +64,9 @@ export class AbilityMove extends PositionedAbility {
         if (checkSchema)
             abilityMoveSource = await checkAgainstSchema(abilityMoveSource, abilityMoveSchema, parsingContext);
 
-        // Ability partial refers to future Ability object
+        // Ability and EventRegistrar partials refer to future Ability and EventRegistrar objects
         const abilityPartial: Partial<Ability> = Object.create(AbilityMove.prototype);
+        const eventRegistrarPartial = Object.create(EventRegistrar.prototype) as EventRegistrar<AbilityEventInfo, AbilityEvent>;
 
         // Get attributes and update parsing context
         const attributes: AttributeMap = await getAttributes(parsingContext.withExtendedPath('.attributes'), abilityMoveSource.attributes, 'ability');
@@ -73,7 +74,7 @@ export class AbilityMove extends PositionedAbility {
         parsingContext.localAttributes.ability = [attributes, builtinAttributes];
         parsingContext.reducePath();
 
-        const attributeListeners = await getAttributeListeners(parsingContext.withExtendedPath('.attributeListeners'), abilityMoveSource.attributeListeners);
+        const attributeListeners = await getAttributeListeners(parsingContext.withExtendedPath('.attributeListeners'), abilityMoveSource.attributeListeners, eventRegistrarPartial);
         parsingContext.reducePath();
 
         // Get component elements from source
@@ -88,8 +89,8 @@ export class AbilityMove extends PositionedAbility {
 
         // Return created AbilityMove object
         parsingContext.localAttributes.ability = undefined;
-        const eventRegistrar = new EventRegistrar(eventListeners, []);
-        AbilityMove.call(abilityPartial, parsingContext.shipPartial as Ship, descriptor, pattern, condition, eventRegistrar, attributes, builtinAttributes, attributeListeners);
+        EventRegistrar.call(eventRegistrarPartial, eventListeners, []);
+        AbilityMove.call(abilityPartial, parsingContext.shipPartial as Ship, descriptor, pattern, condition, eventRegistrarPartial, attributes, builtinAttributes, attributeListeners);
         return abilityPartial as AbilityMove;
     }
 
@@ -109,8 +110,12 @@ export class AbilityMove extends PositionedAbility {
         if (this.pattern.query(patternX, patternY) === 0)
             return;
 
+        console.log('Start move');
+
         if (!this.ship.tryMoveBy(dx, dy))
             return;
+
+        console.log('Move finished');
 
         this.eventRegistrar.queueEvent('onUse', {
             builtinAttributes: {}
@@ -139,7 +144,8 @@ export class AbilityMove extends PositionedAbility {
             type: 'move',
             descriptor: this.descriptor.makeTransportable(),
             pattern: this.pattern.makeTransportable(false),
-            attributes: this.attributeWatcher.exportAttributeInfo()
+            attributes: this.attributeWatcher.exportAttributeInfo(),
+            usable: this.usable
         };
     }
 }

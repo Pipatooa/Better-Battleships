@@ -32,7 +32,7 @@ export class Team implements IAttributeHolder, IBuiltinAttributeHolder<'team'> {
     private _players: Player[] = [];
     protected _lost = false;
 
-    private readonly attributeWatcher: AttributeWatcher;
+    public readonly attributeWatcher: AttributeWatcher;
 
     /**
      * Team constructor
@@ -58,11 +58,7 @@ export class Team implements IAttributeHolder, IBuiltinAttributeHolder<'team'> {
                        public readonly builtinAttributes: BuiltinAttributeRecord<'team'>) {
 
         this.attributeWatcher = new AttributeWatcher(this.attributes, this.builtinAttributes);
-        this.eventRegistrar.eventEvaluationCompleteCallback = (listenersProcessed: number) => {
-            if (listenersProcessed === 0)
-                return;
-            this.exportAttributeUpdates();
-        };
+        this.eventRegistrar.eventEvaluationCompleteCallback = () => this.exportAttributeUpdates();
     }
 
     /**
@@ -73,7 +69,7 @@ export class Team implements IAttributeHolder, IBuiltinAttributeHolder<'team'> {
      */
     private static generateBuiltinAttributes(object: Team): BuiltinAttributeRecord<'team'> {
         return {
-            playerCount: new AttributeCodeControlled(() => object._players.length)
+            playerCount: new AttributeCodeControlled(() => object._players.length, () => {}, true)
         };
     }
 
@@ -92,9 +88,10 @@ export class Team implements IAttributeHolder, IBuiltinAttributeHolder<'team'> {
         if (checkSchema)
             teamSource = await checkAgainstSchema(teamSource, teamSchema, parsingContext);
 
-        // Team partial refers to future team object
+        // Team and EventRegistrar partials refer to future team and EventRegistrar objects
         const teamPartial: Partial<Team> = Object.create(Team.prototype);
         parsingContext.teamPartial = teamPartial;
+        const eventRegistrarPartial = Object.create(EventRegistrar.prototype) as EventRegistrar<TeamEventInfo, TeamEvent>;
 
         // Get attributes and update parsing context
         const attributes: AttributeMap = await getAttributes(parsingContext.withExtendedPath('.attributes'), teamSource.attributes, 'team');
@@ -102,7 +99,7 @@ export class Team implements IAttributeHolder, IBuiltinAttributeHolder<'team'> {
         parsingContext.localAttributes.team = [attributes, builtinAttributes];
         parsingContext.reducePath();
 
-        const attributeListeners = await getAttributeListeners(parsingContext.withExtendedPath('.attributeListeners'), teamSource.attributeListeners);
+        const attributeListeners = await getAttributeListeners(parsingContext.withExtendedPath('.attributeListeners'), teamSource.attributeListeners, eventRegistrarPartial);
         parsingContext.reducePath();
         for (const attributeListener of attributeListeners)
             attributeListener.register();
@@ -147,8 +144,8 @@ export class Team implements IAttributeHolder, IBuiltinAttributeHolder<'team'> {
         // Return created Team object
         parsingContext.localAttributes.team = undefined;
         parsingContext.teamPartial = undefined;
-        const eventRegistrar = new EventRegistrar(eventListeners, []);
-        Team.call(teamPartial, parsingContext.scenarioPartial as Scenario, id, descriptor, playerPrototypes, teamSource.color, teamSource.highlightColor, eventRegistrar, attributes, builtinAttributes);
+        EventRegistrar.call(eventRegistrarPartial, eventListeners, []);
+        Team.call(teamPartial, parsingContext.scenarioPartial as Scenario, id, descriptor, playerPrototypes, teamSource.color, teamSource.highlightColor, eventRegistrarPartial, attributes, builtinAttributes);
         return teamPartial as Team;
     }
 
@@ -164,8 +161,7 @@ export class Team implements IAttributeHolder, IBuiltinAttributeHolder<'team'> {
             descriptor: this.descriptor.makeTransportable(),
             maxPlayers: this._playerPrototypes.length,
             color: this.color,
-            highlightColor: this.highlightColor,
-            attributes: this.attributeWatcher.exportAttributeInfo()
+            highlightColor: this.highlightColor
         };
     }
 

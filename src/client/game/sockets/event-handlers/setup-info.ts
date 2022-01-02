@@ -1,13 +1,11 @@
-import { game }                   from '../../game';
-import { allPlayers, selfPlayer } from '../../player';
-import { getAbilities }           from '../../scenario/abilities/ability-getter';
-import { Board }                  from '../../scenario/board';
-import { RotatablePattern }       from '../../scenario/rotatable-pattern';
-import { Ship }                   from '../../scenario/ship';
-import { initiateRenderers }      from '../../ui/canvas/initiate';
-import { initiateGameSetupUI }    from '../../ui/initiate';
-import { setupTurnIndicator }     from '../../ui/updaters/turn-updater';
-import type { ISetupInfoEvent }   from 'shared/network/events/i-setup-info';
+import { game }                 from '../../game';
+import { allPlayers }           from '../../player';
+import { Board }                from '../../scenario/board';
+import { Ship }                 from '../../scenario/ship';
+import { initiateRenderers }    from '../../ui/canvas/initiate';
+import { initiateGameSetupUI }  from '../../ui/initiate';
+import { setupTurnIndicator }   from '../../ui/updaters/turn-updater';
+import type { ISetupInfoEvent } from 'shared/network/events/i-setup-info';
 
 /**
  * Handles a setup info event from the server
@@ -21,27 +19,21 @@ export async function handleSetupInfo(setupInfoEvent: ISetupInfoEvent): Promise<
     $('#game-container').removeClass('d-none');
 
     // Unpack board data
-    game.board = await Board.fromSource(setupInfoEvent.boardInfo);
-    game.spawnRegion = game.board.regions[setupInfoEvent.playerInfo.spawnRegion];
-
-    // Unpack player colors
-    for (const [playerIdentity, color] of Object.entries(setupInfoEvent.playerColors)) {
-        const player = allPlayers[playerIdentity];
-        [player.color, player.highlightColor] = color;
-    }
+    game.board = await Board.fromInfo(setupInfoEvent.boardInfo);
+    game.spawnRegion = game.board.regions[setupInfoEvent.spawnRegion];
 
     // Unpack player info
+    for (const [identity, info] of Object.entries(setupInfoEvent.playerInfo)) {
+        const player = allPlayers[identity];
+        player.color = info.color;
+        player.highlightColor = info.highlightColor;
+    }
+
+    // Unpack ship info
     const ships: Ship[] = [];
-    for (const [trackingID, shipInfo] of setupInfoEvent.playerInfo.ships) {
-        const pattern = RotatablePattern.fromSource(shipInfo.pattern);
-
-        // Ship partial refers to future ship object
-        const shipPartial: Partial<Ship> = Object.create(Ship.prototype);
-
-        const abilities = getAbilities(shipPartial as Ship, shipInfo.abilities);
-
-        Ship.call(shipPartial, trackingID, undefined, undefined, shipInfo.descriptor, pattern, selfPlayer, abilities);
-        ships.push(shipPartial as Ship);
+    for (const [trackingID, shipInfo] of Object.entries(setupInfoEvent.ships)) {
+        const ship = Ship.fromInfo(shipInfo, trackingID);
+        ships.push(ship);
     }
 
     setupTurnIndicator(setupInfoEvent.turnOrder, setupInfoEvent.maxTurnTime);
