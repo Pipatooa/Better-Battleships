@@ -1,4 +1,4 @@
-import type { Rotation }           from '../../scenario/objects/common/rotation';
+import type { Rotation }           from '../../scenario/rotation';
 import type { IBaseClientRequest } from './i-client-request';
 
 /**

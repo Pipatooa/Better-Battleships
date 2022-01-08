@@ -2,7 +2,8 @@ import { ColorAtlas }                         from './color-atlas';
 import { getGLTextureLocation, TextureIndex } from './texture-index';
 import type { Board, Tile }                   from '../../scenario/board';
 import type { Pattern }                       from '../../scenario/pattern';
-import type { ModelProgram }                  from './model-programs/model-program';
+import type { Region }                        from '../../scenario/region';
+import type { BoardProgram }                  from './model-programs/board-program';
 
 /**
  * BoardInfoGenerator - Client Version
@@ -16,7 +17,6 @@ export class BoardInfoGenerator {
     private static readonly secondaryBorderRatio = 0.03;
     private static readonly tileTextureSize = 64;
     private static readonly borderColor = new Float32Array([...ColorAtlas.colorFromHex('#161a6b').map(v => v / 255), 1]);
-    private static readonly highlightMultiplier = 0.25;
 
     // Generated tile textures
     private static texturesGenerated = false;
@@ -34,10 +34,10 @@ export class BoardInfoGenerator {
 
     // Tracking
     private board: Board;
-    private _highlightedRegion: string | undefined;
+    private _highlightedRegion: Region | undefined;
 
     public constructor(private readonly gl: WebGL2RenderingContext,
-                       private readonly modelProgram: ModelProgram<never, 'tileTexture' | 'borderRatio' | 'borderColor' | 'borderTextureArray' | 'boardInfo' | 'boardInfoSize' | 'boardSize' | 'highlightMultiplier'>,
+                       private readonly modelProgram: BoardProgram,
                        board: Board) {
 
         if (!BoardInfoGenerator.texturesGenerated) {
@@ -219,19 +219,19 @@ export class BoardInfoGenerator {
     /**
      * Flags a region to be highlighted
      *
-     * @param  id Id of region to highlight
+     * @param  region Region to highlight
      */
-    public highlightRegion(id: string): void {
-        this._highlightedRegion = id;
+    public highlightRegion(region: Region): void {
+        this._highlightedRegion = region;
         for (let y = 0; y < this.board.size[1]; y++) {
             const row = this.board.tiles[y];
             for (let x = 0; x < this.board.size[0]; x++) {
                 const regions = row[x][1];
-                const highlighted = regions.map(r => r.id).includes(id);
+                const highlighted = regions.includes(region);
                 this.setRenderFlag(this.getDataStart(x, y), RenderFlag.Highlighted, highlighted);
             }
         }
-        this.highlightMultiplierUniform = BoardInfoGenerator.highlightMultiplier;
+        this.enableHighlighting();
     }
 
     /**
@@ -242,9 +242,14 @@ export class BoardInfoGenerator {
      * @param  pattern Pattern describing area to highlight
      */
     public highlightPattern(x: number, y: number, pattern: Pattern): void {
-        for (const [dx, dy] of pattern.patternEntries)
-            this.setRenderFlag(this.getDataStart(x + dx, y + dy), RenderFlag.Highlighted, true);
-        this.highlightMultiplierUniform = BoardInfoGenerator.highlightMultiplier;
+        for (const [dx, dy] of pattern.patternEntries) {
+            const tileX = x + dx;
+            const tileY = y + dy;
+            if (tileX < 0 || tileX >= this.board.size[0] || tileY < 0 || tileY >= this.board.size[1])
+                continue;
+            this.setRenderFlag(this.getDataStart(tileX, tileY), RenderFlag.Highlighted, true);
+        }
+        this.enableHighlighting();
     }
 
     /**
@@ -258,6 +263,13 @@ export class BoardInfoGenerator {
             }
         }
         this.highlightMultiplierUniform = 1.0;
+    }
+
+    /**
+     * Enables highlighting of regions of the board
+     */
+    public enableHighlighting(): void {
+        this.highlightMultiplierUniform = 0.25;
     }
 
     /**
@@ -282,7 +294,7 @@ export class BoardInfoGenerator {
         this.gl.useProgram(this.modelProgram.program);
         this.gl.uniform1i(this.modelProgram.uniformLocations.boardInfo, TextureIndex.BoardInfo);
         this.gl.uniform1f(this.modelProgram.uniformLocations.boardInfoSize, this.textureSize);
-        this.gl.uniform2fv(this.modelProgram.uniformLocations.boardSize, new Float32Array(this.board.size));
+        this.gl.uniform3fv(this.modelProgram.uniformLocations.boardSize, new Float32Array([...this.board.size, Math.max(...this.board.size)]));
     }
 
     /**
@@ -340,7 +352,7 @@ export class BoardInfoGenerator {
      * Getters and setters
      */
 
-    public get highlightedRegion(): string | undefined {
+    public get highlightedRegion(): Region | undefined {
         return this._highlightedRegion;
     }
 }

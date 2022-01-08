@@ -34,6 +34,7 @@ export class Player implements IAttributeHolder, IBuiltinAttributeHolder<'player
 
     public readonly ships: { [trackingID: string]: Ship };
 
+    private shipCount: number;
     private readonly attributeWatcher: AttributeWatcher;
 
     /**
@@ -59,6 +60,8 @@ export class Player implements IAttributeHolder, IBuiltinAttributeHolder<'player
                        public readonly builtinAttributes: BuiltinAttributeRecord<'player'>,
                        private readonly attributeListeners: AttributeListener[]) {
 
+        this.shipCount = ships.length;
+
         this.ships = {};
         for (const ship of ships)
             this.ships[ship.teamTrackingID] = ship;
@@ -75,7 +78,10 @@ export class Player implements IAttributeHolder, IBuiltinAttributeHolder<'player
      */
     private static generateBuiltinAttributes(object: Player): BuiltinAttributeRecord<'player'> {
         return {
-            shipCount: new AttributeCodeControlled(() => Object.values(object.ships).length, () => {}, true,
+            shipCount: new AttributeCodeControlled(
+                () => object.shipCount,
+                (newValue: number) => object.shipCount = newValue,
+                true,
                 new Descriptor('Ships', 'Number of ships this player owns'))
         };
     }
@@ -171,6 +177,7 @@ export class Player implements IAttributeHolder, IBuiltinAttributeHolder<'player
      */
     public removeShip(ship: Ship): void {
         delete this.ships[ship.teamTrackingID];
+        this.builtinAttributes.shipCount.forceSetValue(this.shipCount - 1);
     }
 
     /**
@@ -205,7 +212,7 @@ export class Player implements IAttributeHolder, IBuiltinAttributeHolder<'player
         this.eventRegistrar.queueEvent('onPlayerLostLocal', {
             builtinAttributes: {}
         });
-        this.eventRegistrar.queueEvent('onPlayerLostFriendly', {
+        this.eventRegistrar.parentRegistrar!.queueEvent('onPlayerLostFriendly', {
             builtinAttributes: {},
             foreignPlayer: this
         });
@@ -213,7 +220,7 @@ export class Player implements IAttributeHolder, IBuiltinAttributeHolder<'player
         for (const team of Object.values(this.team.scenario.teams)) {
             if (team === this.team)
                 continue;
-            this.eventRegistrar.queueEvent('onPlayerLostUnfriendly', {
+            this.eventRegistrar.parentRegistrar!.queueEvent('onPlayerLostUnfriendly', {
                 builtinAttributes: {},
                 foreignTeam: this.team,
                 foreignPlayer: this

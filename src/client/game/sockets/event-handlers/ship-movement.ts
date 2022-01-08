@@ -1,5 +1,6 @@
 import { game }                from 'client/game/game';
 import { trackedShips }        from '../../scenario/ship';
+import { updateCurrentView }   from '../../ui/managers/view-manager';
 import type { IShipMoveEvent } from 'shared/network/events/i-ship-move';
 
 /**
@@ -10,6 +11,7 @@ import type { IShipMoveEvent } from 'shared/network/events/i-ship-move';
 export function handleShipMove(shipMoveEvent: IShipMoveEvent): void {
     const ship = trackedShips[shipMoveEvent.trackingID];
     ship.moveTo(shipMoveEvent.x, shipMoveEvent.y);
+    updateCurrentView();
     game.board!.informationGenerator!.push();
     game.gameRenderer!.renderNext();
 }

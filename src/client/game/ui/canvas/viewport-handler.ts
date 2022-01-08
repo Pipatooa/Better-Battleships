@@ -26,9 +26,10 @@ export class ViewportHandler {
                        private readonly gl: WebGL2RenderingContext,
                        private readonly modelProgram: ModelProgram<never, 'offset' | 'scale'>,
                        private readonly allowPanning: boolean,
+                       public relativeSubjectDimensions: [number, number],
                        scaleLowerBound?: number,
                        scaleUpperBound?: number,
-                       private readonly forcedAspect?: number,
+                       private forcedAspect?: number,
                        initialOffset?: [number, number],
                        initialScale?: [number, number]) {
 
@@ -94,8 +95,9 @@ export class ViewportHandler {
      * @returns    Mapped UV coordinates
      */
     public screenToCanvasCoordinates(x: number, y: number): [number, number] {
-        let newX = (x - this.canvasOffsetParent.offsetLeft) / this.canvas.clientWidth * 2 - 1;
-        let newY = -(y - this.canvasOffsetParent.offsetTop) / this.canvas.clientHeight * 2 + 1;
+        const canvasBoundingRect = this.canvas.getBoundingClientRect();
+        let newX = (x - canvasBoundingRect.left) / this.canvas.clientWidth * 2 - 1;
+        let newY = -(y - canvasBoundingRect.top) / this.canvas.clientHeight * 2 + 1;
         return [newX, newY];
     }
 
@@ -108,8 +110,8 @@ export class ViewportHandler {
      * @returns        Non-rounded mapped board coordinates
      */
     public canvasToBoardCoordinates(x: number, y: number, board: Board): [number, number] {
-        let newX = (x / this.scaleUniform[0] - this.offsetUniform[0]) * board.size[0];
-        let newY = (1 - y / this.scaleUniform[1] + this.offsetUniform[1]) * board.size[1];
+        let newX = (x / this.scaleUniform[0] - this.offsetUniform[0]) * board.size[0] / this.relativeSubjectDimensions[0];
+        let newY = (1 - y / this.scaleUniform[1] + this.offsetUniform[1]) * board.size[1] / this.relativeSubjectDimensions[1];
         return [newX, newY];
     }
 
@@ -178,11 +180,15 @@ export class ViewportHandler {
     }
 
     /**
-     * Constrains panning so that viewport stays in sensible location
+     * Constrains panning so that viewport stays in sensible location to frame subject
      */
     private constrainCanvasOffset(): void {
-        this.offsetUniform[0] = clamp(this.offsetUniform[0], -1 / this.scaleUniform[0] - 1, 1 / this.scaleUniform[0]);
-        this.offsetUniform[1] = clamp(this.offsetUniform[1], -1 / this.scaleUniform[1] - 1, 1 / this.scaleUniform[1]);
+        const xMin = -1 / this.scaleUniform[0] - 1;
+        const xMax = 1 / this.scaleUniform[0] - 1 + this.relativeSubjectDimensions[0];
+        this.offsetUniform[0] = clamp(this.offsetUniform[0], xMin, xMax);
+        const yMin = -1 / this.scaleUniform[1] - 1;
+        const yMax = 1 / this.scaleUniform[1] - 1 + this.relativeSubjectDimensions[1];
+        this.offsetUniform[1] = clamp(this.offsetUniform[1], yMin, yMax);
     }
 
     /**
@@ -191,6 +197,12 @@ export class ViewportHandler {
 
     public get canvasAspectRatio(): number {
         return this._canvasAspectRatio;
+    }
+
+    public set _forcedAspect(ratio: number) {
+        this.forcedAspect = ratio;
+        this._canvasAspectRatio = ratio;
+        this.scaleUniform[1] = this.scaleUniform[0] * ratio;
     }
 
     public set updateCallback(updateCallback: () => void) {

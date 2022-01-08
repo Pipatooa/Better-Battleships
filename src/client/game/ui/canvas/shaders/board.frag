@@ -20,12 +20,13 @@ uniform float secondaryBorderRatio;
 
 uniform sampler2D boardInfo;
 uniform float boardInfoSize;
-uniform vec2 boardSize;
+uniform vec3 boardSize;
 
 uniform sampler2D selectionInfo;
 uniform float selectionInfoSize;
 uniform vec2 selectionSize;
 uniform vec2 selectionOffset;
+uniform vec2 selectionOpacity;
 
 uniform float highlightMultiplier;
 

@@ -93,11 +93,12 @@ export class AttributeListener {
      *
      * @param  eventContext Context for resolving objects and values when an event is triggered
      */
-    public onAttributeValueUpdate(eventContext: GenericEventContext & { value: number }): void {
+    public preQueueEventListenerCall(eventContext: GenericEventContext & { value: number }): void {
         const callback = (eventEvaluationState: EventEvaluationState, eventContext: GenericEventContext ): void =>
             this.executeActions(eventEvaluationState, eventContext as GenericEventContext & { value: number });
+
         const eventListener = [EventListenerPrimaryPriority.ActionDefault, this.priority, callback] as EventListener<any, string, string>;
-        this.eventRegistrar.preQueueEventListenerCall([eventListener, eventContext, this.eventRegistrar]);
+        this.eventRegistrar.preQueueEventListenerCall(eventListener, eventContext);
     }
 
     /**
@@ -109,6 +110,9 @@ export class AttributeListener {
     public executeActions(eventEvaluationState: EventEvaluationState, eventContext: GenericEventContext & { value: number } ): void {
         const meetsConstraint = this.constraint.check(eventContext, eventContext.value);
         let shouldExecute: boolean;
+
+        console.log(this.attribute);
+        console.log(meetsConstraint, this.previouslyMetConstraint, this.triggerType);
 
         switch (this.triggerType) {
             case 'once':
@@ -123,6 +127,8 @@ export class AttributeListener {
                 this.previouslyMetConstraint = meetsConstraint;
                 break;
         }
+
+        console.log(shouldExecute);
 
         if (shouldExecute) {
             for (const action of this.actions)

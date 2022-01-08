@@ -1,6 +1,6 @@
 import { EventEvaluationState }                                                                        from './event-evaluation-state';
 import type { EventInfoEntry }                                                                         from './base-events';
-import type { EventContextForEvent }                                                                   from './event-context';
+import type { EventContextForEvent, GenericEventContext }                                              from './event-context';
 import type { EventListener, EventListeners, GenericQueuedEventListenerCall, QueuedEventListenerCall } from './event-listener';
 
 /**
@@ -11,7 +11,7 @@ import type { EventListener, EventListeners, GenericQueuedEventListenerCall, Que
 export class EventRegistrar<T extends Record<S, EventInfoEntry>, S extends string> {
 
     private _rootRegistrar: EventRegistrar<T, S> = this;
-    private parentRegistrar: EventRegistrar<T, S> | undefined;
+    private _parentRegistrar: EventRegistrar<T, S> | undefined;
     private deactivated = false;
 
     private preQueuedEventListenerCalls: GenericQueuedEventListenerCall[] = [];
@@ -33,7 +33,7 @@ export class EventRegistrar<T extends Record<S, EventInfoEntry>, S extends strin
             (eventListeners as EventListener<T, S, S>[]).sort((f, s) => f[0] === s[0] ? f[1] - s[1] : f[0] - s[0]);
 
         for (const subRegistrar of this.subRegistrars) {
-            subRegistrar.parentRegistrar = this;
+            subRegistrar._parentRegistrar = this;
             subRegistrar.rootRegistrar = this;
         }
     }
@@ -75,7 +75,7 @@ export class EventRegistrar<T extends Record<S, EventInfoEntry>, S extends strin
      */
     public addSubRegistrar(subRegistrar: EventRegistrar<T, S>): void {
         this.subRegistrars.push(subRegistrar);
-        subRegistrar.parentRegistrar = this;
+        subRegistrar._parentRegistrar = this;
         subRegistrar.rootRegistrar = this._rootRegistrar;
     }
 
@@ -86,7 +86,7 @@ export class EventRegistrar<T extends Record<S, EventInfoEntry>, S extends strin
      */
     public removeSubRegistrar(subRegistrar: EventRegistrar<T, S>): void {
         this.subRegistrars = this.subRegistrars.filter(r => r !== subRegistrar);
-        subRegistrar.parentRegistrar = undefined;
+        subRegistrar._parentRegistrar = undefined;
         subRegistrar.rootRegistrar = subRegistrar;
     }
 
@@ -97,7 +97,7 @@ export class EventRegistrar<T extends Record<S, EventInfoEntry>, S extends strin
         if (this.deactivated)
             return;
         this.deactivated = true;
-        this.parentRegistrar?.removeSubRegistrar(this);
+        this._parentRegistrar?.removeSubRegistrar(this);
         for (const subRegistrar of this.subRegistrars)
             subRegistrar.deactivate();
     }
@@ -126,19 +126,20 @@ export class EventRegistrar<T extends Record<S, EventInfoEntry>, S extends strin
     /**
      * Add an event listener call to a queue of event listener calls waiting to be queued
      *
-     * @param  eventListenerCall Event listener call to be pre-queued
+     * @param  eventListener Event listener to call to be pre-queued
+     * @param  eventContext  Context for resolving objects and values when an even is triggered
      */
-    public preQueueEventListenerCall(eventListenerCall: GenericQueuedEventListenerCall): void {
-        this.preQueuedEventListenerCalls.push(eventListenerCall);
+    public preQueueEventListenerCall(eventListener: EventListener<never, never, never>, eventContext: GenericEventContext): void {
+        this._rootRegistrar.preQueuedEventListenerCalls.push([eventListener, eventContext, this as EventRegistrar<any, string>]);
     }
 
     /**
      * Moves pre-queued event listener calls to the main event listener call queue
      */
-    public queuePreQueuedEventListenerCalls(): void {
-        this.preQueuedEventListenerCalls.sort((f, s) => f[0][0] === s[0][0] ? f[0][1] - s[0][1] : f[0][0] - s[0][0]);
-        this.queueEventListenerCalls(this.preQueuedEventListenerCalls);
-        this.preQueuedEventListenerCalls = [];
+    private queuePreQueuedEventListenerCalls(): void {
+        this._rootRegistrar.preQueuedEventListenerCalls.sort((f, s) => f[0][0] === s[0][0] ? f[0][1] - s[0][1] : f[0][0] - s[0][0]);
+        this._rootRegistrar.queueEventListenerCalls(this.preQueuedEventListenerCalls);
+        this._rootRegistrar.preQueuedEventListenerCalls = [];
     }
 
     /**
@@ -147,6 +148,9 @@ export class EventRegistrar<T extends Record<S, EventInfoEntry>, S extends strin
      * @param  newEventListenerCalls Array of new listener calls to add
      */
     public queueEventListenerCalls(newEventListenerCalls: GenericQueuedEventListenerCall[]): void {
+        if (newEventListenerCalls.length === 0)
+            return;
+
         // Merge new event listener calls into existing queue, sorted by ascending priority
         const newQueue: GenericQueuedEventListenerCall[] = [];
         let i = 0, j = 0;
@@ -183,30 +187,39 @@ export class EventRegistrar<T extends Record<S, EventInfoEntry>, S extends strin
      */
     public evaluateEvents(): void {
 
+        // Always execute on the root registrar
+        if (this !== this._rootRegistrar) {
+            this._rootRegistrar.evaluateEvents();
+            return;
+        }
+
         // Create a new evaluation state if one does not exist for this queue
-        if (this._rootRegistrar._eventEvaluationState !== undefined)
+        if (this._eventEvaluationState !== undefined)
             return;
         const eventEvaluationState = new EventEvaluationState();
-        this._rootRegistrar._eventEvaluationState = eventEvaluationState;
+        this._eventEvaluationState = eventEvaluationState;
 
         // Process queue - More listeners may be added to queue during evaluation
         let listenersProcessed = 0;
-        while (this._rootRegistrar.queuedEventListenerCalls.length > 0) {
-            const [eventListener, eventContext, eventRegistrar] = this._rootRegistrar.queuedEventListenerCalls.pop()!;
+        while (this.queuedEventListenerCalls.length > 0) {
+            const [eventListener, eventContext, eventRegistrar] = this.queuedEventListenerCalls.pop()!;
+
             if (eventRegistrar.deactivated)
                 continue;
             if (eventEvaluationState.terminate)
                 return;
             eventListener[2](eventEvaluationState, eventContext);
             listenersProcessed++;
+            if (this.preQueuedEventListenerCalls.length > 0)
+                this.queuePreQueuedEventListenerCalls();
         }
 
         if (eventEvaluationState.terminate)
             return;
 
         // Finish evaluation
-        this._rootRegistrar._eventEvaluationState = undefined;
-        this._rootRegistrar.onEventEvaluationComplete(listenersProcessed, eventEvaluationState);
+        this._eventEvaluationState = undefined;
+        this.onEventEvaluationComplete(listenersProcessed, eventEvaluationState);
     }
 
     /**
@@ -233,6 +246,10 @@ export class EventRegistrar<T extends Record<S, EventInfoEntry>, S extends strin
         this._rootRegistrar = registrar;
         for (const subRegistrar of this.subRegistrars)
             subRegistrar.rootRegistrar = registrar;
+    }
+
+    public get parentRegistrar(): EventRegistrar<T, S> | undefined {
+        return this._parentRegistrar;
     }
 
     public get eventEvaluationState(): EventEvaluationState | undefined {

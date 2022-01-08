@@ -5,9 +5,7 @@
     "description": "Basic Movement"
   },
   "icon": "arrows-move",
-  "condition": {
-    "type": "none"
-  },
+  "condition": {},
   "pattern": {
     "size": [3, 3],
     "values": {
@@ -20,16 +18,7 @@
       ".#."
     ]
   },
-  "actions": {
-    "onUse": [
-      {
-        "type": "win",
-        "priority": 100,
-        "condition": {},
-        "team": "local"
-      }
-    ]
-  },
+  "actions": {},
   "attributes": {},
   "attributeListeners": []
 }

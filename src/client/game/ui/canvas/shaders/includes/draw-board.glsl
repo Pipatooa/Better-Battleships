@@ -17,10 +17,14 @@ void drawBoard(float x, float y)
             primaryColor.xyz *= highlightMultiplier;
             secondaryColor.xyz *= highlightMultiplier;
         }
-        else if (fract(x) < borderRatio || fract(y) < borderRatio) {
-            fragColor.xyz *= highlightMultiplier;
+        else {
+            vec4 darkened = fragColor;
+            darkened.xyz *= highlightMultiplier;
+            fragColor = mix(fragColor, darkened, tileSample.x);
         }
     }
+
+    primaryColor.xyz = mix(fragColor.xyz, primaryColor.xyz, 0.75);
 
     if (tileInfo.y != 0.0)
         drawBorderedTile(x, y, primaryColor, secondaryColor, fragColor, tileInfo.z);

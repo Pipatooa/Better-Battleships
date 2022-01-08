@@ -1,6 +1,12 @@
+import type {
+    AbilityUsabilityInfo,
+    IAbilityFireUsabilityInfo,
+    IAbilityMoveUsabilityInfo,
+    IAbilityRotateUsabilityInfo
+} from './ability-usability-info';
 import type { MultipleAttributeInfo } from './i-attribute-info';
 import type { IDescriptorInfo }       from './i-descriptor-info';
-import type { IPatternInfo }          from './i-pattern-info';
+import type { IRotatablePatternInfo } from './i-rotatable-pattern-info';
 
 /**
  * Portable network version of generic Ability object
@@ -11,32 +17,30 @@ export type AbilityInfo =
     IAbilityFireInfo;
 
 /**
- * Base interface for all network portable version of Ability object
+ * Base interface for all network portable versions of Ability object
  */
 export interface IBaseAbilityInfo {
     type: string,
     descriptor: IDescriptorInfo,
     icon: string,
     attributes: MultipleAttributeInfo,
-    usable: boolean
+    usability: AbilityUsabilityInfo
 }
 
 /**
- * Portable network version of AbilityFire object
+ * Portable network version of AbilityMove object
  */
 export interface IAbilityMoveInfo extends IBaseAbilityInfo {
     type: 'move',
-    pattern: IPatternInfo
+    usability: IAbilityMoveUsabilityInfo
 }
 
 /**
- * Portable network version of AbilityFire object
+ * Portable network version of AbilityRotate object
  */
 export interface IAbilityRotateInfo extends IBaseAbilityInfo {
     type: 'rotate',
-    rot90: boolean,
-    rot180: boolean,
-    rot270: boolean
+    usability: IAbilityRotateUsabilityInfo
 }
 
 /**
@@ -44,6 +48,6 @@ export interface IAbilityRotateInfo extends IBaseAbilityInfo {
  */
 export interface IAbilityFireInfo extends IBaseAbilityInfo {
     type: 'fire',
-    selectionPattern: IPatternInfo,
-    effectPattern: IPatternInfo
+    effectPattern: IRotatablePatternInfo,
+    usability: IAbilityFireUsabilityInfo
 }

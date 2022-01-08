@@ -4,8 +4,6 @@ import { valueSchema }                               from '../../values/sources/
 import { baseConditionSchema }                       from './base-condition';
 import type { IConditionAllSource }                  from './condition-all';
 import type { IConditionAnySource }                  from './condition-any';
-import type { IConditionFixedSource }                from './condition-fixed';
-import type { IConditionNoneSource }                 from './condition-none';
 import type { IConditionSomeSource }                 from './condition-some';
 import type { IConditionValueMeetsConstraintSource } from './condition-value-meets-constraint';
 
@@ -13,11 +11,11 @@ import type { IConditionValueMeetsConstraintSource } from './condition-value-mee
  * Type matching all condition sources
  */
 export type ConditionSource =
-    IConditionNoneSource |
+    null |
+    Record<string, never> |
     IConditionAnySource |
     IConditionAllSource |
     IConditionSomeSource |
-    IConditionFixedSource |
     IConditionValueMeetsConstraintSource;
 
 /**
@@ -26,7 +24,7 @@ export type ConditionSource =
  * Able to verify all conditions
  */
 export const conditionSchema = baseConditionSchema.keys({
-    type: Joi.valid('none', 'any', 'all', 'some', 'fixed', 'valueMeetsConstraint').required(),
+    type: Joi.valid('any', 'all', 'some', 'fixed', 'valueMeetsConstraint').required(),
     subConditions: Joi.array().items(Joi.link('...')).min(2).when('type',
         { is: Joi.valid('any', 'all', 'some'), then: Joi.required(), otherwise: Joi.forbidden() }),
     valueConstraint: valueConstraintSchema.when('type',
@@ -37,6 +35,16 @@ export const conditionSchema = baseConditionSchema.keys({
         { is: 'valueMeetsConstraint', then: Joi.required(), otherwise: Joi.forbidden() }),
     constraint: valueConstraintSchema.when('type',
         { is: 'valueMeetsConstraint', then: Joi.required(), otherwise: Joi.forbidden() }),
-    inverted: Joi.boolean().when('type',
-        { is: Joi.valid('fixed', 'none'), then: Joi.forbidden(), otherwise: Joi.optional() })
+    inverted: Joi.boolean().optional()
 });
+
+/**
+ * Full schema for validating source JSON data
+ *
+ * Able to verify all conditions including empty conditions
+ */
+export const nullableConditionSchema = Joi.alternatives(
+    null,
+    Joi.object().required(),
+    conditionSchema.required()
+);

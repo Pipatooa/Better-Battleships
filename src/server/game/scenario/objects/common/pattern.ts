@@ -13,21 +13,25 @@ import type { IPatternInfo }   from 'shared/network/scenario/i-pattern-info';
 export class Pattern {
 
     protected readonly patternEntryMap: { [key: string]: number };
+    public readonly integerCenter: [number, number];
 
     /**
      * Pattern constructor
      *
      * @param  _patternEntries Array of pattern entries for pattern
      * @param  center          Center of the pattern
+     * @param  integerCenter   Center snapped to an integer coordinate
      */
     protected constructor(protected readonly _patternEntries: PatternEntry[],
-                          public readonly center: [number, number]) {
-
+                          public readonly center: [number, number],
+                          integerCenter?: [number, number]) {
         this.patternEntryMap = {};
         for (const [x, y, value] of _patternEntries) {
             const key = `${x},${y}`;
             this.patternEntryMap[key] = value;
         }
+
+        this.integerCenter = integerCenter ?? [Math.floor(this.center[0]), Math.floor(this.center[1])];
     }
 
     /**
@@ -179,6 +183,7 @@ export class Pattern {
 
         return {
             center: this.center,
+            integerCenter: this.integerCenter,
             tiles: tiles
         };
     }

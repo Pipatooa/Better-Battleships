@@ -1,4 +1,4 @@
-import { builtinAttributePrefix }                       from './sources/builtin-attributes';
+import { builtinAttributePrefix }                       from 'shared/scenario/builtin-attribute-prefix';
 import type { AttributeMap }                            from './i-attribute-holder';
 import type { AttributeUpdates, MultipleAttributeInfo } from 'shared/network/scenario/i-attribute-info';
 
@@ -44,7 +44,7 @@ export class AttributeWatcher {
                 const callback = (newValue: number): void => {
                     if (newValue === this.oldAttributeValues[name])
                         return;
-                    this.oldBuiltinAttributeValues[name] = newValue;
+                    this.oldAttributeValues[name] = newValue;
                     this.updates[name] = newValue;
                     this._updatesAvailable = true;
                 };

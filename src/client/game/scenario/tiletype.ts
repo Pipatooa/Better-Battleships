@@ -8,11 +8,10 @@ import type { ITileTypeInfo } from 'shared/network/scenario/i-tiletype-info';
  */
 export class TileType {
 
-    public colorPaletteIndex: number | undefined;
-
     public constructor(public readonly descriptor: Descriptor,
                        public readonly color: string,
-                       public readonly traversable: boolean) {
+                       public readonly traversable: boolean,
+                       public colorPaletteIndex?: number) {
     }
 
     /**

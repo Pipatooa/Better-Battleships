@@ -12,7 +12,7 @@
                         <div id="teams-list"></div>
                         <div class="p-3">
                             <h5 class="mb-0"><b>Unassigned</b></h5>
-                            <p>Players who are not current assigned to any team.</p>
+                            <p>Players who are not currently assigned to any team.</p>
                             <div id="unassigned-players"></div>
                         </div>
                         <div class="mt-auto p-3">
@@ -74,9 +74,7 @@
             </p>
             <div class="mt-2" id="game-tooltip-ship-attribute-section">
                 <p class="mb-0"><b>Attributes:</b></p>
-                <ul class="attribute-list" id="game-tooltip-ship-attribute-list">
-                    <li><span>Health</span>: <span>5</span></li>
-                </ul>
+                <ul class="attribute-list" id="game-tooltip-ship-attribute-list"></ul>
             </div>
         </div>
         <div class="mb-2 d-none" id="game-tooltip-player-section">
@@ -86,9 +84,7 @@
             </p>
             <div id="game-tooltip-player-attribute-section">
                 <p class="mb-0">Attributes:</p>
-                <ul class="attribute-list" id="game-tooltip-player-attribute-list">
-                    <li><span>Ships Remaining</span>: <span>3</span></li>
-                </ul>
+                <ul class="attribute-list" id="game-tooltip-player-attribute-list"></ul>
             </div>
         </div>
     </div>
@@ -130,17 +126,7 @@
                 </div>
             </div>
             <div class="main-container border-top border-end border-dark" id="view-panel">
-                <div class="row text-center">
-                    <div class="col" id="placement-view-container">
-                        <div class="view p-3 border border-dark view-active" id="placement-view-button">Placement</div>
-                    </div>
-                    <div class="col">
-                        <div class="view p-3 border border-dark" id="visibility-view-button">Visibility</div>
-                    </div>
-                    <div class="col">
-                        <div class="view p-3 border border-dark" id="normal-view-button">Normal</div>
-                    </div>
-                </div>
+                <div class="row text-center" id="view-container"></div>
             </div>
             <div class="canvas-wrapper h-100">
                 <canvas width="100" height="100" id="game-canvas">
@@ -164,22 +150,15 @@
                     </div>
                     <div id="sidebar-ship-ability-section">
                         <h5 class="mb-2"><b>Abilities:</b></h5>
-                        <div class="d-grid mb-2" id="sidebar-ship-ability-container">
-                            <div class="ability border border-2 border-dark selected-ability"></div>
-                            <div class="ability border border-2 border-dark ability-unavailable"></div>
-                            <div class="ability border border-2 border-dark"></div>
-                            <div class="ability border border-2 border-dark"></div>
-                        </div>
+                        <div class="d-grid mb-2" id="sidebar-ship-ability-container"></div>
                         <div id="sidebar-ship-ability-info-section">
                             <p>
-                                <b id="sidebar-ship-ability-name">Ability Name</b>:
-                                <br><span id="sidebar-ship-ability-description">This is a description for the selected ability</span>
+                                <b id="sidebar-ship-ability-name"></b>:
+                                <br><span id="sidebar-ship-ability-description"></span>
                             </p>
                             <div id="sidebar-ship-ability-attribute-section">
                                 <p class="mb-0"><b>Attributes:</b></p>
-                                <ul class="attribute-list" id="sidebar-ship-ability-attribute-list">
-                                    <li><span>Health</span>: <span>5</span></li>
-                                </ul>
+                                <ul class="attribute-list" id="sidebar-ship-ability-attribute-list"></ul>
                             </div>
                             <div class="canvas-wrapper w-100" id="sidebar-ship-ability-canvas-wrapper">
                                 <canvas width="100" height="100" id="ability-canvas"></canvas>

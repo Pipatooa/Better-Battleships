@@ -3,7 +3,7 @@ import { baseEventInfo }               from '../../../events/base-events';
 import { actionSchema }                from '../../actions/sources/action';
 import { attributeHolderSchema }       from '../../attributes/sources/attribute-holder';
 import { descriptorSchema }            from '../../common/sources/descriptor';
-import { conditionSchema }             from '../../conditions/sources/condition';
+import { nullableConditionSchema }     from '../../conditions/sources/condition';
 import type { ActionSource }           from '../../actions/sources/action';
 import type { IAttributeHolderSource } from '../../attributes/sources/attribute-holder';
 import type { IDescriptorSource }      from '../../common/sources/descriptor';
@@ -28,7 +28,7 @@ export const baseAbilitySchema = Joi.object({
     type: Joi.string().required(),
     descriptor: descriptorSchema.required(),
     icon: Joi.string().required(),
-    condition: conditionSchema.required(),
+    condition: nullableConditionSchema.required(),
     actions: Joi.object().pattern(Joi.valid(...Object.keys(baseEventInfo)), Joi.array().items(actionSchema.keys({
         priority: Joi.number().required()
     }))).required()

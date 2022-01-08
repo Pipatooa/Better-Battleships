@@ -1,6 +1,6 @@
 import Joi                            from 'joi';
 import { baseRequestSchema }          from 'shared/network/requests/i-client-request';
-import { Rotation }                   from 'shared/scenario/objects/common/rotation';
+import { Rotation }                   from 'shared/scenario/rotation';
 import { GamePhase }                  from '../../game';
 import type { Ship }                  from '../../scenario/objects/ship';
 import type { Client }                from '../client';
@@ -51,6 +51,6 @@ export async function handleShipPlacementRequest(client: Client, shipPlacementRe
 export const shipPlacementRequestSchema = baseRequestSchema.keys({
     request: 'shipPlacement',
     shipPlacements: Joi.object().pattern(Joi.string(),
-        Joi.array().items(Joi.number(), Joi.number(), Joi.number().valid(Rotation.NoChange, Rotation.Clockwise90, Rotation.Clockwise180, Rotation.Clockwise270)).required()
+        Joi.array().items(Joi.number(), Joi.number(), Joi.number().valid(Rotation.None, Rotation.Clockwise90, Rotation.Clockwise180, Rotation.Clockwise270)).required()
     ).required()
 });

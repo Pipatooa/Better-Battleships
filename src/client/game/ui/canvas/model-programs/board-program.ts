@@ -34,7 +34,7 @@ const uniformNames = [
     'tileTexture', 'borderRatio', 'borderColor',
     'borderTextureArray',
     'boardInfo', 'boardInfoSize', 'boardSize',
-    'selectionInfo', 'selectionInfoSize', 'selectionSize', 'selectionOffset',
+    'selectionInfo', 'selectionInfoSize', 'selectionSize', 'selectionOffset', 'selectionOpacity',
     'highlightMultiplier'
 ] as const;
 

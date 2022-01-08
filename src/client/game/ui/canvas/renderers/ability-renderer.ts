@@ -21,9 +21,11 @@ export class AbilityRenderer extends BoardRenderer {
     public readonly viewportHandler: ViewportHandler;
     public readonly selectionInfoGenerator: SelectionInfoGenerator;
 
-    private readonly colorAtlas: ColorAtlas<'moveValid' | 'moveOrigin'>;
+    private readonly colorAtlas: ColorAtlas;
 
-    public constructor(colorAtlas: ColorAtlas<'moveValid' | 'moveOrigin'>) {
+    private currentlyRenderedAbility: Ability | undefined;
+
+    public constructor(colorAtlas: ColorAtlas) {
         const canvas = $('#ability-canvas').get(0) as HTMLCanvasElement;
         const gl = Renderer.getContext(canvas);
         super(gl, [new BoardProgram(gl)]);
@@ -31,7 +33,7 @@ export class AbilityRenderer extends BoardRenderer {
 
         // Initialise renderer
         game.abilityRenderer = this;
-        this.viewportHandler = new ViewportHandler(canvas, this.gl, this.modelPrograms[0], false, 1, 1, 1, [-0.5, -0.5], [2, 2]);
+        this.viewportHandler = new ViewportHandler(canvas, this.gl, this.modelPrograms[0], false, [1, 1], 1, 1, 1, [-0.5, -0.5], [2, 2]);
         this.viewportHandler.updateCallback = () => this.renderNext();
         this.selectionInfoGenerator = new SelectionInfoGenerator(this.gl, this.modelPrograms[0]);
         this.selectionInfoGenerator.push();
@@ -46,13 +48,25 @@ export class AbilityRenderer extends BoardRenderer {
      * @param  ability Ability to display information for
      */
     public renderAbility(ability: Ability): void {
-        this._board = ability.generateAbilityBoard(this.colorAtlas);
 
+        // Remove existing callback
+        if (this.currentlyRenderedAbility !== undefined)
+            this.currentlyRenderedAbility.boardChangedCallback = undefined;
+
+        // Generate board and set callback to re-render ability if the board is changed
+        this._board = ability.generateAbilityBoard(this.colorAtlas);
+        ability.boardChangedCallback = () => this.renderAbility(ability);
+        this.currentlyRenderedAbility = ability;
+
+        // Update ability canvas and renderer states
         SidebarElements.shipAbilityCanvasWrapper.setVisibility(this._board !== undefined);
         if (this._board !== undefined) {
             this.boardInfoGenerator = new BoardInfoGenerator(this.gl, this.modelPrograms[0], this._board);
             this.boardInfoGenerator.push();
-            this.viewportHandler.updateViewport(true);
+            const boardLargeDimension = Math.max(...this._board.size);
+            this.viewportHandler._forcedAspect = this._board.size[1] / this._board.size[0];
+            this.viewportHandler.relativeSubjectDimensions = [this._board.size[0] / boardLargeDimension, this._board.size[1] / boardLargeDimension];
+            this.viewportHandler.updateViewport(false);
             this.renderNext();
         }
     }

@@ -6,20 +6,11 @@ void drawSelection(float x, float y, float selectionInfoX, float selectionInfoY)
     if (selectionSample.x == 0.0)
         return;
 
-    vec4 primaryColor;
-    vec4 secondaryColor;
+    vec4 primaryColor = getAtlasColor(selectionSample.x);
+    vec4 secondaryColor = getAtlasColor(selectionSample.y);
 
-    // If no secondary color, draw transparent white
-    if (selectionSample.y == 0.0)
-    {
-        primaryColor = mix(fragColor, vec4(1.0, 1.0, 1.0, 1.0), 0.2);
-        secondaryColor = primaryColor;
-    }
-    else
-    {
-        primaryColor = getAtlasColor(selectionSample.x);
-        secondaryColor = getAtlasColor(selectionSample.y);
-    }
+    primaryColor.xyz = mix(fragColor.xyz, primaryColor.xyz, selectionOpacity.x);
+    secondaryColor.xyz = mix(fragColor.xyz, secondaryColor.xyz, selectionOpacity.y);
 
     drawBorderedTile(x, y, primaryColor, secondaryColor, fragColor, selectionSample.z);
 }

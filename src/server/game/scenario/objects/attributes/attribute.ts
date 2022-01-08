@@ -77,7 +77,7 @@ export abstract class Attribute {
             value: value
         };
         for (const attributeListener of this.attributeListeners)
-            attributeListener.onAttributeValueUpdate(eventContext);
+            attributeListener.preQueueEventListenerCall(eventContext);
     }
 
     /**

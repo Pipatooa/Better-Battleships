@@ -1,6 +1,6 @@
-import Joi                      from 'joi';
-import { conditionSchema }      from '../../conditions/sources/condition';
-import type { ConditionSource } from '../../conditions/sources/condition';
+import Joi                         from 'joi';
+import { nullableConditionSchema } from '../../conditions/sources/condition';
+import type { ConditionSource }    from '../../conditions/sources/condition';
 
 /**
  * JSON source interface reflecting base action schema
@@ -16,8 +16,5 @@ export interface IBaseActionSource {
  */
 export const baseActionSchema = Joi.object({
     type: Joi.string().required(),
-    condition: Joi.alternatives(
-        Joi.object().required(),
-        conditionSchema.required()
-    ).required()
+    condition: nullableConditionSchema.required()
 });

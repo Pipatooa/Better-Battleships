@@ -8,18 +8,20 @@ import type { IPatternInfo } from 'shared/network/scenario/i-pattern-info';
 export class Pattern {
 
     protected readonly patternEntryMap: { [key: string]: number };
+    public readonly bounds: [number, number, number, number];
 
     /**
      * Pattern constructor
      *
      * @param  _patternEntries Array of pattern entries for pattern
      * @param  center          Center of the pattern
+     * @param  integerCenter   Center snapped to an integer coordinate
      * @param  patternEntryMap Optional pre-generated dictionary of positions to values
      */
     public constructor(protected readonly _patternEntries: PatternEntry[],
                        public readonly center: [number, number],
+                       public readonly integerCenter: [number, number],
                        patternEntryMap?: { [key: string]: number }) {
-
 
         if (patternEntryMap !== undefined)
             this.patternEntryMap = patternEntryMap;
@@ -30,6 +32,16 @@ export class Pattern {
                 this.patternEntryMap[key] = value ?? 1;
             }
         }
+
+        // Iterate through pattern entries and update bounds
+        let xMin = Infinity, xMax = -Infinity, yMin = Infinity, yMax = -Infinity;
+        for (const [x, y] of this.patternEntries) {
+            xMin = Math.min(xMin, x);
+            xMax = Math.max(xMax, x);
+            yMin = Math.min(yMin, y);
+            yMax = Math.max(yMax, y);
+        }
+        this.bounds = [xMin, xMax, yMin, yMax];
     }
 
     /**
@@ -39,25 +51,7 @@ export class Pattern {
      * @returns              Created Pattern object
      */
     public static fromInfo(patternInfo: IPatternInfo): Pattern {
-        return new Pattern(patternInfo.tiles as PatternEntry[], patternInfo.center);
-    }
-
-    /**
-     * Returns the bounding coordinates for the pattern
-     *
-     * @returns  [xMax, yMax] Bounding coordinates
-     */
-    public getBounds(): [number, number] {
-        let xMax = 0;
-        let yMax = 0;
-
-        // Iterate through pattern entries and update bounds
-        for (const [x, y] of this.patternEntries) {
-            xMax = Math.max(xMax, x);
-            yMax = Math.max(yMax, y);
-        }
-        
-        return [xMax, yMax];
+        return new Pattern(patternInfo.tiles as PatternEntry[], patternInfo.center, patternInfo.integerCenter);
     }
 
     /**
@@ -104,7 +98,7 @@ export class Pattern {
      */
     public getExtendedPattern(radius: number): Pattern {
         const patternEntries = this.getExtendedPatternEntries(radius);
-        return new Pattern(patternEntries, this.center);
+        return new Pattern(patternEntries, this.center, this.integerCenter);
     }
 
     /**

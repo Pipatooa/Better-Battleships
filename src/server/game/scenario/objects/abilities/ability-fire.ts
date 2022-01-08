@@ -1,3 +1,4 @@
+import { SubAbilityUsability }                         from 'shared/network/scenario/ability-usability-info';
 import { EventRegistrar }                              from '../../events/event-registrar';
 import { checkAgainstSchema }                          from '../../schema-checker';
 import { eventListenersFromActionSource }              from '../actions/action-getter';
@@ -5,7 +6,7 @@ import { getAttributeListeners }                       from '../attribute-listen
 import { AttributeCodeControlled }                     from '../attributes/attribute-code-controlled';
 import { getAttributes }                               from '../attributes/attribute-getter';
 import { Descriptor }                                  from '../common/descriptor';
-import { Pattern }                                     from '../common/pattern';
+import { RotatablePattern }                            from '../common/rotatable-pattern';
 import { buildCondition }                              from '../conditions/condition-builder';
 import { Ability }                                     from './ability';
 import { fireAbilityEventInfo }                        from './events/fire-ability-event';
@@ -16,11 +17,14 @@ import type { ParsingContext }                         from '../../parsing-conte
 import type { AttributeListener }                      from '../attribute-listeners/attribute-listener';
 import type { BuiltinAttributeRecord }                 from '../attributes/attribute-holder';
 import type { AttributeMap }                           from '../attributes/i-attribute-holder';
+import type { PatternEntry }                           from '../common/pattern';
 import type { Condition }                              from '../conditions/condition';
 import type { Ship }                                   from '../ship';
 import type { FireAbilityEvent, FireAbilityEventInfo } from './events/fire-ability-event';
 import type { IAbilityFireSource }                     from './sources/ability-fire';
-import type { AbilityInfo }                            from 'shared/network/scenario/ability-info';
+import type { IAbilityFireInfo }                       from 'shared/network/scenario/ability-info';
+import type { IAbilityFireUsabilityInfo }              from 'shared/network/scenario/ability-usability-info';
+import type { Rotation }                               from 'shared/scenario/rotation';
 
 /**
  * AbilityFire - Server Version
@@ -49,9 +53,9 @@ export class AbilityFire extends PositionedAbility {
     public constructor(ship: Ship,
                        descriptor: Descriptor,
                        icon: string,
-                       public readonly selectionPattern: Pattern,
-                       public readonly effectPattern: Pattern,
-                       public readonly displayEffectPatternValues: boolean,
+                       private selectionPattern: RotatablePattern,
+                       private effectPattern: RotatablePattern,
+                       private readonly displayEffectPatternValues: boolean,
                        condition: Condition,
                        eventRegistrar: EventRegistrar<FireAbilityEventInfo, FireAbilityEvent>,
                        attributes: AttributeMap,
@@ -94,9 +98,9 @@ export class AbilityFire extends PositionedAbility {
         parsingContext.reducePath();
         const icon = getIconUrlFromSource(parsingContext.withExtendedPath('.icon'), abilityFireSource.icon);
         parsingContext.reducePath();
-        const selectionPattern = await Pattern.fromSource(parsingContext.withExtendedPath('.selectionPattern'), abilityFireSource.selectionPattern, false);
+        const selectionPattern = await RotatablePattern.fromSource(parsingContext.withExtendedPath('.selectionPattern'), abilityFireSource.selectionPattern, false);
         parsingContext.reducePath();
-        const effectPattern = await Pattern.fromSource(parsingContext.withExtendedPath('.effectPattern'), abilityFireSource.effectPattern, false);
+        const effectPattern = await RotatablePattern.fromSource(parsingContext.withExtendedPath('.effectPattern'), abilityFireSource.effectPattern, false);
         parsingContext.reducePath();
         const condition = await buildCondition(parsingContext.withExtendedPath('.condition'), abilityFireSource.condition, false);
         parsingContext.reducePath();
@@ -111,44 +115,126 @@ export class AbilityFire extends PositionedAbility {
     }
 
     /**
+     * Returns network transportable form of this object.
+     *
+     * May not include all details of the object. Just those that the client needs to know.
+     *
+     * @param    includeSubAbilityDetails Whether to include details about which sub-abilities are usable
+     * @returns                           Created IAbilityFireInfo object
+     */
+    public makeTransportable(includeSubAbilityDetails: boolean): IAbilityFireInfo {
+        return {
+            type: 'fire',
+            descriptor: this.descriptor.makeTransportable(),
+            icon: this.icon,
+            effectPattern: this.effectPattern.makeTransportable(this.displayEffectPatternValues),
+            attributes: this.attributeWatcher.exportAttributeInfo(),
+            usability: this.getFullUsability(includeSubAbilityDetails)
+        };
+    }
+
+    /**
+     * Returns an object describing the usability of this ability and its sub-abilities
+     *
+     * @param    includeSubAbilityDetails Whether to include details about which sub-abilities are usable
+     * @returns                           Created IAbilityFireUsabilityInfo object
+     */
+    public getFullUsability(includeSubAbilityDetails: boolean): IAbilityFireUsabilityInfo {
+        return {
+            usable: this._usable,
+            pattern: this.selectionPattern.makeTransportable(includeSubAbilityDetails)
+        };
+    }
+
+    /**
+     * Checks whether this ability and its sub-abilities are usable
+     *
+     * @returns  [Main ability usability updated, Sub-ability usability updated]
+     */
+    public checkUsable(): [mainUsabilityUpdated: boolean, subAbilityUsabilityUpdated: boolean] {
+        const oldUsability = this._usable;
+        this._usable = this.condition.check({
+            builtinAttributes: {}
+        });
+
+        const mainUsabilityUpdated = this._usable !== oldUsability;
+        let subAbilityUsabilityUpdated = false;
+
+        // Create a new pattern indexing validity of firing positions
+        // At least one tile of the effect pattern must overlap with the board for a position to be valid
+        const newPatternEntries: PatternEntry[] = [];
+        for (const [x, y, oldValidity] of this.selectionPattern.patternEntries) {
+            const centerX = this.ship.x + x - this.selectionPattern.integerCenter[0] + this.ship.pattern.integerCenter[0];
+            const centerY = this.ship.y + y - this.selectionPattern.integerCenter[1] + this.ship.pattern.integerCenter[1];
+
+            let newValidity = SubAbilityUsability.Invalid;
+            for (const [dx, dy] of this.effectPattern.patternEntries) {
+                const tileX = centerX + dx - this.effectPattern.integerCenter[0];
+                const tileY = centerY + dy - this.effectPattern.integerCenter[1];
+                const tile = this.ship.board.tiles[tileY]?.[tileX];
+                if (tile !== undefined)
+                    newValidity = SubAbilityUsability.Valid;
+            }
+            if (newValidity !== oldValidity)
+                subAbilityUsabilityUpdated = true;
+
+            newPatternEntries.push([x, y, newValidity]);
+        }
+
+        // Update pattern if changes occurred
+        if (subAbilityUsabilityUpdated)
+            this.selectionPattern = new RotatablePattern(newPatternEntries, this.selectionPattern.center, this.selectionPattern.rotationalCenter, this.selectionPattern.integerCenter);
+
+        return [mainUsabilityUpdated, subAbilityUsabilityUpdated];
+    }
+
+    /**
      * Execute actions related to this ability if the ability's condition is met
      *
-     * @param  x X coordinate of effect pattern
-     * @param  y Y coordinate of effect pattern
+     * @param  dx Horizontal distance from center of ship to fire upon
+     * @param  dy Vertical distance from center of ship to fire upon
      */
-    public use(x: number, y: number): void {
-        if (!this.usable)
+    public use(dx: number, dy: number): void {
+        if (!this._usable)
             return;
 
-        const selectionPatternX = x - this.selectionPattern.center[0];
-        const selectionPatternY = y - this.selectionPattern.center[1];
+        const patternX = dx + this.selectionPattern.integerCenter[0];
+        const patternY = dy + this.selectionPattern.integerCenter[1];
 
-        if (this.selectionPattern.query(selectionPatternX, selectionPatternY) === 0)
+        if (this.selectionPattern.query(patternX, patternY) !== SubAbilityUsability.Valid)
             return;
 
         this.eventRegistrar.queueEvent('onUse', {
             builtinAttributes: {}
         });
 
+        // Container to act as persistent reference to hitCount so events raised refer to final hit count
         const hitCountContainer = {
             hitCount: 0
         };
 
-        for (const [dx, dy, v] of this.effectPattern.patternEntries) {
-            const tile = this.ship.board.tiles[y + dy]?.[x + dx];
+        const centerX = dx + this.ship.x + this.ship.pattern.integerCenter[0];
+        const centerY = dy + this.ship.y + this.ship.pattern.integerCenter[1];
+
+        // Create onHit event for every ship within effect pattern
+        for (const [x, y, v] of this.effectPattern.patternEntries) {
+            const tileX = centerX + x - this.effectPattern.integerCenter[0];
+            const tileY = centerY + y - this.effectPattern.integerCenter[1];
+            const tile = this.ship.board.tiles[tileY]?.[tileX];
             const ship = tile?.[2];
-            if (ship !== undefined) {
-                this.eventRegistrar.queueEvent('onHit', {
-                    builtinAttributes: {
-                        patternValue: new AttributeCodeControlled(() => v, () => {}, true),
-                        hitCount: new AttributeCodeControlled(() => hitCountContainer.hitCount, () => {}, true)
-                    },
-                    foreignTeam: ship.owner.team,
-                    foreignPlayer: ship.owner,
-                    foreignShip: ship
-                });
-                hitCountContainer.hitCount++;
-            }
+            if (ship === undefined)
+                continue;
+
+            this.eventRegistrar.queueEvent('onHit', {
+                builtinAttributes: {
+                    patternValue: new AttributeCodeControlled(() => v, () => {}, true),
+                    hitCount: new AttributeCodeControlled(() => hitCountContainer.hitCount, () => {}, true)
+                },
+                foreignTeam: ship.owner.team,
+                foreignPlayer: ship.owner,
+                foreignShip: ship
+            });
+            hitCountContainer.hitCount++;
         }
 
         if (hitCountContainer.hitCount === 0) {
@@ -169,21 +255,12 @@ export class AbilityFire extends PositionedAbility {
     }
 
     /**
-     * Returns network transportable form of this object.
+     * Called when the ship that this ability is attached to rotates
      *
-     * May not include all details of the object. Just those that the client needs to know.
-     *
-     * @returns  Created AbilityInfo object
+     * @param  rotation Amount the ship was rotated by
      */
-    public makeTransportable(): AbilityInfo {
-        return {
-            type: 'fire',
-            descriptor: this.descriptor.makeTransportable(),
-            icon: this.icon,
-            selectionPattern: this.selectionPattern.makeTransportable(false),
-            effectPattern: this.effectPattern.makeTransportable(this.displayEffectPatternValues),
-            attributes: this.attributeWatcher.exportAttributeInfo(),
-            usable: this.usable
-        };
+    public onShipRotate(rotation: Rotation): void {
+        this.selectionPattern = this.selectionPattern.rotated(rotation);
+        this.effectPattern = this.effectPattern.rotated(rotation);
     }
 }

@@ -20,7 +20,8 @@
   "visibility": 10,
   "abilities": [
     "test-move-ability",
-    "battleship-fire-ability"
+    "battleship-fire-ability",
+    "test-rotate-ability"
   ],
   "attributes": {
     "testAttribute": {

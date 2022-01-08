@@ -2,7 +2,7 @@ import Joi                           from 'joi';
 import { actionSchema }              from '../../actions/sources/action';
 import { attributeHolderSchema }     from '../../attributes/sources/attribute-holder';
 import { patternSchema }             from '../../common/sources/pattern';
-import { conditionSchema }           from '../../conditions/sources/condition';
+import { nullableConditionSchema }   from '../../conditions/sources/condition';
 import { abilityEventInfo }          from '../events/ability-events';
 import { fireAbilityEventInfo }      from '../events/fire-ability-event';
 import { baseAbilitySchema }         from './base-ability';
@@ -39,7 +39,7 @@ export const abilitySchema = baseAbilitySchema.keys({
         { is: 'fire', then: Joi.required(), otherwise: Joi.forbidden() }),
     displayEffectPatternValues: Joi.boolean().when('type',
         { is: 'fire', then: Joi.required(), otherwise: Joi.forbidden() }),
-    condition: conditionSchema.required(),
+    condition: nullableConditionSchema.required(),
     actions: Joi.when('type',
         {
             is: 'fire',

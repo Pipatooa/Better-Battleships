@@ -1,4 +1,4 @@
-import { Rotation }                   from 'shared/scenario/objects/common/rotation';
+import { rotatePoint }                from 'shared/scenario/rotation';
 import { checkAgainstSchema }         from '../../schema-checker';
 import { Pattern }                    from './pattern';
 import { patternSchema }              from './sources/pattern';
@@ -6,6 +6,7 @@ import type { ParsingContext }        from '../../parsing-context';
 import type { PatternEntry }          from './pattern';
 import type { IPatternSource }        from './sources/pattern';
 import type { IRotatablePatternInfo } from 'shared/network/scenario/i-rotatable-pattern-info';
+import type { Rotation }              from 'shared/scenario/rotation';
 
 /**
  * RotatablePattern - Server Version
@@ -20,11 +21,13 @@ export class RotatablePattern extends Pattern {
      * @param  _patternEntries  Array of pattern entries for pattern
      * @param  center           Center of the pattern
      * @param  rotationalCenter Point about which the pattern rotates
+     * @param  integerCenter    Center snapped to an integer coordinate
      */
-    protected constructor(_patternEntries: PatternEntry[],
-                          center: [number, number],
-                          private readonly rotationalCenter: number) {
-        super(_patternEntries, center);
+    public constructor(_patternEntries: PatternEntry[],
+                       center: [number, number],
+                       public readonly rotationalCenter: [number, number],
+                       integerCenter?: [number, number]) {
+        super(_patternEntries, center, integerCenter);
     }
     
     /**
@@ -43,7 +46,7 @@ export class RotatablePattern extends Pattern {
 
         // Rotational center of the pattern
         const largeDimension = Math.max(...patternSource.size);
-        const rotationalCenter = largeDimension / 2;
+        const rotationalCenter = (largeDimension - 1) / 2;
 
         // Where provided tile pattern fits within padded square pattern to allow for rotation
         const offsetX = Math.floor((largeDimension - patternSource.size[0]) / 2);
@@ -56,7 +59,7 @@ export class RotatablePattern extends Pattern {
         const patternEntries = Pattern.getPatternEntriesFromSource(parsingContext, patternSource, [offsetX, offsetY]);
 
         // Return new created RotatablePattern object
-        return new RotatablePattern(patternEntries, [ centerX, centerY ], rotationalCenter);
+        return new RotatablePattern(patternEntries, [ centerX, centerY ], [rotationalCenter, rotationalCenter]);
     }
 
     /**
@@ -83,59 +86,13 @@ export class RotatablePattern extends Pattern {
     public rotated(rotation: Rotation): RotatablePattern {
         const patternEntries: PatternEntry[] = [];
         for (const [x, y, v] of this._patternEntries ){
-            const [newX, newY] = this.rotatePoint(x, y, rotation);
+            const [newX, newY] = rotatePoint([x, y], this.rotationalCenter, rotation);
             patternEntries.push([newX, newY, v]);
         }
 
-        const newCenter = this.rotatePoint(...this.center, rotation);
-        return new RotatablePattern(patternEntries, newCenter, this.rotationalCenter);
-    }
-
-    /**
-     * Rotates a point about the center of this pattern
-     *
-     * @param    x        X coordinate of point
-     * @param    y        Y coordinate of point
-     * @param    rotation Rotation to apply to point
-     * @returns           Transformed point
-     */
-    protected rotatePoint(x: number, y: number, rotation: Rotation): [number, number] {
-
-        // Get dx and dy of pattern entry from pattern center
-        const dx = x - this.rotationalCenter;
-        const dy = y - this.rotationalCenter;
-
-        let newDx: number;
-        let newDy: number;
-
-        // Perform rotation transforms
-        switch (rotation) {
-            case Rotation.NoChange:
-                newDx = dx;
-                newDy = dy;
-                break;
-            case Rotation.Clockwise90:
-                newDx = -dy;
-                newDy = dx;
-                break;
-            case Rotation.Clockwise180:
-                newDx = -dx;
-                newDy = -dy;
-                break;
-            case Rotation.Clockwise270:
-                newDx = dy;
-                newDy = -dx;
-                break;
-            case Rotation.FullRotation:
-                newDx = dx;
-                newDy = dy;
-                break;
-        }
-
-        // Offset new dx and dy from pattern center
-        const newX = newDx + this.rotationalCenter;
-        const newY = newDy + this.rotationalCenter;
-        return [newX, newY];
+        const newCenter = rotatePoint(this.center, this.rotationalCenter, rotation);
+        const newIntegerCenter = rotatePoint(this.integerCenter, this.rotationalCenter, rotation);
+        return new RotatablePattern(patternEntries, newCenter, this.rotationalCenter, newIntegerCenter);
     }
 
     /**

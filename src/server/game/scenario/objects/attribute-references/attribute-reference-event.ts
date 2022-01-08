@@ -1,5 +1,5 @@
+import { builtinAttributePrefix }    from 'shared/scenario/builtin-attribute-prefix';
 import { UnpackingError }            from '../../errors/unpacking-error';
-import { builtinAttributePrefix }    from '../attributes/sources/builtin-attributes';
 import { AttributeReference }        from './attribute-reference';
 import type { GenericEventContext }  from '../../events/event-context';
 import type { EventEvaluationState } from '../../events/event-evaluation-state';

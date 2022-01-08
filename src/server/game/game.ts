@@ -1,14 +1,14 @@
 import console                        from 'console';
 import { TimeoutManager }             from 'shared/timeout-manager';
 import config                         from '../config';
-import type { IBoardInfo }            from '../../shared/network/scenario/i-board-info';
-import type { IShipPrototypeInfo }    from '../../shared/network/scenario/i-ship-prototype-info';
 import type { Player }                from './scenario/objects/player';
 import type { Scenario }              from './scenario/objects/scenario';
 import type { Client }                from './sockets/client';
 import type { IServerEvent }          from 'shared/network/events/i-server-event';
 import type { MultipleAttributeInfo } from 'shared/network/scenario/i-attribute-info';
+import type { IBoardInfo }            from 'shared/network/scenario/i-board-info';
 import type { IPlayerInfo }           from 'shared/network/scenario/i-player-info';
+import type { IShipPrototypeInfo }    from 'shared/network/scenario/i-ship-prototype-info';
 
 /**
  * Game - Server Version
@@ -233,7 +233,7 @@ export class Game {
         for (const client of this.clients) {
             const ships: { [trackingID: string]: IShipPrototypeInfo } = {};
             for (const [trackingID, ship] of Object.entries(client.player!.ships))
-                ships[trackingID] = ship.makeTransportable(true);
+                ships[trackingID] = ship.makeTransportable(true, false);
 
             client.sendEvent({
                 event: 'setupInfo',

@@ -1,3 +1,4 @@
+import type { Rotation }              from '../../scenario/rotation';
 import type { AbilityInfo }           from './ability-info';
 import type { MultipleAttributeInfo } from './i-attribute-info';
 import type { IDescriptorInfo }       from './i-descriptor-info';
@@ -21,5 +22,6 @@ export interface IShipPrototypeInfo {
 export interface IShipInfo extends IShipPrototypeInfo {
     owner: string,
     x: number,
-    y: number
+    y: number,
+    rotation: Rotation
 }

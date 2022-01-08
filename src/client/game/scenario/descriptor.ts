@@ -1,14 +1,13 @@
 import type { IDescriptorInfo } from 'shared/network/scenario/i-descriptor-info';
 
-
 /**
  * Descriptor - Client Version
  *
  * Stores a name and a description for another object
  */
 export class Descriptor {
-    protected constructor(public readonly name: string,
-                          public readonly description: string) {
+    public constructor(public readonly name: string,
+                       public readonly description: string) {
     }
 
     /**

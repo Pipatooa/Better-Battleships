@@ -173,7 +173,7 @@ export class Team implements IAttributeHolder, IBuiltinAttributeHolder<'team'> {
     public setPlayers(clients: Client[]): void {
 
         // Get player prototypes for this number of players
-        const playerPrototypes = this._playerPrototypes[clients.length];
+        const playerPrototypes = this._playerPrototypes[clients.length - 1];
 
         // Copy player prototype list into player list
         for (let i = 0; i < clients.length; i++) {

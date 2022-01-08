@@ -1,21 +1,22 @@
 import { game }                               from '../../game';
 import { allPlayers }                         from '../../player';
+import { specialColors }                      from './special-colors';
 import { getGLTextureLocation, TextureIndex } from './texture-index';
 import type { TileType }                      from '../../scenario/tiletype';
 import type { ModelProgram }                  from './model-programs/model-program';
+import type { SpecialColor }                  from './special-colors';
 
-export class ColorAtlas<C extends string> {
+export class ColorAtlas {
 
     private readonly colorData: [number, number, number][] | undefined = [
-        [0, 0, 0],
-        [255, 255, 255]
+        [0, 0, 0]
     ];
     
-    public readonly specialColorIndices: Record<C, number>;
+    public readonly specialColorIndices: Record<SpecialColor, number>;
 
-    public constructor(specialColors: Record<C, string>) {
-        this.specialColorIndices = {} as Record<C, number>;
-        this.registerSpecialColors(specialColors);
+    public constructor() {
+        this.specialColorIndices = {} as Record<SpecialColor, number>;
+        this.registerSpecialColors();
     }
 
     /**
@@ -96,12 +97,10 @@ export class ColorAtlas<C extends string> {
 
     /**
      * Registers all colors used for specific purposes
-     *
-     * @param  specialColors Record of color names to hex color strings
      */
-    public registerSpecialColors(specialColors: Record<C, string>): void {
+    public registerSpecialColors(): void {
         for (const [name, hexColor] of Object.entries(specialColors)) {
-            this.specialColorIndices[name as C] = this.registerHex(hexColor as string);
+            this.specialColorIndices[name as SpecialColor] = this.registerHex(hexColor);
         }
     }
 

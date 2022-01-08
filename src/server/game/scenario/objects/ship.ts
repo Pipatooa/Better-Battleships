@@ -1,20 +1,14 @@
-import {
-    Rotation
-}                                                                                 from 'shared/scenario/objects/common/rotation';
-import { v4 }                             from 'uuid';
-import { UnpackingError }                 from '../errors/unpacking-error';
-import { EventListenerPrimaryPriority }   from '../events/event-listener';
-import { EventRegistrar }                 from '../events/event-registrar';
-import { checkAgainstSchema }             from '../schema-checker';
-import { getJSONFromEntry }               from '../unpacker';
-import { buildAbility }                   from './abilities/ability-builder';
-import { eventListenersFromActionSource } from './actions/action-getter';
-import {
-    getAttributeListeners
-}                                                                                 from './attribute-listeners/attribute-listener-getter';
-import {
-    AttributeCodeControlled
-}                                                                                 from './attributes/attribute-code-controlled';
+import { Rotation }                                                               from 'shared/scenario/rotation';
+import { v4 }                                                                     from 'uuid';
+import { UnpackingError }                                                         from '../errors/unpacking-error';
+import { EventListenerPrimaryPriority }                                           from '../events/event-listener';
+import { EventRegistrar }                                                         from '../events/event-registrar';
+import { checkAgainstSchema }                                                     from '../schema-checker';
+import { getJSONFromEntry }                                                       from '../unpacker';
+import { buildAbility }                                                           from './abilities/ability-builder';
+import { eventListenersFromActionSource }                                         from './actions/action-getter';
+import { getAttributeListeners }                                                  from './attribute-listeners/attribute-listener-getter';
+import { AttributeCodeControlled }                                                from './attributes/attribute-code-controlled';
 import { getAttributes }                                                          from './attributes/attribute-getter';
 import { AttributeWatcher }                                                       from './attributes/attribute-watcher';
 import { Descriptor }                                                             from './common/descriptor';
@@ -33,11 +27,9 @@ import type { Player }                                                          
 import type { IShipSource }                                                       from './sources/ship';
 import type { Team }                                                              from './team';
 import type { AbilityInfo }                                                       from 'shared/network/scenario/ability-info';
+import type { AbilityUsabilityInfo }                                              from 'shared/network/scenario/ability-usability-info';
 import type { AttributeUpdates }                                                  from 'shared/network/scenario/i-attribute-info';
-import type {
-    IShipInfo,
-    IShipPrototypeInfo
-}                                                                                 from 'shared/network/scenario/i-ship-prototype-info';
+import type { IShipInfo, IShipPrototypeInfo }                                     from 'shared/network/scenario/i-ship-prototype-info';
 
 /**
  * Ship - Server Version
@@ -63,7 +55,9 @@ export class Ship implements IAttributeHolder, IBuiltinAttributeHolder<'ship'> {
 
     private readonly attributeWatcher: AttributeWatcher;
     private hasMoved = false;
-    private rotatedBy: Rotation = Rotation.NoChange;
+
+    private currentRotation: Rotation = Rotation.None;
+    private rotatedBy: Rotation = Rotation.None;
     
     /**
      * Ship constructor
@@ -240,15 +234,16 @@ export class Ship implements IAttributeHolder, IBuiltinAttributeHolder<'ship'> {
      *
      * May not include all details of the object. Just those that the client needs to know.
      *
-     * @param    prototypeOnly Whether to export IShipPrototypeInfo or IShipInfo
-     * @returns                Created IShipPrototype | IShipInfo object
+     * @param    prototypeOnly            Whether to export IShipPrototypeInfo or IShipInfo
+     * @param    includeSubAbilityDetails Whether to include details about which sub-abilities are usable
+     * @returns                           Created IShipPrototype | IShipInfo object
      */
-    public makeTransportable(prototypeOnly: false): IShipInfo;
-    public makeTransportable(prototypeOnly: true): IShipPrototypeInfo;
-    public makeTransportable(prototypeOnly: boolean): IShipPrototypeInfo | IShipInfo {
+    public makeTransportable(prototypeOnly: false, includeSubAbilityDetails: boolean): IShipInfo;
+    public makeTransportable(prototypeOnly: true, includeSubAbilityDetails: boolean): IShipPrototypeInfo;
+    public makeTransportable(prototypeOnly: boolean, includeSubAbilityDetails: boolean): IShipPrototypeInfo | IShipInfo {
         const abilityInfo: AbilityInfo[] = [];
         for (const ability of this.abilities)
-            abilityInfo.push(ability.makeTransportable());
+            abilityInfo.push(ability.makeTransportable(includeSubAbilityDetails));
 
         const prototypeInfo: IShipPrototypeInfo = {
             descriptor: this.descriptor.makeTransportable(),
@@ -386,17 +381,14 @@ export class Ship implements IAttributeHolder, IBuiltinAttributeHolder<'ship'> {
     }
 
     /**
-     * Tries to move the ship to a new location on the board
+     * Checks whether this ship can move to a new location on the board
      *
-     * @param    x Destination X coordinate
-     * @param    y Destination Y coordinate
-     * @returns    Whether the movement was successful
+     * @param    dx Horizontal distance to move ship by
+     * @param    dy Vertical distance to move ship by
+     * @returns     Whether this shop can move to the new location
      */
-    public tryMoveTo(x: number, y: number): boolean {
-        const movementAllowed = this.board.checkMovement(this, x, y);
-        if (movementAllowed)
-            this.moveTo(x, y);
-        return movementAllowed;
+    public canMoveBy(dx: number, dy: number): boolean {
+        return this.board.checkMovement(this, this._x + dx, this._y + dy);
     }
 
     /**
@@ -407,17 +399,6 @@ export class Ship implements IAttributeHolder, IBuiltinAttributeHolder<'ship'> {
      */
     public moveBy(dx: number, dy: number): void {
         this.moveTo(this._x + dx, this._y + dy);
-    }
-    
-    /**
-     * Tries to move the ship by an offset
-     *
-     * @param    x Horizontal distance to move ship by
-     * @param    y Vertical distance to move ship by
-     * @returns    Whether the movement was successful
-     */
-    public tryMoveBy(x: number, y: number): boolean {
-        return this.tryMoveTo(this._x + x, this._y + y);
     }
 
     /**
@@ -435,21 +416,22 @@ export class Ship implements IAttributeHolder, IBuiltinAttributeHolder<'ship'> {
         this.updateKnown();
         this.updateOthers();
 
+        for (const ability of this.abilities)
+            ability.onShipRotate(rotation);
+
+        this.currentRotation += rotation;
         this.rotatedBy += rotation;
         this.rotatedBy %= Rotation.FullRotation;
     }
 
     /**
-     * Tries to rotate the ship in place
+     * Checks whether this ship can be rotated in place
      *
      * @param    rotation Amount to rotate ship by
-     * @returns           Whether the rotation was successful
+     * @returns           Whether this shop can rotate by the specified amount
      */
-    public tryRotateBy(rotation: Rotation): boolean {
-        const rotationAllowed = this.board.checkRotation(this, rotation);
-        if (rotationAllowed)
-            this.rotateBy(rotation);
-        return rotationAllowed;
+    public canRotateBy(rotation: Rotation): boolean {
+        return this.board.checkRotation(this, rotation);
     }
 
     /**
@@ -458,31 +440,53 @@ export class Ship implements IAttributeHolder, IBuiltinAttributeHolder<'ship'> {
     private updateAbilities(): void {
 
         // Update usability of all abilities and construct array of usability for each ability
-        const abilityUsability: boolean[] = [];
+        const subAbilityUsabilityUpdates: boolean[] = [];
         let sendUpdate = false;
         for (const ability of this.abilities) {
-            const [usable, oldUsability] = ability.checkUsable();
-            abilityUsability.push(usable);
+            const usabilityUpdated = ability.checkUsable();
+            subAbilityUsabilityUpdates.push(usabilityUpdated[1]);
 
             // Send update if usability has changed upon update
-            sendUpdate ||= usable !== oldUsability;
+            sendUpdate ||= usabilityUpdated[0] || usabilityUpdated[1];
         }
 
-        if (sendUpdate)
-            for (const [team, trackingID] of Object.values(this.knownTo))
-                team.broadcastEvent({
-                    event: 'shipAbilityUpdate',
-                    trackingID: trackingID,
-                    usability: abilityUsability
-                });
+        if (!sendUpdate)
+            return;
+
+        const localTeamAbilityUsabilityUpdates: (boolean | AbilityUsabilityInfo)[] = [];
+        const foreignTeamAbilityUsabilityUpdates: (boolean | AbilityUsabilityInfo)[] = [];
+
+        // Construct ability usability update arrays for local and foreign teams that know of this ship
+        for (let i = 0; i < this.abilities.length; i++) {
+            const ability = this.abilities[i];
+            const subAbilityUsabilityUpdated = subAbilityUsabilityUpdates[i];
+
+            // Only provide boolean if sub-ability usability has not changed
+            if (!subAbilityUsabilityUpdated) {
+                localTeamAbilityUsabilityUpdates.push(ability.usable);
+                foreignTeamAbilityUsabilityUpdates.push(ability.usable);
+
+            // Otherwise, provide full information
+            } else {
+                localTeamAbilityUsabilityUpdates.push(ability.getFullUsability(true));
+                foreignTeamAbilityUsabilityUpdates.push(ability.getFullUsability(false));
+            }
+        }
+
+        for (const [team, trackingID] of Object.values(this.knownTo))
+            team.broadcastEvent({
+                event: 'shipAbilityUpdate',
+                trackingID: trackingID,
+                usabilityUpdates: team === this.owner.team
+                    ? localTeamAbilityUsabilityUpdates
+                    : foreignTeamAbilityUsabilityUpdates
+            });
     }
 
     /**
      * Notifies clients of any attribute updates which have occurred on this ship
      */
     private exportChanges(): void {
-
-        console.log('Exporting changes...');
 
         // Publish ship disappearance
         for (const [team, trackingID] of Object.values(this.oldKnownTo)) {
@@ -512,7 +516,7 @@ export class Ship implements IAttributeHolder, IBuiltinAttributeHolder<'ship'> {
 
             // Ship appearance
             if (this.oldKnownTo[team.id] === undefined && team !== this.owner.team) {
-                shipInfo ??= this.makeTransportable(false);
+                shipInfo ??= this.makeTransportable(false, false);
                 team.broadcastEvent({
                     event: 'shipAppear',
                     trackingID: trackingID,
@@ -537,7 +541,7 @@ export class Ship implements IAttributeHolder, IBuiltinAttributeHolder<'ship'> {
                         y: this._y
                     });
 
-                if (this.rotatedBy !== Rotation.NoChange)
+                if (this.rotatedBy !== Rotation.None)
                     team.broadcastEvent({
                         event: 'shipRotate',
                         trackingID: trackingID,
@@ -547,7 +551,7 @@ export class Ship implements IAttributeHolder, IBuiltinAttributeHolder<'ship'> {
         }
 
         this.hasMoved = false;
-        this.rotatedBy = Rotation.NoChange;
+        this.rotatedBy = Rotation.None;
         this.oldKnownTo = this.knownTo;
     }
 

@@ -8,6 +8,8 @@ import type { Condition }                                from '../conditions/con
 import type { Ship }                                     from '../ship';
 import type { AbilityEvent, AbilityEventInfo }           from './events/ability-events';
 import type { AbilityInfo }                              from 'shared/network/scenario/ability-info';
+import type { AbilityUsabilityInfo }                     from 'shared/network/scenario/ability-usability-info';
+import type { Rotation }                                 from 'shared/scenario/rotation';
 
 /**
  * Ability - Server Version
@@ -16,7 +18,7 @@ import type { AbilityInfo }                              from 'shared/network/sc
  */
 export abstract class Ability implements IAttributeHolder, BuiltinAttributeRecord<'ability'> {
 
-    protected usable = false;
+    protected _usable = false;
     public readonly attributeWatcher: AttributeWatcher;
 
     /**
@@ -53,14 +55,6 @@ export abstract class Ability implements IAttributeHolder, BuiltinAttributeRecor
     }
 
     /**
-     * Registers all attribute listeners for this object and all sub-objects
-     */
-    public registerAttributeListeners(): void {
-        for (const attributeListener of this.attributeListeners)
-            attributeListener.register();
-    }
-
-    /**
      * Generates built-in attributes for Ability object
      *
      * @param    object Object to generate built-in attributes for
@@ -71,24 +65,50 @@ export abstract class Ability implements IAttributeHolder, BuiltinAttributeRecor
     }
 
     /**
-     * Checks whether this ability is usable
-     *
-     * @returns  [usable, oldUsability]
-     */
-    public checkUsable(): [boolean, boolean] {
-        const oldUsability = this.usable;
-        this.usable = this.condition.check({
-            builtinAttributes: {}
-        });
-        return [this.usable, oldUsability];
-    }
-
-    /**
      * Returns network transportable form of this object.
      *
      * May not include all details of the object. Just those that the client needs to know.
      *
-     * @returns  Created AbilityInfo object
+     * @param    includeSubAbilityDetails Whether to include details about which sub-abilities are usable
+     * @returns                           Created AbilityInfo object
      */
-    public abstract makeTransportable(): AbilityInfo;
+    public abstract makeTransportable(includeSubAbilityDetails: boolean): AbilityInfo;
+
+    /**
+     * Registers all attribute listeners for this object and all sub-objects
+     */
+    public registerAttributeListeners(): void {
+        for (const attributeListener of this.attributeListeners)
+            attributeListener.register();
+    }
+
+    /**
+     * Returns an object describing the usability of this ability and its sub-abilities
+     *
+     * @param    includeSubAbilityDetails Whether to include details about which sub-abilities are usable
+     * @returns                           Created AbilityUsabilityInfo object
+     */
+    public abstract getFullUsability(includeSubAbilityDetails: boolean): AbilityUsabilityInfo;
+
+    /**
+     * Checks whether this ability and its sub-abilities are usable
+     *
+     * @returns  [Main ability usability updated, Sub-ability usability updated]
+     */
+    public abstract checkUsable(): [mainUsabilityUpdated: boolean, subAbilityUsabilityUpdated: boolean];
+
+    /**
+     * Called when the ship that this ability is attached to rotates
+     *
+     * @param  rotation Amount the ship was rotated by
+     */
+    public abstract onShipRotate(rotation: Rotation): void;
+
+    /**
+     * Getters and setters
+     */
+
+    public get usable(): boolean {
+        return this._usable;
+    }
 }

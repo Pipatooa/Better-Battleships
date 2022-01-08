@@ -1,4 +1,6 @@
+import { game }                     from 'client/game/game';
 import { trackedShips }             from '../../scenario/ship';
+import { updateCurrentView }        from '../../ui/managers/view-manager';
 import type { IShipDestroyedEvent } from 'shared/network/events/i-ship-destroyed';
 
 /**
@@ -8,4 +10,7 @@ import type { IShipDestroyedEvent } from 'shared/network/events/i-ship-destroyed
  */
 export function handleShipDestroyed(shipDestroyedEvent: IShipDestroyedEvent): void {
     trackedShips[shipDestroyedEvent.trackingID].deconstruct();
+    updateCurrentView();
+    game.board!.informationGenerator!.push();
+    game.gameRenderer!.renderNext();
 }

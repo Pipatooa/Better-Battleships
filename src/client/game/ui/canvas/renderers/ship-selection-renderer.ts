@@ -2,7 +2,7 @@ import { game }                      from '../../../game';
 import { Board }                     from '../../../scenario/board';
 import { sendRequest }               from '../../../sockets/opener';
 import { initiateGameMainUI }        from '../../initiate';
-import { ShipPlacer }                from '../../managers/ship-placer';
+import { ShipPlacerUiManager }       from '../../managers/ship-placer-ui-manager';
 import { UIManager }                 from '../../managers/ui-manager';
 import { VariableVisibilityElement } from '../../variable-visibility-element';
 import { BoardInfoGenerator }        from '../board-info-generator';
@@ -14,7 +14,7 @@ import { Renderer }                  from './renderer';
 import type { Tile }                 from '../../../scenario/board';
 import type { Ship }                 from '../../../scenario/ship';
 import type { ColorAtlas }           from '../color-atlas';
-import type { Rotation }             from 'shared/scenario/objects/common/rotation';
+import type { Rotation }             from 'shared/scenario/rotation';
 
 /**
  * ShipSelectionRenderer - Client Version
@@ -52,7 +52,7 @@ export class ShipSelectionRenderer extends BoardRenderer {
      * @param  colorAtlas Color atlas for rendering
      * @param  ships      Array of ships to display to the player
      */
-    public constructor(colorAtlas: ColorAtlas<string>,
+    public constructor(colorAtlas: ColorAtlas,
                        ships: Ship[]) {
         const canvas = $('#ship-selection-canvas').get(0) as HTMLCanvasElement;
         const gl = Renderer.getContext(canvas);
@@ -75,7 +75,9 @@ export class ShipSelectionRenderer extends BoardRenderer {
         this.sidebarShipSelectionRemainingCountElement = $('#sidebar-ship-selection-remaining-count');
 
         // Rendering initialisation
-        this.viewportHandler = new ViewportHandler(canvas, this.gl, this.modelPrograms[0], false, 1, 1, 1, [-0.5, -0.5], [2, 2]);
+        const boardLargeDimension = Math.max(...this._board.size);
+        const relativeBoardDimensions: [number, number] = [this._board.size[0] / boardLargeDimension, this._board.size[1] / boardLargeDimension];
+        this.viewportHandler = new ViewportHandler(canvas, this.gl, this.modelPrograms[0], false, relativeBoardDimensions, 1, 1, 1, [-0.5, -0.5], [2, 2]);
         this.viewportHandler.updateCallback = () => this.renderNext();
         this.boardInfoGenerator = new BoardInfoGenerator(this.gl, this.modelPrograms[0], this._board);
         this.boardInfoGenerator.push();
@@ -127,21 +129,21 @@ export class ShipSelectionRenderer extends BoardRenderer {
         // Find maximum length of ship
         let maxLength = 0;
         for (const ship of this.ships) {
-            const [maxX, maxY] = ship.pattern.getBounds();
-            maxLength = Math.max(maxLength, maxX + 1, maxY + 1);
+            const [xMin, xMax, yMin, yMax] = ship.pattern.bounds;
+            maxLength = Math.max(maxLength, xMax - xMin + 1, yMax - yMin + 1);
         }
 
         // Populate tile array
         const tileType = game.board!.primaryTileType;
-        const boardSize = maxLength + 2;
+        const boardSize = Math.max(maxLength + 2, 5);
         for (let y = 0; y < boardSize; y++) {
             tiles[y] = [];
             for (let x = 0; x < boardSize; x++) {
-                tiles[y][x] = [tileType, [], undefined, undefined];
+                tiles[y][x] = [tileType, [], undefined];
             }
         }
 
-        return new Board(tiles, game.board!.tileTypes, tileType);
+        return new Board(tiles, game.board!.tileTypes, tileType, false);
     }
 
     /**
@@ -182,17 +184,17 @@ export class ShipSelectionRenderer extends BoardRenderer {
             return;
 
         const ship = this.ships[this.selectedIndex];
-        const [maxX, maxY] = ship.pattern.getBounds();
+        const [, xMax, , yMax] = ship.pattern.bounds;
 
         // Center ship
-        const x = Math.floor((this._board.size[0] - maxX - 1) / 2);
-        const y = Math.floor((this._board.size[1] - maxY - 1) / 2);
+        const x = Math.floor((this._board.size[0] - xMax - 1) / 2);
+        const y = Math.floor((this._board.size[1] - yMax - 1) / 2);
         ship.moveTo(x, y);
         this.renderNext();
 
         const currentUIManager = UIManager.currentManager;
-        if (currentUIManager instanceof ShipPlacer)
-            currentUIManager.selectedShip = this.ships[this.selectedIndex];
+        if (currentUIManager instanceof ShipPlacerUiManager)
+            currentUIManager.setSelectedShip(this.ships[this.selectedIndex]);
     }
 
     /**

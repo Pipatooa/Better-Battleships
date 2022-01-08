@@ -65,6 +65,10 @@
 .view {
     cursor: pointer;
 
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+
     background: var(--view-normal-color);
     color: var(--view-normal-text-color);
 }
@@ -80,7 +84,13 @@
 }
 
 #sidebar-ship-section {
-    overflow-y: auto;
+    overflow-y: scroll;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+#sidebar-section::-webkit-scrollbar {
+    display: none;
 }
 
 #sidebar-ship-ability-container {

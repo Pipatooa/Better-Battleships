@@ -8,9 +8,9 @@ import type { IShipAbilityUpdate } from 'shared/network/events/i-ship-ability-up
  */
 export function handleShipAbilityUpdate(shipAbilityUpdateEvent: IShipAbilityUpdate): void {
     const ship = trackedShips[shipAbilityUpdateEvent.trackingID];
-    for (let i = 0; i < shipAbilityUpdateEvent.usability.length; i++) {
-        const usable = shipAbilityUpdateEvent.usability[i];
+    for (let i = 0; i < shipAbilityUpdateEvent.usabilityUpdates.length; i++) {
+        const usabilityUpdate = shipAbilityUpdateEvent.usabilityUpdates[i];
         const ability = ship.abilities[i];
-        ability.usable = usable;
+        ability.updateUsability(usabilityUpdate);
     }
 }

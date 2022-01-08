@@ -26,21 +26,21 @@ export class Board {
      * @param  tiles           2d array of tiles indexed [y][x]
      * @param  tileTypes       Array of tile types composing the board
      * @param  primaryTileType Tile type which will be used to generate ship selection board
+     * @param  hasRegions      Whether to index regions for this board
      */
     public constructor(public readonly tiles: Tile[][],
                        public readonly tileTypes: TileType[],
-                       public readonly primaryTileType: TileType) {
+                       public readonly primaryTileType: TileType,
+                       hasRegions: boolean) {
         this.size = [this.tiles[0].length, this.tiles.length];
 
         this.regions = {};
-        for (const row of this.tiles) {
-            for (const tile of row) {
-                for (const region of tile[1]) {
-                    if (this.regions[region.id] === undefined)
-                        this.regions[region.id] = region;
-                }
-            }
-        }
+        if (hasRegions)
+            for (const row of this.tiles)
+                for (const tile of row)
+                    for (const region of tile[1])
+                        if (this.regions[region.id] === undefined)
+                            this.regions[region.id] = region;
     }
 
     /**
@@ -86,11 +86,11 @@ export class Board {
 
                 const tileType: TileType = tileTypes[tileTypeChar];
                 const regionIDs: string[] = boardInfo.regionPalette[regionChar];
-                tiles[y][x] = [tileType, regionIDs.map(id => regions[id]), undefined, undefined];
+                tiles[y][x] = [tileType, regionIDs.map(id => regions[id]), undefined];
             }
         }
 
-        return new Board(tiles, Object.values(tileTypes), primaryTileType!);
+        return new Board(tiles, Object.values(tileTypes), primaryTileType!, true);
     }
 
     /**
@@ -157,4 +157,6 @@ export class Board {
 /**
  * Type describing an entry for a single tile
  */
-export type Tile = [TileType, Region[], Ship | undefined, (() => void) | undefined];
+export type Tile =
+    [type: TileType, regions: Region[], ship: Ship | undefined] |
+    [type: TileType, regions: Region[], ship: Ship | undefined, hoverCallback: (() => void) | undefined, clickCallback: (() => void) | undefined];

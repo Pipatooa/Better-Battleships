@@ -1,5 +1,5 @@
+import { builtinAttributePrefix }                         from 'shared/scenario/builtin-attribute-prefix';
 import { UnpackingError }                                 from '../../errors/unpacking-error';
-import { builtinAttributePrefix }                         from '../attributes/sources/builtin-attributes';
 import { AttributeReference }                             from './attribute-reference';
 import { attributeReferenceForeignObjectSelectors }       from './sources/attribute-reference';
 import type { ECA, EventContext, GenericEventContext }    from '../../events/event-context';
@@ -21,11 +21,11 @@ export class AttributeReferenceForeign extends AttributeReference {
      *
      * @param  objectSelector Object selector part of attribute reference string
      * @param  attributeName  Name of referenced attribute
-     * @param  special        Whether this attribute reference refers to a built-in value or a user defined value
+     * @param  builtin        Whether this attribute reference refers to a built-in value or a user defined value
      */
     public constructor(protected readonly objectSelector: AttributeReferenceForeignObjectSelector,
                        protected readonly attributeName: string,
-                       protected readonly special: boolean) {
+                       protected readonly builtin: boolean) {
         super();
     }
 
@@ -84,7 +84,7 @@ export class AttributeReferenceForeign extends AttributeReference {
                 break;
         }
 
-        const attributeMap = this.special ? attributeHolder.attributes : attributeHolder.builtinAttributes;
+        const attributeMap = this.builtin ? attributeHolder.builtinAttributes : attributeHolder.attributes;
         return attributeMap[this.attributeName];
     }
 

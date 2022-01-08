@@ -11,7 +11,7 @@ import type { IBoardSource }     from './sources/board';
 import type { TileGenerator }    from './tile-generator';
 import type { IBoardInfo }       from 'shared/network/scenario/i-board-info';
 import type { ITileTypeInfo }    from 'shared/network/scenario/i-tiletype-info';
-import type { Rotation }         from 'shared/scenario/objects/common/rotation';
+import type { Rotation }         from 'shared/scenario/rotation';
 
 /**
  * Board - Server Version

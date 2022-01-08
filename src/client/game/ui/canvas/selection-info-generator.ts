@@ -1,7 +1,9 @@
 import { Pattern }                            from '../../scenario/pattern';
 import { getGLTextureLocation, TextureIndex } from './texture-index';
+import type { Rotation }                      from '../../../../shared/scenario/rotation';
+import type { RotatablePattern }              from '../../scenario/rotatable-pattern';
 import type { Ship }                          from '../../scenario/ship';
-import type { ModelProgram }                  from './model-programs/model-program';
+import type { BoardProgram }                  from './model-programs/board-program';
 
 /**
  * SelectionInfoGenerator - Client Version
@@ -10,19 +12,22 @@ import type { ModelProgram }                  from './model-programs/model-progr
  */
 export class SelectionInfoGenerator {
 
+    private static readonly defaultSelectionPattern: Pattern = new Pattern([[0, 0, 1]], [0, 0], [0, 0]);
+    private static readonly defaultSelectionOpacity = new Float32Array([0.2, 0.2]);
+    private static readonly shipSelectionOpacity = new Float32Array([0.7, 1.0]);
+
     private readonly selectionInfoUniform: WebGLTexture;
     private selectionInfoSizeUniform: number;
     private selectionOffsetUniform: Float32Array;
-    private selectionOffsetRaw: [number, number];
+    private selectionOpacityUniform: Float32Array = SelectionInfoGenerator.defaultSelectionOpacity;
 
+    private selectionOffsetRaw: [number, number];
     private selectionOffsetDelta: [number, number] = [0, 0];
 
     private textureData: Uint8Array;
 
-    private readonly defaultSelectionPattern: Pattern = new Pattern([[0, 0, 1]], [0, 0]);
-
     public constructor(private readonly gl: WebGL2RenderingContext,
-                       private readonly modelProgram: ModelProgram<never, 'selectionInfo' | 'selectionInfoSize' | 'selectionSize' | 'selectionOffset'>) {
+                       private readonly modelProgram: BoardProgram) {
 
         // Create a new texture to hold information about the selected area
         this.selectionInfoUniform = this.gl.createTexture()!;
@@ -47,53 +52,73 @@ export class SelectionInfoGenerator {
      *
      * @param  selectionPattern Selection pattern to use
      */
-    public setSelectionPattern(selectionPattern: Pattern = this.defaultSelectionPattern): void {
-        const patternLargeDimension = Math.max(...selectionPattern.getBounds()) + 1;
+    public setSelectionPattern(selectionPattern: Pattern = SelectionInfoGenerator.defaultSelectionPattern): void {
+
+        // Determine minimum texture size and create texture data array
+        const patternLargeDimension = Math.max(...selectionPattern.bounds) + 1;
         this.selectionInfoSizeUniform = Math.pow(2, Math.ceil(Math.log2(patternLargeDimension)));
         this.textureData = new Uint8Array(3 * this.selectionInfoSizeUniform * this.selectionInfoSizeUniform);
 
+        // Populate texture data array using pattern values
         for (let y = 0; y < this.selectionInfoSizeUniform; y++) {
             for (let x = 0; x < this.selectionInfoSizeUniform; x++) {
                 const dataStart = 3 * (y * this.selectionInfoSizeUniform + x);
-                this.textureData[dataStart] = selectionPattern.query(x, y);
+                const patternValue = selectionPattern.query(x, y);
+
+                // Primary color, secondary color, border flags
+                this.textureData[dataStart] = patternValue;
+                this.textureData[dataStart + 1] = patternValue;
                 this.textureData[dataStart + 2] = selectionPattern.getBorderFlags(x, y);
             }
         }
 
+        this.selectionOpacityUniform = SelectionInfoGenerator.defaultSelectionOpacity;
         this.setOffsetDelta(-selectionPattern.center[0] - 0.5, -selectionPattern.center[1] - 0.5);
     }
 
     /**
      * Replaces selection pattern with a ship
      *
-     * @param  ship Ship to use as selection
+     * @param  ship     Ship to use as selection
+     * @param  rotation Optional rotation to apply to ship pattern
      */
-    public setSelectionShip(ship: Ship | undefined): void {
+    public setSelectionShip(ship: Ship | undefined, rotation?: Rotation): void {
+
+        // Set default selection pattern if no ship provided
         if (ship === undefined) {
             this.setSelectionPattern();
             return;
         }
-        const shipLargeDimension = Math.max(...ship.pattern.getBounds()) + 1;
+
+        // Apply rotation if present
+        let pattern: RotatablePattern = ship.pattern;
+        if (rotation !== undefined)
+            pattern = pattern.rotated(rotation);
+
+        // Determine minimum texture size and create texture data array
+        const shipLargeDimension = Math.max(...pattern.bounds) + 1;
         this.selectionInfoSizeUniform = Math.pow(2, Math.ceil(Math.log2(shipLargeDimension)));
         this.textureData = new Uint8Array(3 * this.selectionInfoSizeUniform * this.selectionInfoSizeUniform);
 
+        // Populate texture data array using pattern values
         const shipColorPaletteIndex = ship.player.colorPaletteIndex!;
         const borderColorPaletteIndex = ship.player.team!.colorPaletteIndex!;
         for (let y = 0; y < this.selectionInfoSizeUniform; y++) {
             for (let x = 0; x < this.selectionInfoSizeUniform; x++) {
                 const dataStart = 3 * (y * this.selectionInfoSizeUniform + x);
-                const isShipTile = ship.pattern.query(x, y);
+                const isShipTile = pattern.query(x, y);
                 if (!isShipTile)
                     continue;
 
-                // Primary, secondary color and border flags
+                // Primary color, secondary color, border flags
                 this.textureData[dataStart] = shipColorPaletteIndex;
                 this.textureData[dataStart + 1] = borderColorPaletteIndex;
-                this.textureData[dataStart + 2] = ship.pattern.getBorderFlags(x, y);
+                this.textureData[dataStart + 2] = pattern.getBorderFlags(x, y);
             }
         }
 
-        this.setOffsetDelta(-ship.pattern.center[0] - 0.5, -ship.pattern.center[1] - 0.5);
+        this.selectionOpacityUniform = SelectionInfoGenerator.shipSelectionOpacity;
+        this.setOffsetDelta(-pattern.center[0] - 0.5, -pattern.center[1] - 0.5);
     }
 
     /**
@@ -126,6 +151,16 @@ export class SelectionInfoGenerator {
     }
 
     /**
+     * Sets the opacity to render the selection at
+     *
+     * @param  opacity       Opacity to set for inner selection
+     * @param  borderOpacity Opacity to set for border of selection
+     */
+    public setSelectionOpacity(opacity: number, borderOpacity: number): void {
+        this.selectionOpacityUniform = new Float32Array([opacity, borderOpacity]);
+    }
+
+    /**
      * Pushes selection information to the GPU
      */
     public push(): void {
@@ -139,5 +174,6 @@ export class SelectionInfoGenerator {
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST);
         this.gl.uniform1f(this.modelProgram.uniformLocations.selectionInfoSize, this.selectionInfoSizeUniform);
         this.gl.uniform2fv(this.modelProgram.uniformLocations.selectionOffset, this.selectionOffsetUniform);
+        this.gl.uniform2fv(this.modelProgram.uniformLocations.selectionOpacity, this.selectionOpacityUniform);
     }
 }

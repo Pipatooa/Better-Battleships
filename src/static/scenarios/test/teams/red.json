@@ -8,15 +8,6 @@
   "playerConfigs": [
     [
       { "playerPrototype": "player", "spawnRegion": "spawn-red-1", "color": "#d82215", "highlightColor": "#e85247" }
-    ],
-    [
-      { "playerPrototype": "player", "spawnRegion": "spawn-red-2", "color": "#d82215", "highlightColor": "#e85247" },
-      { "playerPrototype": "player", "spawnRegion": "spawn-red-3", "color": "#d82215", "highlightColor": "#e85247" }
-    ],
-    [
-      { "playerPrototype": "player", "spawnRegion": "spawn-red-1", "color": "#d82215", "highlightColor": "#e85247" },
-      { "playerPrototype": "player", "spawnRegion": "spawn-red-2", "color": "#d82215", "highlightColor": "#e85247" },
-      { "playerPrototype": "player", "spawnRegion": "spawn-red-3", "color": "#d82215", "highlightColor": "#e85247" }
     ]
   ],
   "attributes": {},

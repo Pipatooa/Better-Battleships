@@ -11,10 +11,7 @@ import type { Ship }             from '../../scenario/ship';
  * @param  ships Ships for the player to place
  */
 export function initiateRenderers(ships: Ship[]): void {
-    const colorAtlas = new ColorAtlas({
-        'moveValid': '#198754',
-        'moveOrigin': '#ffc107'
-    });
+    const colorAtlas = new ColorAtlas();
     colorAtlas.registerTeamColors();
     colorAtlas.registerPlayerColors();
     colorAtlas.registerTileColors(game.board!.tileTypes);

@@ -24,7 +24,9 @@
         "description": "Health of this ship"
       },
       "initialValue": 4,
-      "constraints": [],
+      "constraints": [{
+        "min": 0
+      }],
       "readonly": false
     }
   },

@@ -1,5 +1,5 @@
 import Joi                        from 'joi';
-import { builtinAttributePrefix } from '../../attributes/sources/builtin-attributes';
+import { builtinAttributePrefix } from 'shared/scenario/builtin-attribute-prefix';
 
 /**
  * Array of possible attribute reference types

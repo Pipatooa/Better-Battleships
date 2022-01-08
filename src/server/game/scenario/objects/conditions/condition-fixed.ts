@@ -1,8 +1,4 @@
-import { checkAgainstSchema }         from '../../schema-checker';
-import { Condition }                  from './condition';
-import { conditionFixedSchema }       from './sources/condition-fixed';
-import type { ParsingContext }        from '../../parsing-context';
-import type { IConditionFixedSource } from './sources/condition-fixed';
+import { Condition } from './condition';
 
 /**
  * ConditionFixed - Server Version
@@ -17,7 +13,7 @@ export class ConditionFixed extends Condition {
      * @param  result Result to return when checked
      * @protected
      */
-    protected constructor(public readonly result: boolean) {
+    public constructor(public readonly result: boolean) {
         super(false);
     }
 
@@ -28,26 +24,5 @@ export class ConditionFixed extends Condition {
      */
     public check(): boolean {
         return this.result;
-    }
-
-    /**
-     * Factory function to generate ConditionFixed from JSON scenario data
-     *
-     * @param    parsingContext       Context for resolving scenario data
-     * @param    conditionFixedSource JSON data for ConditionFixed
-     * @param    checkSchema          When true, validates source JSON data against schema
-     * @returns                       Created ConditionFixed object
-     */
-    public static async fromSource(parsingContext: ParsingContext, conditionFixedSource: IConditionFixedSource | boolean, checkSchema: boolean): Promise<ConditionFixed> {
-
-        // Boolean source
-        if (conditionFixedSource === true || conditionFixedSource === false)
-            return new ConditionFixed(conditionFixedSource);
-
-        // Validate JSON data against schema
-        if (checkSchema)
-            conditionFixedSource = await checkAgainstSchema(conditionFixedSource, conditionFixedSchema, parsingContext);
-
-        return new ConditionFixed(conditionFixedSource.result);
     }
 }
