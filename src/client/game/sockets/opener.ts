@@ -1,5 +1,5 @@
 import WebSocket                                    from 'isomorphic-ws';
-import { handleMessage }                            from './message-handler';
+import { handleServerEvent }                        from './server-event-handler';
 import type { CloseEvent, MessageEvent, OpenEvent } from 'isomorphic-ws';
 import type { IClientRequest }                      from 'shared/network/requests/i-client-request';
 
@@ -21,7 +21,7 @@ export function openSocketConnection(): void {
     // Register message handler for websocket
     ws.onmessage = (e: MessageEvent) => {
         console.log(`Message from server: ${e.data}`);
-        handleMessage(e);
+        handleServerEvent(e);
     };
 
     // Register close handler for websocket

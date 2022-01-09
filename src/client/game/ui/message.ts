@@ -1,16 +1,7 @@
+const messageContainer = $('#inner-message-container');
+
 let messages: Message[] = [];
 const messageLimit = 5;
-
-/**
- * Registers a set of listeners for message handling
- */
-export function registerMessageListeners(): void {
-    // Space to dismiss oldest message
-    document.addEventListener('keypress', (ev: KeyboardEvent) => {
-        if (ev.key === ' ')
-            messages.shift()?.deconstruct();
-    });
-}
 
 /**
  * Message - Client Version
@@ -19,7 +10,6 @@ export function registerMessageListeners(): void {
  */
 export class Message {
 
-    private static readonly messageContainer = $('#inner-message-container');
     private readonly element: JQuery;
 
     /**
@@ -39,7 +29,7 @@ export class Message {
     /**
      * Allows this object to be discarded
      */
-    public deconstruct(): void {
+    private deconstruct(): void {
         this.element.remove();
         messages = messages.filter(m => m !== this);
     }
@@ -55,14 +45,25 @@ export class Message {
         // Create elements
         const innerMessage = $('<p class="mb-0"></p>').text(message);
         const messageTextElement = $('<div class="py-2 px-3 my-auto me-auto"></div>').append(innerMessage);
-        const closeMessageButton = $('<div class="p-2 close-message"><b>×</b></div>');
+        const closeMessageButton = $('<div class="close-button p-2"><b>×</b></div>');
         const messageElement = $('<div class="d-flex message mb-2 rounded-3"></div>');
         messageElement.append(messageTextElement, closeMessageButton);
-        Message.messageContainer.append(messageElement);
+        messageContainer.append(messageElement);
 
         // Register event listeners
         closeMessageButton.on('click', () => this.deconstruct());
 
         return messageElement;
+    }
+
+    /**
+     * Registers a set of listeners for message handling
+     */
+    public static registerListeners(): void {
+        // Space to dismiss oldest message
+        document.addEventListener('keypress', (ev: KeyboardEvent) => {
+            if (ev.key === ' ')
+                messages.shift()?.deconstruct();
+        });
     }
 }

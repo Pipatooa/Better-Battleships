@@ -117,6 +117,7 @@ export class Ship implements IAttributeHolder, IBuiltinAttributeHolder<'ship'> {
         }
 
         this.unSpot();
+        this.updateOthers();
         this.board.removeShip(this);
     }
 

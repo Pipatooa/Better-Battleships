@@ -35,22 +35,26 @@
     position: absolute;
     z-index: 500;
 
-    pointer-events: none;
-
     font-size: 0.75rem;
 }
 
-#info-popup {
+#left-pane {
+    position: relative;
+}
+
+#popup {
     position: absolute;
     z-index: 1000;
 
-    width: inherit;
-    height: inherit;
-
-    top: 50%;
-    transform: translateY(-50%);
-
     pointer-events: none;
+}
+
+#popup > div {
+    pointer-events: auto;
+}
+
+.hotkey-list {
+    list-style: none;
 }
 
 #view-panel {
@@ -62,6 +66,8 @@
 
     bottom: 0;
     left: 0;
+
+    background: var(--main-container-background);
 }
 
 .view {
@@ -104,15 +110,36 @@
     height: min-content;
 }
 
-.message > .close-message {
-    background: var(--message-close-color);
-    color: var(--message-close-button-color);
-    font-size: 1.3rem;
+.message > .close-button {
+    cursor: pointer;
 
-    border-top-right-radius: .2rem;
-    border-bottom-right-radius: .2rem;
+    border-top-right-radius: .3rem;
+    border-bottom-right-radius: .3rem;
+
+    background: var(--message-close-color);
+    background-clip: padding-box;
+    color: var(--message-close-button-color);
+
+    font-size: 1.3rem;
+}
+
+#popup-buttons {
+    position: absolute;
+    z-index: 500;
+
+    bottom: 0;
+    right: 0;
+}
+
+.popup-button {
+    background: var(--main-container-background);
 
     cursor: pointer;
+}
+
+.popup-button > svg {
+    width: 1.5em;
+    height: 1.5em;
 }
 
 #sidebar-ship-section {
@@ -128,10 +155,6 @@
 #sidebar-ship-ability-container {
     grid-gap: 0.5em;
     grid-template-columns: repeat(auto-fill, minmax(2em, 1fr));
-}
-
-#info-popup-close-button {
-    pointer-events: auto;
 }
 
 .ability {

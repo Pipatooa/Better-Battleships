@@ -16,7 +16,7 @@ const { readdirSync }         = require('fs');
 
 const commonConfig = {
     resolve: {
-        extensions: ['.js', '.json', '.ts', '.d.ts', '.glsl', '.vert', '.frag'],
+        extensions: ['.js', '.json', '.ts', '.d.ts', '.glsl', '.vert', '.frag', '.html'],
         plugins: [PnpWebpackPlugin, new TsconfigPathsPlugin()]
     },
     resolveLoader: {
@@ -128,6 +128,10 @@ const webConfig = {
                     MiniCssExtractPlugin.loader,
                     'css-loader'
                 ]
+            },
+            {
+                test: /\.html$/,
+                loader: "html-loader"
             }
         ]
     },

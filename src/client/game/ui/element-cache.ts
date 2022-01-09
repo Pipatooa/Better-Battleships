@@ -52,3 +52,14 @@ export namespace SidebarElements {
     export const turnCountdownSection = new VariableVisibilityElement($('#sidebar-turn-countdown-section'));
     export const turnCountdown = $('#sidebar-turn-countdown');
 }
+
+/**
+ * Cache of all elements composing the info popup
+ */
+export namespace PopupElements {
+    export const popup = new VariableVisibilityElement($('#popup'));
+
+    export const title = $('#popup-title');
+    export const content = $('#popup-content');
+    export const closeButton = $('#popup-close-button');
+}

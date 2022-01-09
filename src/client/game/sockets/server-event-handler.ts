@@ -4,7 +4,7 @@ import { handleEnteringSetup }             from './event-handlers/entering-setup
 import { handleGameInfo }                  from './event-handlers/game-info';
 import { handleGameOver }                  from './event-handlers/game-over';
 import { handleGameStart }                 from './event-handlers/game-start';
-import { handleMessageEvent }              from './event-handlers/message';
+import { handleMessage }                   from './event-handlers/message';
 import { handlePlayerAttributeUpdate }     from './event-handlers/player-attribute-update';
 import { handlePlayerJoin }                from './event-handlers/player-join';
 import { handlePlayerLeave }               from './event-handlers/player-leave';
@@ -29,7 +29,7 @@ import type { ServerEvent, ServerEventID } from 'shared/network/events/server-ev
  *
  * @param  e Message event
  */
-export function handleMessage(e: MessageEvent): void {
+export function handleServerEvent(e: MessageEvent): void {
 
     // Unpack JSON request data
     const serverEvent = JSON.parse(e.data.toString()) as ServerEvent;
@@ -75,5 +75,5 @@ const handlers: Record<ServerEventID, (event: any) => void> = {
     shipRotate: handleShipRotate,
     teamAttributeUpdate: handleTeamAttributeUpdate,
     turnAdvancement: handleTurnAdvancement,
-    message: handleMessageEvent
+    message: handleMessage
 };

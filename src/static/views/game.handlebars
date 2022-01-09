@@ -89,43 +89,19 @@
         </div>
     </div>
     <div class="row h-100 mx-0 p-0 border-top border-dark">
-        <div class="col-10 p-0 border-end border-dark">
-            <div id="info-popup">
-                <div class="row">
-                    <div class="d-flex justify-content-center">
-                        <div class="col-8">
-                            <div class="d-flex flex-column">
-                                <div class="card mt-auto">
-                                    <div class="card-body">
-                                        <h5><b><span id="info-popup-title">Placing Ships</span>:</b></h5>
-                                        <div id="info-popup-content">
-                                            <p>
-                                                Ships to be placed are available on the sidebar (right of screen).
-                                                Cycle through the ships using the <kbd>Previous</kbd> and <kbd>Next</kbd> buttons and select a ship by clicking on it.
-                                                Stats for the different ships are shown on the sidebar including their name, description, attributes and abilities which are available to the ship.
-                                            </p>
-                                            <p>
-                                                Drag the ship to a suitable location on the board (left of screen) and click again to place the ship.
-                                                The ship can only be placed within the highlighted region, and must be placed on traversable tiles (indicated by a ✓ in the tooltip).
-                                                If the ship can be rotated, press <kbd>R</kbd> to rotate it.
-                                                To change the placement of a ship, click on it again to pick it back up.
-                                            </p>
-                                            <p>
-                                                Once you have placed all of your ships, hit the <kbd>Done</kbd> button.
-                                            </p>
-                                            <p>
-                                                To bring this prompt up again, click on the info button in the bottom left of the screen.
-                                            </p>
-                                        </div>
-                                        <button class="btn btn-dark" id="info-popup-close-button">OK</button>
-                                    </div>
-                                </div>
-                            </div>
+        <div class="col-10 p-0 border-end border-dark" id="left-pane">
+            <div class="d-flex w-100 h-100 d-none" id="popup">
+                <div class="w-75 m-auto">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5><b><span id="popup-title"></span>:</b></h5>
+                            <div id="popup-content"></div>
+                            <button class="btn btn-dark" id="popup-close-button">OK</button>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="main-container border-top border-end border-dark" id="view-panel">
+            <div class="border-top border-end border-dark" id="view-panel">
                 <div class="row text-center" id="view-container"></div>
             </div>
             <div id="message-container">
@@ -133,6 +109,20 @@
                     <div class="d-flex justify-content-center">
                         <div class="col-8" id="inner-message-container"></div>
                     </div>
+                </div>
+            </div>
+            <div class="d-flex p-1 justify-content-between" id="popup-buttons">
+                <div class="d-block popup-button p-2 me-1 rounded-3" id="hotkey-popup-button">
+                    <svg class="d-block bi bi-keyboard" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M14 5a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h12zM2 4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2H2z"/>
+                        <path d="M13 10.25a.25.25 0 0 1 .25-.25h.5a.25.25 0 0 1 .25.25v.5a.25.25 0 0 1-.25.25h-.5a.25.25 0 0 1-.25-.25v-.5zm0-2a.25.25 0 0 1 .25-.25h.5a.25.25 0 0 1 .25.25v.5a.25.25 0 0 1-.25.25h-.5a.25.25 0 0 1-.25-.25v-.5zm-5 0A.25.25 0 0 1 8.25 8h.5a.25.25 0 0 1 .25.25v.5a.25.25 0 0 1-.25.25h-.5A.25.25 0 0 1 8 8.75v-.5zm2 0a.25.25 0 0 1 .25-.25h1.5a.25.25 0 0 1 .25.25v.5a.25.25 0 0 1-.25.25h-1.5a.25.25 0 0 1-.25-.25v-.5zm1 2a.25.25 0 0 1 .25-.25h.5a.25.25 0 0 1 .25.25v.5a.25.25 0 0 1-.25.25h-.5a.25.25 0 0 1-.25-.25v-.5zm-5-2A.25.25 0 0 1 6.25 8h.5a.25.25 0 0 1 .25.25v.5a.25.25 0 0 1-.25.25h-.5A.25.25 0 0 1 6 8.75v-.5zm-2 0A.25.25 0 0 1 4.25 8h.5a.25.25 0 0 1 .25.25v.5a.25.25 0 0 1-.25.25h-.5A.25.25 0 0 1 4 8.75v-.5zm-2 0A.25.25 0 0 1 2.25 8h.5a.25.25 0 0 1 .25.25v.5a.25.25 0 0 1-.25.25h-.5A.25.25 0 0 1 2 8.75v-.5zm11-2a.25.25 0 0 1 .25-.25h.5a.25.25 0 0 1 .25.25v.5a.25.25 0 0 1-.25.25h-.5a.25.25 0 0 1-.25-.25v-.5zm-2 0a.25.25 0 0 1 .25-.25h.5a.25.25 0 0 1 .25.25v.5a.25.25 0 0 1-.25.25h-.5a.25.25 0 0 1-.25-.25v-.5zm-2 0A.25.25 0 0 1 9.25 6h.5a.25.25 0 0 1 .25.25v.5a.25.25 0 0 1-.25.25h-.5A.25.25 0 0 1 9 6.75v-.5zm-2 0A.25.25 0 0 1 7.25 6h.5a.25.25 0 0 1 .25.25v.5a.25.25 0 0 1-.25.25h-.5A.25.25 0 0 1 7 6.75v-.5zm-2 0A.25.25 0 0 1 5.25 6h.5a.25.25 0 0 1 .25.25v.5a.25.25 0 0 1-.25.25h-.5A.25.25 0 0 1 5 6.75v-.5zm-3 0A.25.25 0 0 1 2.25 6h1.5a.25.25 0 0 1 .25.25v.5a.25.25 0 0 1-.25.25h-1.5A.25.25 0 0 1 2 6.75v-.5zm0 4a.25.25 0 0 1 .25-.25h.5a.25.25 0 0 1 .25.25v.5a.25.25 0 0 1-.25.25h-.5a.25.25 0 0 1-.25-.25v-.5zm2 0a.25.25 0 0 1 .25-.25h5.5a.25.25 0 0 1 .25.25v.5a.25.25 0 0 1-.25.25h-5.5a.25.25 0 0 1-.25-.25v-.5z"/>
+                    </svg>
+                </div>
+                <div class="d-block popup-button p-2 rounded-3" id="info-popup-button">
+                    <svg class="d-block bi bi-info-circle" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+                        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                        <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
+                    </svg>
                 </div>
             </div>
             <div class="canvas-wrapper h-100">

@@ -1,10 +1,12 @@
-import { registerGameLinkHandlers }  from './game-link-tooltip';
-import { registerInfoPopupHandlers } from './info-popup';
-import { MainUIManager }             from './managers/main-ui-manager';
-import { ShipPlacerUiManager }       from './managers/ship-placer-ui-manager';
-import { initialiseViewManager }     from './managers/view-manager';
-import { registerMessageListeners }  from './message';
-import { ready }                     from './misc-buttons';
+import { registerGameLinkHandlers }      from './game-link-tooltip';
+import { registerInfoPopupHandlers }     from './info-popup';
+import { MainUIManager }                 from './managers/main-ui-manager';
+import { ShipPlacerUiManager }           from './managers/ship-placer-ui-manager';
+import { initialiseViewManager }         from './managers/view-manager';
+import { Message }                       from './message';
+import { ready }                         from './misc-buttons';
+import { Popup }                         from './popups/popup';
+import { registerSpecialPopupListeners } from './popups/special-popups';
 
 /**
  * Initiates all lobby UI managers
@@ -22,7 +24,10 @@ export function initiateLobbyUI(): void {
 export function initiateGameSetupUI(): void {
     registerInfoPopupHandlers();
     initialiseViewManager();
-    registerMessageListeners();
+
+    Popup.registerListeners();
+    Message.registerListeners();
+    registerSpecialPopupListeners();
 
     new ShipPlacerUiManager();
 }
