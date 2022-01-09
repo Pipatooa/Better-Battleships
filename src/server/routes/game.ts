@@ -1,6 +1,4 @@
-import console                  from 'console';
 import express                  from 'express';
-import { queryDatabase }        from '../db/query';
 import { queryGame }            from '../game/game-manager';
 import { requireAuth }          from '../middleware';
 import type { Game }            from '../game/game';
@@ -55,7 +53,7 @@ router.get('/:gameID', requireAuth, async (req, res) => {
         return;
     }
 
-    // Check for existing game session for user
+    /*// Check for existing game session for user
     const query = 'SELECT `current_session` FROM `user` WHERE `username` = ?';
     const rows = await queryDatabase(query, [ username ]);
 
@@ -63,7 +61,7 @@ router.get('/:gameID', requireAuth, async (req, res) => {
     if (rows.length !== 0) {
         console.log(rows);
         // TODO: Session reconnection
-    }
+    }*/
 
     // Deliver page content
     res.render('game', {

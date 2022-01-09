@@ -1,7 +1,7 @@
 import console                        from 'console';
 import { TimeoutManager }             from 'shared/timeout-manager';
-import config                         from '../config';
-import type { Player }                from './scenario/objects/player';
+import config                         from '../config/config';
+import { queryDatabase }              from '../db/query';
 import type { Scenario }              from './scenario/objects/scenario';
 import type { Client }                from './sockets/client';
 import type { ServerEvent }           from 'shared/network/events/server-event';
@@ -18,10 +18,10 @@ import type { IShipPrototypeInfo }    from 'shared/network/scenario/i-ship-proto
 export class Game {
 
     public readonly timeoutManager: TimeoutManager<'gameJoinTimeout' | 'startSetup'>;
-
     public clients: Client[] = [];
 
     protected _gamePhase: GamePhase = GamePhase.Lobby;
+    public gameOverCallback: ((reason: string) => void) | undefined;
 
     /**
      * Game constructor
@@ -34,18 +34,12 @@ export class Game {
                        public readonly gameID: string,
                        public readonly scenario: Scenario) {
 
-        scenario.game = this;
+        this.scenario.game = this;
 
         // Set timeout function for entering the setup phase of the game
         this.timeoutManager = new TimeoutManager({
             gameJoinTimeout: [() => {}, 0, false],
             startSetup: [() => this.startSetup(), config.gameStartWaitDuration, false]
-        });
-
-        // Set callback for turn advancements to notify clients
-        this.scenario.turnManager.turnAdvancementCallback = (player: Player) => this.broadcastEvent({
-            event: 'turnAdvancement',
-            player: player.client!.identity
         });
     }
 
@@ -282,13 +276,47 @@ export class Game {
      * Ends the game
      *
      * @param  winningTeamID Team that is declaring as having won the game
+     * @param  winMessage    Winning message to display to users
      */
-    public endGame(winningTeamID: string): void {
+    public endGame(winningTeamID: string, winMessage: string): void {
         this._gamePhase = GamePhase.Finished;
         this.broadcastEvent({
             event: 'gameOver',
-            winningTeam: winningTeamID
+            winningTeam: winningTeamID,
+            message: winMessage
         });
+
+        // Record game results
+        const queryStatementSections: string[] = [];
+        const values: (number | string | boolean)[] = [];
+        for (const client of this.clients) {
+            queryStatementSections.push('(?, ?, ?)');
+            values.push(this.internalID);
+            values.push(client.username);
+            values.push(!client.player!.team.lost);
+        }
+        const query1 = `UPDATE \`game\` SET \`complete\` = TRUE WHERE \`id\` = ${this.internalID};`;
+        const query2 = `INSERT INTO \`result\` (\`game_id\`, \`username\`, \`won\`) VALUES ${queryStatementSections.join(',')};`;
+        queryDatabase(query1).then(async () =>
+            queryDatabase(query2, values).then(() =>
+                this.killGame('Game over')
+            )
+        );
+    }
+
+    /**
+     * Ends the game without sending a message to clients
+     *
+     * @param  reason Reason that the game was terminated
+     */
+    public killGame(reason: string): void {
+        this._gamePhase = GamePhase.Killed;
+        for (const client of this.clients)
+            client.ws.close(1000);
+        this.clients = [];
+        this.gameOverCallback?.(reason);
+        this.timeoutManager.stopTimeout('gameJoinTimeout');
+        this.timeoutManager.stopTimeout('startSetup');
     }
 
     /**
@@ -319,5 +347,6 @@ export const enum GamePhase {
     EnteringSetup,
     Setup,
     InProgress,
-    Finished
+    Finished,
+    Killed
 }

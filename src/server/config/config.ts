@@ -1,13 +1,17 @@
-import assert from 'assert';
-import fs     from 'fs';
-import path   from 'path';
-import ms     from 'ms';
-import toml   from 'toml';
+import assert        from 'assert';
+import fs            from 'fs';
+import path          from 'path';
+import ms            from 'ms';
+import toml          from 'toml';
+import defaultConfig from './default-config.toml';
 
 /**
  * Container object containing values from config.tml file
  */
 export class Config {
+
+    public readonly port: number;
+
     public readonly gameLimit: number;
     public readonly gameIDLength: number;
     public readonly gameJoinTimeout: number;
@@ -36,8 +40,12 @@ export class Config {
 
         this.configRaw = configRaw;
 
+        // Server section
+        assert.deepStrictEqual(typeof configRaw.server, 'object', 'Config: could not find server section');
+        this.port = this.getFromConfig('number', 'server.port');
+
         // Game section
-        assert.deepStrictEqual(typeof configRaw.game, 'object', 'Config: could not find section game');
+        assert.deepStrictEqual(typeof configRaw.game, 'object', 'Config: could not find game section');
         this.gameLimit = this.getFromConfig('number', 'game.limit');
         this.gameIDLength = this.getFromConfig('number', 'game.idLength');
         this.gameJoinTimeout = this.getFromConfig('number', 'game.joinTimeout');
@@ -48,7 +56,7 @@ export class Config {
         this.evaluationActionLimit = this.getFromConfig('number', 'evaluation.actionLimit');
 
         // Sql section
-        assert.deepStrictEqual(typeof configRaw.sql, 'object', 'Config: could not find section sql');
+        assert.deepStrictEqual(typeof configRaw.sql, 'object', 'Config: could not find sql section');
         this.sqlHost = this.getFromConfig('string', 'sql.host');
         this.sqlUser = this.getFromConfig('string', 'sql.user');
         this.sqlPassword = this.getFromConfig('string', 'sql.password');
@@ -56,7 +64,7 @@ export class Config {
         this.sqlConnectionLimit = this.getFromConfig('number', 'sql.connectionLimit');
 
         // Auth section
-        assert.deepStrictEqual(typeof configRaw.sql, 'object', 'Config: could not find section auth');
+        assert.deepStrictEqual(typeof configRaw.sql, 'object', 'Config: could not find auth section');
         this.authHashRounds = this.getFromConfig('number', 'auth.hashRounds');
         this.authJwtSecretToken = this.getFromConfig('string', 'auth.jwtSecretToken');
         this.authJwtExpiryTimeSeconds = ms(this.getFromConfig('string', 'auth.jwtExpiryTime')) as unknown as number;
@@ -85,39 +93,12 @@ export class Config {
     }
 }
 
-/**
- * Default config
- */
-const defaultConfig = `
-[game]
-limit = 8
-idLength = 6
-joinTimeout = 5000
-startWaitDuration = 5000
-
-[evaluation]
-actionLimit = 50
-
-[sql]
-host = ""
-user = ""
-password = ""
-database = ""
-connectionLimit = 1
-
-[auth]
-hashRounds = 10
-jwtSecretToken = ""
-jwtExpiryTime = ""
-`.trimStart();
-
-
 // ----- On Module Load ----- //
 
 // If config file does not exist, create default config file
 const configFilePath = path.join(__dirname, './config.tml');
 if (!fs.existsSync(configFilePath))
-    fs.writeFileSync(configFilePath, defaultConfig);
+    fs.writeFileSync(configFilePath, defaultConfig, 'utf-8');
 
 // Parse config.tml file
 const configRaw = toml.parse(fs.readFileSync(configFilePath, 'utf-8'));

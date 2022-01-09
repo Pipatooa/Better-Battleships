@@ -3,7 +3,7 @@ import { checkRequestAuth }         from '../../auth/request-handler';
 import { GamePhase }                from '../game';
 import { queryGame }                from '../game-manager';
 import { Client }                   from './client';
-import { handleRequestFromMessage } from './message-handler';
+import { handleRequestFromMessage } from './request-handler';
 import type http                    from 'http';
 import type { IncomingMessage }     from 'http';
 import type WebSocket               from 'isomorphic-ws';
@@ -19,7 +19,7 @@ let currentConnections = 0;
  * @param  server HTTP server for upgrade handling
  * @param  wss    WebSocket server to register handlers for
  */
-export default function register(server: http.Server, wss: WebSocket.Server): void {
+export function registerWebsocketHandlers(server: http.Server, wss: WebSocket.Server): void {
 
     // Register upgrade handler
     server.on('upgrade', async (req: http.IncomingMessage, socket: Socket, head: Buffer) => {
@@ -79,8 +79,6 @@ export default function register(server: http.Server, wss: WebSocket.Server): vo
 
             // Join client to game
             game.joinClient(client);
-
-            // Increment connection count
             currentConnections++;
 
             // Broadcast connection event for connection handler

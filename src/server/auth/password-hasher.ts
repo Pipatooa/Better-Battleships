@@ -1,5 +1,5 @@
 import bcrypt from 'bcryptjs';
-import config from '../config';
+import config from '../config/config';
 
 /**
  * Returns a generated hash for a password

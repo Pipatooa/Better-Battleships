@@ -1,4 +1,3 @@
-import console                           from 'console';
 import { checkPassword, checkPassword2 } from './check-password';
 import { checkUsername }                 from './check-username';
 
@@ -56,15 +55,10 @@ export async function submitForm(formElement: JQuery,
         return;
     }
 
-    // If username was taken
-    if (registrationResponse.message === 'Username taken') {
-        usernameElement.addClass('is-invalid');
-        usernameFeedbackElement.html('Username taken');
-        return;
-    }
-
-    // Other failure mode
-    console.log(registrationResponse);
+    // Otherwise, display reason
+    usernameElement.addClass('is-invalid');
+    usernameFeedbackElement.text(registrationResponse.message);
+    return;
 }
 
 /**

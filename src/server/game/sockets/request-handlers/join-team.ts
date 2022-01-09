@@ -23,7 +23,7 @@ export async function handleJoinTeamRequest(client: Client, joinTeamRequest: IJo
 
     // If no team was found that matched the ID provided
     if (team === undefined) {
-        client.ws.close(1013, 'Team does not exist');
+        client.ws.close(1002, 'Team does not exist');
         return;
     }
 

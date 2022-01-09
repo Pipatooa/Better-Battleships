@@ -11,10 +11,7 @@ import type { IEndTurnRequest } from 'shared/network/requests/i-end-turn';
  */
 export async function handleEndTurnRequest(client: Client, endTurnRequest: IEndTurnRequest): Promise<void> {
 
-    if (client.game.gamePhase !== GamePhase.InProgress)
-        return;
-
-    if (client.game.scenario.turnManager.currentTurn !== client.player)
+    if (client.game.gamePhase !== GamePhase.InProgress || client.game.scenario.turnManager.currentTurn !== client.player)
         return;
 
     client.game.scenario.turnManager.advanceTurn(true);

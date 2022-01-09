@@ -1,0 +1,23 @@
+[server]
+port = 8080
+
+[game]
+limit = 8
+idLength = 6
+joinTimeout = 5000
+startWaitDuration = 5000
+
+[evaluation]
+actionLimit = 50
+
+[sql]
+host = ""
+user = ""
+password = ""
+database = ""
+connectionLimit = 1
+
+[auth]
+hashRounds = 10
+jwtSecretToken = ""
+jwtExpiryTime = ""

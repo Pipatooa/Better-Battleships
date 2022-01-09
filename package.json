@@ -69,6 +69,7 @@
     "nodemon-webpack-plugin": "^4.5.2",
     "optimize-css-assets-webpack-plugin": "^6.0.1",
     "pnp-webpack-plugin": "^1.7.0",
+    "raw-loader": "^4.0.2",
     "terser-webpack-plugin": "^5.1.4",
     "ts-loader": "^9.2.4",
     "ts-shader-loader": "^1.0.6",

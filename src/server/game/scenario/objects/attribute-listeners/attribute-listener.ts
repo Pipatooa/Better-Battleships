@@ -111,9 +111,6 @@ export class AttributeListener {
         const meetsConstraint = this.constraint.check(eventContext, eventContext.value);
         let shouldExecute: boolean;
 
-        console.log(this.attribute);
-        console.log(meetsConstraint, this.previouslyMetConstraint, this.triggerType);
-
         switch (this.triggerType) {
             case 'once':
                 shouldExecute = meetsConstraint && !this.previouslyMetConstraint;
@@ -127,8 +124,6 @@ export class AttributeListener {
                 this.previouslyMetConstraint = meetsConstraint;
                 break;
         }
-
-        console.log(shouldExecute);
 
         if (shouldExecute) {
             for (const action of this.actions)

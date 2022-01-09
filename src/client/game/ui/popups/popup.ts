@@ -13,13 +13,17 @@ export class Popup {
     /**
      * Popup constructor
      *
-     * @param  title   Title of the popup
-     * @param  message Message to display
-     * @param  special Whether the message contains raw html
+     * @param  title          Title of the popup
+     * @param  message        Message to display
+     * @param  special        Whether the message contains raw html
+     * @param  buttonText     Text to display within the popup dismissal button
+     * @param  buttonFunction Function to execute before popup closes
      */
     public constructor(private readonly title: string,
                        private readonly message: string,
-                       private readonly special: boolean) {
+                       private readonly special: boolean,
+                       private readonly buttonText: string = 'OK',
+                       private readonly buttonFunction: () => boolean = () => true) {
 
         // If special, show immediately
         // Currently shown popup will be re-queued unless it is also special
@@ -70,6 +74,12 @@ export class Popup {
                 PopupElements.content.append(paragraph);
             }
 
+        PopupElements.closeButton.text(this.buttonText);
+        PopupElements.closeButton.on('click', () => {
+            if (this.buttonFunction())
+                Popup.nextPopup();
+        });
+
         PopupElements.popup.setVisibility(true);
     }
 
@@ -80,10 +90,9 @@ export class Popup {
 
         // Esc to dismiss popup
         document.addEventListener('keydown', (ev: KeyboardEvent) => {
-            if (ev.key === 'Escape')
-                Popup.nextPopup();
+            if (ev.key === 'Escape' && currentPopup !== undefined)
+                if (currentPopup.buttonFunction())
+                    Popup.nextPopup();
         });
-
-        PopupElements.closeButton.on('click', () => Popup.nextPopup());
     }
 }

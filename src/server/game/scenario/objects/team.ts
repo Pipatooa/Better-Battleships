@@ -40,6 +40,7 @@ export class Team implements IAttributeHolder, IBuiltinAttributeHolder<'team'> {
      * @param  scenario          Scenario that this player belongs to
      * @param  id                ID for team
      * @param  descriptor        Descriptor for team
+     * @param  winMessage        Message to display to clients when the game is won by this team
      * @param  _playerPrototypes Array of potential players for the team
      * @param  color             Team color
      * @param  highlightColor    Team color when highlighted
@@ -50,6 +51,7 @@ export class Team implements IAttributeHolder, IBuiltinAttributeHolder<'team'> {
     public constructor(public readonly scenario: Scenario,
                        public readonly id: string,
                        public readonly descriptor: Descriptor,
+                       public readonly winMessage: string,
                        protected _playerPrototypes: Player[][],
                        public readonly color: string,
                        public readonly highlightColor: string,
@@ -145,7 +147,7 @@ export class Team implements IAttributeHolder, IBuiltinAttributeHolder<'team'> {
         parsingContext.localAttributes.team = undefined;
         parsingContext.teamPartial = undefined;
         EventRegistrar.call(eventRegistrarPartial, eventListeners, []);
-        Team.call(teamPartial, parsingContext.scenarioPartial as Scenario, id, descriptor, playerPrototypes, teamSource.color, teamSource.highlightColor, eventRegistrarPartial, attributes, builtinAttributes);
+        Team.call(teamPartial, parsingContext.scenarioPartial as Scenario, id, descriptor, teamSource.winMessage, playerPrototypes, teamSource.color, teamSource.highlightColor, eventRegistrarPartial, attributes, builtinAttributes);
         return teamPartial as Team;
     }
 

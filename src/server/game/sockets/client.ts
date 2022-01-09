@@ -19,6 +19,7 @@ export class Client {
     public ready = false;
     public shipsPlaced = false;
 
+    public readonly username: string;
     public readonly identity: string;
 
     /**
@@ -36,7 +37,8 @@ export class Client {
         this.id = v4();
 
         // Create an identity string from auth
-        this.identity = `user:${authPayload.username}`;
+        this.username = authPayload.username;
+        this.identity = `user:${this.username}`;
     }
 
     /**

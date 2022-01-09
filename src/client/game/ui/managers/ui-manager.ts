@@ -211,8 +211,6 @@ export abstract class UIManager {
     private updateVisibilityView(): void {
 
         game.board!.informationGenerator!.clearHighlight();
-
-        console.log(this._heldShip, this._selectedShip);
         
         // Client is not holding a ship and no ship on the board is selected
         if (this._heldShip === undefined && (!this.includeSelectedShipInVisibilityView || this._selectedShip === undefined))

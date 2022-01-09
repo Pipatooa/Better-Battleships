@@ -3,7 +3,7 @@ import formidable          from 'formidable';
 import Joi                 from 'joi';
 import { checkPassword }   from '../auth/password-hasher';
 import { signNewJwtToken } from '../auth/token-handler';
-import config              from '../config';
+import config              from '../config/config';
 import { queryDatabase }   from '../db/query';
 import { preventCSRF }     from '../middleware';
 

@@ -14,7 +14,6 @@ export class TurnManager {
     private turnIndex = 0;
 
     private readonly timeoutManager: TimeoutManager<'turnTimeout'>;
-    public turnAdvancementCallback: ((player: Player) => any) | undefined;
 
     /**
      * TurnManager constructor
@@ -112,8 +111,17 @@ export class TurnManager {
             this.scenario.eventRegistrar.evaluateEvents();
 
         this.timeoutManager.startTimeout('turnTimeout');
-        if (this.turnAdvancementCallback !== undefined)
-            this.turnAdvancementCallback(newPlayer);
+        this.scenario.game?.broadcastEvent({
+            event: 'turnAdvancement',
+            player: newPlayer.client!.identity
+        });
+    }
+
+    /**
+     * Stops automatic turn advancement from occurring
+     */
+    public stop(): void {
+        this.timeoutManager.stopTimeout('turnTimeout');
     }
 
     /**

@@ -1,13 +1,8 @@
-import Joi            from 'joi';
-import {
-    IndexedAbility
-}                      from 'server/game/scenario/objects/abilities/indexed-ability';
-import {
-    baseRequestSchema
-}                      from 'shared/network/requests/i-client-request';
-import {
-    PositionedAbility
-}                      from '../../scenario/objects/abilities/positioned-ability';
+import Joi                          from 'joi';
+import { IndexedAbility }           from 'server/game/scenario/objects/abilities/indexed-ability';
+import { baseRequestSchema }        from 'shared/network/requests/i-client-request';
+import { GamePhase }                from '../../game';
+import { PositionedAbility }        from '../../scenario/objects/abilities/positioned-ability';
 import type { Client }              from '../client';
 import type {
     IUseAbilityRequest,
@@ -23,8 +18,8 @@ import type {
  */
 export async function handleUseAbilityRequest(client: Client, useAbilityRequest: IUseAbilityRequest): Promise<void> {
 
-    // Check if it is the player's turn
-    if (client.game.scenario.turnManager.currentTurn !== client.player)
+    // Check if game is in progress and that it is the player's turn
+    if (client.game.gamePhase !== GamePhase.InProgress || client.game.scenario.turnManager.currentTurn !== client.player)
         return;
 
     const ship = client.player.ships[useAbilityRequest.ship];

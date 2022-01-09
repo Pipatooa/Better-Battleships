@@ -3,6 +3,7 @@
     "name": "Blue Team",
     "description": "This is the blue team"
   },
+  "winMessage": "Something about blue team winning!",
   "color": "#072547",
   "highlightColor": "#3378c6",
   "playerConfigs": [

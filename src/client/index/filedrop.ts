@@ -93,5 +93,4 @@ export async function setFileFromDownload(url: string): Promise<void> {
 
     const data = await res.blob();
     file = new File([data], 'scenario.zip');
-    console.log(file);
 }

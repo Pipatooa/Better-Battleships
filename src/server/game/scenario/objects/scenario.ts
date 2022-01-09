@@ -193,7 +193,8 @@ export class Scenario implements IAttributeHolder, IBuiltinAttributeHolder<'scen
         }
 
         this.eventRegistrar.eventEvaluationState!.terminate = true;
-        this.game!.endGame(winningTeam!.id);
+        this.turnManager.stop();
+        this.game!.endGame(winningTeam!.id, winningTeam!.winMessage);
         return true;
     }
 }

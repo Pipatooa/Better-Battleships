@@ -17,6 +17,4 @@ export function copyToClipboard(text: string): void {
 
     // Remove temporary element
     temp.remove();
-
-    console.log(text);
 }

@@ -5,5 +5,6 @@ import type { IBaseServerEvent } from './server-event';
  */
 export interface IGameOverEvent extends IBaseServerEvent {
     event: 'gameOver',
-    winningTeam: string
+    winningTeam: string,
+    message: string
 }

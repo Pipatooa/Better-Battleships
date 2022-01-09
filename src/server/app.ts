@@ -1,15 +1,16 @@
-import http                       from 'http';
-import path                       from 'path';
-import process                    from 'process';
-import cookieParser               from 'cookie-parser';
-import express                    from 'express';
-import exphbs                     from 'express-handlebars';
-import WebSocket                  from 'isomorphic-ws';
-import { executeDBStartupScript } from './db/startup';
-import { findAvailableIcons }     from './game/scenario/objects/abilities/icons';
+import http                          from 'http';
+import path                          from 'path';
+import process                       from 'process';
+import cookieParser                  from 'cookie-parser';
+import express                       from 'express';
+import exphbs                        from 'express-handlebars';
+import WebSocket                     from 'isomorphic-ws';
+import config                        from './config/config';
+import { executeDBStartupScript }    from './db/startup';
+import { findAvailableIcons }        from './game/scenario/objects/abilities/icons';
+import { registerWebsocketHandlers } from './game/sockets/register-handlers';
 
-import socketRegister from './game/sockets/register';
-
+// Routers
 import gameRouter         from './routes/game';
 import gameCreateRouter   from './routes/game/create';
 import gameNotFoundRouter from './routes/game/notfound';
@@ -18,7 +19,7 @@ import loginRouter        from './routes/login';
 import registerRouter     from './routes/register';
 
 const app = express();
-const port = 8080;
+const port = config.port;
 
 // Set current working directory to be where this file is located
 process.chdir(__dirname);
@@ -55,7 +56,7 @@ executeDBStartupScript().then(() => {
     app.use('/register', registerRouter);
 
     // Register socket handles for the websocket server
-    socketRegister(server, wss);
+    registerWebsocketHandlers(server, wss);
 
     // Start the server
     server.listen(port, () => {

@@ -13,7 +13,6 @@ const { readdirSync }         = require('fs');
 /**
  * Common config
  */
-
 const commonConfig = {
     resolve: {
         extensions: ['.js', '.json', '.ts', '.d.ts', '.glsl', '.vert', '.frag', '.html'],
@@ -27,7 +26,6 @@ const commonConfig = {
 /**
  * Webpack Node config
  */
-
 const nodeConfig = {
     name: 'node',
     entry: './src/server/app.ts',
@@ -35,8 +33,12 @@ const nodeConfig = {
     module: {
         rules: [
             {
-                test: /.*\.ts$/,
+                test: /\.ts$/,
                 use: 'ts-loader'
+            },
+            {
+                test: /\.toml$/,
+                use: 'raw-loader'
             }
         ]
     },
@@ -75,7 +77,6 @@ const nodeConfig = {
 /**
  * Webpack web config
  */
-
 const scenarioDirs = readdirSync('./src/static/scenarios', { withFileTypes: true })
     .filter(entry => entry.isDirectory())
     .map(entry => entry.name);

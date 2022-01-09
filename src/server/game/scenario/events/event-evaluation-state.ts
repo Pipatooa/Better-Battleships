@@ -1,4 +1,4 @@
-import config              from 'server/config';
+import config              from 'server/config/config';
 import { EvaluationError } from '../errors/evaluation-error';
 
 /**

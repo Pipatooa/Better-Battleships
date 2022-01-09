@@ -1,5 +1,5 @@
 import console           from 'console';
-import config            from '../config';
+import config            from '../config/config';
 import { queryDatabase } from '../db/query';
 import { Game }          from './game';
 import type { Scenario } from './scenario/objects/scenario';
@@ -27,7 +27,7 @@ function generateGameID(): string {
     // Generate IDs until an ID which isn't used has been generated
     do {
         gameID = Math.random().toString().substr(2, config.gameIDLength);
-    } while (gameID in games);
+    } while (games[gameID] !== undefined);
 
     // Return unique game ID
     return gameID;
@@ -64,6 +64,9 @@ export async function createGame(scenario: Scenario): Promise<Game> {
     game.timeoutManager.setTimeoutFunction('gameJoinTimeout', () => removeGame(gameID, 'Timed out'), config.gameJoinTimeout, false);
     game.timeoutManager.startTimeout('gameJoinTimeout');
 
+    // When the game ends, remove it
+    game.gameOverCallback = (reason: string) => removeGame(gameID, reason);
+
     // Debug
     console.log(`Created game with id '${gameID}'. Current games: ${numGames}`);
 
@@ -80,7 +83,8 @@ export async function createGame(scenario: Scenario): Promise<Game> {
 export function removeGame(gameID: string, reason: string): void {
 
     // Remove the game and decrement number of concurrent games
-    delete games[gameID];
+    if (!delete games[gameID])
+        return;
     numGames--;
 
     // Debug

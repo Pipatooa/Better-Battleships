@@ -15,6 +15,7 @@ import type { TeamEvent }              from '../events/team-events';
  */
 export interface ITeamSource extends IAttributeHolderSource {
     descriptor: IDescriptorSource,
+    winMessage: string,
     color: string,
     highlightColor: string,
     playerConfigs: IPlayerConfig[][],
@@ -36,6 +37,7 @@ export interface IPlayerConfig {
  */
 export const teamSchema = Joi.object({
     descriptor: descriptorSchema.required(),
+    winMessage: Joi.string().required(),
     color: colorSchema.required(),
     highlightColor: colorSchema.required(),
     playerConfigs: Joi.array().items(Joi.array().items(Joi.object({
