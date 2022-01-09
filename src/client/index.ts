@@ -1,6 +1,7 @@
-import { createCustomGame }                  from './index/create-custom-game';
-import { bindFileDrop, setFileFromDownload } from './index/filedrop';
-import { joinGame }                          from './index/join-game';
+import { createCustomGame }                        from './index/create-custom-game';
+import { bindFileDrop, setFileFromDownload }       from './index/filedrop';
+import { joinGame }                                from './index/join-game';
+import { createBuiltinGame, showBuiltinScenarios } from './index/show-builtin-scenarios';
 
 $(document).ready(async () => {
 
@@ -15,11 +16,14 @@ $(document).ready(async () => {
     const errorMessageElement = $('#error-message');
     const errorContextElement = $('#error-context');
 
-    // If default scenario flag is set, auto-submit form
+    // If scenario flag is set, auto-submit form
     if (searchParams.has('scenario')) {
         await setFileFromDownload(`/scenarios/${searchParams.get('scenario')}.zip`);
         await createCustomGame(errorContainer, errorMessageElement, errorContextElement);
     }
+
+    // Load built-in scenarios
+    await showBuiltinScenarios();
 
     // Selected tab listener
     type SelectedTab = 'nav-scenario-built-in-tab' | 'nav-scenario-custom-tab';
@@ -30,9 +34,11 @@ $(document).ready(async () => {
     $('#create-game-button').on('click', async () => {
         switch (selectedTab) {
             case 'nav-scenario-built-in-tab':
+                await createBuiltinGame(errorContainer, errorMessageElement, errorContextElement);
                 break;
             case 'nav-scenario-custom-tab':
                 await createCustomGame(errorContainer, errorMessageElement, errorContextElement);
+                break;
         }
     });
 

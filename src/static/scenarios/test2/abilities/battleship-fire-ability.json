@@ -1,0 +1,119 @@
+{
+  "type": "fire",
+  "descriptor": {
+    "name": "Broadside Fire",
+    "description": "The Battleship's broadside fire deals 3-5 damage across multiple cells. Cooldown of 1 turns. On hit, cooldown of 2 turns."
+  },
+  "icon": "exclamation-diamond",
+  "selectionPattern": {
+    "size": [9, 5],
+    "values": {
+      ".": 0,
+      "#": 1
+    },
+    "pattern": [
+      "###...###",
+      "###...###",
+      "###...###",
+      "###...###",
+      "###...###"
+    ]
+  },
+  "effectPattern": {
+    "size": [3, 3],
+    "values": {
+      ".": 0,
+      "#": -3,
+      "=": -5
+    },
+    "pattern": [
+      ".#.",
+      "#=#",
+      ".#."
+    ]
+  },
+  "displayEffectPatternValues": true,
+  "condition": {
+    "type": "valueMeetsConstraint",
+    "value": {
+      "type": "attributeReference",
+      "attribute": "local:ability.cooldown"
+    },
+    "constraint": {
+      "exactly": 0
+    }
+  },
+  "actions": {
+    "onTurnStart": [
+      {
+        "type": "setAttribute",
+        "priority": 0,
+        "condition": {},
+        "attribute": "local:ability.cooldown",
+        "value": {
+          "type": "sum",
+          "values": [
+            {
+              "type": "attributeReference",
+              "attribute": "local:ability.cooldown"
+            },
+            -1
+          ]
+        }
+      }
+    ],
+    "onUse": [
+      {
+        "type": "setAttribute",
+        "priority": 0,
+        "condition": {},
+        "attribute": "local:ability.cooldown",
+        "value": 1
+      }
+    ],
+    "onHit": [
+      {
+        "type": "setAttribute",
+        "priority": -1,
+        "condition": {},
+        "attribute": "local:ability.cooldown",
+        "value": 2
+      },
+      {
+        "type": "setAttribute",
+        "priority": 0,
+        "condition": {},
+        "attribute": "foreign:ship.health",
+        "value": {
+          "type": "sum",
+          "values": [
+            {
+              "type": "attributeReference",
+              "attribute": "foreign:ship.health"
+            },
+            {
+              "type": "attributeReference",
+              "attribute": "local:event.@patternValue"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "attributes": {
+    "cooldown": {
+      "descriptor": {
+        "name": "Cooldown",
+        "description": "Number of turns until this ability can be used again"
+      },
+      "initialValue": 0,
+      "constraints": [
+        {
+          "min": 0
+        }
+      ],
+      "readonly": false
+    }
+  },
+  "attributeListeners": []
+}

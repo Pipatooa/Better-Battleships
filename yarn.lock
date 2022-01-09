@@ -1320,6 +1320,7 @@ __metadata:
     webpack-cli: ^4.7.2
     webpack-files-archive-plugin: ^1.0.1
     ws: ^8.0.0
+    yaml: ^1.10.2
     zip-file-webpack-plugin: ^1.2.0
   languageName: unknown
   linkType: soft

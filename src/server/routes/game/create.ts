@@ -100,6 +100,10 @@ router.post('/', preventCSRF, requireAuth, async (req, res) => {
                 context: 'An error occurred whilst trying to parse the request'
             });
             return;
+
+        } finally {
+            // Remove scenario file
+            await new Promise<void>((resolve) => fs.unlink(file.path, () => resolve()));
         }
 
         // Create a new game

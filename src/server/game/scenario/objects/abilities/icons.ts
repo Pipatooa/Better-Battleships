@@ -9,13 +9,9 @@ const iconsAvailable = new Set();
  * Finds icons which are available for use in scenarios
  */
 export function findAvailableIcons(): void {
-    fs.readdir(iconDirectory, (err, files) => {
-        if (err)
-            throw err;
-
-        for (const file of files)
-            iconsAvailable.add(file.replace(/.svg$/, ''));    
-    });
+    const files = fs.readdirSync(iconDirectory);
+    for (const file of files)
+        iconsAvailable.add(file.replace(/.svg$/, ''));
 }
 
 /**

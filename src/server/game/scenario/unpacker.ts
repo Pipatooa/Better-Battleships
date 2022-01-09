@@ -59,7 +59,7 @@ export async function unpack(fileJSON: FileJSON): Promise<Scenario> {
     // Create parsing context
     const parsingContext = new ParsingContext(fileJSON, boardEntry, foreignAttributesRegistryEntry, teamEntries, playerPrototypeEntries, shipEntries, abilityEntries);
 
-    // Scenario data
+    // Parse scenario data
     const scenarioEntry: IZipEntry = await getEntryFromZip(scenarioZip, 'scenario.json');
     const scenarioSource: IScenarioSource = await getJSONFromEntry(scenarioEntry) as unknown as IScenarioSource;
     return await Scenario.fromSource(parsingContext.withFile('scenario.json'), scenarioSource, true);
@@ -89,13 +89,13 @@ async function getEntryFromZip(zip: AdmZip, name: string): Promise<IZipEntry> {
  * @param    zipEntry ZIP Entry to decompress and parse JSON data
  * @returns           JSON data returned from ZIP entry
  */
-export async function getJSONFromEntry(zipEntry: IZipEntry): Promise<JSON> {
-    return new Promise<JSON>((resolve, reject) => {
+export async function getJSONFromEntry(zipEntry: IZipEntry): Promise<Record<string, unknown>> {
+    return new Promise<Record<string, unknown>>((resolve, reject) => {
 
         // Decompress and retrieve data
         zipEntry.getDataAsync(async (data: Buffer) => {
             // Try to parse data as JSON
-            let json: JSON;
+            let json: Record<string, unknown>;
             try {
                 json = await JSON.parse(data.toString());
             } catch (e: unknown) {

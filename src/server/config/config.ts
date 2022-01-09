@@ -5,12 +5,16 @@ import ms            from 'ms';
 import toml          from 'toml';
 import defaultConfig from './default-config.toml';
 
+const configFilePath = path.join(__dirname, './config.toml');
+
 /**
  * Container object containing values from config.tml file
  */
 export class Config {
 
     public readonly port: number;
+    public readonly siteName: string;
+    public readonly baseUrl: string;
 
     public readonly gameLimit: number;
     public readonly gameIDLength: number;
@@ -43,6 +47,8 @@ export class Config {
         // Server section
         assert.deepStrictEqual(typeof configRaw.server, 'object', 'Config: could not find server section');
         this.port = this.getFromConfig('number', 'server.port');
+        this.siteName = this.getFromConfig('string', 'server.siteName');
+        this.baseUrl = this.getFromConfig('string', 'server.baseUrl');
 
         // Game section
         assert.deepStrictEqual(typeof configRaw.game, 'object', 'Config: could not find game section');
@@ -96,11 +102,11 @@ export class Config {
 // ----- On Module Load ----- //
 
 // If config file does not exist, create default config file
-const configFilePath = path.join(__dirname, './config.tml');
 if (!fs.existsSync(configFilePath))
     fs.writeFileSync(configFilePath, defaultConfig, 'utf-8');
 
 // Parse config.tml file
-const configRaw = toml.parse(fs.readFileSync(configFilePath, 'utf-8'));
+const contents = fs.readFileSync(configFilePath, 'utf-8');
+const configRaw = toml.parse(contents);
 const config = new Config(configRaw);
 export default config;

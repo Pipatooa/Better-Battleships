@@ -1,0 +1,16 @@
+{
+  "author": "Bradley Hall",
+  "descriptor": {
+    "name": "Test Scenario 2",
+    "description": "This is a second scenario."
+  },
+  "teams": [
+    "blue",
+    "red"
+  ],
+  "turnOrdering": "team",
+  "maxTurnTime": 120,
+  "attributes": {},
+  "attributeListeners": [],
+  "actions": {}
+}

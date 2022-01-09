@@ -7,19 +7,20 @@ import exphbs                        from 'express-handlebars';
 import WebSocket                     from 'isomorphic-ws';
 import config                        from './config/config';
 import { executeDBStartupScript }    from './db/startup';
+import { findAvailableScenarios }    from './game/scenario/builtin-scenarios';
 import { findAvailableIcons }        from './game/scenario/objects/abilities/icons';
 import { registerWebsocketHandlers } from './game/sockets/register-handlers';
 
 // Routers
-import gameRouter         from './routes/game';
-import gameCreateRouter   from './routes/game/create';
-import gameNotFoundRouter from './routes/game/notfound';
-import indexRouter        from './routes/index';
-import loginRouter        from './routes/login';
-import registerRouter     from './routes/register';
+import gameRouter          from './routes/game';
+import gameCreateRouter    from './routes/game/create';
+import gameNotFoundRouter  from './routes/game/notfound';
+import indexRouter         from './routes/index';
+import loginRouter         from './routes/login';
+import registerRouter      from './routes/register';
+import scenariosListRouter from './routes/scenarios/list';
 
 const app = express();
-const port = config.port;
 
 // Set current working directory to be where this file is located
 process.chdir(__dirname);
@@ -27,7 +28,8 @@ process.chdir(__dirname);
 // Execute database startup script
 executeDBStartupScript().then(() => {
 
-    // Find icons for use in scenarios
+    // Find scenario data
+    findAvailableScenarios();
     findAvailableIcons();
 
     // Create a http server and an accompanying websocket server
@@ -40,8 +42,8 @@ executeDBStartupScript().then(() => {
     app.set('view engine', 'handlebars');
 
     // Set handlebars variables
-    app.locals.siteName = 'Better Battleships';
-    app.locals.baseUrl = 'http://localhost:8080';
+    app.locals.siteName = config.siteName;
+    app.locals.baseUrl = config.baseUrl;
 
     // Express middleware setup
     app.use(express.static(path.join(process.cwd(), 'public')));
@@ -54,13 +56,14 @@ executeDBStartupScript().then(() => {
     app.use('/game', gameRouter);
     app.use('/login', loginRouter);
     app.use('/register', registerRouter);
+    app.use('/scenarios/list', scenariosListRouter);
 
     // Register socket handles for the websocket server
     registerWebsocketHandlers(server, wss);
 
     // Start the server
-    server.listen(port, () => {
+    server.listen(config.port, () => {
         const datetime = new Date();
-        console.log(`Started server on port ${port}. The time is ${datetime.toLocaleTimeString()}`);
+        console.log(`Started server on port ${config.port}. The time is ${datetime.toLocaleTimeString()}`);
     });
 });
