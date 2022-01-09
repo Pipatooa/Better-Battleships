@@ -2,7 +2,7 @@ import type { MultipleAttributeInfo } from '../scenario/i-attribute-info';
 import type { IBoardInfo }            from '../scenario/i-board-info';
 import type { IPlayerInfo }           from '../scenario/i-player-info';
 import type { IShipPrototypeInfo }    from '../scenario/i-ship-prototype-info';
-import type { IBaseServerEvent }      from './i-server-event';
+import type { IBaseServerEvent }      from './server-event';
 
 /**
  * Event sent when the setup phase of the game begins

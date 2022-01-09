@@ -1,5 +1,5 @@
 import type { IAttributeUpdateEvent } from './i-attribute-update';
-import type { IBaseServerEvent }      from './i-server-event';
+import type { IBaseServerEvent }      from './server-event';
 
 /**
  * Event sent when the attributes on a team change

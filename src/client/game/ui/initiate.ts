@@ -3,6 +3,7 @@ import { registerInfoPopupHandlers } from './info-popup';
 import { MainUIManager }             from './managers/main-ui-manager';
 import { ShipPlacerUiManager }       from './managers/ship-placer-ui-manager';
 import { initialiseViewManager }     from './managers/view-manager';
+import { registerMessageListeners }  from './message';
 import { ready }                     from './misc-buttons';
 
 /**
@@ -21,6 +22,7 @@ export function initiateLobbyUI(): void {
 export function initiateGameSetupUI(): void {
     registerInfoPopupHandlers();
     initialiseViewManager();
+    registerMessageListeners();
 
     new ShipPlacerUiManager();
 }

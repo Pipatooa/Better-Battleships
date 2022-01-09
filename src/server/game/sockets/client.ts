@@ -4,7 +4,7 @@ import type { Game }         from '../game';
 import type { Player }       from '../scenario/objects/player';
 import type { Team }         from '../scenario/objects/team';
 import type WebSocket        from 'isomorphic-ws';
-import type { IServerEvent } from 'shared/network/events/i-server-event';
+import type { ServerEvent }  from 'shared/network/events/server-event';
 
 /**
  * Client - Server Version
@@ -44,7 +44,7 @@ export class Client {
      *
      * @param  serverEvent Event to send to the client
      */
-    public sendEvent(serverEvent: IServerEvent): void {
+    public sendEvent(serverEvent: ServerEvent): void {
         this.ws.send(JSON.stringify(serverEvent));
     }
 }

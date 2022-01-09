@@ -4,7 +4,7 @@ import config                         from '../config';
 import type { Player }                from './scenario/objects/player';
 import type { Scenario }              from './scenario/objects/scenario';
 import type { Client }                from './sockets/client';
-import type { IServerEvent }          from 'shared/network/events/i-server-event';
+import type { ServerEvent }           from 'shared/network/events/server-event';
 import type { MultipleAttributeInfo } from 'shared/network/scenario/i-attribute-info';
 import type { IBoardInfo }            from 'shared/network/scenario/i-board-info';
 import type { IPlayerInfo }           from 'shared/network/scenario/i-player-info';
@@ -296,7 +296,7 @@ export class Game {
      *
      * @param  serverEvent Event to broadcast
      */
-    public broadcastEvent(serverEvent: IServerEvent): void {
+    public broadcastEvent(serverEvent: ServerEvent): void {
         for (const client of this.clients) {
             client.sendEvent(serverEvent);
         }

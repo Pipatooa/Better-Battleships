@@ -10,6 +10,11 @@ export class AttributeCollection {
     public readonly shouldDisplay: boolean;
     private elements: [JQuery, { [name: string]: [JQuery, JQuery] }][] = [];
 
+    /**
+     * AttributeCollection constructor
+     *
+     * @param  attributes Dictionary mapping attribute names to attribute information
+     */
     public constructor(private readonly attributes: MultipleAttributeInfo) {
         this.shouldDisplay = Object.entries(this.attributes).length > 0;
     }
@@ -26,7 +31,7 @@ export class AttributeCollection {
             const name = attributeInfo.descriptor.name;
             const value = AttributeCollection.convertToDisplayForm(attributeInfo.value);
             for (const elementSet of this.elements) {
-                const [nameElement, attributeElement] = elementSet[1][name];
+                const [ nameElement, attributeElement ] = elementSet[1][name];
                 nameElement.text(`${name}: `);
                 attributeElement.text(value);
             }
@@ -102,5 +107,15 @@ export class AttributeCollection {
         }
 
         return `${prefix}${middle.toPrecision(5).replace(/(?:\.0+|(\.\d+?)0+)$/, '$1')}${suffix}`;
+    }
+
+    /**
+     * Retrieves the value for an attribute
+     *
+     * @param    attributeName Name of attribute
+     * @returns                Value of the attribute
+     */
+    public getValue(attributeName: string): number {
+        return this.attributes[attributeName].value;
     }
 }

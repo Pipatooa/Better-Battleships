@@ -1,12 +1,12 @@
-import { game }                                                   from '../../game';
-import { selfPlayer }                                             from '../../player';
-import { TooltipElements }                                        from '../element-cache';
-import { updateSidebarShipSection }                               from '../updaters/sidebar-updater';
-import { updateTooltip }                                          from '../updaters/tooltip-updater';
-import { createView, currentView, updateCurrentView, viewExists } from './view-manager';
-import type { Ability }                                           from '../../scenario/abilities/ability';
-import type { Tile }                                              from '../../scenario/board';
-import type { Ship }                                              from '../../scenario/ship';
+import { game }                                      from '../../game';
+import { selfPlayer }                                from '../../player';
+import { TooltipElements }                           from '../element-cache';
+import { updateSidebarShipSection }                  from '../updaters/sidebar-updater';
+import { updateTooltip }                             from '../updaters/tooltip-updater';
+import { createView, updateCurrentView, viewExists } from './view-manager';
+import type { Ability }                              from '../../scenario/abilities/ability';
+import type { Tile }                                 from '../../scenario/board';
+import type { Ship }                                 from '../../scenario/ship';
 
 /**
  * UIManager - Client Version
@@ -73,11 +73,7 @@ export abstract class UIManager {
         game.abilityRenderer!.viewportHandler.canvas.addEventListener('mouseleave', this.abilityCanvasLeaveListener);
 
         if (!viewExists('Visibility'))
-            createView('Visibility', () => {
-                this.updateVisibilityView();
-                game.board!.informationGenerator!.push();
-                game.gameRenderer!.renderNext();
-            }, () => {}, 'V');
+            createView('Visibility', () => UIManager.currentManager!.updateVisibilityView(), () => {}, 'V');
     }
 
     /**
@@ -213,10 +209,10 @@ export abstract class UIManager {
      * Updates the visibility view when it is active
      */
     private updateVisibilityView(): void {
-        if (currentView !== 'Visibility')
-            return;
 
         game.board!.informationGenerator!.clearHighlight();
+
+        console.log(this._heldShip, this._selectedShip);
         
         // Client is not holding a ship and no ship on the board is selected
         if (this._heldShip === undefined && (!this.includeSelectedShipInVisibilityView || this._selectedShip === undefined))
@@ -238,6 +234,9 @@ export abstract class UIManager {
             else if (this._selectedShip !== undefined)
                 game.board!.informationGenerator!.highlightPattern(this._selectedShip.x!, this._selectedShip.y!, this._selectedShip.visibilityPattern);
         }
+
+        game.board!.informationGenerator!.push();
+        game.gameRenderer!.renderNext();
     }
 
     /**
@@ -308,6 +307,7 @@ export abstract class UIManager {
         if (lastSelectedAbility !== undefined) {
             lastSelectedAbility.createAbilityView();
             this.updateSidebar();
+            game.abilityRenderer!.renderAbility(lastSelectedAbility);
         }
     }
 

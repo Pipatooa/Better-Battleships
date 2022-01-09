@@ -1,5 +1,5 @@
 import type { AttributeUpdates } from '../scenario/i-attribute-info';
-import type { IBaseServerEvent } from './i-server-event';
+import type { IBaseServerEvent } from './server-event';
 
 /**
  * Event sent when the attributes on an object change

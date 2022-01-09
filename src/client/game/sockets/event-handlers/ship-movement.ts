@@ -1,6 +1,8 @@
 import { game }                from 'client/game/game';
+import { selfPlayer }          from '../../player';
 import { trackedShips }        from '../../scenario/ship';
 import { updateCurrentView }   from '../../ui/managers/view-manager';
+import { Message }             from '../../ui/message';
 import type { IShipMoveEvent } from 'shared/network/events/i-ship-move';
 
 /**
@@ -14,4 +16,8 @@ export function handleShipMove(shipMoveEvent: IShipMoveEvent): void {
     updateCurrentView();
     game.board!.informationGenerator!.push();
     game.gameRenderer!.renderNext();
+
+    // Display update messages to player
+    if (ship.player.team !== selfPlayer.team)
+        new Message('An enemy ship has moved!');
 }

@@ -19,7 +19,7 @@ import type { TeamEventInfo, TeamEvent }                                        
 import type { Scenario }                                                          from './scenario';
 import type { IPlayerSource }                                                     from './sources/player';
 import type { IPlayerConfig, ITeamSource }                                        from './sources/team';
-import type { IServerEvent }                                                      from 'shared/network/events/i-server-event';
+import type { ServerEvent }                                                       from 'shared/network/events/server-event';
 import type { ITeamInfo }                                                         from 'shared/network/scenario/i-team-info';
 
 /**
@@ -198,7 +198,7 @@ export class Team implements IAttributeHolder, IBuiltinAttributeHolder<'team'> {
      * @param  serverEvent   Event to broadcast
      * @param  excludePlayer Player to exclude from the broadcast
      */
-    public broadcastEvent(serverEvent: IServerEvent, excludePlayer?: Player): void {
+    public broadcastEvent(serverEvent: ServerEvent, excludePlayer?: Player): void {
         for (const player of this._players) {
             if (player === excludePlayer)
                 continue;

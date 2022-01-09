@@ -52,7 +52,7 @@ export class ActionLose extends Action {
         switch (actionLoseSource.player) {
             case 'local':
                 if (parsingContext.playerPartial === undefined)
-                    throw new UnpackingError(`The 'lose' action defined at '${parsingContext.currentPath}' is invalid. No player to cause to lose.`,
+                    throw new UnpackingError(`The 'lose' action defined at '${parsingContext.currentPath}' is invalid. No player to refer to.`,
                         parsingContext);
                 player = parsingContext.playerPartial as Player;
                 break;

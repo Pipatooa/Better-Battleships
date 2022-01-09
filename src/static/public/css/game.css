@@ -6,6 +6,8 @@
     --view-hovered-text-color: var(--bs-dark);
     --view-active-color: var(--bs-green);
     --view-active-text-color: var(--bs-dark);
+    --message-close-color: var(--bs-dark);
+    --message-close-button-color: var(--bs-gray);
     --player-ready-color: var(--bs-success);
     --player-not-ready-color: var(--bs-danger);
     --turn-indicator-color: var(--bs-gray);
@@ -83,13 +85,43 @@
     color: var(--view-active-text-color);
 }
 
+#message-container {
+    position: absolute;
+    z-index: 500;
+
+    width: inherit;
+    height: min-content;
+
+    bottom: 0;
+}
+
+.message {
+    position: relative;
+    background: var(--main-container-background);
+}
+
+.message > div {
+    height: min-content;
+}
+
+.message > .close-message {
+    background: var(--message-close-color);
+    color: var(--message-close-button-color);
+    font-size: 1.3rem;
+
+    border-top-right-radius: .2rem;
+    border-bottom-right-radius: .2rem;
+
+    cursor: pointer;
+}
+
 #sidebar-ship-section {
     overflow-y: scroll;
     -ms-overflow-style: none;
     scrollbar-width: none;
 }
 
-#sidebar-section::-webkit-scrollbar {
+#sidebar-ship-section::-webkit-scrollbar {
     display: none;
 }
 

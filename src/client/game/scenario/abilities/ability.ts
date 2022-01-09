@@ -106,8 +106,8 @@ export abstract class Ability {
         this._usable = usable;
 
         if (usable)
-            this._gameElement?.addClass('ability-unavailable');
-        else
             this._gameElement?.removeClass('ability-unavailable');
+        else
+            this._gameElement?.addClass('ability-unavailable');
     }
 }

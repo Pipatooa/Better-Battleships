@@ -4,6 +4,7 @@ import type { IEnteringSetupEvent }         from './i-entering-setup';
 import type { IGameInfoEvent }              from './i-game-info';
 import type { IGameOverEvent }              from './i-game-over';
 import type { IGameStartEvent }             from './i-game-start';
+import type { IMessageEvent }               from './i-message';
 import type { IPlayerAttributeUpdateEvent } from './i-player-attribute-update';
 import type { IPlayerJoinEvent }            from './i-player-join';
 import type { IPlayerLeaveEvent }           from './i-player-leave';
@@ -31,7 +32,7 @@ export interface IBaseServerEvent {
 /**
  * Type matching any server event
  */
-export type IServerEvent =
+export type ServerEvent =
     IConnectionInfoEvent |
     IEnterSetupFailureEvent |
     IEnteringSetupEvent |
@@ -53,12 +54,13 @@ export type IServerEvent =
     IShipMoveEvent |
     IShipRotateEvent |
     ITeamAttributeUpdate |
-    ITurnAdvancementEvent;
+    ITurnAdvancementEvent |
+    IMessageEvent;
 
 /**
  * Intermediate variable to trick Typescript
  */
-let x: IServerEvent;
+let x: ServerEvent;
 
 /**
  * Type matching all event name strings

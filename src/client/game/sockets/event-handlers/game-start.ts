@@ -1,3 +1,4 @@
+import { Message }              from '../../ui/message';
 import { startTurnTimer }       from '../../ui/updaters/turn-updater';
 import type { IGameStartEvent } from 'shared/network/events/i-game-start';
 
@@ -14,4 +15,7 @@ export function handleGameStart(gameStartEvent: IGameStartEvent): void {
     $('#info-pane-turn-section').removeClass('d-none');
 
     startTurnTimer();
+
+    // Display update messages to player
+    new Message('The game has started!');
 }

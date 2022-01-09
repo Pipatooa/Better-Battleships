@@ -52,7 +52,7 @@ export class ActionWin extends Action {
         switch (actionWinSource.team) {
             case 'local':
                 if (parsingContext.teamPartial === undefined)
-                    throw new UnpackingError(`The 'win' action defined at '${parsingContext.currentPath}' is invalid. No team to cause to win.`,
+                    throw new UnpackingError(`The 'win' action defined at '${parsingContext.currentPath}' is invalid. No team to refer to.`,
                         parsingContext);
                 team = parsingContext.teamPartial as Team;
                 break;

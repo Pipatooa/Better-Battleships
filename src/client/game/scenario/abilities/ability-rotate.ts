@@ -1,9 +1,12 @@
 import { game }                                                   from 'client/game/game';
 import { SubAbilityUsability, subAbilityUsabilityIndexOffset }    from 'shared/network/scenario/ability-usability-info';
 import { rotatePoint, Rotation }                                  from 'shared/scenario/rotation';
+import { selfPlayer }                                             from '../../player';
 import { sendRequest }                                            from '../../sockets/opener';
 import { UIManager }                                              from '../../ui/managers/ui-manager';
 import { createView, removeView, selectView, updateViewIfActive } from '../../ui/managers/view-manager';
+import { Message }                                                from '../../ui/message';
+import { currentPlayerTurn }                                      from '../../ui/updaters/turn-updater';
 import { AttributeCollection }                                    from '../attribute-collection';
 import { Board }                                                  from '../board';
 import { Descriptor }                                             from '../descriptor';
@@ -244,6 +247,7 @@ export class AbilityRotate extends Ability {
         this.rot90location = rotatePoint(this.rot90location, [2, 2], rotation);
         this.rot180location = rotatePoint(this.rot180location, [2, 2], rotation);
         this.rot270location = rotatePoint(this.rot270location, [2, 2], rotation);
+        this.boardChangedCallback?.();
     }
 
     /**
@@ -252,8 +256,16 @@ export class AbilityRotate extends Ability {
      * @param  rotation Rotation to apply to ship
      */
     public use(rotation: Rotation): void {
-        if (!this._usable)
+        if (this.ship.player !== selfPlayer)
             return;
+        if (!this._usable) {
+            new Message('Cannot use this ability at the moment.');
+            return;
+        }
+        if (currentPlayerTurn !== selfPlayer) {
+            new Message("Cannot use this ability. It's not your turn.");
+            return;
+        }
         sendRequest({
             request: 'useAbility',
             ship: this.ship.trackingID,

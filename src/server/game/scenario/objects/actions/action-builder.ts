@@ -1,13 +1,14 @@
-import { checkAgainstSchema }  from '../../schema-checker';
-import { ActionAdvanceTurn }   from './action-advance-turn';
-import { ActionDestroyShip }   from './action-destroy-ship';
-import { ActionLose }          from './action-lose';
-import { ActionSetAttribute }  from './action-set-attribute';
-import { ActionWin }           from './action-win';
-import { actionSchema }        from './sources/action';
-import type { ParsingContext } from '../../parsing-context';
-import type { Action }         from './action';
-import type { ActionSource }   from './sources/action';
+import { checkAgainstSchema }   from '../../schema-checker';
+import { ActionAdvanceTurn }    from './action-advance-turn';
+import { ActionDestroyShip }    from './action-destroy-ship';
+import { ActionDisplayMessage } from './action-display-message';
+import { ActionLose }           from './action-lose';
+import { ActionSetAttribute }   from './action-set-attribute';
+import { ActionWin }            from './action-win';
+import { actionSchema }         from './sources/action';
+import type { ParsingContext }  from '../../parsing-context';
+import type { Action }          from './action';
+import type { ActionSource }    from './sources/action';
 
 /**
  * Factory function to generate Action from JSON scenario data
@@ -24,7 +25,6 @@ export async function buildAction(parsingContext: ParsingContext, actionSource: 
         actionSource = await checkAgainstSchema(actionSource, actionSchema, parsingContext);
 
     let action: Action;
-
     switch (actionSource.type) {
         case 'setAttribute':
             action = await ActionSetAttribute.fromSource(parsingContext, actionSource, false);
@@ -41,6 +41,8 @@ export async function buildAction(parsingContext: ParsingContext, actionSource: 
         case 'lose':
             action = await ActionLose.fromSource(parsingContext, actionSource, false);
             break;
+        case 'displayMessage':
+            action = await ActionDisplayMessage.fromSource(parsingContext, actionSource, false);
     }
 
     return action;

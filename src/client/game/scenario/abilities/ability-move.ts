@@ -1,5 +1,6 @@
 import { SubAbilityUsability, subAbilityUsabilityIndexOffset } from 'shared/network/scenario/ability-usability-info';
 import { game }                                                from '../../game';
+import { selfPlayer }                                          from '../../player';
 import { sendRequest }                                         from '../../sockets/opener';
 import { UIManager }                                           from '../../ui/managers/ui-manager';
 import {
@@ -7,7 +8,9 @@ import {
     removeView,
     selectView,
     updateViewIfActive
-} from '../../ui/managers/view-manager';
+}                                                              from '../../ui/managers/view-manager';
+import { Message }                        from '../../ui/message';
+import { currentPlayerTurn }              from '../../ui/updaters/turn-updater';
 import { AttributeCollection }            from '../attribute-collection';
 import { Board }                          from '../board';
 import { Descriptor }                     from '../descriptor';
@@ -207,6 +210,7 @@ export class AbilityMove extends Ability {
      */
     public onShipRotate(rotation: Rotation): void {
         this.pattern = this.pattern.rotated(rotation);
+        this.boardChangedCallback?.();
     }
 
     /**
@@ -216,8 +220,16 @@ export class AbilityMove extends Ability {
      * @param  dy Vertical distance to move
      */
     public use(dx: number, dy: number): void {
-        if (!this._usable)
+        if (this.ship.player !== selfPlayer)
             return;
+        if (!this._usable) {
+            new Message('Cannot use this ability at the moment.');
+            return;
+        }
+        if (currentPlayerTurn !== selfPlayer) {
+            new Message("Cannot use this ability. It's not your turn.");
+            return;
+        }
         sendRequest({
             request: 'useAbility',
             ship: this.ship.trackingID,
