@@ -8,7 +8,6 @@ import { TileType }              from './tiletype';
 import type { ParsingContext }   from '../parsing-context';
 import type { Ship }             from './ship';
 import type { IBoardSource }     from './sources/board';
-import type { TileGenerator }    from './tile-generator';
 import type { IBoardInfo }       from 'shared/network/scenario/i-board-info';
 import type { ITileTypeInfo }    from 'shared/network/scenario/i-tiletype-info';
 import type { Rotation }         from 'shared/scenario/rotation';
@@ -26,13 +25,11 @@ export class Board {
     /**
      * Board constructor
      *
-     * @param  tiles      2d array of tiles indexed [y][x]
-     * @param  regions    Dictionary of regions indexed by ID
-     * @param  generators List of tile generators
+     * @param  tiles   2d array of tiles indexed [y][x]
+     * @param  regions Dictionary of regions indexed by ID
      */
     public constructor(public readonly tiles: Tile[][],
-                       public readonly regions: { [id: string]: Region },
-                       public readonly generators: TileGenerator[]) {
+                       public readonly regions: { [id: string]: Region }) {
 
         this.size = [ tiles[0].length, tiles.length ];
     }
@@ -41,7 +38,7 @@ export class Board {
      * Factory function to generate Board from JSON scenario data
      *
      * @param    parsingContext Context for resolving scenario data
-     * @param    boardSource    JSON data from 'board.json'
+     * @param    boardSource    JSON data from 'board.json' or 'board.yaml'
      * @param    checkSchema    When true, validates source JSON data against schema
      * @returns                 Created Board object
      */
@@ -109,7 +106,7 @@ export class Board {
         }
 
         // Return created Board object
-        return new Board(tiles, regions, []);
+        return new Board(tiles, regions);
     }
 
     /**

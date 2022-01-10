@@ -1,4 +1,5 @@
 import AdmZip                   from 'adm-zip';
+import yaml                     from 'yaml';
 import { UnpackingError }       from './errors/unpacking-error';
 import { Scenario }             from './objects/scenario';
 import { ParsingContext }       from './parsing-context';
@@ -7,6 +8,7 @@ import type { IZipEntry }       from 'adm-zip';
 import type { FileJSON }        from 'formidable';
 
 export type ZipEntryMap = { [name: string]: IZipEntry };
+const entryRegex = /^(abilities|ships|players|teams)\/([a-zA-Z\-_\d]+)(\.json|\.yaml)$/;
 
 /**
  * Unpacks a zip file into a scenario object asynchronously
@@ -18,6 +20,13 @@ export async function unpack(fileJSON: FileJSON): Promise<Scenario> {
 
     // Read scenario zip file
     const scenarioZip = new AdmZip(fileJSON.path);
+
+    // Get format of scenario
+    const formatEntry = await getEntryFromZip(scenarioZip, 'format.txt');
+    const format = (await getRawDataFromEntry(formatEntry)).trim();
+    if (format !== 'JSON' && format !== 'YAML')
+        throw new UnpackingError(`Invalid scenario format '${format}'. Must be either 'JSON' or 'YAML'.`, 'format.txt');
+    const fileExtension = `.${format.toLowerCase()}`;
 
     // Get a list of all zip entries
     const zipEntries: AdmZip.IZipEntry[] = scenarioZip.getEntries();
@@ -31,8 +40,8 @@ export async function unpack(fileJSON: FileJSON): Promise<Scenario> {
     for (const entry of zipEntries) {
 
         // Check entry regex
-        const result: RegExpExecArray | null = /^(abilities|ships|players|teams)\/([a-zA-Z\-_\d]+).json$/.exec(entry.entryName);
-        if (result === null)
+        let result: RegExpExecArray | null = entryRegex.exec(entry.entryName);
+        if (result === null || result[3] !== fileExtension)
             continue;
 
         // Put entry in correct array of entries
@@ -53,16 +62,16 @@ export async function unpack(fileJSON: FileJSON): Promise<Scenario> {
     }
 
     // Fixed filename zip entries
-    const boardEntry: IZipEntry = await getEntryFromZip(scenarioZip, 'board.json');
-    const foreignAttributesRegistryEntry: IZipEntry = await getEntryFromZip(scenarioZip, 'foreign-attributes.json');
+    const boardEntry: IZipEntry = await getEntryFromZip(scenarioZip, `board${fileExtension}`);
+    const foreignAttributesRegistryEntry: IZipEntry = await getEntryFromZip(scenarioZip, `foreign-attributes${fileExtension}`);
 
     // Create parsing context
-    const parsingContext = new ParsingContext(fileJSON, boardEntry, foreignAttributesRegistryEntry, teamEntries, playerPrototypeEntries, shipEntries, abilityEntries);
+    const parsingContext = new ParsingContext(fileJSON, format, boardEntry, foreignAttributesRegistryEntry, teamEntries, playerPrototypeEntries, shipEntries, abilityEntries);
 
     // Parse scenario data
-    const scenarioEntry: IZipEntry = await getEntryFromZip(scenarioZip, 'scenario.json');
-    const scenarioSource: IScenarioSource = await getJSONFromEntry(scenarioEntry) as unknown as IScenarioSource;
-    return await Scenario.fromSource(parsingContext.withFile('scenario.json'), scenarioSource, true);
+    const scenarioEntry: IZipEntry = await getEntryFromZip(scenarioZip, `scenario${fileExtension}`);
+    const scenarioSource: IScenarioSource = await getJSONFromEntry(scenarioEntry, parsingContext.scenarioFormat) as unknown as IScenarioSource;
+    return await Scenario.fromSource(parsingContext.withFile(`scenario${fileExtension}`), scenarioSource, true);
 }
 
 /**
@@ -84,12 +93,26 @@ async function getEntryFromZip(zip: AdmZip, name: string): Promise<IZipEntry> {
 }
 
 /**
+ * Gets decompressed contents from a ZIP entry
+ *
+ * @param    zipEntry ZIP Entry to decompress and retrieve data from
+ * @returns           String contents of ZIP entry
+ */
+export async function getRawDataFromEntry(zipEntry: IZipEntry): Promise<string> {
+    return new Promise<string>((resolve) => {
+        // Decompress and retrieve data
+        zipEntry.getDataAsync((data: Buffer) => resolve(data.toString('utf-8')));
+    });
+}
+
+/**
  * Gets decompressed JSON contents from a ZIP entry
  *
- * @param    zipEntry ZIP Entry to decompress and parse JSON data
+ * @param    zipEntry ZIP Entry to decompress and parse formatted data
+ * @param    format   Format of source data to turn into JSON
  * @returns           JSON data returned from ZIP entry
  */
-export async function getJSONFromEntry(zipEntry: IZipEntry): Promise<Record<string, unknown>> {
+export async function getJSONFromEntry(zipEntry: IZipEntry, format: 'JSON' | 'YAML'): Promise<Record<string, unknown>> {
     return new Promise<Record<string, unknown>>((resolve, reject) => {
 
         // Decompress and retrieve data
@@ -97,7 +120,15 @@ export async function getJSONFromEntry(zipEntry: IZipEntry): Promise<Record<stri
             // Try to parse data as JSON
             let json: Record<string, unknown>;
             try {
-                json = await JSON.parse(data.toString());
+                const contents = data.toString('utf-8');
+                switch (format) {
+                    case 'JSON':
+                        json = JSON.parse(contents);
+                        break;
+                    case 'YAML':
+                        json = yaml.parse(contents);
+                        break;
+                }
             } catch (e: unknown) {
                 if (e instanceof SyntaxError) {
                     reject(new UnpackingError(e.message, zipEntry.entryName));
@@ -108,7 +139,7 @@ export async function getJSONFromEntry(zipEntry: IZipEntry): Promise<Record<stri
                 return;
             }
 
-            // Return parsed JSON
+            // Return parsed data
             resolve(json);
         });
     });

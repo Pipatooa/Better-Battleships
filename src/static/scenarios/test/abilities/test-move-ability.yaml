@@ -1,0 +1,24 @@
+type: move
+
+descriptor:
+  name: Basic Move
+  description: Basic Movement
+
+icon: arrows-move
+condition: {}
+
+pattern:
+  size:
+    - 3
+    - 3
+  values:
+    '.': 0
+    '#': 1
+  pattern:
+    - '.#.'
+    - '###'
+    - '.#.'
+
+actions: {}
+attributes: {}
+attributeListeners: []

@@ -19,6 +19,8 @@ import type { FileJSON }                         from 'formidable';
  */
 export class ParsingContext {
 
+    public readonly scenarioFileExtension: '.json' | '.yaml';
+
     private readonly fileStack: string[] = [];
     private readonly pathSegmentStack: string[] = [];
 
@@ -37,6 +39,7 @@ export class ParsingContext {
      * ParsingContext constructor
      *
      * @param  scenarioFile                  Scenario file to use
+     * @param  scenarioFormat                Format of scenario files
      * @param  boardEntry                    Zip entry for board.json
      * @param  foreignAttributeRegistryEntry Zip entry for foreign-attributes.json
      * @param  teamEntries                   Zip entries for teams/team.json files
@@ -45,6 +48,7 @@ export class ParsingContext {
      * @param  abilityEntries                Zip entries for abilities/ability.json files
      */
     public constructor(public readonly scenarioFile: FileJSON,
+                       public readonly scenarioFormat: 'JSON' | 'YAML',
                        public readonly boardEntry: IZipEntry,
                        public readonly foreignAttributeRegistryEntry: IZipEntry,
                        public readonly teamEntries: ZipEntryMap,
@@ -52,6 +56,7 @@ export class ParsingContext {
                        public readonly shipEntries: ZipEntryMap,
                        public readonly abilityEntries: ZipEntryMap) {
 
+        this.scenarioFileExtension = `.${this.scenarioFormat.toLowerCase()}` as '.json' | '.yaml';
     }
 
     public withFile(file: string): this {

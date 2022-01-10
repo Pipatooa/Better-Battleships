@@ -1,9 +1,7 @@
-import Joi                     from 'joi';
-import { genericNameSchema }   from '../common/sources/generic-name';
-import { tileGeneratorSchema } from '../tile-generator';
-import { tileTypeSchema }      from './tile-type';
-import type { TileGenerator }  from '../tile-generator';
-import type { TileType }       from '../tiletype';
+import Joi                   from 'joi';
+import { genericNameSchema } from '../common/sources/generic-name';
+import { tileTypeSchema }    from './tile-type';
+import type { TileType }     from '../tiletype';
 
 /**
  * JSON source interface reflecting schema
@@ -13,8 +11,7 @@ export interface IBoardSource {
     tilePalette: { [char: string]: TileType },
     regionPalette: { [char: string]: string[] },
     tiles: string[],
-    regions: string[],
-    generators: TileGenerator[]
+    regions: string[]
 }
 
 /**
@@ -31,6 +28,5 @@ export const boardSchema = Joi.object({
     ).min(5).required(),
     regions: Joi.array().items(
         Joi.string().min(5)
-    ).min(5).required(),
-    generators: Joi.array().items(tileGeneratorSchema).required()
+    ).min(5).required()
 });

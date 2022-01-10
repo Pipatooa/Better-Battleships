@@ -195,15 +195,15 @@ export class Ship implements IAttributeHolder, IBuiltinAttributeHolder<'ship'> {
 
             // If ship does not exist
             if (!(abilityName in parsingContext.abilityEntries))
-                throw new UnpackingError(`Could not find 'abilities/${abilityName}.json'`, parsingContext);
+                throw new UnpackingError(`Could not find 'abilities/${abilityName}${parsingContext.scenarioFileExtension}'`, parsingContext);
 
             // If ability already exists
             if (abilityName in abilities)
                 throw new UnpackingError(`Ship cannot define the same ability twice '${abilityName}' at '${parsingContext.currentPath}.abilities[${i}]'`, parsingContext);
 
             // Unpack ability data
-            const abilitySource: AbilitySource = await getJSONFromEntry(parsingContext.abilityEntries[abilityName]) as unknown as AbilitySource;
-            const ability = await buildAbility(parsingContext.withFile(`abilities/${abilityName}.json`), abilitySource, true);
+            const abilitySource: AbilitySource = await getJSONFromEntry(parsingContext.abilityEntries[abilityName], parsingContext.scenarioFormat) as unknown as AbilitySource;
+            const ability = await buildAbility(parsingContext.withFile(`abilities/${abilityName}${parsingContext.scenarioFileExtension}`), abilitySource, true);
             subRegistrars.push(ability.eventRegistrar);
             parsingContext.reduceFileStack();
             abilities.push(ability);

@@ -127,11 +127,11 @@ export class Team implements IAttributeHolder, IBuiltinAttributeHolder<'team'> {
 
                 // If player does not exist
                 if (!(playerName in parsingContext.playerPrototypeEntries))
-                    throw new UnpackingError(`Could not find 'players/${playerName}.json'`, parsingContext);
+                    throw new UnpackingError(`Could not find 'players/${playerName}${parsingContext.scenarioFileExtension}'`, parsingContext);
 
                 // Unpack player
-                const playerSource: IPlayerSource = await getJSONFromEntry(parsingContext.playerPrototypeEntries[playerName]) as unknown as IPlayerSource;
-                const player = await Player.fromSource(parsingContext.withFile(`players/${playerName}.json`), playerSource, playerConfig.spawnRegion, playerConfig.color, playerConfig.highlightColor, true);
+                const playerSource: IPlayerSource = await getJSONFromEntry(parsingContext.playerPrototypeEntries[playerName], parsingContext.scenarioFormat) as unknown as IPlayerSource;
+                const player = await Player.fromSource(parsingContext.withFile(`players/${playerName}${parsingContext.scenarioFileExtension}`), playerSource, playerConfig.spawnRegion, playerConfig.color, playerConfig.highlightColor, true);
                 parsingContext.reduceFileStack();
                 players.push(player);
             }

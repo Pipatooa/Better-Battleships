@@ -12,7 +12,7 @@ import type { ValueSource }            from '../../values/sources/value';
 export interface IAttributeSource {
     descriptor: IDescriptorSource | Record<string, never>,
     initialValue: ValueSource,
-    constraints: IValueConstraintSource[],
+    constraint: IValueConstraintSource | null,
     readonly: boolean
 }
 
@@ -25,6 +25,10 @@ export const attributeSchema = Joi.object({
         descriptorSchema
     ).required(),
     initialValue: valueSchema.required(),
-    constraints: Joi.array().items(valueConstraintSchema).required(),
+    constraint: Joi.alternatives(
+        null,
+        Joi.object(),
+        valueConstraintSchema
+    ).required(),
     readonly: Joi.boolean().required()
 });

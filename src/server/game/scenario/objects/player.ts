@@ -124,11 +124,11 @@ export class Player implements IAttributeHolder, IBuiltinAttributeHolder<'player
 
             // If ship does not exist
             if (!(shipName in parsingContext.shipEntries))
-                throw new UnpackingError(`Could not find 'ships/${shipName}.json'`, parsingContext);
+                throw new UnpackingError(`Could not find 'ships/${shipName}${parsingContext.scenarioFileExtension}'`, parsingContext);
 
             // Unpack ship data
-            const shipSource: IShipSource = await getJSONFromEntry(parsingContext.shipEntries[shipName]) as unknown as IShipSource;
-            const ship = await Ship.fromSource(parsingContext.withFile(`ships/${shipName}.json`), shipSource, true);
+            const shipSource: IShipSource = await getJSONFromEntry(parsingContext.shipEntries[shipName], parsingContext.scenarioFormat) as unknown as IShipSource;
+            const ship = await Ship.fromSource(parsingContext.withFile(`ships/${shipName}${parsingContext.scenarioFileExtension}`), shipSource, true);
             parsingContext.reduceFileStack();
             subRegistrars.push(ship.eventRegistrar);
             ships.push(ship);

@@ -1,0 +1,41 @@
+descriptor:
+  name: Cruiser
+  description: This is a cruiser
+
+pattern:
+  size:
+    - 1
+    - 4
+  values:
+    '#': 1
+  pattern:
+    - '#'
+    - '#'
+    - '#'
+    - '#'
+
+visibility: 7
+abilities: []
+
+actions: {}
+
+attributes:
+  health:
+    descriptor:
+      name: Health
+      description: Health of this ship
+    initialValue: 4
+    constraint:
+      min: 0
+    readonly: false
+
+attributeListeners:
+  - attribute: 'local:ship.health'
+    priority: 0
+    constraint:
+      exactly: 0
+    actions:
+      - type: destroyShip
+        condition: {}
+        ship: local
+    triggerType: once

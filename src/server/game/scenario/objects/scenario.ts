@@ -75,7 +75,7 @@ export class Scenario implements IAttributeHolder, IBuiltinAttributeHolder<'scen
      * Factory function to generate Scenario from JSON scenario data
      *
      * @param    parsingContext Context for resolving scenario data
-     * @param    scenarioSource JSON data from 'scenario.json'
+     * @param    scenarioSource JSON data from 'scenario.json' or 'scenario.yaml'
      * @param    checkSchema    When true, validates source JSON data against schema
      * @returns                 Created Scenario object
      */
@@ -93,8 +93,8 @@ export class Scenario implements IAttributeHolder, IBuiltinAttributeHolder<'scen
         parsingContext.turnManagerPartial = turnManagerPartial;
 
         // Get foreign attribute registry and update parsing context
-        const foreignAttributeRegistrySource = await getJSONFromEntry(parsingContext.foreignAttributeRegistryEntry) as unknown as ForeignAttributeRegistrySource;
-        parsingContext.foreignAttributeRegistry = await ForeignAttributeRegistry.fromSource(parsingContext.withFile('foreign-attributes.json'), foreignAttributeRegistrySource, true);
+        const foreignAttributeRegistrySource = await getJSONFromEntry(parsingContext.foreignAttributeRegistryEntry, parsingContext.scenarioFormat) as unknown as ForeignAttributeRegistrySource;
+        parsingContext.foreignAttributeRegistry = await ForeignAttributeRegistry.fromSource(parsingContext.withFile(`foreign-attributes${parsingContext.scenarioFileExtension}`), foreignAttributeRegistrySource, true);
         parsingContext.reduceFileStack();
 
         // Get attributes and update parsing context
@@ -113,8 +113,8 @@ export class Scenario implements IAttributeHolder, IBuiltinAttributeHolder<'scen
         parsingContext.reducePath();
 
         // Get board
-        const boardSource: IBoardSource = await getJSONFromEntry(parsingContext.boardEntry) as unknown as IBoardSource;
-        const board = await Board.fromSource(parsingContext.withFile('board.json'), boardSource, true);
+        const boardSource: IBoardSource = await getJSONFromEntry(parsingContext.boardEntry, parsingContext.scenarioFormat) as unknown as IBoardSource;
+        const board = await Board.fromSource(parsingContext.withFile(`board${parsingContext.scenarioFileExtension}`), boardSource, true);
         parsingContext.reduceFileStack();
         parsingContext.board = board;
 
@@ -126,11 +126,11 @@ export class Scenario implements IAttributeHolder, IBuiltinAttributeHolder<'scen
 
             // If team does not exist
             if (!(teamName in parsingContext.teamEntries))
-                throw new UnpackingError(`Could not find 'teams/${teamName}.json'`, parsingContext);
+                throw new UnpackingError(`Could not find 'teams/${teamName}${parsingContext.scenarioFileExtension}'`, parsingContext);
 
             // Unpack team data
-            const teamSource: ITeamSource = await getJSONFromEntry(parsingContext.teamEntries[teamName]) as unknown as ITeamSource;
-            const team = await Team.fromSource(parsingContext.withFile(`teams/${teamName}.json`), teamSource, teamName, true);
+            const teamSource: ITeamSource = await getJSONFromEntry(parsingContext.teamEntries[teamName], parsingContext.scenarioFormat) as unknown as ITeamSource;
+            const team = await Team.fromSource(parsingContext.withFile(`teams/${teamName}${parsingContext.scenarioFileExtension}`), teamSource, teamName, true);
             subRegistrars.push(team.eventRegistrar);
             parsingContext.reduceFileStack();
             teams[teamName] = team;

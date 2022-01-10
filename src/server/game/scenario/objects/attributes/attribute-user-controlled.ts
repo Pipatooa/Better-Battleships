@@ -24,23 +24,23 @@ export class AttributeUserControlled extends Attribute {
      *
      * @param  descriptor   Optional descriptor for this attribute
      * @param  initialValue Initial value for this attribute
-     * @param  constraints  Constraints to apply to held value. Will be applied in order
+     * @param  constraint   Constraint to apply to held value
      * @param  readonly     Whether this value should be readonly
      */
     public constructor(descriptor: Descriptor | undefined,
                        protected readonly initialValue: Value,
-                       protected readonly constraints: ValueConstraint[],
+                       protected readonly constraint: ValueConstraint | undefined,
                        public readonly readonly: boolean) {
         super(descriptor);
     }
 
     /**
-     * Factory function to generate Attribute from JSON scenario data
+     * Factory function to generate AttributeUserControlled from JSON scenario data
      *
      * @param    parsingContext  Context for resolving scenario data
-     * @param    attributeSource JSON data for Attribute
+     * @param    attributeSource JSON data for AttributeUserControlled
      * @param    checkSchema     When true, validates source JSON data against schema
-     * @returns                  Created Attribute object
+     * @returns                  Created AttributeUserControlled object
      */
     public static async fromSource(parsingContext: ParsingContext, attributeSource: IAttributeSource, checkSchema: boolean): Promise<AttributeUserControlled> {
 
@@ -54,20 +54,19 @@ export class AttributeUserControlled extends Attribute {
             parsingContext.reducePath();
         }
 
+        // Get component elements from source
         const initialValue = await buildValue(parsingContext.withExtendedPath('.initialValue'), attributeSource.initialValue, false);
         parsingContext.reducePath();
-
-        // Get constraints
-        const constraints: ValueConstraint[] = [];
-        for (let i = 0; i < attributeSource.constraints.length; i++) {
-            const constraintSource = attributeSource.constraints[i];
-            const constraint = await buildValueConstraint(parsingContext.withExtendedPath(`.constraints[${i}]`), constraintSource, false);
+        let constraint: ValueConstraint | undefined;
+        if (attributeSource.constraint === null)
+            constraint = undefined;
+        else {
+            constraint = await buildValueConstraint(parsingContext.withExtendedPath('.constraint'), attributeSource.constraint, false);
             parsingContext.reducePath();
-            constraints.push(constraint);
         }
 
-        // Return created Attribute object
-        return new AttributeUserControlled(descriptor, initialValue, constraints, attributeSource.readonly);
+        // Return created AttributeUserControlled object
+        return new AttributeUserControlled(descriptor, initialValue, constraint, attributeSource.readonly);
     }
 
     /**
@@ -96,12 +95,11 @@ export class AttributeUserControlled extends Attribute {
         if (this.readonly)
             return;
 
-        // Iterate through constraints and constrain value accordingly
-        for (const constraint of this.constraints) {
-            value = constraint.constrain({
+        // Constrain value before setting new value
+        if (this.constraint !== undefined)
+            value = this.constraint.constrain({
                 builtinAttributes: {}
             }, value);
-        }
 
         // Set value as new constrained value
         this.value = value;
