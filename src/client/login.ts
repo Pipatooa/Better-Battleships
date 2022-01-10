@@ -36,7 +36,7 @@ $(document).ready(() => {
         }
 
         // If unsuccessful
-        formFeedbackElement.html(loginResponse.message);
+        formFeedbackElement.text(loginResponse.message);
     });
 });
 

@@ -1,3 +1,5 @@
+import crypto                   from 'crypto';
+import fs                       from 'fs';
 import AdmZip                   from 'adm-zip';
 import yaml                     from 'yaml';
 import { UnpackingError }       from './errors/unpacking-error';
@@ -16,8 +18,7 @@ const entryRegex = /^(abilities|ships|players|teams)\/([a-zA-Z\-_\d]+)(\.json|\.
  * @param    fileJSON Scenario file information
  * @returns           Scenario object
  */
-export async function unpack(fileJSON: FileJSON): Promise<Scenario> {
-
+export async function unpack(fileJSON: FileJSON): Promise<[Scenario, string]> {
     // Read scenario zip file
     const scenarioZip = new AdmZip(fileJSON.path);
 
@@ -71,7 +72,21 @@ export async function unpack(fileJSON: FileJSON): Promise<Scenario> {
     // Parse scenario data
     const scenarioEntry: IZipEntry = await getEntryFromZip(scenarioZip, `scenario${fileExtension}`);
     const scenarioSource: IScenarioSource = await getJSONFromEntry(scenarioEntry, parsingContext.scenarioFormat) as unknown as IScenarioSource;
-    return await Scenario.fromSource(parsingContext.withFile(`scenario${fileExtension}`), scenarioSource, true);
+    const scenario = await Scenario.fromSource(parsingContext.withFile(`scenario${fileExtension}`), scenarioSource, true);
+
+    // Compute hash of zip file
+    const hash = crypto.createHash('sha256');
+    const stream = fs.createReadStream(fileJSON.path);
+    const digest = await new Promise<string>((resolve) => {
+        stream.on('end', () => {
+            hash.setEncoding('hex');
+            hash.end();
+            resolve(hash.read());
+        });
+        stream.pipe(hash);
+    });
+
+    return [scenario, digest];
 }
 
 /**

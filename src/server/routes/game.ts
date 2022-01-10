@@ -53,16 +53,6 @@ router.get('/:gameID', requireAuth, async (req, res) => {
         return;
     }
 
-    /*// Check for existing game session for user
-    const query = 'SELECT `current_session` FROM `user` WHERE `username` = ?';
-    const rows = await queryDatabase(query, [ username ]);
-
-    // If session exists
-    if (rows.length !== 0) {
-        console.log(rows);
-        // TODO: Session reconnection
-    }*/
-
     // Deliver page content
     res.render('game', {
         url: req.baseUrl + req.url,

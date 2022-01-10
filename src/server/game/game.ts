@@ -295,8 +295,8 @@ export class Game {
             values.push(client.username);
             values.push(!client.player!.team.lost);
         }
-        const query1 = `UPDATE \`game\` SET \`complete\` = TRUE WHERE \`id\` = ${this.internalID};`;
-        const query2 = `INSERT INTO \`result\` (\`game_id\`, \`username\`, \`won\`) VALUES ${queryStatementSections.join(',')};`;
+        const query1 = `UPDATE game SET completion = CURRENT_TIMESTAMP WHERE id = ${this.internalID};`;
+        const query2 = `INSERT INTO result (game_id, username, won) VALUES ${queryStatementSections.join(',')};`;
         queryDatabase(query1).then(async () =>
             queryDatabase(query2, values).then(() =>
                 this.killGame('Game over')

@@ -37,21 +37,21 @@ function generateGameID(): string {
  * Creates a new game using a scenario
  *
  * @param    scenario Scenario to use for game
+ * @param    fileHash Hash of scenario file
  * @returns           Created Game object
  */
-export async function createGame(scenario: Scenario): Promise<Game> {
+export async function createGame(scenario: Scenario, fileHash: string): Promise<Game> {
 
     // Create a random ID for the game
     const gameID: string = generateGameID();
 
     // Create database entry for uploaded scenario
-    let query = 'INSERT INTO `scenario` (`builtin`, `name`, `description`) VALUES (FALSE, ?, ?) RETURNING `id`;';
-    let rows = await queryDatabase(query, [ scenario.descriptor.name, scenario.descriptor.description ]);
-    const scenarioID = rows[0].id;
+    let query = 'INSERT INTO scenario VALUES (?, FALSE, ?, ?, ?) ON DUPLICATE KEY UPDATE hash=hash;';
+    await queryDatabase(query, [fileHash, scenario.author, scenario.descriptor.name, scenario.descriptor.description]);
 
     // Create database entry for game
-    query = 'INSERT INTO `game` (`game_id`, `scenario`) VALUES (?, ?) RETURNING `id`;';
-    rows = await queryDatabase(query, [ gameID, scenarioID ]);
+    query = 'INSERT INTO game (game_id, scenario) VALUES (?, ?) RETURNING id;';
+    const rows = await queryDatabase(query, [ gameID, fileHash ]);
     const gameInternalID = rows[0].id;
 
     // Create game object and save it to list of games
@@ -83,7 +83,8 @@ export async function createGame(scenario: Scenario): Promise<Game> {
 export function removeGame(gameID: string, reason: string): void {
 
     // Remove the game and decrement number of concurrent games
-    if (!delete games[gameID])
+    const deleted = delete games[gameID];
+    if (!deleted)
         return;
     numGames--;
 

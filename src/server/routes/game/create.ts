@@ -60,10 +60,11 @@ router.post('/', preventCSRF, requireAuth, async (req, res) => {
         const file = files.file as unknown as FileJSON;
 
         let scenario: Scenario;
+        let hash: string;
 
         // Process uploaded scenario zip file
         try {
-            scenario = await unpack(file);
+            [scenario, hash] = await unpack(file);
         } catch (e: unknown) {
 
             // If there was an unpacking error, return a JSON object with details
@@ -107,7 +108,7 @@ router.post('/', preventCSRF, requireAuth, async (req, res) => {
         }
 
         // Create a new game
-        const game: Game = await createGame(scenario);
+        const game: Game = await createGame(scenario, hash);
         res.send({
             success: true,
             gameID: game.gameID,

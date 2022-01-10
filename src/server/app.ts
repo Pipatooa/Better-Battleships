@@ -11,7 +11,7 @@ import { findAvailableScenarios }    from './game/scenario/builtin-scenarios';
 import { findAvailableIcons }        from './game/scenario/objects/abilities/icons';
 import { registerWebsocketHandlers } from './game/sockets/register-handlers';
 
-// Routers
+// Main Routers
 import gameRouter          from './routes/game';
 import gameCreateRouter    from './routes/game/create';
 import gameNotFoundRouter  from './routes/game/notfound';
@@ -20,16 +20,22 @@ import loginRouter         from './routes/login';
 import registerRouter      from './routes/register';
 import scenariosListRouter from './routes/scenarios/list';
 
+// Stats API Routers
+import statsApiGameRouter     from './routes/stats/api/game';
+import statsApiGamesRouter    from './routes/stats/api/games';
+import statsApiScenarioRouter from './routes/stats/api/scenario';
+import statsApiUserRouter     from './routes/stats/api/user';
+
 const app = express();
 
 // Set current working directory to be where this file is located
 process.chdir(__dirname);
 
 // Execute database startup script
-executeDBStartupScript().then(() => {
+executeDBStartupScript().then(async () => {
 
     // Find scenario data
-    findAvailableScenarios();
+    await findAvailableScenarios();
     findAvailableIcons();
 
     // Create a http server and an accompanying websocket server
@@ -57,6 +63,11 @@ executeDBStartupScript().then(() => {
     app.use('/login', loginRouter);
     app.use('/register', registerRouter);
     app.use('/scenarios/list', scenariosListRouter);
+
+    app.use('/stats/api/game', statsApiGameRouter);
+    app.use('/stats/api/games', statsApiGamesRouter);
+    app.use('/stats/api/scenario', statsApiScenarioRouter);
+    app.use('/stats/api/user', statsApiUserRouter);
 
     // Register socket handles for the websocket server
     registerWebsocketHandlers(server, wss);
