@@ -29,6 +29,9 @@ export async function showBuiltinScenarios(): Promise<void> {
         scenarioDescription.text(description);
     });
 
+    $('#download-scenario-button').on('click', () =>
+        window.location.href = `/scenarios/${currentScenario}`);
+
     // Use first scenario as default selected
     currentScenario = scenarios[0][0];
     scenarioDescription.text(scenarios[0][2]);

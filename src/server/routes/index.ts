@@ -15,7 +15,8 @@ router.get('/', requireAuth, preventCSRF, async (req, res) => {
         pageTitle: 'Home',
         pageDescription: '',
         stylesheets: [
-            '/css/style.css'
+            '/css/style.css',
+            '/css/index.css'
         ],
         scripts: [
             '/js/index.js'
