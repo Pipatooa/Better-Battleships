@@ -1,7 +1,7 @@
 import { SubAbilityUsability }                         from 'shared/network/scenario/ability-usability-info';
 import { EventRegistrar }                              from '../../events/event-registrar';
 import { checkAgainstSchema }                          from '../../schema-checker';
-import { eventListenersFromActionSource }              from '../actions/action-getter';
+import { getEventListenersFromActionSource }           from '../actions/action-getter';
 import { getAttributeListeners }                       from '../attribute-listeners/attribute-listener-getter';
 import { AttributeCodeControlled }                     from '../attributes/attribute-code-controlled';
 import { getAttributes }                               from '../attributes/attribute-getter';
@@ -104,7 +104,7 @@ export class AbilityFire extends PositionedAbility {
         parsingContext.reducePath();
         const condition = await buildCondition(parsingContext.withExtendedPath('.condition'), abilityFireSource.condition, false);
         parsingContext.reducePath();
-        const eventListeners = await eventListenersFromActionSource(parsingContext.withExtendedPath('.actions'), fireAbilityEventInfo, abilityFireSource.actions);
+        const eventListeners = await getEventListenersFromActionSource(parsingContext.withExtendedPath('.actions'), fireAbilityEventInfo, abilityFireSource.actions);
         parsingContext.reducePath();
 
         // Return created AbilityFire object
@@ -154,7 +154,8 @@ export class AbilityFire extends PositionedAbility {
     public checkUsable(): [mainUsabilityUpdated: boolean, subAbilityUsabilityUpdated: boolean] {
         const oldUsability = this._usable;
         this._usable = this.condition.check({
-            builtinAttributes: {}
+            builtinAttributes: {},
+            locations: {}
         });
 
         const mainUsabilityUpdated = this._usable !== oldUsability;
@@ -205,7 +206,8 @@ export class AbilityFire extends PositionedAbility {
             return;
 
         this.eventRegistrar.queueEvent('onUse', {
-            builtinAttributes: {}
+            builtinAttributes: {},
+            locations: {}
         });
 
         // Container to act as persistent reference to hitCount so events raised refer to final hit count
@@ -222,8 +224,15 @@ export class AbilityFire extends PositionedAbility {
             const tileY = centerY + y - this.effectPattern.integerCenter[1];
             const tile = this.ship.board.tiles[tileY]?.[tileX];
             const ship = tile?.[2];
-            if (ship === undefined)
+            if (ship === undefined) {
+                this.eventRegistrar.queueEvent('onMiss', {
+                    builtinAttributes: {},
+                    locations: {
+                        tile: [[x, y]]
+                    }
+                });
                 continue;
+            }
 
             this.eventRegistrar.queueEvent('onHit', {
                 builtinAttributes: {
@@ -232,24 +241,20 @@ export class AbilityFire extends PositionedAbility {
                 },
                 foreignTeam: ship.owner.team,
                 foreignPlayer: ship.owner,
-                foreignShip: ship
+                foreignShip: ship,
+                locations: {
+                    tile: [[x, y]]
+                }
             });
             hitCountContainer.hitCount++;
         }
 
         if (hitCountContainer.hitCount === 0) {
-            this.eventRegistrar.queueEvent('onMiss', {
-                builtinAttributes: {}
+            this.eventRegistrar.queueEvent('onMissCompletely', {
+                builtinAttributes: {},
+                locations: {}
             });
         }
-
-        this.eventRegistrar.rootRegistrar.queueEvent('onAbilityUsed', {
-            builtinAttributes: {},
-            foreignTeam: this.ship.owner.team,
-            foreignPlayer: this.ship.owner,
-            foreignShip: this.ship,
-            foreignAbility: this
-        });
 
         this.eventRegistrar.evaluateEvents();
     }

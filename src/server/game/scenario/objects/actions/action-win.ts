@@ -1,14 +1,14 @@
-import { UnpackingError }                              from '../../errors/unpacking-error';
-import { checkAgainstSchema }                          from '../../schema-checker';
-import { buildCondition }                              from '../conditions/condition-builder';
-import { Action }                                      from './action';
-import { actionWinSchema }                             from './sources/action-win';
-import type { ECA, EventContext, GenericEventContext } from '../../events/event-context';
-import type { EventEvaluationState }                   from '../../events/event-evaluation-state';
-import type { ParsingContext }                         from '../../parsing-context';
-import type { Condition }                              from '../conditions/condition';
-import type { Team }                                   from '../team';
-import type { IActionWinSource }                       from './sources/action-win';
+import { UnpackingError }                         from '../../errors/unpacking-error';
+import { checkAgainstSchema }                     from '../../schema-checker';
+import { buildCondition }                         from '../conditions/condition-builder';
+import { Action }                                 from './action';
+import { actionWinSchema }                        from './sources/action-win';
+import type { EventContext, GenericEventContext } from '../../events/event-context';
+import type { EventEvaluationState }              from '../../events/event-evaluation-state';
+import type { ParsingContext }                    from '../../parsing-context';
+import type { Condition }                         from '../conditions/condition';
+import type { Team }                              from '../team';
+import type { IActionWinSource }                  from './sources/action-win';
 
 /**
  * ActionWin - Server Version
@@ -81,7 +81,7 @@ export class ActionWin extends Action {
         if (!this.condition.check(eventContext))
             return;
 
-        const team = this.team ?? (eventContext as EventContext<'team', ECA>).foreignTeam;
+        const team = this.team ?? (eventContext as EventContext<'team', any, any, any>).foreignTeam;
         for (const otherTeam of Object.values(team.scenario.teams)) {
             if (otherTeam === team)
                 continue;

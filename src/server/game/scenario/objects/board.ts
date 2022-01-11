@@ -1,16 +1,32 @@
-import { CharacterMapGenerator } from 'shared/character-map-generator';
-import { arraysEqual }           from 'shared/utility';
-import { UnpackingError }        from '../errors/unpacking-error';
-import { checkAgainstSchema }    from '../schema-checker';
-import { Region }                from './region';
-import { boardSchema }           from './sources/board';
-import { TileType }              from './tiletype';
-import type { ParsingContext }   from '../parsing-context';
-import type { Ship }             from './ship';
-import type { IBoardSource }     from './sources/board';
-import type { IBoardInfo }       from 'shared/network/scenario/i-board-info';
-import type { ITileTypeInfo }    from 'shared/network/scenario/i-tiletype-info';
-import type { Rotation }         from 'shared/scenario/rotation';
+import { CharacterMapGenerator }              from 'shared/character-map-generator';
+import { arraysEqual }                        from 'shared/utility';
+import { UnpackingError }                     from '../errors/unpacking-error';
+import { EventListenerPrimaryPriority }       from '../events/event-listener';
+import { EventRegistrar }                     from '../events/event-registrar';
+import { checkAgainstSchema }                 from '../schema-checker';
+import { getActionsFromSource }               from './actions/action-getter';
+import { tileEventInfo }                      from './events/board-events';
+import { Region }                             from './region';
+import { boardSchema }                        from './sources/board';
+import { TileType }                           from './tiletype';
+import type { EventContextForEvent }          from '../events/event-context';
+import type { EventEvaluationState }          from '../events/event-evaluation-state';
+import type { EventListener, EventListeners } from '../events/event-listener';
+import type { ParsingContext }                from '../parsing-context';
+import type { Action }                        from './actions/action';
+import type {
+    BoardEvent,
+    BoardEventInfo,
+    RegionEvent,
+    RegionEventInfo,
+    TileEvent,
+    TileEventInfo
+}                             from './events/board-events';
+import type { Ship }          from './ship';
+import type { IBoardSource }  from './sources/board';
+import type { IBoardInfo }    from 'shared/network/scenario/i-board-info';
+import type { ITileTypeInfo } from 'shared/network/scenario/i-tiletype-info';
+import type { Rotation }      from 'shared/scenario/rotation';
 
 /**
  * Board - Server Version
@@ -25,11 +41,13 @@ export class Board {
     /**
      * Board constructor
      *
-     * @param  tiles   2d array of tiles indexed [y][x]
-     * @param  regions Dictionary of regions indexed by ID
+     * @param  tiles          2d array of tiles indexed [y][x]
+     * @param  regions        Dictionary of regions indexed by ID
+     * @param  eventRegistrar Registrar of all board event listeners
      */
     public constructor(public readonly tiles: Tile[][],
-                       public readonly regions: { [id: string]: Region }) {
+                       public readonly regions: { [id: string]: Region },
+                       public readonly eventRegistrar: EventRegistrar<BoardEventInfo, BoardEvent>) {
 
         this.size = [ tiles[0].length, tiles.length ];
     }
@@ -47,6 +65,9 @@ export class Board {
         // Validate JSON against schema
         if (checkSchema)
             boardSource = await checkAgainstSchema(boardSource, boardSchema, parsingContext);
+
+        // Board partial refers to future Board object
+        const boardPartial: Partial<Board> = Object.create(Board.prototype);
 
         // Unpack palette data
         const palette: { [char: string]: TileType } = {};
@@ -91,16 +112,18 @@ export class Board {
                 const tileChar: string = tileRow.charAt(x);
                 const regionChar: string = regionRow.charAt(x);
 
+                const tileType = palette[tileChar];
+                const regionIDs = regionPalette[regionChar];
+
                 // If character did not match any tile type within the palette
-                if (!(tileChar in palette))
-                    throw new UnpackingError(`Could not find tile of type '${tileChar}' defined at '${parsingContext.currentPathPrefix}tiles[${y}][${x}]' within the palette defined at '${parsingContext.currentPathPrefix}palette'`, parsingContext);
-                if (!(regionChar in regionPalette))
+                if (tileType === undefined)
+                    throw new UnpackingError(`Could not find tile of type '${tileChar}' defined at '${parsingContext.currentPathPrefix}tiles[${y}][${x}]' within the palette defined at '${parsingContext.currentPathPrefix}tilePalette'`, parsingContext);
+                if (regionIDs === undefined)
                     throw new UnpackingError(`Could not find regions matching '${regionChar}' defined at '${parsingContext.currentPathPrefix}regions[${y}][${x}]' within the palette defined at '${parsingContext.currentPathPrefix}regionPalette'`, parsingContext);
 
                 // Get tile type and add tile to region
-                const tileType: TileType = palette[tileChar];
                 const tileRegions: Region[] = [];
-                for (const regionID of regionPalette[regionChar]) {
+                for (const regionID of regionIDs) {
                     const region = regions[regionID];
                     tileRegions.push(region);
                     region.tiles.push([x, y]);
@@ -109,8 +132,80 @@ export class Board {
             }
         }
 
+        // Get tile event listeners
+        const boardEventListeners = {} as EventListeners<BoardEventInfo, BoardEvent>;
+        for (const [tileChar, actionSources] of Object.entries(boardSource.tileActions)) {
+            const tileType = palette[tileChar];
+            if (tileType === undefined)
+                throw new UnpackingError(`Could not find tile of type '${tileChar}' defined at '${parsingContext.currentPathPrefix}tileActions.${tileChar}' within the palette defined at '${parsingContext.currentPathPrefix}tilePalette'`,
+                    parsingContext);
+
+            const actions = await getActionsFromSource(parsingContext.withExtendedPath('.tileActions'), tileEventInfo, actionSources);
+            parsingContext.reducePath();
+
+            // Create event listeners for each event
+            for (const entry of Object.entries(actions)) {
+                const [eventName, eventActions] = entry as [TileEvent, Action[]];
+                if (boardEventListeners[eventName] === undefined)
+                    boardEventListeners[eventName] = [];
+
+                // Listener called when a tile event is triggered but before actions are executed
+                const listenerCallback = (eventEvaluationState: EventEvaluationState, eventContext: EventContextForEvent<TileEventInfo, TileEvent, any>): void => {
+                    // Check if tile type for event call matches this tile type
+                    const [ x, y ] = eventContext.locations.tile[0];
+                    const tile = (boardPartial as Board).tiles[y][x];
+                    if (tile[0] !== tileType)
+                        return;
+
+                    // Queue event listener calls for each ability
+                    for (const action of eventActions) {
+                        const actionListenerCallback = (eventEvaluationState: EventEvaluationState, eventContext: EventContextForEvent<TileEventInfo, TileEvent, any>): void =>
+                            action.execute(eventEvaluationState, eventContext);
+                        (boardPartial as Board).eventRegistrar.preQueueEventListenerCall([EventListenerPrimaryPriority.ActionDefault, action.priority, actionListenerCallback], eventContext);
+                    }
+                };
+                boardEventListeners[eventName].push([EventListenerPrimaryPriority.PreAction, 0, listenerCallback]);
+            }
+        }
+
+        // Get region event listeners
+        for (const [regionID, actionSources] of Object.entries(boardSource.regionActions)) {
+            const region = regions[regionID];
+            if (region === undefined)
+                throw new UnpackingError(`Could not find region with id '${regionID}' defined at '${parsingContext.currentPathPrefix}regionActions.${regionID}' within the palette defined at '${parsingContext.currentPathPrefix}regionPalette'`,
+                    parsingContext);
+
+            const regionEventListeners = await getActionsFromSource(parsingContext.withExtendedPath('.tileActions'), tileEventInfo, actionSources);
+            parsingContext.reducePath();
+
+            // Create event listeners for each event
+            for (const entry of Object.entries(regionEventListeners)) {
+                const [eventName, eventActions] = entry as [RegionEvent, Action[]];
+                if (boardEventListeners[eventName] === undefined)
+                    boardEventListeners[eventName] = [];
+
+                // Listener called when a region event is triggered but before actions are executed
+                const listenerCallback = (eventEvaluationState: EventEvaluationState, eventContext: EventContextForEvent<RegionEventInfo, RegionEvent, any>): void => {
+                    // Check if region matches
+                    if (eventContext.region !== region)
+                        return;
+
+                    // Queue event listener calls for each ability
+                    for (const action of eventActions) {
+                        const actionListenerCallback = (eventEvaluationState: EventEvaluationState, eventContext: EventContextForEvent<RegionEventInfo, RegionEvent, any>): void =>
+                            action.execute(eventEvaluationState, eventContext);
+                        (boardPartial as Board).eventRegistrar.preQueueEventListenerCall([EventListenerPrimaryPriority.ActionDefault, action.priority, actionListenerCallback], eventContext);
+                    }
+                };
+                boardEventListeners[eventName].push([EventListenerPrimaryPriority.PreAction, 0, listenerCallback]);
+            }
+        }
+
+        const eventRegistrar = new EventRegistrar(boardEventListeners, []);
+
         // Return created Board object
-        return new Board(tiles, regions);
+        Board.call(boardPartial, tiles, regions, eventRegistrar);
+        return boardPartial as Board;
     }
 
     /**

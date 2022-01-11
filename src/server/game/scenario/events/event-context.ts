@@ -7,20 +7,10 @@ import type { Team }                                    from '../objects/team';
 import type { EventInfoEntry }                          from './base-events';
 
 /**
- * Type alias for event context A type
- */
-export type ECA = string;
-
-/**
- * Type alias for event context F type
- */
-export type ECF = AttributeReferenceForeignObjectSelector;
-
-/**
  * Type describing information for resolving relevant objects and values when an event is triggered
  */
-export type EventContext<F extends ECF, A extends ECA>
-    = IEventContextBuiltinAttributes<A> & EventContextForeignObjects<F>;
+export type EventContext<F extends AttributeReferenceForeignObjectSelector, A extends string, L extends string, O extends string>
+    = IEventContextBuiltinAttributes<A> & EventContextForeignObjects<F> & IEventContextLocations<L> & Record<O, any>;
 
 /**
  * Interface describing a holder of built-in attributes
@@ -68,9 +58,19 @@ interface IEventContextForeignAbilityObjects {
 }
 
 /**
+ * Interface describing a holder of built-in attributes
+ */
+interface IEventContextLocations<L extends string> {
+    locations: Record<L, [number, number][]>
+}
+
+/**
  * Type matching an event context for a particular event entry
  */
 export type EventContextForEvent<T extends Record<S, EventInfoEntry>, S extends string, X extends S>
-    = EventContext<T[X extends undefined ? X : X][0][number], T[X extends undefined ? X : X][1][number]>;
+    = EventContext<T[X extends undefined ? X : X][0][number], T[X extends undefined ? X : X][1][number], T[X extends undefined ? X : X][2][number], T[X extends undefined ? X : X][3][number]>;
 
-export type GenericEventContext = EventContext<any, any>;
+/**
+ * Type matching an event context for a generic event entry
+ */
+export type GenericEventContext = EventContext<any, any, any, any>;

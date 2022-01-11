@@ -2,7 +2,7 @@ import { UnpackingError }                                                       
 import { EventRegistrar }                                                         from '../events/event-registrar';
 import { checkAgainstSchema }                                                     from '../schema-checker';
 import { getJSONFromEntry }                                                       from '../unpacker';
-import { eventListenersFromActionSource }                                         from './actions/action-getter';
+import { getEventListenersFromActionSource }                                      from './actions/action-getter';
 import { getAttributeListeners }                                                  from './attribute-listeners/attribute-listener-getter';
 import { AttributeCodeControlled }                                                from './attributes/attribute-code-controlled';
 import { getAttributes }                                                          from './attributes/attribute-getter';
@@ -134,7 +134,7 @@ export class Player implements IAttributeHolder, IBuiltinAttributeHolder<'player
             ships.push(ship);
         }
 
-        const eventListeners = await eventListenersFromActionSource(parsingContext.withExtendedPath('.actions'), playerEventInfo, playerSource.actions);
+        const eventListeners = await getEventListenersFromActionSource(parsingContext.withExtendedPath('.actions'), playerEventInfo, playerSource.actions);
         parsingContext.reducePath();
 
         // Return created Player object
@@ -210,11 +210,13 @@ export class Player implements IAttributeHolder, IBuiltinAttributeHolder<'player
         });
 
         this.eventRegistrar.queueEvent('onPlayerLostLocal', {
-            builtinAttributes: {}
+            builtinAttributes: {},
+            locations: {}
         });
         this.eventRegistrar.parentRegistrar!.queueEvent('onPlayerLostFriendly', {
             builtinAttributes: {},
-            foreignPlayer: this
+            foreignPlayer: this,
+            locations: {}
         });
 
         for (const team of Object.values(this.team.scenario.teams)) {
@@ -223,15 +225,10 @@ export class Player implements IAttributeHolder, IBuiltinAttributeHolder<'player
             this.eventRegistrar.parentRegistrar!.queueEvent('onPlayerLostUnfriendly', {
                 builtinAttributes: {},
                 foreignTeam: this.team,
-                foreignPlayer: this
+                foreignPlayer: this,
+                locations: {}
             });
         }
-
-        this.eventRegistrar.rootRegistrar.queueEvent('onPlayerLostGeneric', {
-            builtinAttributes: {},
-            foreignTeam: this.team,
-            foreignPlayer: this
-        });
 
         if (propagateUp)
             this.team.checkLost();

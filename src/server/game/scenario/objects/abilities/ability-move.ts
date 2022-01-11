@@ -1,7 +1,7 @@
 import { SubAbilityUsability }                 from 'shared/network/scenario/ability-usability-info';
 import { EventRegistrar }                      from '../../events/event-registrar';
 import { checkAgainstSchema }                  from '../../schema-checker';
-import { eventListenersFromActionSource }      from '../actions/action-getter';
+import { getEventListenersFromActionSource }   from '../actions/action-getter';
 import { getAttributeListeners }               from '../attribute-listeners/attribute-listener-getter';
 import { getAttributes }                       from '../attributes/attribute-getter';
 import { Descriptor }                          from '../common/descriptor';
@@ -93,7 +93,7 @@ export class AbilityMove extends PositionedAbility {
         parsingContext.reducePath();
         const condition = await buildCondition(parsingContext.withExtendedPath('.condition'), abilityMoveSource.condition, false);
         parsingContext.reducePath();
-        const eventListeners = await eventListenersFromActionSource(parsingContext.withExtendedPath('.actions'), abilityEventInfo, abilityMoveSource.actions);
+        const eventListeners = await getEventListenersFromActionSource(parsingContext.withExtendedPath('.actions'), abilityEventInfo, abilityMoveSource.actions);
         parsingContext.reducePath();
 
         // Return created AbilityMove object
@@ -142,7 +142,8 @@ export class AbilityMove extends PositionedAbility {
     public checkUsable(): [mainUsabilityUpdated: boolean, subAbilityUsabilityUpdated: boolean] {
         const oldUsability = this._usable;
         this._usable = this.condition.check({
-            builtinAttributes: {}
+            builtinAttributes: {},
+            locations: {}
         });
 
         const mainUsabilityUpdated = this._usable !== oldUsability;
@@ -194,15 +195,8 @@ export class AbilityMove extends PositionedAbility {
         this.ship.moveBy(dx, dy);
 
         this.eventRegistrar.queueEvent('onUse', {
-            builtinAttributes: {}
-        });
-
-        this.eventRegistrar.rootRegistrar.queueEvent('onAbilityUsed', {
             builtinAttributes: {},
-            foreignTeam: this.ship.owner.team,
-            foreignPlayer: this.ship.owner,
-            foreignShip: this.ship,
-            foreignAbility: this
+            locations: {}
         });
 
         this.eventRegistrar.evaluateEvents();

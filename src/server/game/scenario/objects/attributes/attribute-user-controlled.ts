@@ -77,7 +77,8 @@ export class AttributeUserControlled extends Attribute {
     public getValue(): number {
         if (this.value === undefined)
             this.value = this.initialValue.evaluate({
-                builtinAttributes: {}
+                builtinAttributes: {},
+                locations: {}
             });
         return this.value;
     }
@@ -98,7 +99,8 @@ export class AttributeUserControlled extends Attribute {
         // Constrain value before setting new value
         if (this.constraint !== undefined)
             value = this.constraint.constrain({
-                builtinAttributes: {}
+                builtinAttributes: {},
+                locations: {}
             }, value);
 
         // Set value as new constrained value

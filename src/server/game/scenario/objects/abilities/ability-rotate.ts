@@ -2,7 +2,7 @@ import { SubAbilityUsability }                 from 'shared/network/scenario/abi
 import { Rotation }                            from 'shared/scenario/rotation';
 import { EventRegistrar }                      from '../../events/event-registrar';
 import { checkAgainstSchema }                  from '../../schema-checker';
-import { eventListenersFromActionSource }      from '../actions/action-getter';
+import { getEventListenersFromActionSource }   from '../actions/action-getter';
 import { getAttributeListeners }               from '../attribute-listeners/attribute-listener-getter';
 import { getAttributes }                       from '../attributes/attribute-getter';
 import { Descriptor }                          from '../common/descriptor';
@@ -100,7 +100,7 @@ export class AbilityRotate extends IndexedAbility {
         parsingContext.reducePath();
         const condition = await buildCondition(parsingContext.withExtendedPath('.condition'), abilityRotateSource.condition, false);
         parsingContext.reducePath();
-        const eventListeners = await eventListenersFromActionSource(parsingContext.withExtendedPath('.actions'), abilityEventInfo, abilityRotateSource.actions);
+        const eventListeners = await getEventListenersFromActionSource(parsingContext.withExtendedPath('.actions'), abilityEventInfo, abilityRotateSource.actions);
         parsingContext.reducePath();
 
         // Return created AbilityFire object
@@ -158,7 +158,8 @@ export class AbilityRotate extends IndexedAbility {
         const oldRot270Valid = this.rot270valid;
 
         this._usable = this.condition.check({
-            builtinAttributes: {}
+            builtinAttributes: {},
+            locations: {}
         });
 
         if (this.rot90valid !== SubAbilityUsability.NotUsable)
@@ -202,15 +203,8 @@ export class AbilityRotate extends IndexedAbility {
         this.ship.rotateBy(rotation);
 
         this.eventRegistrar.queueEvent('onUse', {
-            builtinAttributes: {}
-        });
-
-        this.eventRegistrar.rootRegistrar.queueEvent('onAbilityUsed', {
             builtinAttributes: {},
-            foreignTeam: this.ship.owner.team,
-            foreignPlayer: this.ship.owner,
-            foreignShip: this.ship,
-            foreignAbility: this
+            locations: {}
         });
 
         this.eventRegistrar.evaluateEvents();

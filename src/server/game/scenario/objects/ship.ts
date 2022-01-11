@@ -1,35 +1,51 @@
-import { Rotation }                                                               from 'shared/scenario/rotation';
-import { v4 }                                                                     from 'uuid';
-import { UnpackingError }                                                         from '../errors/unpacking-error';
-import { EventListenerPrimaryPriority }                                           from '../events/event-listener';
-import { EventRegistrar }                                                         from '../events/event-registrar';
-import { checkAgainstSchema }                                                     from '../schema-checker';
-import { getJSONFromEntry }                                                       from '../unpacker';
-import { buildAbility }                                                           from './abilities/ability-builder';
-import { eventListenersFromActionSource }                                         from './actions/action-getter';
-import { getAttributeListeners }                                                  from './attribute-listeners/attribute-listener-getter';
-import { AttributeCodeControlled }                                                from './attributes/attribute-code-controlled';
-import { getAttributes }                                                          from './attributes/attribute-getter';
-import { AttributeWatcher }                                                       from './attributes/attribute-watcher';
-import { Descriptor }                                                             from './common/descriptor';
-import { RotatablePattern }                                                       from './common/rotatable-pattern';
-import { shipEventInfo }                                                          from './events/ship-events';
-import { shipSchema }                                                             from './sources/ship';
-import type { ParsingContext }                                                    from '../parsing-context';
-import type { Ability }                                                           from './abilities/ability';
-import type { AbilitySource }                                                     from './abilities/sources/ability';
-import type { AttributeListener }                                                 from './attribute-listeners/attribute-listener';
+import { Rotation }                          from 'shared/scenario/rotation';
+import { v4 }                                from 'uuid';
+import { UnpackingError }                    from '../errors/unpacking-error';
+import { EventListenerPrimaryPriority }      from '../events/event-listener';
+import { EventRegistrar }                    from '../events/event-registrar';
+import { checkAgainstSchema }                from '../schema-checker';
+import { getJSONFromEntry }                  from '../unpacker';
+import { buildAbility }                      from './abilities/ability-builder';
+import { getEventListenersFromActionSource } from './actions/action-getter';
+import {
+    getAttributeListeners
+}                                                                                 from './attribute-listeners/attribute-listener-getter';
+import {
+    AttributeCodeControlled
+}                                                                                 from './attributes/attribute-code-controlled';
+import { getAttributes }       from './attributes/attribute-getter';
+import { AttributeWatcher }    from './attributes/attribute-watcher';
+import { Descriptor }          from './common/descriptor';
+import { RotatablePattern }    from './common/rotatable-pattern';
+import { shipEventInfo }       from './events/ship-events';
+import { shipSchema }          from './sources/ship';
+import type { ParsingContext } from '../parsing-context';
+import type { Ability }        from './abilities/ability';
+import type { AbilitySource }  from './abilities/sources/ability';
+import type {
+    AttributeListener
+}                                                                                 from './attribute-listeners/attribute-listener';
 import type { BuiltinAttributeRecord, IAttributeHolder, IBuiltinAttributeHolder } from './attributes/attribute-holder';
-import type { AttributeMap }                                                      from './attributes/i-attribute-holder';
-import type { Board }                                                             from './board';
-import type { ShipEvent, ShipEventInfo }                                          from './events/ship-events';
-import type { Player }                                                            from './player';
-import type { IShipSource }                                                       from './sources/ship';
-import type { Team }                                                              from './team';
-import type { AbilityInfo }                                                       from 'shared/network/scenario/ability-info';
-import type { AbilityUsabilityInfo }                                              from 'shared/network/scenario/ability-usability-info';
-import type { AttributeUpdates }                                                  from 'shared/network/scenario/i-attribute-info';
-import type { IShipInfo, IShipPrototypeInfo }                                     from 'shared/network/scenario/i-ship-prototype-info';
+import type {
+    AttributeMap
+}                                                                                 from './attributes/i-attribute-holder';
+import type { Board }                    from './board';
+import type { ShipEvent, ShipEventInfo } from './events/ship-events';
+import type { Player }                   from './player';
+import type { Region }                   from './region';
+import type { IShipSource }              from './sources/ship';
+import type { Team }                     from './team';
+import type { AbilityInfo }              from 'shared/network/scenario/ability-info';
+import type {
+    AbilityUsabilityInfo
+}                                                                                 from 'shared/network/scenario/ability-usability-info';
+import type {
+    AttributeUpdates
+}                                                                                 from 'shared/network/scenario/i-attribute-info';
+import type {
+    IShipInfo,
+    IShipPrototypeInfo
+}                                                                                 from 'shared/network/scenario/i-ship-prototype-info';
 
 /**
  * Ship - Server Version
@@ -209,7 +225,7 @@ export class Ship implements IAttributeHolder, IBuiltinAttributeHolder<'ship'> {
             abilities.push(ability);
         }
 
-        const eventListeners = await eventListenersFromActionSource(parsingContext.withExtendedPath('.actions'), shipEventInfo, shipSource.actions);
+        const eventListeners = await getEventListenersFromActionSource(parsingContext.withExtendedPath('.actions'), shipEventInfo, shipSource.actions);
         parsingContext.reducePath();
 
         // Return created Ship object
@@ -363,6 +379,134 @@ export class Ship implements IAttributeHolder, IBuiltinAttributeHolder<'ship'> {
     }
 
     /**
+     * Retrieves an array of tile coordinates and regions that this ship occupies
+     *
+     * @returns  [tileCoordinates, regions]
+     */
+    private getTilesAndRegions(): [string[], Region[]] {
+        const tileCoordinates: string[] = [];
+        const regions: Region[] = [];
+        for (const [dx, dy] of this._pattern.patternEntries) {
+            const x = this._x + dx;
+            const y = this._y + dy;
+            tileCoordinates.push(`${x},${y}`);
+            const tileRegions = this.board.tiles[y][x][1];
+            for (const region of tileRegions)
+                if (!regions.includes(region))
+                    regions.push(region);
+        }
+        return [tileCoordinates, regions];
+    }
+
+    /**
+     * Determines which tile coordinates have changed between two arrays and raises board events accordingly
+     *
+     * @param  oldTileCoordinates Array of tile coordinates which this ship used to occupy
+     * @param  newTileCoordinates Array of tile coordinates which this ship currently occupies
+     */
+    private queueTileChangeEvents(oldTileCoordinates: string[], newTileCoordinates: string[]): void {
+        const eventRegistrar = this.owner.team.scenario.board.eventRegistrar;
+
+        for (const oldTileCoordinate of oldTileCoordinates) {
+            const [stringX, stringY] = oldTileCoordinate.split(',');
+            const x = parseInt(stringX);
+            const y = parseInt(stringY);
+            if (newTileCoordinates.includes(oldTileCoordinate))
+                // Tile unchanged
+                eventRegistrar.queueEvent('onShipMoveOverTile', {
+                    builtinAttributes: {},
+                    foreignTeam: this.owner.team,
+                    foreignPlayer: this.owner,
+                    foreignShip: this,
+                    locations: {
+                        tile: [[x, y]]
+                    }
+                });
+            else
+                // Tile left
+                eventRegistrar.queueEvent('onShipLeaveTile', {
+                    builtinAttributes: {},
+                    foreignTeam: this.owner.team,
+                    foreignPlayer: this.owner,
+                    foreignShip: this,
+                    locations: {
+                        tile: [[x, y]]
+                    }
+                });
+        }
+
+        for (const newTileCoordinate of newTileCoordinates) {
+            if (!oldTileCoordinates.includes(newTileCoordinate)) {
+                // Tile entered
+                const [stringX, stringY] = newTileCoordinate.split(',');
+                const x = parseInt(stringX);
+                const y = parseInt(stringY);
+                eventRegistrar.queueEvent('onShipEnterTile', {
+                    builtinAttributes: {},
+                    foreignTeam: this.owner.team,
+                    foreignPlayer: this.owner,
+                    foreignShip: this,
+                    locations: {
+                        tile: [[x, y]]
+                    }
+                });
+            }
+        }
+    }
+
+    /**
+     * Determines which regions have changed between two arrays and raises board events accordingly
+     *
+     * @param  oldRegions Array of regions which this ship used to occupy
+     * @param  newRegions Array of regions which this ship currently occupies
+     */
+    private queueRegionChangeEvents(oldRegions: Region[], newRegions: Region[]): void {
+        const eventRegistrar = this.owner.team.scenario.board.eventRegistrar;
+
+        for (const region of oldRegions) {
+            if (newRegions.includes(region))
+                // Region unchanged
+                eventRegistrar.queueEvent('onShipMoveWithinRegion', {
+                    builtinAttributes: {},
+                    foreignTeam: this.owner.team,
+                    foreignPlayer: this.owner,
+                    foreignShip: this,
+                    locations: {
+                        region: region.tiles
+                    },
+                    region: region
+                });
+            else
+                // Region left
+                eventRegistrar.queueEvent('onShipLeaveRegion', {
+                    builtinAttributes: {},
+                    foreignTeam: this.owner.team,
+                    foreignPlayer: this.owner,
+                    foreignShip: this,
+                    locations: {
+                        region: region.tiles
+                    },
+                    region: region
+                });
+        }
+
+        for (const region of newRegions) {
+            if (!oldRegions.includes(region))
+                // Region entered
+                eventRegistrar.queueEvent('onShipEnterRegion', {
+                    builtinAttributes: {},
+                    foreignTeam: this.owner.team,
+                    foreignPlayer: this.owner,
+                    foreignShip: this,
+                    locations: {
+                        region: region.tiles
+                    },
+                    region: region
+                });
+        }
+    }
+
+    /**
      * Moves the ship to a new location on the board
      *
      * @param  x Destination X coordinate
@@ -371,13 +515,16 @@ export class Ship implements IAttributeHolder, IBuiltinAttributeHolder<'ship'> {
     public moveTo(x: number, y: number): void {
         this.unSpot();
         this.board.removeShip(this);
+        const [oldTileCoordinates, oldRegions] = this.getTilesAndRegions();
         this._x = x;
         this._y = y;
         this.board.addShip(this);
         this.spot();
         this.updateKnown();
         this.updateOthers();
-        
+        const [newTileCoordinates, newRegions] = this.getTilesAndRegions();
+        this.queueTileChangeEvents(oldTileCoordinates, newTileCoordinates);
+        this.queueRegionChangeEvents(oldRegions, newRegions);
         this.hasMoved = true;
     }
 

@@ -1,14 +1,14 @@
-import { UnpackingError }                              from '../../errors/unpacking-error';
-import { checkAgainstSchema }                          from '../../schema-checker';
-import { buildCondition }                              from '../conditions/condition-builder';
-import { Action }                                      from './action';
-import { actionLoseSchema }                            from './sources/action-lose';
-import type { ECA, EventContext, GenericEventContext } from '../../events/event-context';
-import type { EventEvaluationState }                   from '../../events/event-evaluation-state';
-import type { ParsingContext }                         from '../../parsing-context';
-import type { Condition }                              from '../conditions/condition';
-import type { Player }                                 from '../player';
-import type { IActionLoseSource }                      from './sources/action-lose';
+import { UnpackingError }                         from '../../errors/unpacking-error';
+import { checkAgainstSchema }                     from '../../schema-checker';
+import { buildCondition }                         from '../conditions/condition-builder';
+import { Action }                                 from './action';
+import { actionLoseSchema }                       from './sources/action-lose';
+import type { EventContext, GenericEventContext } from '../../events/event-context';
+import type { EventEvaluationState }              from '../../events/event-evaluation-state';
+import type { ParsingContext }                    from '../../parsing-context';
+import type { Condition }                         from '../conditions/condition';
+import type { Player }                            from '../player';
+import type { IActionLoseSource }                 from './sources/action-lose';
 
 /**
  * ActionLose - Server Version
@@ -80,7 +80,7 @@ export class ActionLose extends Action {
         if (!this.condition.check(eventContext))
             return;
 
-        const player = this.player ?? (eventContext as EventContext<'player', ECA>).foreignPlayer;
+        const player = this.player ?? (eventContext as EventContext<'player', any, any, any>).foreignPlayer;
         player.lose( true);
     }
 }

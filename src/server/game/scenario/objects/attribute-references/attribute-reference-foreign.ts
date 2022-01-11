@@ -2,7 +2,7 @@ import { builtinAttributePrefix }                         from 'shared/scenario/
 import { UnpackingError }                                 from '../../errors/unpacking-error';
 import { AttributeReference }                             from './attribute-reference';
 import { attributeReferenceForeignObjectSelectors }       from './sources/attribute-reference';
-import type { ECA, EventContext, GenericEventContext }    from '../../events/event-context';
+import type { EventContext, GenericEventContext }         from '../../events/event-context';
 import type { EventEvaluationState }                      from '../../events/event-evaluation-state';
 import type { ParsingContext }                            from '../../parsing-context';
 import type { Attribute }                                 from '../attributes/attribute';
@@ -71,16 +71,16 @@ export class AttributeReferenceForeign extends AttributeReference {
 
         switch (this.objectSelector) {
             case 'team':
-                attributeHolder = (eventContext as EventContext<'team', ECA>).foreignTeam;
+                attributeHolder = (eventContext as EventContext<'team', any, any, any>).foreignTeam;
                 break;
             case 'player':
-                attributeHolder = (eventContext as EventContext<'player', ECA>).foreignPlayer;
+                attributeHolder = (eventContext as EventContext<'player', any, any, any>).foreignPlayer;
                 break;
             case 'ship':
-                attributeHolder = (eventContext as EventContext<'ship', ECA>).foreignShip;
+                attributeHolder = (eventContext as EventContext<'ship', any, any, any>).foreignShip;
                 break;
             case 'ability':
-                attributeHolder = (eventContext as EventContext<'ability', ECA>).foreignAbility;
+                attributeHolder = (eventContext as EventContext<'ability', any, any, any>).foreignAbility;
                 break;
         }
 

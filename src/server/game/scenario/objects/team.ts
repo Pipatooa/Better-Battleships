@@ -2,7 +2,7 @@ import { UnpackingError }                                                       
 import { EventRegistrar }                                                         from '../events/event-registrar';
 import { checkAgainstSchema }                                                     from '../schema-checker';
 import { getJSONFromEntry }                                                       from '../unpacker';
-import { eventListenersFromActionSource }                                         from './actions/action-getter';
+import { getEventListenersFromActionSource }                                      from './actions/action-getter';
 import { getAttributeListeners }                                                  from './attribute-listeners/attribute-listener-getter';
 import { AttributeCodeControlled }                                                from './attributes/attribute-code-controlled';
 import { getAttributes }                                                          from './attributes/attribute-getter';
@@ -147,7 +147,7 @@ export class Team implements IAttributeHolder, IBuiltinAttributeHolder<'team'> {
             playerPrototypes.push(players);
         }
 
-        const eventListeners = await eventListenersFromActionSource(parsingContext.withExtendedPath('.actions'), teamEventInfo, teamSource.actions);
+        const eventListeners = await getEventListenersFromActionSource(parsingContext.withExtendedPath('.actions'), teamEventInfo, teamSource.actions);
         parsingContext.reducePath();
 
         // Return created Team object
@@ -290,7 +290,8 @@ export class Team implements IAttributeHolder, IBuiltinAttributeHolder<'team'> {
             return;
 
         this.eventRegistrar.queueEvent('onTeamLostLocal',  {
-            builtinAttributes: {}
+            builtinAttributes: {},
+            locations: {}
         });
 
         for (const team of Object.values(this.scenario.teams)) {
@@ -298,14 +299,10 @@ export class Team implements IAttributeHolder, IBuiltinAttributeHolder<'team'> {
                 continue;
             team.eventRegistrar.queueEvent('onTeamLostForeign', {
                 builtinAttributes: {},
-                foreignTeam: this
+                foreignTeam: this,
+                locations: {}
             });
         }
-
-        this.eventRegistrar.queueEvent('onTeamLostGeneric',  {
-            builtinAttributes: {},
-            foreignTeam: this
-        });
 
         if (propagateDown)
             for (const player of this._players)

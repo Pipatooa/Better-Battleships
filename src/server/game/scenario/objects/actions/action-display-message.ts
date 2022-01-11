@@ -1,16 +1,16 @@
-import { UnpackingError }                              from '../../errors/unpacking-error';
-import { checkAgainstSchema }                          from '../../schema-checker';
-import { buildCondition }                              from '../conditions/condition-builder';
-import { Team }                                        from '../team';
-import { Action }                                      from './action';
-import { actionDisplayMessageSchema }                  from './sources/action-display-message';
-import type { IMessageEvent }                          from '../../../../../shared/network/events/i-message';
-import type { ECA, EventContext, GenericEventContext } from '../../events/event-context';
-import type { EventEvaluationState }                   from '../../events/event-evaluation-state';
-import type { ParsingContext }                         from '../../parsing-context';
-import type { Condition }                              from '../conditions/condition';
-import type { Player }                                 from '../player';
-import type { IActionDisplayMessage }                  from './sources/action-display-message';
+import { UnpackingError }                         from '../../errors/unpacking-error';
+import { checkAgainstSchema }                     from '../../schema-checker';
+import { buildCondition }                         from '../conditions/condition-builder';
+import { Team }                                   from '../team';
+import { Action }                                 from './action';
+import { actionDisplayMessageSchema }             from './sources/action-display-message';
+import type { IMessageEvent }                     from '../../../../../shared/network/events/i-message';
+import type { EventContext, GenericEventContext } from '../../events/event-context';
+import type { EventEvaluationState }              from '../../events/event-evaluation-state';
+import type { ParsingContext }                    from '../../parsing-context';
+import type { Condition }                         from '../conditions/condition';
+import type { Player }                            from '../player';
+import type { IActionDisplayMessage }             from './sources/action-display-message';
 
 /**
  * ActionDisplayMessage - Server Version
@@ -100,9 +100,9 @@ export class ActionDisplayMessage extends Action {
 
         // Select target dynamically if necessary
         const target = this.target === 'team'
-            ? (eventContext as EventContext<'team', ECA>).foreignTeam
+            ? (eventContext as EventContext<'team', any, any, any>).foreignTeam
             : this.target === 'player'
-                ? (eventContext as EventContext<'player', ECA>).foreignPlayer
+                ? (eventContext as EventContext<'player', any, any, any>).foreignPlayer
                 : this.target;
 
         // Send message event to clients

@@ -5,7 +5,7 @@ import { shipEventInfo } from '../../events/ship-events';
  */
 export const abilityEventInfo = {
     ...shipEventInfo,
-    onUse: [[], []]
+    onUse: [[], [], [], []]
 } as const;
 
 /**

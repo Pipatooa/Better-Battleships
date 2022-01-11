@@ -39,7 +39,8 @@ export class TurnManager {
     public start(): void {
         this.timeoutManager.startTimeout('turnTimeout');
         this._turnOrder![this.turnIndex].eventRegistrar.queueEvent('onTurnStart', {
-            builtinAttributes: {}
+            builtinAttributes: {},
+            locations: {}
         });
     }
 
@@ -95,16 +96,19 @@ export class TurnManager {
         } while (this.turnIndex !== startIndex && newPlayer.lost);
 
         oldPlayer.eventRegistrar.queueEvent('onTurnEnd',  {
-            builtinAttributes: {}
+            builtinAttributes: {},
+            locations: {}
         });
         newPlayer.eventRegistrar.queueEvent('onTurnStart',  {
-            builtinAttributes: {}
+            builtinAttributes: {},
+            locations: {}
         });
 
         this.scenario.eventRegistrar.queueEvent('onTurnAdvancement', {
             builtinAttributes: {},
             foreignTeam: newPlayer.team,
-            foreignPlayer: newPlayer
+            foreignPlayer: newPlayer,
+            locations: {}
         });
 
         if (evaluateEvents)

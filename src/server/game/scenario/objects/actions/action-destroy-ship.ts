@@ -1,14 +1,14 @@
-import { UnpackingError }                              from '../../errors/unpacking-error';
-import { checkAgainstSchema }                          from '../../schema-checker';
-import { buildCondition }                              from '../conditions/condition-builder';
-import { Action }                                      from './action';
-import { actionDestroyShipSchema }                     from './sources/action-destroy-ship';
-import type { ECA, EventContext, GenericEventContext } from '../../events/event-context';
-import type { EventEvaluationState }                   from '../../events/event-evaluation-state';
-import type { ParsingContext }                         from '../../parsing-context';
-import type { Condition }                              from '../conditions/condition';
-import type { Ship }                                   from '../ship';
-import type { IActionDestroyShipSource }               from './sources/action-destroy-ship';
+import { UnpackingError }                         from '../../errors/unpacking-error';
+import { checkAgainstSchema }                     from '../../schema-checker';
+import { buildCondition }                         from '../conditions/condition-builder';
+import { Action }                                 from './action';
+import { actionDestroyShipSchema }                from './sources/action-destroy-ship';
+import type { EventContext, GenericEventContext } from '../../events/event-context';
+import type { EventEvaluationState }              from '../../events/event-evaluation-state';
+import type { ParsingContext }                    from '../../parsing-context';
+import type { Condition }                         from '../conditions/condition';
+import type { Ship }                              from '../ship';
+import type { IActionDestroyShipSource }          from './sources/action-destroy-ship';
 
 /**
  * ActionDestroyShip - Server Version
@@ -80,7 +80,7 @@ export class ActionDestroyShip extends Action {
         if (!this.condition.check(eventContext))
             return;
 
-        const ship = this.ship ?? (eventContext as EventContext<'ship', ECA>).foreignShip;
+        const ship = this.ship ?? (eventContext as EventContext<'ship', any, any, any>).foreignShip;
         ship.deconstruct();
         ship.owner.removeShip(ship);
     }

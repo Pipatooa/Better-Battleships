@@ -45,8 +45,12 @@ export class EventRegistrar<T extends Record<S, EventInfoEntry>, S extends strin
      * @param  listener Event listener
      */
     public addEventListener<X extends S>(event: X, listener: EventListener<T, S, X>): void {
-        this.eventListeners[event].push(listener);
-        this.eventListeners[event].sort((f, s) => f[0] === s[0] ? f[1] - s[1] : f[0] - s[0]);
+        if (this.eventListeners[event] === undefined)
+            this.eventListeners[event] = [listener];
+        else {
+            this.eventListeners[event].push(listener);
+            this.eventListeners[event].sort((f, s) => f[0] === s[0] ? f[1] - s[1] : f[0] - s[0]);
+        }
 
         const existingListeners = this.eventListeners[event];
         const newEventListeners: EventListener<T, S, X>[] = [];
@@ -113,10 +117,13 @@ export class EventRegistrar<T extends Record<S, EventInfoEntry>, S extends strin
     public queueEvent<X extends S>(event: X, eventContext: EventContextForEvent<T, S, X>): void {
 
         // Add event listener calls for this event to the queue
-        const newEventListenerCalls: QueuedEventListenerCall<T, S, X>[] = [];
-        for (const eventListener of this.eventListeners[event])
-            newEventListenerCalls.push([eventListener, eventContext, this]);
-        this.queueEventListenerCalls(newEventListenerCalls as GenericQueuedEventListenerCall[]);
+        const eventListeners = this.eventListeners[event];
+        if (eventListeners !== undefined) {
+            const newEventListenerCalls: QueuedEventListenerCall<T, S, X>[] = [];
+            for (const eventListener of this.eventListeners[event])
+                newEventListenerCalls.push([ eventListener, eventContext, this ]);
+            this.queueEventListenerCalls(newEventListenerCalls as GenericQueuedEventListenerCall[]);
+        }
 
         // Merge sub-registrar events into event listener call queue
         for (const subRegistrar of this.subRegistrars)
@@ -213,9 +220,6 @@ export class EventRegistrar<T extends Record<S, EventInfoEntry>, S extends strin
             if (this.preQueuedEventListenerCalls.length > 0)
                 this.queuePreQueuedEventListenerCalls();
         }
-
-        if (eventEvaluationState.terminate)
-            return;
 
         // Finish evaluation
         this._eventEvaluationState = undefined;

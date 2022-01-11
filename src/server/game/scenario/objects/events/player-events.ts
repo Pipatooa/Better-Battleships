@@ -5,13 +5,13 @@ import { teamEventInfo } from './team-events';
  */
 export const playerEventInfo = {
     ...teamEventInfo,
-    onTurnStart: [[], []],
-    onTurnEnd: [[], []],
-    onPlayerLostLocal: [[], []]
+    onTurnStart: [[], [], [], []],
+    onTurnEnd: [[], [], [], []],
+    onPlayerLostLocal: [[], [], [], []]
 } as const;
 
 /**
- * Type matching record describing all fire ability events
+ * Type matching record describing all player events
  */
 export type PlayerEventInfo = typeof playerEventInfo;
 

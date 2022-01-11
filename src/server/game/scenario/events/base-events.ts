@@ -3,17 +3,14 @@ import type { AttributeReferenceForeignObjectSelector } from '../objects/attribu
 /**
  * Type describing dictionary of event name strings to foreign attribute level available and built-in attribute names
  */
-export type EventInfoEntry = readonly [readonly AttributeReferenceForeignObjectSelector[], readonly string[]];
+export type EventInfoEntry = readonly [readonly AttributeReferenceForeignObjectSelector[], readonly string[], readonly string[], readonly string[]];
 
 /**
  * Record describing all base events
  */
 export const baseEventInfo = {
-    onGameStart: [[], []],
-    onTurnAdvancement: [['team', 'player'], []],
-    onAbilityUsed: [['team', 'player', 'ship', 'ability'], []],
-    onPlayerLostGeneric: [['team', 'player'], []],
-    onTeamLostGeneric: [['team'], []]
+    onGameStart: [[], [], [], []],
+    onTurnAdvancement: [['team', 'player'], [], [], []]
 } as const;
 
 /**
@@ -25,8 +22,3 @@ export type BaseEventInfo = typeof baseEventInfo;
  * Type matching all global event name strings
  */
 export type BaseEvent = keyof BaseEventInfo;
-
-/**
- * Type matching all built-in attributes names for a specific event
- */
-export type EventBuiltinAttributes<T extends Record<S, EventInfoEntry>, S extends string, X extends S> = T[X][1][number];

@@ -4,7 +4,7 @@ import { EventRegistrar }                                                       
 import { checkAgainstSchema }                                                     from '../schema-checker';
 import { TurnManager }                                                            from '../turn-manager';
 import { getJSONFromEntry }                                                       from '../unpacker';
-import { eventListenersFromActionSource }                                         from './actions/action-getter';
+import { getEventListenersFromActionSource }                                      from './actions/action-getter';
 import { getAttributeListeners }                                                  from './attribute-listeners/attribute-listener-getter';
 import { ForeignAttributeRegistry }                                               from './attribute-references/foreign-attribute-registry';
 import { AttributeCodeControlled }                                                from './attributes/attribute-code-controlled';
@@ -121,7 +121,7 @@ export class Scenario implements IAttributeHolder, IBuiltinAttributeHolder<'scen
         // Get teams
         const teams: { [name: string]: Team } = {};
         const teamsList: Team[] = [];
-        const subRegistrars: EventRegistrar<BaseEventInfo, BaseEvent>[] = [];
+        const subRegistrars: EventRegistrar<BaseEventInfo, BaseEvent>[] = [board.eventRegistrar];
         for (const teamName of scenarioSource.teams) {
 
             // If team does not exist
@@ -140,7 +140,7 @@ export class Scenario implements IAttributeHolder, IBuiltinAttributeHolder<'scen
         // Create turn manager
         TurnManager.call(turnManagerPartial, scenarioPartial as Scenario, scenarioSource.turnOrdering, teamsList, scenarioSource.maxTurnTime);
 
-        const eventListeners = await eventListenersFromActionSource(parsingContext.withExtendedPath('.actions'), baseEventInfo, scenarioSource.actions);
+        const eventListeners = await getEventListenersFromActionSource(parsingContext.withExtendedPath('.actions'), baseEventInfo, scenarioSource.actions);
         parsingContext.reducePath();
 
         // Return created Scenario object

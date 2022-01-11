@@ -8,7 +8,7 @@ export const shipEventInfo = {
 } as const;
 
 /**
- * Type matching record describing all fire ability events
+ * Type matching record describing all ship events
  */
 export type ShipEventInfo = typeof shipEventInfo;
 

@@ -6,7 +6,7 @@ import { AttributeReference }                                          from '../
 import { AttributeReferenceLocal }                                     from '../attribute-references/attribute-reference-local';
 import { buildValueConstraint }                                        from '../constraints/value-constraint-builder';
 import { attributeListenerSchema }                                     from './sources/attribute-listener';
-import type { GenericEventContext }                                    from '../../events/event-context';
+import type { EventContext, GenericEventContext }                      from '../../events/event-context';
 import type { EventEvaluationState }                                   from '../../events/event-evaluation-state';
 import type { EventListener }                                          from '../../events/event-listener';
 import type { EventRegistrar }                                         from '../../events/event-registrar';
@@ -93,9 +93,9 @@ export class AttributeListener {
      *
      * @param  eventContext Context for resolving objects and values when an event is triggered
      */
-    public preQueueEventListenerCall(eventContext: GenericEventContext & { value: number }): void {
+    public preQueueEventListenerCall(eventContext: EventContext<any, any, any, 'value'>): void {
         const callback = (eventEvaluationState: EventEvaluationState, eventContext: GenericEventContext ): void =>
-            this.executeActions(eventEvaluationState, eventContext as GenericEventContext & { value: number });
+            this.executeActions(eventEvaluationState, eventContext as EventContext<any, any, any, 'value'>);
 
         const eventListener = [EventListenerPrimaryPriority.ActionDefault, this.priority, callback] as EventListener<any, string, string>;
         this.eventRegistrar.preQueueEventListenerCall(eventListener, eventContext);
@@ -107,7 +107,7 @@ export class AttributeListener {
      * @param  eventEvaluationState Current state of event evaluation
      * @param  eventContext         Context for resolving objects and values when an event is triggered
      */
-    public executeActions(eventEvaluationState: EventEvaluationState, eventContext: GenericEventContext & { value: number } ): void {
+    public executeActions(eventEvaluationState: EventEvaluationState, eventContext: EventContext<any, any, any, 'value'> ): void {
         const meetsConstraint = this.constraint.check(eventContext, eventContext.value);
         let shouldExecute: boolean;
 

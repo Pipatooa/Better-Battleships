@@ -261,7 +261,8 @@ export class Game {
      */
     public startGame(): void {
         this.scenario.eventRegistrar.queueEvent('onGameStart', {
-            builtinAttributes: {}
+            builtinAttributes: {},
+            locations: {}
         });
         this.scenario.turnManager.start();
         this.scenario.eventRegistrar.evaluateEvents();

@@ -1,7 +1,7 @@
-import type { GenericEventContext } from '../../events/event-context';
-import type { AttributeListener }   from '../attribute-listeners/attribute-listener';
-import type { Descriptor }          from '../common/descriptor';
-import type { IAttributeInfo }      from 'shared/network/scenario/i-attribute-info';
+import type { EventContext }      from '../../events/event-context';
+import type { AttributeListener } from '../attribute-listeners/attribute-listener';
+import type { Descriptor }        from '../common/descriptor';
+import type { IAttributeInfo }    from 'shared/network/scenario/i-attribute-info';
 
 /**
  * Attribute - Server Version
@@ -72,8 +72,9 @@ export abstract class Attribute {
         for (const callback of this._attributeUpdateCallbacks)
             callback(value);
 
-        const eventContext: GenericEventContext & { value: number } = {
+        const eventContext: EventContext<any, any, any, 'value'> = {
             builtinAttributes: {},
+            locations: {},
             value: value
         };
         for (const attributeListener of this.attributeListeners)

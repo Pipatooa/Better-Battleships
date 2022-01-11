@@ -5,14 +5,14 @@ import { baseEventInfo } from '../../events/base-events';
  */
 export const teamEventInfo = {
     ...baseEventInfo,
-    onPlayerLostFriendly: [['player'], []],
-    onPlayerLostUnfriendly: [['team', 'player'], []],
-    onTeamLostLocal: [[], []],
-    onTeamLostForeign: [['team'], []]
+    onPlayerLostFriendly: [['player'], [], [], []],
+    onPlayerLostUnfriendly: [['team', 'player'], [], [], []],
+    onTeamLostLocal: [[], [], [], []],
+    onTeamLostForeign: [['team'], [], [], []]
 } as const;
 
 /**
- * Type matching record describing all fire ability events
+ * Type matching record describing all ship events
  */
 export type TeamEventInfo = typeof teamEventInfo;
 
