@@ -97,10 +97,14 @@ export class Board {
                 if (!(regionChar in regionPalette))
                     throw new UnpackingError(`Could not find regions matching '${regionChar}' defined at '${parsingContext.currentPathPrefix}regions[${y}][${x}]' within the palette defined at '${parsingContext.currentPathPrefix}regionPalette'`, parsingContext);
 
+                // Get tile type and add tile to region
                 const tileType: TileType = palette[tileChar];
                 const tileRegions: Region[] = [];
-                for (const regionID of regionPalette[regionChar])
-                    tileRegions.push(regions[regionID]);
+                for (const regionID of regionPalette[regionChar]) {
+                    const region = regions[regionID];
+                    tileRegions.push(region);
+                    region.tiles.push([x, y]);
+                }
                 tiles[y][x] = [tileType, tileRegions, undefined, []];
             }
         }

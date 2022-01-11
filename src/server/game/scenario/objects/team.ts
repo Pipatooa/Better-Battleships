@@ -16,6 +16,7 @@ import type { ParsingContext }                                                  
 import type { IAttributeHolder, IBuiltinAttributeHolder, BuiltinAttributeRecord } from './attributes/attribute-holder';
 import type { AttributeMap }                                                      from './attributes/i-attribute-holder';
 import type { TeamEventInfo, TeamEvent }                                          from './events/team-events';
+import type { Region }                                                            from './region';
 import type { Scenario }                                                          from './scenario';
 import type { IPlayerSource }                                                     from './sources/player';
 import type { IPlayerConfig, ITeamSource }                                        from './sources/team';
@@ -115,6 +116,7 @@ export class Team implements IAttributeHolder, IBuiltinAttributeHolder<'team'> {
         for (let i = 0; i < teamSource.playerConfigs.length; i++) {
             const playerConfigs: IPlayerConfig[] = teamSource.playerConfigs[i];
             const playerCount: number = i + 1;
+            const playerSpawnRegions: string[] = [];
 
             // Check player count and length of specified player configs are the same
             if (playerCount !== playerConfigs.length)
@@ -133,8 +135,13 @@ export class Team implements IAttributeHolder, IBuiltinAttributeHolder<'team'> {
                 const playerSource: IPlayerSource = await getJSONFromEntry(parsingContext.playerPrototypeEntries[playerName], parsingContext.scenarioFormat) as unknown as IPlayerSource;
                 const player = await Player.fromSource(parsingContext.withFile(`players/${playerName}${parsingContext.scenarioFileExtension}`), playerSource, playerConfig.spawnRegion, playerConfig.color, playerConfig.highlightColor, true);
                 parsingContext.reduceFileStack();
+
                 players.push(player);
+                playerSpawnRegions.push(playerConfig.spawnRegion);
             }
+
+            Team.checkPlayerSpawnRegions(parsingContext.withExtendedPath(`.playerConfigs[${i}]`), playerSpawnRegions);
+            parsingContext.reducePath();
 
             // Add list of players to list of possible player configurations
             playerPrototypes.push(players);
@@ -149,6 +156,43 @@ export class Team implements IAttributeHolder, IBuiltinAttributeHolder<'team'> {
         EventRegistrar.call(eventRegistrarPartial, eventListeners, []);
         Team.call(teamPartial, parsingContext.scenarioPartial as Scenario, id, descriptor, teamSource.winMessage, playerPrototypes, teamSource.color, teamSource.highlightColor, eventRegistrarPartial, attributes, builtinAttributes);
         return teamPartial as Team;
+    }
+
+    /**
+     * Checks whether the spawn regions of players overlap
+     *
+     * @param  parsingContext Context for resolving scenario data
+     * @param  spawnRegionIDs Array of player spawn region ids
+     */
+    private static checkPlayerSpawnRegions(parsingContext: ParsingContext, spawnRegionIDs: string[]): void {
+        const regions: Region[] = [];
+        
+        // Iterate through spawn regions
+        for (let i = 0; i < spawnRegionIDs.length; i++){
+            const regionID = spawnRegionIDs[i];
+            const region = parsingContext.board!.regions[regionID];
+            if (region === undefined)
+                throw new UnpackingError(`Could not find region '${regionID}' defined at '${parsingContext.currentPathPrefix}[${i}].spawnRegion'.`,
+                    parsingContext);
+            if (i === 0)
+                continue;
+            
+            // Check that tiles of region do not belong to an existing spawn region
+            for (const [x, y] of region.tiles) {
+                const tile = parsingContext.board!.tiles[y][x];
+                for (const otherRegion of tile[1])
+                    if (otherRegion.spawnRegionIndex !== undefined)
+                        throw new UnpackingError(`Player spawn region '${regionID}' defined at '${parsingContext.currentPathPrefix}[${i}].spawnRegion' overlaps another player spawn region '${otherRegion.id}' defined at '${parsingContext.currentPathPrefix}[${otherRegion.spawnRegionIndex}].spawnRegion'`,
+                            parsingContext);
+            }
+
+            regions.push(region);
+            region.spawnRegionIndex = i;
+        }
+        
+        // Unmark spawn regions indexes to allow algorithm to be run again with different player configs
+        for (const region of regions)
+            region.spawnRegionIndex = undefined;
     }
 
     /**
