@@ -6,7 +6,7 @@ import { sendRequest }                                            from '../../so
 import { UIManager }                                              from '../../ui/managers/ui-manager';
 import { createView, removeView, selectView, updateViewIfActive } from '../../ui/managers/view-manager';
 import { Message }                                                from '../../ui/message';
-import { currentPlayerTurn }                                      from '../../ui/updaters/turn-updater';
+import { currentPlayerTurn }                                      from '../../ui/updaters/turn-indicator-updater';
 import { AttributeCollection }                                    from '../attribute-collection';
 import { Board }                                                  from '../board';
 import { Descriptor }                                             from '../descriptor';

@@ -1,3 +1,4 @@
+import { allTeams }                  from '../../team';
 import type { ITeamAttributeUpdate } from 'shared/network/events/i-team-attribute-update';
 
 /**
@@ -6,5 +7,6 @@ import type { ITeamAttributeUpdate } from 'shared/network/events/i-team-attribut
  * @param  teamAttributeUpdateEvent Event object to handle
  */
 export function handleTeamAttributeUpdate(teamAttributeUpdateEvent: ITeamAttributeUpdate): void {
-
+    const team = allTeams[teamAttributeUpdateEvent.team];
+    team.attributeCollection!.updateAttributes(teamAttributeUpdateEvent.attributes);
 }

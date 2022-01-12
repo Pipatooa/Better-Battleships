@@ -9,6 +9,7 @@ import { getAttributeListeners }                                                
 import { ForeignAttributeRegistry }                                               from './attribute-references/foreign-attribute-registry';
 import { AttributeCodeControlled }                                                from './attributes/attribute-code-controlled';
 import { getAttributes }                                                          from './attributes/attribute-getter';
+import { AttributeWatcher }                                                       from './attributes/attribute-watcher';
 import { Board }                                                                  from './board';
 import { Descriptor }                                                             from './common/descriptor';
 import { scenarioSchema }                                                         from './sources/scenario';
@@ -35,6 +36,8 @@ export class Scenario implements IAttributeHolder, IBuiltinAttributeHolder<'scen
 
     public game: Game | undefined;
 
+    public readonly attributeWatcher: AttributeWatcher;
+
     /**
      * Scenario constructor
      *
@@ -57,6 +60,9 @@ export class Scenario implements IAttributeHolder, IBuiltinAttributeHolder<'scen
                        public readonly eventRegistrar: EventRegistrar<BaseEventInfo, BaseEvent>,
                        public readonly attributes: AttributeMap,
                        public readonly builtinAttributes: BuiltinAttributeRecord<'scenario'>) {
+
+        this.attributeWatcher = new AttributeWatcher(this.attributes, this.builtinAttributes);
+        this.eventRegistrar.eventEvaluationCompleteCallback = () => this.exportAttributeUpdates();
     }
 
     /**
@@ -174,6 +180,19 @@ export class Scenario implements IAttributeHolder, IBuiltinAttributeHolder<'scen
             descriptor: this.descriptor.makeTransportable(),
             teams: teamInfo
         };
+    }
+
+    /**
+     * Notifies clients of any attribute updates which have occurred on this team
+     */
+    public exportAttributeUpdates(): void {
+        if (!this.attributeWatcher.updatesAvailable)
+            return;
+
+        this.game!.broadcastEvent({
+            event: 'scenarioAttributeUpdate',
+            attributes: this.attributeWatcher.exportUpdates()
+        });
     }
 
     /**

@@ -1,5 +1,5 @@
 import { Message }              from '../../ui/message';
-import { startTurnTimer }       from '../../ui/updaters/turn-updater';
+import { startTurnTimer }       from '../../ui/updaters/turn-indicator-updater';
 import type { IGameStartEvent } from 'shared/network/events/i-game-start';
 
 /**

@@ -219,6 +219,8 @@ export class Game {
         for (const client of this.clients)
             playerInfo[client.identity] = client.player!.makeTransportable();
 
+        // Export scenario and team attributes
+        const scenarioAttributes = this.scenario.attributeWatcher.exportAttributeInfo();
         const teamAttributes: { [id: string]: MultipleAttributeInfo } = {};
         for (const [id, team] of Object.entries(this.scenario.teams))
             teamAttributes[id] = team.attributeWatcher.exportAttributeInfo();
@@ -234,6 +236,7 @@ export class Game {
                 boardInfo: boardInfo,
                 playerInfo: playerInfo,
                 teamAttributes: teamAttributes,
+                scenarioAttributes: scenarioAttributes,
                 spawnRegion: client.player!.spawnRegionID,
                 ships: ships,
                 turnOrder: turnOrder,

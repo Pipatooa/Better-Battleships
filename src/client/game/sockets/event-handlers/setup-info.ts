@@ -1,10 +1,12 @@
 import { game }                 from '../../game';
 import { allPlayers }           from '../../player';
+import { AttributeCollection }  from '../../scenario/attribute-collection';
 import { Board }                from '../../scenario/board';
 import { Ship }                 from '../../scenario/ship';
+import { allTeams }             from '../../team';
 import { initiateRenderers }    from '../../ui/canvas/initiate';
 import { initiateGameSetupUI }  from '../../ui/initiate';
-import { setupTurnIndicator }   from '../../ui/updaters/turn-updater';
+import { setupTurnIndicator }   from '../../ui/updaters/turn-indicator-updater';
 import type { ISetupInfoEvent } from 'shared/network/events/i-setup-info';
 
 /**
@@ -27,6 +29,7 @@ export async function handleSetupInfo(setupInfoEvent: ISetupInfoEvent): Promise<
         const player = allPlayers[identity];
         player.color = info.color;
         player.highlightColor = info.highlightColor;
+        player.attributeCollection = new AttributeCollection(info.attributes);
     }
 
     // Unpack ship info
@@ -34,6 +37,13 @@ export async function handleSetupInfo(setupInfoEvent: ISetupInfoEvent): Promise<
     for (const [trackingID, shipInfo] of Object.entries(setupInfoEvent.ships)) {
         const ship = Ship.fromInfo(shipInfo, trackingID);
         ships.push(ship);
+    }
+
+    // Unpack scenario and team attribute info
+    game.scenarioAttributes = new AttributeCollection(setupInfoEvent.scenarioAttributes);
+    for (const [teamID, attributes] of Object.entries(setupInfoEvent.teamAttributes)) {
+        const team = allTeams[teamID];
+        team.attributeCollection = new AttributeCollection(attributes);
     }
 
     setupTurnIndicator(setupInfoEvent.turnOrder, setupInfoEvent.maxTurnTime);

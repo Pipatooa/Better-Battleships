@@ -10,6 +10,7 @@ import { handlePlayerJoin }                from './event-handlers/player-join';
 import { handlePlayerLeave }               from './event-handlers/player-leave';
 import { handlePlayerLost }                from './event-handlers/player-lost';
 import { handlePlayerReady }               from './event-handlers/player-ready';
+import { handleScenarioAttributeUpdate }   from './event-handlers/scenario-attribute-update';
 import { handleSetupInfo }                 from './event-handlers/setup-info';
 import { handleShipAbilityUpdate }         from './event-handlers/ship-ability-update';
 import { handleShipAppear }                from './event-handlers/ship-appear';
@@ -65,6 +66,7 @@ const handlers: Record<ServerEventID, (event: any) => void> = {
     playerLost: handlePlayerLost,
     playerReady: handlePlayerReady,
     playerTeamAssignment: handlePlayerTeamAssignment,
+    scenarioAttributeUpdate: handleScenarioAttributeUpdate,
     setupInfo: handleSetupInfo,
     shipAbilityUpdate: handleShipAbilityUpdate,
     shipAppear: handleShipAppear,

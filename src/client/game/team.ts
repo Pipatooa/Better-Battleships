@@ -1,7 +1,10 @@
-import { joinTeam }        from './ui/misc-buttons';
-import type { Player }     from './player';
-import type { Descriptor } from './scenario/descriptor';
-import type { ITeamInfo }  from 'shared/network/scenario/i-team-info';
+import { joinTeam }                 from './ui/misc-buttons';
+import type { Player }              from './player';
+import type { AttributeCollection } from './scenario/attribute-collection';
+import type { Descriptor }          from './scenario/descriptor';
+import type { ITeamInfo }           from 'shared/network/scenario/i-team-info';
+
+export const allTeams: { [id: string]: Team } = {};
 
 /**
  * Team - Client Version
@@ -18,6 +21,7 @@ export class Team {
 
     protected _players: Player[] = [];
     public readonly lobbyPlayerContainerElement: JQuery;
+    public attributeCollection: AttributeCollection | undefined;
 
     /**
      * Team constructor
@@ -35,6 +39,7 @@ export class Team {
 
         // Create pane in lobby for players to join team
         this.lobbyPlayerContainerElement = this.createTeamElements();
+        allTeams[this.id] = this;
     }
 
     /**

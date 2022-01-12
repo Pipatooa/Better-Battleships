@@ -7,6 +7,7 @@ import { Message }                       from './message';
 import { ready }                         from './misc-buttons';
 import { Popup }                         from './popups/popup';
 import { registerSpecialPopupListeners } from './popups/special-popups';
+import { updateMainAttributePane }       from './updaters/main-attribute-updater';
 
 /**
  * Initiates all lobby UI managers
@@ -28,6 +29,8 @@ export function initiateGameSetupUI(): void {
     Popup.registerListeners();
     Message.registerListeners();
     registerSpecialPopupListeners();
+
+    updateMainAttributePane();
 
     new ShipPlacerUiManager();
 }

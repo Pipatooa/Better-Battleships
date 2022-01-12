@@ -9,8 +9,8 @@ import {
     removeView,
     selectView,
     updateViewIfActive
-}                                                              from '../../ui/managers/view-manager';
-import { currentPlayerTurn }              from '../../ui/updaters/turn-updater';
+}                              from '../../ui/managers/view-manager';
+import { currentPlayerTurn }              from '../../ui/updaters/turn-indicator-updater';
 import { AttributeCollection }            from '../attribute-collection';
 import { Board }                          from '../board';
 import { Descriptor }                     from '../descriptor';

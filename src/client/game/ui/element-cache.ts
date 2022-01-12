@@ -18,9 +18,16 @@ export namespace TooltipElements {
     export const shipSection = new VariableVisibilityElement($('#game-tooltip-ship-section'));
     export const shipName = $('#game-tooltip-ship-name');
     export const shipOwner = $('#game-tooltip-ship-owner');
-
     export const shipAttributeSection = new VariableVisibilityElement($('#game-tooltip-ship-attribute-section'));
     export const shipAttributeList = $('#game-tooltip-ship-attribute-list');
+
+    export const playerSection = new VariableVisibilityElement($('#game-tooltip-player-section'));
+    export const playerName = $('#game-tooltip-player-name');
+    export const playerTeam = $('#game-tooltip-player-team');
+    export const playerAttributeSection = new VariableVisibilityElement($('#game-tooltip-player-attribute-section'));
+    export const playerAttributeList = $('#game-tooltip-player-attribute-list');
+    export const playerTeamAttributeSection = new VariableVisibilityElement($('#game-tooltip-player-team-attribute-section'));
+    export const playerTeamAttributeList = $('#game-tooltip-player-team-attribute-list');
 }
 
 /**
@@ -62,4 +69,20 @@ export namespace PopupElements {
     export const title = $('#popup-title');
     export const content = $('#popup-content');
     export const closeButton = $('#popup-close-button');
+}
+
+/**
+ * Cache of all elements composing the main attribute pane
+ */
+export namespace MainAttributePaneElements {
+
+    export const scenarioAttributes = new VariableVisibilityElement($('#scenario-attributes'));
+    export const scenarioAttributeList = $('#scenario-attribute-list');
+
+    export const teamAttributes = new VariableVisibilityElement($('#team-attributes'));
+    export const teamAttributesList = $('#team-attribute-list');
+
+    export const playerAttributes = new VariableVisibilityElement($('#player-attribute'));
+    export const playerAttributesList = $('#player-attribute-list');
+
 }

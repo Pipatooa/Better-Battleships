@@ -1,3 +1,4 @@
+import { UIManager }                                    from '../ui/managers/ui-manager';
 import type { AttributeUpdates, MultipleAttributeInfo } from 'shared/network/scenario/i-attribute-info';
 
 /**
@@ -51,7 +52,11 @@ export class AttributeCollection {
             const value = AttributeCollection.convertToDisplayForm(attributeInfo.value);
             const nameElement = $('<span></span>').text(`${name}: `);
             const valueElement = $('<span></span>').text(value);
-            const attributeElement = $('<li></li>').append(nameElement, valueElement);
+            const attributeElement = $('<li class="attribute"></li>').append(nameElement, valueElement);
+            attributeElement.on('mouseenter', () =>
+                UIManager.currentManager!.tooltipInfoText = [attributeInfo.descriptor.name, attributeInfo.descriptor.description]);
+            attributeElement.on('mouseleave', () =>
+                UIManager.currentManager!.tooltipInfoText = undefined);
             container.append(attributeElement);
             attributeElements[name] = [nameElement, valueElement];
         }

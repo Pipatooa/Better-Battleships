@@ -33,7 +33,7 @@
 
 #game-tooltip {
     position: absolute;
-    z-index: 500;
+    z-index: 750;
 
     font-size: 0.75rem;
 }
@@ -55,6 +55,15 @@
 
 .hotkey-list {
     list-style: none;
+}
+
+#main-attributes-panel {
+    position: absolute;
+    z-index: 500;
+}
+
+#main-attributes-panel > div {
+    background: var(--main-container-background);
 }
 
 #view-panel {

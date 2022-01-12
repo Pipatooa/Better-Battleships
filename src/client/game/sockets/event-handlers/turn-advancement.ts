@@ -1,6 +1,6 @@
 import { allPlayers, selfPlayer }     from '../../player';
 import { Message }                    from '../../ui/message';
-import { advanceTurnIndicator }       from '../../ui/updaters/turn-updater';
+import { advanceTurnIndicator }       from '../../ui/updaters/turn-indicator-updater';
 import type { ITurnAdvancementEvent } from 'shared/network/events/i-turn-advancement';
 
 /**

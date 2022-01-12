@@ -4,6 +4,7 @@ import { TooltipElements }                           from '../element-cache';
 import { updateSidebarShipSection }                  from '../updaters/sidebar-updater';
 import { updateTooltip }                             from '../updaters/tooltip-updater';
 import { createView, updateCurrentView, viewExists } from './view-manager';
+import type { Player }                               from '../../player';
 import type { Ability }                              from '../../scenario/abilities/ability';
 import type { Tile }                                 from '../../scenario/board';
 import type { Ship }                                 from '../../scenario/ship';
@@ -26,7 +27,7 @@ export abstract class UIManager {
 
     protected _hoveredAbilityLocation: [number, number] | undefined;
 
-    protected tooltipInfoText: [string, string] | undefined = undefined;
+    public tooltipInfoText: [string, string] | undefined = undefined;
 
     private _heldShip: Ship | undefined;
     protected heldShipCoordinates: [number, number] = [-Infinity, -Infinity];
@@ -34,6 +35,7 @@ export abstract class UIManager {
     private _selectedShip: Ship | undefined;
     private _selectedAbility: Ability | undefined;
     private _hoveredAbility: Ability | undefined;
+    private _hoveredPlayer: Player | undefined;
 
     private readonly pointerMoveListener: (ev: PointerEvent) => void;
     private readonly mainCanvasClickListener: () => void;
@@ -99,7 +101,7 @@ export abstract class UIManager {
                 ? [...this.highlightedLocation, this.highlightedTile]
                 : undefined;
 
-        updateTooltip(this.tooltipInfoText, tileInfo, this._heldShip ?? this.highlightedTile?.[2]);
+        updateTooltip(this.tooltipInfoText, tileInfo, this._heldShip ?? this.highlightedTile?.[2], this._hoveredPlayer);
     }
 
     /**
@@ -238,6 +240,30 @@ export abstract class UIManager {
     }
 
     /**
+     * Sets the currently selected ship and updates the UI and renderer state accordingly
+     *
+     * @param  ship Ship to select
+     */
+    protected setSelectedShip(ship: Ship | undefined): void {
+        if (ship === this._selectedShip)
+            return;
+
+        this._selectedShip = ship;
+        this.updateSidebar();
+        updateCurrentView();
+        game.board!.informationGenerator!.push();
+        game.gameRenderer!.renderNext();
+
+        const lastSelectedAbility = ship?.lastSelectedAbility;
+        this.setSelectedAbility(lastSelectedAbility);
+        if (lastSelectedAbility !== undefined) {
+            lastSelectedAbility.createAbilityView();
+            this.updateSidebar();
+            game.abilityRenderer!.renderAbility(lastSelectedAbility);
+        }
+    }
+
+    /**
      * Sets the currently selected ability and updates UI and renderer state accordingly
      *
      * @param  ability Ability to select
@@ -286,30 +312,6 @@ export abstract class UIManager {
     }
 
     /**
-     * Sets the currently selected ship and updates the UI and renderer state accordingly
-     *
-     * @param  ship Ship to select
-     */
-    protected setSelectedShip(ship: Ship | undefined): void {
-        if (ship === this._selectedShip)
-            return;
-
-        this._selectedShip = ship;
-        this.updateSidebar();
-        updateCurrentView();
-        game.board!.informationGenerator!.push();
-        game.gameRenderer!.renderNext();
-
-        const lastSelectedAbility = ship?.lastSelectedAbility;
-        this.setSelectedAbility(lastSelectedAbility);
-        if (lastSelectedAbility !== undefined) {
-            lastSelectedAbility.createAbilityView();
-            this.updateSidebar();
-            game.abilityRenderer!.renderAbility(lastSelectedAbility);
-        }
-    }
-
-    /**
      * Sets the currently held ship and updates the UI and renderer state accordingly
      *
      * @param  ship Ship to set as held
@@ -351,6 +353,10 @@ export abstract class UIManager {
         return this._hoveredAbilityLocation;
     }
 
+    public get selectedShip(): Ship | undefined {
+        return this._selectedShip;
+    }
+
     protected get selectedAbility(): Ability | undefined {
         return this._selectedAbility;
     }
@@ -359,8 +365,13 @@ export abstract class UIManager {
         return this._hoveredAbility;
     }
 
-    public get selectedShip(): Ship | undefined {
-        return this._selectedShip;
+    public get hoveredPlayer(): Player | undefined {
+        return this._hoveredPlayer;
+    }
+
+    public set hoveredPlayer(player: Player | undefined) {
+        this._hoveredPlayer = player;
+        this.updateTooltip();
     }
 
     public get heldShip(): Ship | undefined {

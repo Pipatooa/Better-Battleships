@@ -12,6 +12,7 @@ export interface ISetupInfoEvent extends IBaseServerEvent {
     boardInfo: IBoardInfo,
     playerInfo: { [identity: string]: IPlayerInfo },
     teamAttributes: { [id: string]: MultipleAttributeInfo },
+    scenarioAttributes: MultipleAttributeInfo,
     spawnRegion: string,
     ships: { [trackingID: string]: IShipPrototypeInfo },
     turnOrder: string[],

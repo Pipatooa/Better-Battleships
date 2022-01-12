@@ -1,6 +1,8 @@
-import { nameFromIdentity } from 'shared/utility';
-import { selfIdentity }     from './sockets/event-handlers/connection-info';
-import type { Team }        from 'client/game/team';
+import { nameFromIdentity }         from 'shared/utility';
+import { selfIdentity }             from './sockets/event-handlers/connection-info';
+import { UIManager }                from './ui/managers/ui-manager';
+import type { AttributeCollection } from './scenario/attribute-collection';
+import type { Team }                from 'client/game/team';
 
 export let selfPlayer: Player;
 export let allPlayers: { [id: string]: Player } = {};
@@ -16,12 +18,12 @@ export class Player {
 
     public color: string | undefined;
     public highlightColor: string | undefined;
-
     public colorPaletteIndex: number | undefined;
 
     private readonly _lobbyElement: JQuery;
     private _turnIndicatorElement: JQuery | undefined;
 
+    public attributeCollection: AttributeCollection | undefined;
     private _lost = false;
 
     /**
@@ -80,6 +82,8 @@ export class Player {
         this._turnIndicatorElement = $('<div class="turn-indicator py-1 px-2 rounded-3"></div>');
         this._turnIndicatorElement.text(this.name);
         this._turnIndicatorElement.css('--turn-indicator-team-color', this.team!.color);
+        this._turnIndicatorElement.on('mouseenter', () => UIManager.currentManager!.hoveredPlayer = this);
+        this._turnIndicatorElement.on('mouseleave', () => UIManager.currentManager!.hoveredPlayer = undefined);
         $('#sidebar-turn-container').append($('<div class="col"></div>').append(this._turnIndicatorElement));
     }
 

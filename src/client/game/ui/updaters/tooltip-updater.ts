@@ -1,8 +1,10 @@
 import { TooltipElements } from '../element-cache';
+import type { Player }     from '../../player';
 import type { Tile }       from '../../scenario/board';
 import type { Ship }       from '../../scenario/ship';
 
 let previouslyDisplayedShip: Ship | undefined;
+let previouslyDisplayedPlayer: Player | undefined;
 
 /**
  * Updates the visibility and contents of the game tooltip
@@ -10,13 +12,18 @@ let previouslyDisplayedShip: Ship | undefined;
  * @param  infoText Array containing title and info strings to display
  * @param  tileInfo Array containing coordinates and a tile to display information for
  * @param  ship     Ship to display information for
+ * @param  player   Player to display information for
  */
-export function updateTooltip(infoText: [string, string] | undefined, tileInfo: [number, number, Tile] | undefined, ship: Ship | undefined): void {
+export function updateTooltip(infoText: [string, string] | undefined, tileInfo: [number, number, Tile] | undefined, ship: Ship | undefined, player: Player | undefined): void {
 
     const infoSectionVisible = infoText !== undefined;
     const tileSectionVisible = tileInfo !== undefined;
     const shipSectionVisible = ship !== undefined;
-    const tooltipVisible = infoSectionVisible || tileSectionVisible || shipSectionVisible;
+    const playerSectionVisible = player !== undefined;
+    const tooltipVisible = infoSectionVisible
+        || tileSectionVisible
+        || shipSectionVisible
+        || playerSectionVisible;
 
     // Overall tooltip visibility
     TooltipElements.tooltip.setVisibility(tooltipVisible);
@@ -54,5 +61,30 @@ export function updateTooltip(infoText: [string, string] | undefined, tileInfo: 
             ship!.attributeCollection.displayInContainer(TooltipElements.shipAttributeList);
 
         previouslyDisplayedShip = ship;
+    }
+
+    // Player section
+    TooltipElements.playerSection.setVisibility(playerSectionVisible);
+    if (playerSectionVisible && player !== previouslyDisplayedPlayer) {
+
+        // Main player section
+        TooltipElements.playerName.text(player!.name);
+        TooltipElements.playerTeam.text(player!.team!.descriptor.name);
+
+        // Player attributes
+        const playerAttributeSectionVisible = player!.attributeCollection!.shouldDisplay;
+        TooltipElements.playerAttributeSection.setVisibility(playerAttributeSectionVisible);
+        previouslyDisplayedPlayer?.attributeCollection!.doNotDisplayInContainer(TooltipElements.playerAttributeList);
+        if (playerAttributeSectionVisible)
+            player!.attributeCollection!.displayInContainer(TooltipElements.playerAttributeList);
+
+        // Team attributes
+        const playerTeamAttributeSectionVisible = player!.team!.attributeCollection!.shouldDisplay;
+        TooltipElements.playerTeamAttributeSection.setVisibility(playerTeamAttributeSectionVisible);
+        previouslyDisplayedPlayer?.team!.attributeCollection!.doNotDisplayInContainer(TooltipElements.playerTeamAttributeList);
+        if (playerTeamAttributeSectionVisible)
+            player!.team!.attributeCollection!.displayInContainer(TooltipElements.playerTeamAttributeList);
+
+        previouslyDisplayedPlayer = player;
     }
 }

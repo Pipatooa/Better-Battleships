@@ -1,3 +1,4 @@
+import type { AttributeCollection }   from './scenario/attribute-collection';
 import type { Board }                 from './scenario/board';
 import type { Region }                from './scenario/region';
 import type { Team }                  from './team';
@@ -20,6 +21,8 @@ export class Game {
     public gameRenderer: GameRenderer | undefined;
     public shipSelectionRenderer: ShipSelectionRenderer | undefined;
     public abilityRenderer: AbilityRenderer | undefined;
+
+    public scenarioAttributes: AttributeCollection | undefined;
 
     /**
      * Game constructor
