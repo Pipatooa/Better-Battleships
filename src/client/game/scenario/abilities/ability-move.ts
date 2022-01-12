@@ -104,8 +104,6 @@ export class AbilityMove extends Ability {
         const [xMin, xMax, yMin, yMax] = this.pattern.bounds;
 
         const boardSize = Math.max(xMax - xMin, yMax - yMin, 2) + 3;
-        const offsetX = Math.floor((boardSize + xMin - xMax - 1) / 2);
-        const offsetY = Math.floor((boardSize + yMin - yMax - 1) / 2);
 
         // Set tile colors using color atlas
         AbilityMove.moveTileTypes[0].colorPaletteIndex = colorAtlas.specialColorIndices.unknown;
@@ -119,9 +117,8 @@ export class AbilityMove extends Ability {
         for (let y = 0; y < boardSize; y++) {
             tiles[y] = [];
             for (let x = 0; x < boardSize; x++) {
-                const patternX = x - offsetX;
-                const patternY = y - offsetY;
-
+                const patternX = x - 1;
+                const patternY = y - 1;
                 const dx = patternX - this.pattern.center[0];
                 const dy = patternY - this.pattern.center[1];
 

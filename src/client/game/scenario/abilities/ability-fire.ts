@@ -107,8 +107,6 @@ export class AbilityFire extends Ability {
         const [xMin, xMax, yMin, yMax] = this.selectionPattern.bounds;
 
         const boardSize = Math.max(xMax - xMin, yMax - yMin) + 3;
-        const offsetX = Math.floor((boardSize + xMin - xMax - 1) / 2);
-        const offsetY = Math.floor((boardSize - yMin - yMax - 1) / 2);
 
         AbilityFire.fireTileTypes[0].colorPaletteIndex = colorAtlas.specialColorIndices.unknown;
         AbilityFire.fireTileTypes[1].colorPaletteIndex = colorAtlas.specialColorIndices.invalid;
@@ -121,11 +119,10 @@ export class AbilityFire extends Ability {
         for (let y = 0; y < boardSize; y++) {
             tiles[y] = [];
             for (let x = 0; x < boardSize; x++) {
-                const patternX = x - offsetX;
-                const patternY = y - offsetY;
-
-                const dx = patternX - this.selectionPattern.center[0];
-                const dy = patternY - this.selectionPattern.center[1];
+                const patternX = x - 1;
+                const patternY = y - 1;
+                const dx = patternX - this.selectionPattern.integerCenter[0];
+                const dy = patternY - this.selectionPattern.integerCenter[1];
 
                 // Origin
                 if (dx === 0 && dy === 0) {

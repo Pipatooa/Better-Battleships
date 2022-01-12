@@ -104,8 +104,8 @@ export class Ship implements IAttributeHolder, IBuiltinAttributeHolder<'ship'> {
         this.attributeWatcher = new AttributeWatcher(this.attributes, this.builtinAttributes);
 
         this.eventRegistrar.eventEvaluationCompleteCallback = () => {
-            this.updateAbilities();
             this.exportChanges();
+            this.updateAbilities();
         };
 
         this.eventRegistrar.addEventListener('onGameStart',
