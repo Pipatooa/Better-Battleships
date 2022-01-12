@@ -75,24 +75,12 @@ async function getGames(scenarioID: string, scenarioHash: string, username: stri
     queryStatus.text('Fetching Results...');
 
     // Fetch a list of games
-    const mainResponse = await fetch(`/stats/api/games?${searchParams.toString()}`);
-    if (mainResponse.status !== 200) {
-        queryStatus.text(`Error ${mainResponse.statusText}: ${mainResponse.statusText}`);
+    const response = await fetch(`/stats/api/games?${searchParams.toString()}`);
+    if (response.status !== 200) {
+        queryStatus.text(`Error ${response.statusText}: ${response.statusText}`);
         return undefined;
     }
-    const games: Game[] = await mainResponse.json();
-
-    // Fetch results for each game in separate API calls and add them to results
-    for (const game of games) {
-        const gameResponse = await fetch(`/stats/api/game/${game.id}`);
-        if (gameResponse.status !== 200) {
-            queryStatus.text(`Error ${mainResponse.statusText}: ${mainResponse.statusText}`);
-            return undefined;
-        }
-        game.results = (await gameResponse.json()).results;
-    }
-
-    return games;
+    return await response.json();
 }
 
 /**
@@ -106,20 +94,16 @@ function displayGames(games: Game[]): void {
     queryStatus.text('');
 
     for (const game of games) {
+        // Basic game details
         const idElement = $('<b></b>').text(`${game.game_id}:`);
         const heading = $('<h5></h5>').append(idElement);
 
+        // Basic scenario information
         const scenarioName = $('<b></b>').text(`Scenario: ${game.name} ${game.builtin ? '(Built In)' : '(Custom)'}`);
-        /*const scenarioHash = $('<b></b>').text(game.hash);
-        const scenarioHeading = $('<div class="d-flex justify-content-between"></div>').append(scenarioName, scenarioHash);*/
         const scenarioDescription = $('<p></p>').text(game.description);
         const scenarioSection = $('<div></div>').append(scenarioName, scenarioDescription);
 
-        const timestampDate = new Date(game.timestamp);
-        const timestampString = timestampDate.toLocaleString();
-        const durationSeconds = (new Date(game.completion).getTime() - timestampDate.getTime()) / 1000;
-        const durationString = `${Math.floor(durationSeconds / 60)}:${durationSeconds % 60}`;
-
+        // Game results
         const resultsContainer = $('<div class="d-flex mt-2 justify-content-start"></div>');
         for (const [username, won] of Object.entries(game.results)) {
             const resultInner = $(`<span class="result me-2 py-1 px-2 border border-2 border-dark rounded-3 ${won ? 'won' : 'lost'}"></span>`).text(username);
@@ -128,14 +112,22 @@ function displayGames(games: Game[]): void {
         }
         const resultsSection = $('<b>Results:</b>').append(resultsContainer);
 
-        // const detailsButton = $('<button class="btn btn-dark">Details</button>');
+        // Timestamp formatting
+        const timestampDate = new Date(game.timestamp);
+        const timestampString = timestampDate.toLocaleString();
+        const durationSeconds = (new Date(game.completion).getTime() - timestampDate.getTime()) / 1000;
+        const durationString = `${Math.floor(durationSeconds / 60)}:${durationSeconds % 60}`;
+
+        // Timestamp information
         const timestamp = $('<b class="my-auto"></b>').text(`Timestamp: ${timestampString}`);
         const duration = $('<b class="my-auto"></b>').text(`Duration: ${durationString}`);
         const timeDetails = $('<div class="d-flex flex-grow-1 justify-content-between"></div>').append(timestamp, duration);
         const detailsSection = $('<div class="d-flex mt-3 mb-1 justify-content-between"></div>').append(resultsSection, timeDetails);
 
+        // Scenario hash
         const scenarioHash = $('<b></b>').text(`Scenario Hash: ${game.hash}`);
 
+        // Final constructed element
         const gameElement = $('<div class="mt-3 p-3 border border-dark rounded-3"></div>').append(heading, scenarioSection, resultsSection, detailsSection, scenarioHash);
         gameList.append(gameElement);
     }

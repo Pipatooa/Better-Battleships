@@ -12,6 +12,9 @@ startWaitDuration = 5000
 [evaluation]
 actionLimit = 50
 
+[stats]
+resultsPerPage = 20
+
 [sql]
 host = ""
 user = ""

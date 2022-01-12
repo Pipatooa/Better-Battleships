@@ -23,6 +23,8 @@ export class Config {
 
     public readonly evaluationActionLimit: number;
 
+    public readonly statsResultsPerPage: number;
+
     public readonly sqlHost: string;
     public readonly sqlUser: string;
     public readonly sqlPassword: string;
@@ -60,6 +62,10 @@ export class Config {
         // Evaluation section
         assert.deepStrictEqual(typeof configRaw.evaluation, 'object', 'Config: could not find evaluation section');
         this.evaluationActionLimit = this.getFromConfig('number', 'evaluation.actionLimit');
+
+        // Stats section
+        assert.deepStrictEqual(typeof configRaw.stats, 'object', 'Config: could not find stats section');
+        this.statsResultsPerPage = this.getFromConfig('number', 'stats.resultsPerPage');
 
         // Sql section
         assert.deepStrictEqual(typeof configRaw.sql, 'object', 'Config: could not find sql section');

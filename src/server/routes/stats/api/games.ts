@@ -1,4 +1,5 @@
 import express           from 'express';
+import config            from 'server/config/config';
 import { queryDatabase } from '../../../db/query';
 import { requireAuth }   from '../../../middleware';
 
@@ -12,15 +13,13 @@ export default router;
  */
 router.get('/', requireAuth, async (req, res) => {
 
-    const gameID = req.query.id as string ?? '';
-    const resultsPerPage = 20;
-
     // Query sub-elements
     const conditions: string[] = ['completion IS NOT NULL'];
     const values: (number | string)[] = [];
     let joinResults = false;
 
     // Filter by game ID string start
+    const gameID = req.query.id as string ?? '';
     if (gameID !== '') {
         if (!/^\d*$/.test(gameID)) {
             res.sendStatus(400);
@@ -66,14 +65,34 @@ router.get('/', requireAuth, async (req, res) => {
         return;
     }
     const page = parseInt(rawPage);
-    const offset = resultsPerPage * page;
+    const offset = config.statsResultsPerPage * page;
 
-    values.push(resultsPerPage);
+    values.push(config.statsResultsPerPage);
     values.push(offset);
 
     // Query database for games
     const subQuery = conditions.join(' AND ');
     const query = `SELECT game.id, game.game_id, scenario, hash, name, description, timestamp, completion, scenario.builtin FROM game JOIN scenario ON game.scenario = scenario.hash ${joinResults ? 'JOIN result ON result.game_id = game.id ' : ''}WHERE ${subQuery} ORDER BY game.id DESC LIMIT ? OFFSET ?;`;
-    const rows = await queryDatabase(query, values);
-    res.send(rows);
+    const gameRows = await queryDatabase(query, values);
+
+    // Query database for game results for each game
+    for (const gameRow of gameRows) {
+        const resultQuery = 'SELECT username, won FROM result WHERE game_id = ?';
+        const resultRows = await queryDatabase(resultQuery, gameRow.id);
+        if (resultRows.length === 0) {
+            res.sendStatus(500);
+            return;
+        }
+
+        // Reformat results
+        const results: { [username: string]: 0 | 1 } = {};
+        for (const result of resultRows)
+            results[result.username] = result.won;
+
+        // Attach results and remove internal IDs from data provided
+        gameRow.results = results;
+        delete gameRow.id;
+    }
+
+    res.send(gameRows);
 });

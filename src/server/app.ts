@@ -18,10 +18,7 @@ import loginRouter                   from './routes/login';
 import registerRouter                from './routes/register';
 import scenariosListRouter           from './routes/scenarios/list';
 import statsRouter                   from './routes/stats';
-import statsApiGameRouter            from './routes/stats/api/game';
 import statsApiGamesRouter           from './routes/stats/api/games';
-import statsApiScenarioRouter        from './routes/stats/api/scenario';
-import statsApiUserRouter            from './routes/stats/api/user';
 
 // Create express app
 const app = express();
@@ -65,10 +62,7 @@ executeDBStartupScript().then(async () => {
     app.use('/register', registerRouter);
 
     // Stats API route handlers
-    app.use('/stats/api/game', statsApiGameRouter);
     app.use('/stats/api/games', statsApiGamesRouter);
-    app.use('/stats/api/scenario', statsApiScenarioRouter);
-    app.use('/stats/api/user', statsApiUserRouter);
 
     // Stats page route handlers
     app.use('/stats', statsRouter);
