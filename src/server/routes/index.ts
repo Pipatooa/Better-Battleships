@@ -8,8 +8,7 @@ export default router;
 /**
  * GET Route handler for /
  */
-router.get('/', requireAuth, preventCSRF, async (req, res) => {
-
+router.get('/', requireAuth, preventCSRF, (req, res) => {
     res.render('index', {
         csrfToken: req.csrfToken(),
         pageTitle: 'Home',

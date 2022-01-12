@@ -10,22 +10,20 @@ import { executeDBStartupScript }    from './db/startup';
 import { findAvailableScenarios }    from './game/scenario/builtin-scenarios';
 import { findAvailableIcons }        from './game/scenario/objects/abilities/icons';
 import { registerWebsocketHandlers } from './game/sockets/register-handlers';
+import gameRouter                    from './routes/game';
+import gameCreateRouter              from './routes/game/create';
+import gameNotFoundRouter            from './routes/game/notfound';
+import indexRouter                   from './routes/index';
+import loginRouter                   from './routes/login';
+import registerRouter                from './routes/register';
+import scenariosListRouter           from './routes/scenarios/list';
+import statsRouter                   from './routes/stats';
+import statsApiGameRouter            from './routes/stats/api/game';
+import statsApiGamesRouter           from './routes/stats/api/games';
+import statsApiScenarioRouter        from './routes/stats/api/scenario';
+import statsApiUserRouter            from './routes/stats/api/user';
 
-// Main Routers
-import gameRouter          from './routes/game';
-import gameCreateRouter    from './routes/game/create';
-import gameNotFoundRouter  from './routes/game/notfound';
-import indexRouter         from './routes/index';
-import loginRouter         from './routes/login';
-import registerRouter      from './routes/register';
-import scenariosListRouter from './routes/scenarios/list';
-
-// Stats API Routers
-import statsApiGameRouter     from './routes/stats/api/game';
-import statsApiGamesRouter    from './routes/stats/api/games';
-import statsApiScenarioRouter from './routes/stats/api/scenario';
-import statsApiUserRouter     from './routes/stats/api/user';
-
+// Create express app
 const app = express();
 
 // Set current working directory to be where this file is located
@@ -55,19 +53,25 @@ executeDBStartupScript().then(async () => {
     app.use(express.static(path.join(process.cwd(), 'public')));
     app.use(cookieParser());
 
-    // Register route handlers for express
+    // Main route handlers
     app.use('/', indexRouter);
     app.use('/game/create', gameCreateRouter);
     app.use('/game/notfound', gameNotFoundRouter);
     app.use('/game', gameRouter);
-    app.use('/login', loginRouter);
-    app.use('/register', registerRouter);
     app.use('/scenarios/list', scenariosListRouter);
 
+    // Login route handlers
+    app.use('/login', loginRouter);
+    app.use('/register', registerRouter);
+
+    // Stats API route handlers
     app.use('/stats/api/game', statsApiGameRouter);
     app.use('/stats/api/games', statsApiGamesRouter);
     app.use('/stats/api/scenario', statsApiScenarioRouter);
     app.use('/stats/api/user', statsApiUserRouter);
+
+    // Stats page route handlers
+    app.use('/stats', statsRouter);
 
     // Register socket handles for the websocket server
     registerWebsocketHandlers(server, wss);

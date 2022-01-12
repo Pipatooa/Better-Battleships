@@ -1,0 +1,32 @@
+{{> banner}}
+
+<div class="container-fluid text-center py-5 main-container">
+    <h5>Welcome to Better Battleships! A 2D game based off of the game Battleship, allowing for customisation over all aspects of the game.</h5>
+    <h5>Scenario packs are ZIP files which can be shared between players and easily edited.</h5>
+
+    <div class="container">
+        <div class="row gx-5 px-4 pt-4">
+            <div class="col">
+                <div class="p-3 border border-dark rounded-3 secondary-container">
+                    <div class="row">
+                        <div class="col-md-10 mx-auto">
+                            <div class="d-flex flex-row searchbar justify-content-between">
+                                <input class="form-control" type="text" placeholder="Search for a Game ID" id="game-id">
+                                <input class="form-control rounded-0" type="text" placeholder="Filter by Scenario Hash" id="scenario-hash">
+                                <input class="form-control rounded-0" type="text" placeholder="Filter by Username" id="username">
+                                <select class="form-select rounded-0" aria-label="Default select example" id="scenario-type">
+                                    <option selected value="0">Any Scenario</option>
+                                    <option value="1">Builtin Only</option>
+                                    <option value="2">Custom Only</option>
+                                </select>
+                                <button class="btn btn-primary" id="search-button">Search</button>
+                            </div>
+                            <h5 class="m-3" id="query-status"></h5>
+                            <div class="text-start" id="game-list"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

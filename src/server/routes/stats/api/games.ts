@@ -18,6 +18,7 @@ router.get('/', requireAuth, async (req, res) => {
     // Query sub-elements
     const conditions: string[] = ['completion IS NOT NULL'];
     const values: (number | string)[] = [];
+    let joinResults = false;
 
     // Filter by game ID string start
     if (gameID !== '') {
@@ -25,11 +26,11 @@ router.get('/', requireAuth, async (req, res) => {
             res.sendStatus(400);
             return;
         }
-        conditions.push('game_id LIKE ?');
-        values.push(gameID + '%');
+        conditions.push('game.game_id LIKE ?');
+        values.push('%' + gameID + '%');
     }
 
-    // Filter by scenario
+    // Filter by scenario hash
     const scenario = req.query.scenario as string | undefined;
     if (scenario !== undefined) {
         if (!/[\da-f]{64}/.test(scenario)) {
@@ -38,6 +39,24 @@ router.get('/', requireAuth, async (req, res) => {
         }
         conditions.push('scenario = ?');
         values.push(scenario);
+    }
+
+    // Filter by builtin scenario
+    const builtin = req.query.builtin as string | undefined;
+    if (builtin !== undefined) {
+        if (!/[10]/.test(builtin)) {
+            res.sendStatus(400);
+            return;
+        }
+        conditions.push(`scenario.builtin = ${parseInt(builtin) ? 'TRUE' : 'FALSE'}`);
+    }
+
+    // Filter by username
+    const username = req.query.user as string | undefined;
+    if (username !== undefined && username.length > 0) {
+        joinResults = true;
+        conditions.push('result.username = ?');
+        values.push(username);
     }
 
     // Get correct page of results
@@ -54,7 +73,7 @@ router.get('/', requireAuth, async (req, res) => {
 
     // Query database for games
     const subQuery = conditions.join(' AND ');
-    const query = `SELECT id, game_id, scenario, timestamp, completion FROM game WHERE ${subQuery} ORDER BY id DESC LIMIT ? OFFSET ?;`;
+    const query = `SELECT game.id, game.game_id, scenario, hash, name, description, timestamp, completion, scenario.builtin FROM game JOIN scenario ON game.scenario = scenario.hash ${joinResults ? 'JOIN result ON result.game_id = game.id ' : ''}WHERE ${subQuery} ORDER BY game.id DESC LIMIT ? OFFSET ?;`;
     const rows = await queryDatabase(query, values);
     res.send(rows);
 });

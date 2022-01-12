@@ -110,7 +110,8 @@ const webConfig = {
         'game': './src/client/game.ts',
         'game-not-found': './src/client/game-not-found.ts',
         'register': './src/client/register.ts',
-        'login': './src/client/login.ts'
+        'login': './src/client/login.ts',
+        'stats': './src/client/stats.ts'
     },
     ...commonConfig,
     module: {
