@@ -21,6 +21,9 @@ export class Config {
     public readonly gameJoinTimeout: number;
     public readonly gameStartWaitDuration: number;
 
+    public readonly parsingMaxFileSize: number;
+    public readonly parsingMaxFieldsSize: number;
+
     public readonly evaluationActionLimit: number;
 
     public readonly statsResultsPerPage: number;
@@ -58,6 +61,11 @@ export class Config {
         this.gameIDLength = this.getFromConfig('number', 'game.idLength');
         this.gameJoinTimeout = this.getFromConfig('number', 'game.joinTimeout');
         this.gameStartWaitDuration = this.getFromConfig('number', 'game.startWaitDuration');
+
+        // Parsing section
+        assert.deepStrictEqual(typeof configRaw.parsing, 'object', 'Config: could not find parsing section');
+        this.parsingMaxFileSize = this.getFromConfig('number', 'parsing.maxFileSize');
+        this.parsingMaxFieldsSize = this.getFromConfig('number', 'parsing.maxFieldsSize');
 
         // Evaluation section
         assert.deepStrictEqual(typeof configRaw.evaluation, 'object', 'Config: could not find evaluation section');

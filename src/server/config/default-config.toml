@@ -9,6 +9,10 @@ idLength = 6
 joinTimeout = 5000
 startWaitDuration = 5000
 
+[parsing]
+maxFileSize = 50000
+maxFieldsSize = 256
+
 [evaluation]
 actionLimit = 50
 

@@ -2,6 +2,7 @@ import fs                              from 'fs';
 import express                         from 'express';
 import formidable                      from 'formidable';
 import stringify                       from 'json-stringify-safe';
+import config                          from 'server/config/config';
 import { capacityReached, createGame } from '../../game/game-manager';
 import { UnpackingError }              from '../../game/scenario/errors/unpacking-error';
 import { unpack }                      from '../../game/scenario/unpacker';
@@ -30,7 +31,11 @@ router.post('/', preventCSRF, requireAuth, async (req, res) => {
         return;
     }
 
-    const form = formidable({ multiples: true });
+    const form = formidable({
+        multiples: true,
+        maxFileSize: config.parsingMaxFileSize,
+        maxFieldsSize: config.parsingMaxFieldsSize
+    });
 
     // Parse form data from request
     form.parse(req, async (err, fields, files) => {
@@ -40,7 +45,7 @@ router.post('/', preventCSRF, requireAuth, async (req, res) => {
             res.status(400);
             res.send({
                 success: false,
-                message: 'Could not parse multipart form data',
+                message: (err as Error).message,
                 context: 'An error occurred whilst trying to parse the request'
             });
             return;
