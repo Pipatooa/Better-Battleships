@@ -24,12 +24,12 @@ export class Board {
      * Board constructor
      *
      * @param  tiles           2d array of tiles indexed [y][x]
-     * @param  tileTypes       Array of tile types composing the board
+     * @param  tileTypes       Dictionary mapping chaacters to tile types
      * @param  primaryTileType Tile type which will be used to generate ship selection board
      * @param  hasRegions      Whether to index regions for this board
      */
     public constructor(public readonly tiles: Tile[][],
-                       public readonly tileTypes: TileType[],
+                       public readonly tileTypes: { [char: string]: TileType },
                        public readonly primaryTileType: TileType,
                        hasRegions: boolean) {
         this.size = [this.tiles[0].length, this.tiles.length];
@@ -90,7 +90,7 @@ export class Board {
             }
         }
 
-        return new Board(tiles, Object.values(tileTypes), primaryTileType!, true);
+        return new Board(tiles, tileTypes, primaryTileType!, true);
     }
 
     /**
@@ -140,6 +140,39 @@ export class Board {
             const tile = this.tiles[y]?.[x];
             if (tile !== undefined) {
                 tile[2] = undefined;
+                this.informationGenerator?.updateTile(x, y, tile);
+            }
+        }
+    }
+
+    /**
+     * Updates the tiles on this board from a partial board update event
+     *
+     * @param  tiles Array of tile type characters and changed coordinates
+     */
+    public updateTiles(tiles: [string, [number, number][]][]): void {
+        for (const [char, coordinates] of tiles) {
+            const tileType = this.tileTypes[char];
+            for (const [x, y] of coordinates) {
+                const tile = this.tiles[y][x];
+                tile[0] = tileType;
+                this.informationGenerator?.updateTile(x, y, tile);
+            }
+        }
+    }
+
+    /**
+     * Updates the tiles on this board from a full board update event
+     *
+     * @param  tiles Array of strings representing tile types for all tiles on the board
+     */
+    public updateAllTiles(tiles: string[]): void {
+        for (let y = 0; y < tiles.length; y++) {
+            const row = tiles[y];
+            const tileRow = this.tiles[y];
+            for (let x = 0; x < row.length; x++) {
+                const tile = tileRow[x];
+                tile[0] = this.tileTypes[row.charAt(x)];
                 this.informationGenerator?.updateTile(x, y, tile);
             }
         }

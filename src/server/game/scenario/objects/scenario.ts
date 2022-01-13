@@ -122,7 +122,7 @@ export class Scenario implements IAttributeHolder, IBuiltinAttributeHolder<'scen
         const boardSource: IBoardSource = await getJSONFromEntry(parsingContext.boardEntry, parsingContext.scenarioFormat) as unknown as IBoardSource;
         const board = await Board.fromSource(parsingContext.withFile(`board${parsingContext.scenarioFileExtension}`), boardSource, true);
         parsingContext.reduceFileStack();
-        parsingContext.board = board;
+        parsingContext.boardPartial = board;
 
         // Get teams
         const teams: { [name: string]: Team } = {};
@@ -152,7 +152,7 @@ export class Scenario implements IAttributeHolder, IBuiltinAttributeHolder<'scen
         // Return created Scenario object
         parsingContext.turnManagerPartial = undefined;
         parsingContext.localAttributes.scenario = undefined;
-        parsingContext.board = undefined;
+        parsingContext.boardPartial = undefined;
         parsingContext.foreignAttributeRegistry = undefined;
         EventRegistrar.call(eventRegistrarPartial, eventListeners, subRegistrars);
         Scenario.call(scenarioPartial, parsingContext.scenarioFile, scenarioSource.author, descriptor, board, teams, turnManagerPartial as TurnManager, eventRegistrarPartial, attributes, builtinAttributes);

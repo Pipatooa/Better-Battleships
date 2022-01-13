@@ -5,14 +5,14 @@
  */
 export class CharacterMapGenerator<T> {
 
-    private readonly map: { [char: string]: T } = {};
-
     /**
      * CharacterMapGenerator constructor
      *
      * @param  compareFunction Function used to compare known existing items to new items
+     * @param  map             Pre-existing map of characters to use
      */
-    public constructor(private readonly compareFunction: (existingItem: T, newItem: T) => boolean = (e, n) => e == n) {
+    public constructor(private readonly compareFunction: (existingItem: T, newItem: T) => boolean = (e, n) => e == n,
+                       private readonly map: { [char: string]: T } = {}) {
 
     }
 

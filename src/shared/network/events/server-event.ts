@@ -1,3 +1,4 @@
+import type { BoardUpdateEvent }              from './board-update';
 import type { IConnectionInfoEvent }          from './i-connection-info';
 import type { IEnterSetupFailureEvent }       from './i-enter-setup-failure';
 import type { IEnteringSetupEvent }           from './i-entering-setup';
@@ -34,6 +35,7 @@ export interface IBaseServerEvent {
  * Type matching any server event
  */
 export type ServerEvent =
+    BoardUpdateEvent |
     IConnectionInfoEvent |
     IEnterSetupFailureEvent |
     IEnteringSetupEvent |

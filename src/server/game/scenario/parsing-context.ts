@@ -24,9 +24,9 @@ export class ParsingContext {
     private readonly fileStack: string[] = [];
     private readonly pathSegmentStack: string[] = [];
 
-    public board: Board | undefined;
     public scenarioPartial: Partial<Scenario> | undefined;
     public turnManagerPartial: Partial<TurnManager> | undefined;
+    public boardPartial: Partial<Board> | undefined;
     public teamPartial: Partial<Team> | undefined;
     public playerPartial: Partial<Player> | undefined;
     public shipPartial: Partial<Ship> | undefined;

@@ -1,3 +1,4 @@
+import { handleBoardUpdate }               from './event-handlers/board-update';
 import { handleConnectionInfo }            from './event-handlers/connection-info';
 import { handleEnterSetupFailure }         from './event-handlers/enter-setup-failure';
 import { handleEnteringSetup }             from './event-handlers/entering-setup';
@@ -54,6 +55,7 @@ export function handleServerEvent(e: MessageEvent): void {
  * Typescript record type enforces an entry for each event id
  */
 const handlers: Record<ServerEventID, (event: any) => void> = {
+    boardUpdate: handleBoardUpdate,
     connectionInfo: handleConnectionInfo,
     enterSetupFailure: handleEnterSetupFailure,
     enteringSetup: handleEnteringSetup,

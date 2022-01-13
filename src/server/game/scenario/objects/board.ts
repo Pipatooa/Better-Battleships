@@ -9,6 +9,7 @@ import { tileEventInfo }                      from './events/board-events';
 import { Region }                             from './region';
 import { boardSchema }                        from './sources/board';
 import { TileType }                           from './tiletype';
+import type { Mutable }                       from '../../../../shared/types';
 import type { EventContextForEvent }          from '../events/event-context';
 import type { EventEvaluationState }          from '../events/event-evaluation-state';
 import type { EventListener, EventListeners } from '../events/event-listener';
@@ -22,6 +23,7 @@ import type {
     TileEvent,
     TileEventInfo
 }                             from './events/board-events';
+import type { Scenario }      from './scenario';
 import type { Ship }          from './ship';
 import type { IBoardSource }  from './sources/board';
 import type { IBoardInfo }    from 'shared/network/scenario/i-board-info';
@@ -37,19 +39,27 @@ export class Board {
 
     public readonly size: [number, number];
     private readonly _allShips: Ship[] = [];
+    
+    private tileTypeUpdates: [string, [number, number][]][] = [];
+    private tileTypeUpdateCount = 0;
 
     /**
      * Board constructor
      *
+     * @param  scenario       Scenario that this board belongs to
+     * @param  tileTypes      Dictionary of tile types indexed by tile chars which compose the board
      * @param  tiles          2d array of tiles indexed [y][x]
      * @param  regions        Dictionary of regions indexed by ID
      * @param  eventRegistrar Registrar of all board event listeners
      */
-    public constructor(public readonly tiles: Tile[][],
+    public constructor(public readonly scenario: Scenario,
+                       public readonly tileTypes: { [char: string]: TileType },
+                       public readonly tiles: Tile[][],
                        public readonly regions: { [id: string]: Region },
                        public readonly eventRegistrar: EventRegistrar<BoardEventInfo, BoardEvent>) {
 
-        this.size = [ tiles[0].length, tiles.length ];
+        this.size = [tiles[0].length, tiles.length];
+        this.eventRegistrar.eventEvaluationCompleteCallback = () => this.exportChanges();
     }
 
     /**
@@ -68,13 +78,15 @@ export class Board {
 
         // Board partial refers to future Board object
         const boardPartial: Partial<Board> = Object.create(Board.prototype);
+        parsingContext.boardPartial = boardPartial;
 
-        // Unpack palette data
-        const palette: { [char: string]: TileType } = {};
+        // Unpack tile type palette data
+        const tileTypes: { [char: string]: TileType } = {};
         for (const [char, tileTypeSource] of Object.entries(boardSource.tilePalette)) {
-            palette[char] = await TileType.fromSource(parsingContext.withExtendedPath(`.palette.${char}`), tileTypeSource, false);
+            tileTypes[char] = await TileType.fromSource(parsingContext.withExtendedPath(`.palette.${char}`), tileTypeSource, false);
             parsingContext.reducePath();
         }
+        (boardPartial as Mutable<Board>).tileTypes = tileTypes;
 
         // Unpack region palette data
         const regions: { [id: string]: Region } = {};
@@ -112,7 +124,7 @@ export class Board {
                 const tileChar: string = tileRow.charAt(x);
                 const regionChar: string = regionRow.charAt(x);
 
-                const tileType = palette[tileChar];
+                const tileType = tileTypes[tileChar];
                 const regionIDs = regionPalette[regionChar];
 
                 // If character did not match any tile type within the palette
@@ -135,7 +147,7 @@ export class Board {
         // Get tile event listeners
         const boardEventListeners = {} as EventListeners<BoardEventInfo, BoardEvent>;
         for (const [tileChar, actionSources] of Object.entries(boardSource.tileActions)) {
-            const tileType = palette[tileChar];
+            const tileType = tileTypes[tileChar];
             if (tileType === undefined)
                 throw new UnpackingError(`Could not find tile of type '${tileChar}' defined at '${parsingContext.currentPathPrefix}tileActions.${tileChar}' within the palette defined at '${parsingContext.currentPathPrefix}tilePalette'`,
                     parsingContext);
@@ -204,7 +216,8 @@ export class Board {
         const eventRegistrar = new EventRegistrar(boardEventListeners, []);
 
         // Return created Board object
-        Board.call(boardPartial, tiles, regions, eventRegistrar);
+        parsingContext.boardPartial = undefined;
+        Board.call(boardPartial, parsingContext.scenarioPartial as Scenario, tileTypes, tiles, regions, eventRegistrar);
         return boardPartial as Board;
     }
 
@@ -240,6 +253,7 @@ export class Board {
         const tilePalette: { [char: string]: ITileTypeInfo } = {};
         for (const [char, tileType] of Object.entries(tileTypeMapGenerator.exportMap())) {
             tilePalette[char] = tileType.makeTransportable();
+            tileType.exportChar = char;
         }
 
         const regionPalette: { [char: string]: string[] } = {};
@@ -358,6 +372,78 @@ export class Board {
                 return false;
         }
         return true;
+    }
+
+    /**
+     * Replaces tiles on this board with a new tile type
+     *
+     * @param  tiles    Array of tile coordinates to replace tile types for
+     * @param  tileType Tile type to replace tiles with
+     */
+    public setTileTypes(tiles: [number, number][], tileType: TileType): void {
+        for (const [x, y] of tiles)
+            this.tiles[y][x][0] = tileType;
+        this.tileTypeUpdates.push([tileType.exportChar!, tiles]);
+        this.tileTypeUpdateCount += tiles.length;
+    }
+
+    /**
+     * Replaces tiles on this board with a new tile type
+     *
+     * @param  tiles       Array of tile coordinates to replace tiles types for
+     * @param  oldTileType Tile type to replace
+     * @param  newTileType Tile type to replace tiles with
+     */
+    public replaceTileTypes(tiles: [number, number][], oldTileType: TileType, newTileType: TileType): void {
+        const tilesUpdated: [number, number][] = [];
+        for (const [x, y] of tiles) {
+            const tile = this.tiles[y][x];
+            if (tile[0] !== oldTileType)
+                continue;
+            tile[0] = newTileType;
+            tilesUpdated.push([x, y]);
+        }
+        this.tileTypeUpdates.push([newTileType.exportChar!, tilesUpdated]);
+        this.tileTypeUpdateCount += tilesUpdated.length;
+    }
+
+    /**
+     * Notifies clients of any tile type updates which have occured on this board
+     */
+    private exportChanges(): void {
+        if (!this.tileTypeUpdateCount)
+            return;
+        
+        // Only send changed tiles if less than a third of the board has changed
+        if (this.tileTypeUpdateCount < this.size[0] * this.size[1] / 3)
+            this.scenario.game!.broadcastEvent({
+                event: 'boardUpdate',
+                full: false,
+                tiles: this.tileTypeUpdates
+            });
+
+        // Otherwise, send all tiles
+        else {
+            const tiles: string[] = [];
+            const tileTypeMapGenerator = new CharacterMapGenerator<TileType>(undefined, this.tileTypes);
+
+            // Generate character strings
+            for (const tileRow of this.tiles) {
+                const rowTileTypes: TileType[] = [];
+                for (const tile of tileRow)
+                    rowTileTypes.push(tile[0]);
+                tiles.push(tileTypeMapGenerator.getString(rowTileTypes));
+            }
+
+            this.scenario.game!.broadcastEvent({
+                event: 'boardUpdate',
+                full: true,
+                tiles: tiles
+            });
+        }
+        
+        this.tileTypeUpdates = [];
+        this.tileTypeUpdateCount = 0;
     }
 
     /**

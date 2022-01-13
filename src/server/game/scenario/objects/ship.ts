@@ -56,6 +56,7 @@ export class Ship implements IAttributeHolder, IBuiltinAttributeHolder<'ship'> {
 
     protected _x = 0;
     protected _y = 0;
+    private _destroyed = false;
 
     protected _visibilityPattern: RotatablePattern;
 
@@ -63,7 +64,6 @@ export class Ship implements IAttributeHolder, IBuiltinAttributeHolder<'ship'> {
 
     protected spottedBy: Ship[] = [];
     private spottedByCount = 0;
-
     protected needsSpottingUpdate: Ship[] = [];
 
     protected oldKnownTo: { [id: string]: [team: Team, trackingID: string] } = {};
@@ -135,6 +135,7 @@ export class Ship implements IAttributeHolder, IBuiltinAttributeHolder<'ship'> {
         this.unSpot();
         this.updateOthers();
         this.board.removeShip(this);
+        this._destroyed = true;
     }
 
     /**
@@ -232,7 +233,7 @@ export class Ship implements IAttributeHolder, IBuiltinAttributeHolder<'ship'> {
         parsingContext.localAttributes.ship = undefined;
         parsingContext.shipPartial = undefined;
         EventRegistrar.call(eventRegistrarPartial, eventListeners, subRegistrars);
-        Ship.call(shipPartial, parsingContext.playerPartial as Player, parsingContext.board!, descriptor, pattern, shipSource.visibility, abilities, eventRegistrarPartial, attributes, builtinAttributes, attributeListeners);
+        Ship.call(shipPartial, parsingContext.playerPartial as Player, parsingContext.boardPartial as Board, descriptor, pattern, shipSource.visibility, abilities, eventRegistrarPartial, attributes, builtinAttributes, attributeListeners);
         return shipPartial as Ship;
     }
 
@@ -713,6 +714,10 @@ export class Ship implements IAttributeHolder, IBuiltinAttributeHolder<'ship'> {
 
     public get y(): number {
         return this._y;
+    }
+
+    public get destroyed(): boolean {
+        return this._destroyed;
     }
 
     public get pattern(): RotatablePattern {

@@ -15,6 +15,7 @@ import type { Client }                                                          
 import type { ParsingContext }                                                    from '../parsing-context';
 import type { IAttributeHolder, IBuiltinAttributeHolder, BuiltinAttributeRecord } from './attributes/attribute-holder';
 import type { AttributeMap }                                                      from './attributes/i-attribute-holder';
+import type { Board }                                                             from './board';
 import type { TeamEventInfo, TeamEvent }                                          from './events/team-events';
 import type { Region }                                                            from './region';
 import type { Scenario }                                                          from './scenario';
@@ -166,11 +167,12 @@ export class Team implements IAttributeHolder, IBuiltinAttributeHolder<'team'> {
      */
     private static checkPlayerSpawnRegions(parsingContext: ParsingContext, spawnRegionIDs: string[]): void {
         const regions: Region[] = [];
-        
+        const board = parsingContext.boardPartial as Board;
+
         // Iterate through spawn regions
         for (let i = 0; i < spawnRegionIDs.length; i++){
             const regionID = spawnRegionIDs[i];
-            const region = parsingContext.board!.regions[regionID];
+            const region = board.regions[regionID];
             if (region === undefined)
                 throw new UnpackingError(`Could not find region '${regionID}' defined at '${parsingContext.currentPathPrefix}[${i}].spawnRegion'.`,
                     parsingContext);
@@ -179,7 +181,7 @@ export class Team implements IAttributeHolder, IBuiltinAttributeHolder<'team'> {
             
             // Check that tiles of region do not belong to an existing spawn region
             for (const [x, y] of region.tiles) {
-                const tile = parsingContext.board!.tiles[y][x];
+                const tile = board.tiles[y][x];
                 for (const otherRegion of tile[1])
                     if (otherRegion.spawnRegionIndex !== undefined)
                         throw new UnpackingError(`Player spawn region '${regionID}' defined at '${parsingContext.currentPathPrefix}[${i}].spawnRegion' overlaps another player spawn region '${otherRegion.id}' defined at '${parsingContext.currentPathPrefix}[${otherRegion.spawnRegionIndex}].spawnRegion'`,

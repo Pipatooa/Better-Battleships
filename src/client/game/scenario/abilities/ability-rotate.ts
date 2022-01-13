@@ -172,7 +172,7 @@ export class AbilityRotate extends Ability {
         const [x, y] = this.headingLocation;
         tiles[y][x] = [AbilityRotate.headingTileType, [], undefined];
 
-        return new Board(tiles, [], game.board!.primaryTileType, false);
+        return new Board(tiles, {}, game.board!.primaryTileType, false);
     }
 
     /**

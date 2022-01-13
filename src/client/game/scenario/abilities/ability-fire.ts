@@ -146,7 +146,7 @@ export class AbilityFire extends Ability {
             }
         }
 
-        return new Board(tiles, [], game.board!.primaryTileType, false);
+        return new Board(tiles, {}, game.board!.primaryTileType, false);
     }
 
     /**

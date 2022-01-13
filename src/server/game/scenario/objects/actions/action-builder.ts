@@ -3,7 +3,9 @@ import { ActionAdvanceTurn }    from './action-advance-turn';
 import { ActionDestroyShip }    from './action-destroy-ship';
 import { ActionDisplayMessage } from './action-display-message';
 import { ActionLose }           from './action-lose';
+import { ActionReplaceTile }    from './action-replace-tile';
 import { ActionSetAttribute }   from './action-set-attribute';
+import { ActionSetTile }        from './action-set-tile';
 import { ActionWin }            from './action-win';
 import { actionSchema }         from './sources/action';
 import type { ParsingContext }  from '../../parsing-context';
@@ -43,6 +45,13 @@ export async function buildAction(parsingContext: ParsingContext, actionSource: 
             break;
         case 'displayMessage':
             action = await ActionDisplayMessage.fromSource(parsingContext, actionSource, false);
+            break;
+        case 'setTile':
+            action = await ActionSetTile.fromSource(parsingContext, actionSource, false);
+            break;
+        case 'replaceTile':
+            action = await ActionReplaceTile.fromSource(parsingContext, actionSource, false);
+            break;
     }
 
     return action;

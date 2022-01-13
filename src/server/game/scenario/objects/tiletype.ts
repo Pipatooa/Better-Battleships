@@ -11,6 +11,9 @@ import type { ITileTypeInfo }   from 'shared/network/scenario/i-tiletype-info';
  * Stores a descriptor and a color for a tile
  */
 export class TileType {
+
+    public exportChar: string | undefined;
+
     public constructor(public readonly descriptor: Descriptor,
                        public readonly color: string,
                        public readonly traversable: boolean) {

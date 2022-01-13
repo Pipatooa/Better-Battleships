@@ -10,7 +10,7 @@ import type { EventEvaluationState }              from '../../events/event-evalu
 import type { ParsingContext }                    from '../../parsing-context';
 import type { Condition }                         from '../conditions/condition';
 import type { Player }                            from '../player';
-import type { IActionDisplayMessage }             from './sources/action-display-message';
+import type { IActionDisplayMessageSource }       from './sources/action-display-message';
 
 /**
  * ActionDisplayMessage - Server Version
@@ -44,7 +44,7 @@ export class ActionDisplayMessage extends Action {
      * @param    checkSchema                When true, validates source JSON data against schema
      * @returns                             Created ActionDisplayMessage object
      */
-    public static async fromSource(parsingContext: ParsingContext, actionDisplayMessageSource: IActionDisplayMessage, checkSchema: boolean): Promise<ActionDisplayMessage> {
+    public static async fromSource(parsingContext: ParsingContext, actionDisplayMessageSource: IActionDisplayMessageSource, checkSchema: boolean): Promise<ActionDisplayMessage> {
 
         // Validate JSON data against schema
         if (checkSchema)

@@ -81,7 +81,9 @@ export class ActionDestroyShip extends Action {
             return;
 
         const ship = this.ship ?? (eventContext as EventContext<'ship', any, any, any>).foreignShip;
-        ship.deconstruct();
-        ship.owner.removeShip(ship);
+        if (!ship.destroyed) {
+            ship.deconstruct();
+            ship.owner.removeShip(ship);
+        }
     }
 }
