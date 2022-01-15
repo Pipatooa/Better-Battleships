@@ -9,7 +9,7 @@ import { Descriptor }                                  from '../common/descripto
 import { RotatablePattern }                            from '../common/rotatable-pattern';
 import { buildCondition }                              from '../conditions/condition-builder';
 import { Ability }                                     from './ability';
-import { fireAbilityEventInfo }                        from './events/fire-ability-event';
+import { abilityFireEventInfo }                        from './events/ability-fire-events';
 import { getIconUrlFromSource }                        from './icons';
 import { PositionedAbility }                           from './positioned-ability';
 import { abilityFireSchema }                           from './sources/ability-fire';
@@ -19,8 +19,9 @@ import type { BuiltinAttributeRecord }                 from '../attributes/attri
 import type { AttributeMap }                           from '../attributes/i-attribute-holder';
 import type { PatternEntry }                           from '../common/pattern';
 import type { Condition }                              from '../conditions/condition';
+import type { Scenario }                               from '../scenario';
 import type { Ship }                                   from '../ship';
-import type { FireAbilityEvent, FireAbilityEventInfo } from './events/fire-ability-event';
+import type { AbilityFireEvent, AbilityFireEventInfo } from './events/ability-fire-events';
 import type { IAbilityFireSource }                     from './sources/ability-fire';
 import type { IAbilityFireInfo }                       from 'shared/network/scenario/ability-info';
 import type { IAbilityFireUsabilityInfo }              from 'shared/network/scenario/ability-usability-info';
@@ -33,31 +34,29 @@ import type { Rotation }                               from 'shared/scenario/rot
  */
 export class AbilityFire extends PositionedAbility {
 
-    public readonly eventRegistrar: EventRegistrar<FireAbilityEventInfo, FireAbilityEvent>;
+    public readonly eventRegistrar: EventRegistrar<AbilityFireEventInfo, AbilityFireEvent>;
 
     /**
      * AbilityFire constructor
      *
-     * @param  ship                       Parent ship which this ability belongs to
-     * @param  descriptor                 Descriptor for ability
-     * @param  icon                       Url to icon for this ability
-     * @param  selectionPattern           Pattern determining which cell can be selected to apply the affect pattern around
-     * @param  effectPattern              Pattern determining which cells around the selected cell are affected
-     * @param  displayEffectPatternValues Whether effect pattern values should be displayed to the client when using the ability
-     * @param  condition                  Condition which must hold true to be able to use this action
-     * @param  eventRegistrar             Registrar of all ability event listeners
-     * @param  attributes                 Attributes for the ability
-     * @param  builtinAttributes          Built-in attributes for the ability
-     * @param  attributeListeners         Attribute listeners for the ability
+     * @param  ship               Parent ship which this ability belongs to
+     * @param  descriptor         Descriptor for ability
+     * @param  icon               Url to icon for this ability
+     * @param  selectionPattern   Pattern determining which cell can be selected to apply the affect pattern around
+     * @param  effectPattern      Pattern determining which cells around the selected cell are affected
+     * @param  condition          Condition which must hold true to be able to use this action
+     * @param  eventRegistrar     Registrar of all ability event listeners
+     * @param  attributes         Attributes for the ability
+     * @param  builtinAttributes  Built-in attributes for the ability
+     * @param  attributeListeners Attribute listeners for the ability
      */
     public constructor(ship: Ship,
                        descriptor: Descriptor,
                        icon: string,
                        private selectionPattern: RotatablePattern,
                        private effectPattern: RotatablePattern,
-                       private readonly displayEffectPatternValues: boolean,
                        condition: Condition,
-                       eventRegistrar: EventRegistrar<FireAbilityEventInfo, FireAbilityEvent>,
+                       eventRegistrar: EventRegistrar<AbilityFireEventInfo, AbilityFireEvent>,
                        attributes: AttributeMap,
                        builtinAttributes: BuiltinAttributeRecord<'ability'>,
                        attributeListeners: AttributeListener[]) {
@@ -82,7 +81,7 @@ export class AbilityFire extends PositionedAbility {
 
         // Ability and EventRegistrar partials refer to future Ability and EventRegistrar objects
         const abilityPartial: Partial<Ability> = Object.create(AbilityFire.prototype);
-        const eventRegistrarPartial = Object.create(EventRegistrar.prototype) as EventRegistrar<FireAbilityEventInfo, FireAbilityEvent>;
+        const eventRegistrarPartial = Object.create(EventRegistrar.prototype) as EventRegistrar<AbilityFireEventInfo, AbilityFireEvent>;
 
         // Get attributes and update parsing context
         const attributes: AttributeMap = await getAttributes(parsingContext.withExtendedPath('.attributes'), abilityFireSource.attributes, 'ability');
@@ -98,19 +97,19 @@ export class AbilityFire extends PositionedAbility {
         parsingContext.reducePath();
         const icon = getIconUrlFromSource(parsingContext.withExtendedPath('.icon'), abilityFireSource.icon);
         parsingContext.reducePath();
-        const selectionPattern = await RotatablePattern.fromSource(parsingContext.withExtendedPath('.selectionPattern'), abilityFireSource.selectionPattern, false);
+        const selectionPattern = await RotatablePattern.fromSource(parsingContext.withExtendedPath('.selectionPattern'), abilityFireSource.selectionPattern, true, false);
         parsingContext.reducePath();
-        const effectPattern = await RotatablePattern.fromSource(parsingContext.withExtendedPath('.effectPattern'), abilityFireSource.effectPattern, false);
+        const effectPattern = await RotatablePattern.fromSource(parsingContext.withExtendedPath('.effectPattern'), abilityFireSource.effectPattern, false, false);
         parsingContext.reducePath();
         const condition = await buildCondition(parsingContext.withExtendedPath('.condition'), abilityFireSource.condition, false);
         parsingContext.reducePath();
-        const eventListeners = await getEventListenersFromActionSource(parsingContext.withExtendedPath('.actions'), fireAbilityEventInfo, abilityFireSource.actions);
+        const eventListeners = await getEventListenersFromActionSource(parsingContext.withExtendedPath('.actions'), abilityFireEventInfo, abilityFireSource.actions);
         parsingContext.reducePath();
 
         // Return created AbilityFire object
         parsingContext.localAttributes.ability = undefined;
-        EventRegistrar.call(eventRegistrarPartial, eventListeners, []);
-        AbilityFire.call(abilityPartial, parsingContext.shipPartial as Ship, descriptor, icon, selectionPattern, effectPattern, abilityFireSource.displayEffectPatternValues, condition, eventRegistrarPartial, attributes, builtinAttributes, attributeListeners);
+        EventRegistrar.call(eventRegistrarPartial, parsingContext.scenarioPartial as Scenario, eventListeners, []);
+        AbilityFire.call(abilityPartial, parsingContext.shipPartial as Ship, descriptor, icon, selectionPattern, effectPattern, condition, eventRegistrarPartial, attributes, builtinAttributes, attributeListeners);
         return abilityPartial as AbilityFire;
     }
 
@@ -127,7 +126,7 @@ export class AbilityFire extends PositionedAbility {
             type: 'fire',
             descriptor: this.descriptor.makeTransportable(),
             icon: this.icon,
-            effectPattern: this.effectPattern.makeTransportable(this.displayEffectPatternValues),
+            effectPattern: this.effectPattern.makeTransportable(false),
             attributes: this.attributeWatcher.exportAttributeInfo(),
             usability: this.getFullUsability(includeSubAbilityDetails)
         };
@@ -211,9 +210,8 @@ export class AbilityFire extends PositionedAbility {
         });
 
         // Container to act as persistent reference to hitCount so events raised refer to final hit count
-        const hitCountContainer = {
-            hitCount: 0
-        };
+        const hitCountContainer = { hitCount: 0 };
+        const hitCountAttribute = new AttributeCodeControlled(() => hitCountContainer.hitCount, () => {}, true);
 
         const centerX = dx + this.ship.x + this.ship.pattern.integerCenter[0];
         const centerY = dy + this.ship.y + this.ship.pattern.integerCenter[1];
@@ -225,6 +223,8 @@ export class AbilityFire extends PositionedAbility {
             const tile = this.ship.board.tiles[tileY]?.[tileX];
             const ship = tile?.[2];
             if (ship === undefined) {
+
+                // Event for every missed tile
                 this.eventRegistrar.queueEvent('onMiss', {
                     builtinAttributes: {},
                     locations: {
@@ -234,10 +234,18 @@ export class AbilityFire extends PositionedAbility {
                 continue;
             }
 
+            const isThis = this.ship === ship ? 1 : 0;
+            const isFriendly = this.ship.owner.team === ship.owner.team ? 1 : 0;
+            const isVisible = ship.getTrackingID(this.ship.owner.team) !== undefined ? 1 : 0;
+
+            // Event for every hit tile
             this.eventRegistrar.queueEvent('onHit', {
                 builtinAttributes: {
                     patternValue: new AttributeCodeControlled(() => v, () => {}, true),
-                    hitCount: new AttributeCodeControlled(() => hitCountContainer.hitCount, () => {}, true)
+                    hitCount: hitCountAttribute,
+                    isThis: new AttributeCodeControlled(() => isThis, () => {}, true),
+                    isFriendly: new AttributeCodeControlled(() => isFriendly, () => {}, true),
+                    isVisible: new AttributeCodeControlled(() => isVisible, () => {}, true)
                 },
                 foreignTeam: ship.owner.team,
                 foreignPlayer: ship.owner,
@@ -249,12 +257,19 @@ export class AbilityFire extends PositionedAbility {
             hitCountContainer.hitCount++;
         }
 
-        if (hitCountContainer.hitCount === 0) {
+        // Event for no hits
+        if (hitCountContainer.hitCount === 0)
             this.eventRegistrar.queueEvent('onMissCompletely', {
                 builtinAttributes: {},
                 locations: {}
             });
-        }
+
+        // Event for any hit
+        else
+            this.eventRegistrar.queueEvent('onHitSingle', {
+                builtinAttributes: {},
+                locations: {}
+            });
 
         this.eventRegistrar.evaluateEvents();
     }

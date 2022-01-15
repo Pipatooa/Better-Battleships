@@ -33,6 +33,7 @@ export class Team implements IAttributeHolder, IBuiltinAttributeHolder<'team'> {
 
     private _players: Player[] = [];
     protected _lost = false;
+    protected _inactive = false;
 
     public readonly attributeWatcher: AttributeWatcher;
 
@@ -154,7 +155,7 @@ export class Team implements IAttributeHolder, IBuiltinAttributeHolder<'team'> {
         // Return created Team object
         parsingContext.localAttributes.team = undefined;
         parsingContext.teamPartial = undefined;
-        EventRegistrar.call(eventRegistrarPartial, eventListeners, []);
+        EventRegistrar.call(eventRegistrarPartial, parsingContext.scenarioPartial as Scenario, eventListeners, []);
         Team.call(teamPartial, parsingContext.scenarioPartial as Scenario, id, descriptor, teamSource.winMessage, playerPrototypes, teamSource.color, teamSource.highlightColor, eventRegistrarPartial, attributes, builtinAttributes);
         return teamPartial as Team;
     }
@@ -272,7 +273,7 @@ export class Team implements IAttributeHolder, IBuiltinAttributeHolder<'team'> {
      * Checks whether all players on this team have lost
      */
     public checkLost(): void {
-        for (const player of this.players)
+        for (const player of this._players)
             if (!player.lost)
                 return;
         this.lose(false);
@@ -315,6 +316,19 @@ export class Team implements IAttributeHolder, IBuiltinAttributeHolder<'team'> {
     }
 
     /**
+     * Checks whether all players on this team are inactive
+     */
+    public checkInactive(): void {
+        for (const player of this._players)
+            if (!player.client!.inactive) {
+                this._inactive = false;
+                return;
+            }
+        this._inactive = true;
+        this.scenario.checkGameOver();
+    }
+
+    /**
      * Getters and setters
      */
 
@@ -328,5 +342,9 @@ export class Team implements IAttributeHolder, IBuiltinAttributeHolder<'team'> {
 
     public get lost(): boolean {
         return this._lost;
+    }
+
+    public get inactive(): boolean {
+        return this._inactive;
     }
 }

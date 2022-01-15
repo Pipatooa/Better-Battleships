@@ -1,4 +1,6 @@
+import { EvaluationError }                                                                             from '../errors/evaluation-error';
 import { EventEvaluationState }                                                                        from './event-evaluation-state';
+import type { Scenario }                                                                               from '../objects/scenario';
 import type { EventInfoEntry }                                                                         from './base-events';
 import type { EventContextForEvent, GenericEventContext }                                              from './event-context';
 import type { EventListener, EventListeners, GenericQueuedEventListenerCall, QueuedEventListenerCall } from './event-listener';
@@ -23,10 +25,12 @@ export class EventRegistrar<T extends Record<S, EventInfoEntry>, S extends strin
     /**
      * EventRegistrar constructor
      *
+     * @param  scenario       Scenario that this event registrar is registered for
      * @param  eventListeners Dictionary of event names to arrays of listener functions
      * @param  subRegistrars  Array of registrars to pass events onto when triggered
      */
-    public constructor(private readonly eventListeners: EventListeners<T, S>,
+    public constructor(private readonly scenario: Scenario,
+                       private readonly eventListeners: EventListeners<T, S>,
                        private subRegistrars: EventRegistrar<T, S>[]) {
 
         for (const eventListeners of Object.values(this.eventListeners))
@@ -208,17 +212,31 @@ export class EventRegistrar<T extends Record<S, EventInfoEntry>, S extends strin
 
         // Process queue - More listeners may be added to queue during evaluation
         let listenersProcessed = 0;
-        while (this.queuedEventListenerCalls.length > 0) {
-            const [eventListener, eventContext, eventRegistrar] = this.queuedEventListenerCalls.pop()!;
+        try {
+            while (this.queuedEventListenerCalls.length > 0) {
+                const [ eventListener, eventContext, eventRegistrar ] = this.queuedEventListenerCalls.pop()!;
 
-            if (eventRegistrar.deactivated)
-                continue;
-            if (eventEvaluationState.terminate)
+                if (eventRegistrar.deactivated)
+                    continue;
+                if (eventEvaluationState.terminate)
+                    return;
+                eventListener[2](eventEvaluationState, eventContext);
+                listenersProcessed++;
+                if (this.preQueuedEventListenerCalls.length > 0)
+                    this.queuePreQueuedEventListenerCalls();
+            }
+        // Catch evaluation errors, terminating game
+        } catch (e: unknown) {
+            if (e instanceof EvaluationError) {
+                this.scenario.game!.broadcastEvent({
+                    event: 'gameTerminated',
+                    reason: e.context,
+                    message: e.message
+                });
+                this.scenario.game!.killGame(e.context);
                 return;
-            eventListener[2](eventEvaluationState, eventContext);
-            listenersProcessed++;
-            if (this.preQueuedEventListenerCalls.length > 0)
-                this.queuePreQueuedEventListenerCalls();
+            }
+            throw e;
         }
 
         // Finish evaluation

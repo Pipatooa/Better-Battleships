@@ -49,7 +49,7 @@ export class AttributeUserControlled extends Attribute {
             attributeSource = await checkAgainstSchema(attributeSource, attributeSchema, parsingContext);
 
         let descriptor: Descriptor | undefined;
-        if (Object.entries(attributeSource.descriptor).length !== 0) {
+        if (attributeSource.descriptor !== null || Object.entries(attributeSource.descriptor).length !== 0) {
             descriptor = await Descriptor.fromSource(parsingContext.withExtendedPath('.descriptor'), attributeSource.descriptor as IDescriptorSource, false);
             parsingContext.reducePath();
         }

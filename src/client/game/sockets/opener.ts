@@ -11,7 +11,8 @@ let ws: WebSocket;
 export function openSocketConnection(): void {
 
     // Open a new websocket connection
-    ws = new WebSocket(`ws://${window.location.host}${window.location.pathname}`);
+    const websocketProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+    ws = new WebSocket(`${websocketProtocol}//${window.location.host}${window.location.pathname}`);
 
     // Register message handler for websocket
     ws.onmessage = handleServerEvent;

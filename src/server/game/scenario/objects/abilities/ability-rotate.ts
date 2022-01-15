@@ -17,6 +17,7 @@ import type { AttributeListener }              from '../attribute-listeners/attr
 import type { BuiltinAttributeRecord }         from '../attributes/attribute-holder';
 import type { AttributeMap }                   from '../attributes/i-attribute-holder';
 import type { Condition }                      from '../conditions/condition';
+import type { Scenario }                       from '../scenario';
 import type { Ship }                           from '../ship';
 import type { AbilityEvent, AbilityEventInfo } from './events/ability-events';
 import type { IAbilityRotateSource }           from './sources/ability-rotate';
@@ -24,7 +25,7 @@ import type { IAbilityRotateInfo }             from 'shared/network/scenario/abi
 import type { IAbilityRotateUsabilityInfo }    from 'shared/network/scenario/ability-usability-info';
 
 /**
- * AbilityFire - Server Version
+ * AbilityRotate - Server Version
  *
  * Ability which rotates a ship upon its use
  */
@@ -35,7 +36,7 @@ export class AbilityRotate extends IndexedAbility {
     private rot270valid: SubAbilityUsability;
 
     /**
-     * AbilityFire constructor
+     * AbilityRotate constructor
      *
      * @param  ship               Parent ship which this ability belongs to
      * @param  descriptor         Descriptor for ability
@@ -67,12 +68,12 @@ export class AbilityRotate extends IndexedAbility {
     }
 
     /**
-     * Factory function to generate AbilityFire from JSON scenario data
+     * Factory function to generate AbilityRotate from JSON scenario data
      *
      * @param    parsingContext      Context for resolving scenario data
-     * @param    abilityRotateSource JSON data for AbilityFire
+     * @param    abilityRotateSource JSON data for AbilityRotate
      * @param    checkSchema         When true, validates source JSON data against schema
-     * @returns                      Created AbilityFire object
+     * @returns                      Created AbilityRotate object
      */
     public static async fromSource(parsingContext: ParsingContext, abilityRotateSource: IAbilityRotateSource, checkSchema: boolean): Promise<AbilityRotate> {
 
@@ -103,9 +104,9 @@ export class AbilityRotate extends IndexedAbility {
         const eventListeners = await getEventListenersFromActionSource(parsingContext.withExtendedPath('.actions'), abilityEventInfo, abilityRotateSource.actions);
         parsingContext.reducePath();
 
-        // Return created AbilityFire object
+        // Return created AbilityRotate object
         parsingContext.localAttributes.ability = undefined;
-        EventRegistrar.call(eventRegistrarPartial, eventListeners, []);
+        EventRegistrar.call(eventRegistrarPartial, parsingContext.scenarioPartial as Scenario, eventListeners, []);
         AbilityRotate.call(abilityPartial, parsingContext.shipPartial as Ship, descriptor, icon, abilityRotateSource.rot90, abilityRotateSource.rot180, abilityRotateSource.rot270, condition, eventRegistrarPartial, attributes, builtinAttributes, attributeListeners);
         return abilityPartial as AbilityRotate;
     }

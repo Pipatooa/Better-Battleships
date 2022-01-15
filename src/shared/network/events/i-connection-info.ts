@@ -5,5 +5,6 @@ import type { IBaseServerEvent } from './server-event';
  */
 export interface IConnectionInfoEvent extends IBaseServerEvent {
     event: 'connectionInfo',
-    identity: string
+    identity: string,
+    reconnectionTimeout: number
 }

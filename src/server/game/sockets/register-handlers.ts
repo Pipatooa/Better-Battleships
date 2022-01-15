@@ -1,5 +1,6 @@
 import console                      from 'console';
 import { checkRequestAuth }         from '../../auth/request-handler';
+import config                       from '../../config/config';
 import { GamePhase }                from '../game';
 import { queryGame }                from '../game-manager';
 import { Client }                   from './client';
@@ -48,6 +49,13 @@ export function registerWebsocketHandlers(server: http.Server, wss: WebSocket.Se
             return;
         }
 
+        // Check game finished
+        if (game.gamePhase >= GamePhase.Finished) {
+            socket.write('HTTP/1.1 503 Service Unavailable\r\n\r\n');
+            socket.destroy();
+            return;
+        }
+
         // Check authorisation
         const payload = await checkRequestAuth(req);
 
@@ -58,38 +66,58 @@ export function registerWebsocketHandlers(server: http.Server, wss: WebSocket.Se
             return;
         }
 
-        // Check if game has already started
-        if (game.gamePhase !== GamePhase.Lobby) {
+        // Check for existing client in game
+        const identity = `user:${payload.username}`;
+        const client = game.findClient(identity);
+        let upgradeHandler: (ws: WebSocket) => void;
+
+        // If game is in lobby stage, and they aren't already connected to the game
+        if (client === undefined && game.gamePhase === GamePhase.Lobby)
+            upgradeHandler = (ws: WebSocket) => {
+                const client = new Client(ws, payload, game);
+                client.sendEvent({
+                    event: 'connectionInfo',
+                    identity: client.identity,
+                    reconnectionTimeout: config.gameRejoinTimeout
+                });
+
+                game.joinClient(client);
+                currentConnections++;
+
+                // Broadcast connection event for connection handler
+                wss.emit('connection', ws, req, client);
+            };
+
+        // Player reconnecting
+        else if (client !== undefined && !client.connected && client.allowReconnection)
+            upgradeHandler = (ws: WebSocket) => {
+                client.ws = ws;
+                client.sendEvent({
+                    event: 'connectionInfo',
+                    identity: client.identity,
+                    reconnectionTimeout: config.gameRejoinTimeout
+                });
+
+                game.reconnectClient(client);
+                currentConnections++;
+
+                // Broadcast connection event for connection handler
+                wss.emit('connection', ws, req, client);
+            };
+
+        // Otherwise, destroy connection
+        else {
             socket.write('HTTP/1.1 503 Service Unavailable\r\n\r\n');
             socket.destroy();
             return;
         }
 
-        // Otherwise, continue with upgrade process
-        wss.handleUpgrade(req, socket, head, async (ws) => {
-
-            // Create client from websocket, assigning them a uuid
-            const client = new Client(ws, payload, game);
-
-            // Send client connection information
-            client.sendEvent({
-                event: 'connectionInfo',
-                identity: client.identity
-            });
-
-            // Join client to game
-            game.joinClient(client);
-            currentConnections++;
-
-            // Broadcast connection event for connection handler
-            wss.emit('connection', ws, req, client);
-        });
+        // Update connection
+        wss.handleUpgrade(req, socket, head, upgradeHandler);
     });
 
     // Register connection handler
     wss.on('connection', (ws: WebSocket, req: IncomingMessage, client: Client) => {
-
-        // Debug
         console.log(`Connection from [${req.socket.remoteAddress}]:${req.socket.remotePort} was assigned uuid ${client.id}`);
 
         // Register handlers

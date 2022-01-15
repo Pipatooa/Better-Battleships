@@ -91,6 +91,7 @@ export class ShipPlacerUiManager extends UIManager {
      * Called when the main canvas is clicked on
      */
     protected onMainCanvasClick(): void {
+        // Pickup ship
         if (this.heldShip === undefined) {
             const ship = this.highlightedTile?.[2];
             if (ship !== undefined) {
@@ -100,6 +101,7 @@ export class ShipPlacerUiManager extends UIManager {
                 this.setSelectedShip(ship);
                 ship.placed = false;
             }
+        // Put down ship
         } else if (this.placementValid) {
             this.heldShip.moveTo(...this.heldShipCoordinates);
             game.board!.addShip(this.heldShip, true);
@@ -115,9 +117,11 @@ export class ShipPlacerUiManager extends UIManager {
      * Called when the ship selection canvas is clicked on
      */
     protected onSelectionCanvasClick(): void {
-        if (this.heldShip === undefined) {
+        // Pickup ship
+        if (this.heldShip === undefined)
             this.setHeldShip(game.shipSelectionRenderer!.pickup());
-        } else {
+        // Put down ship
+        else {
             game.shipSelectionRenderer!.closeSlot(this.heldShip);
             this.setHeldShip(undefined);
         }
@@ -147,6 +151,11 @@ export class ShipPlacerUiManager extends UIManager {
         }
     }
 
+    /**
+     * Sets the currently selected ship and updates the UI and renderer state accordingly
+     *
+     * @param  ship Ship to select
+     */
     public setSelectedShip(ship: Ship | undefined): void {
         super.setSelectedShip(ship);
     }

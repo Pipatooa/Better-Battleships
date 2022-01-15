@@ -18,6 +18,7 @@ import type { BuiltinAttributeRecord }         from '../attributes/attribute-hol
 import type { AttributeMap }                   from '../attributes/i-attribute-holder';
 import type { PatternEntry }                   from '../common/pattern';
 import type { Condition }                      from '../conditions/condition';
+import type { Scenario }                       from '../scenario';
 import type { Ship }                           from '../ship';
 import type { AbilityEvent, AbilityEventInfo } from './events/ability-events';
 import type { IAbilityMoveSource }             from './sources/ability-move';
@@ -89,16 +90,16 @@ export class AbilityMove extends PositionedAbility {
         parsingContext.reducePath();
         const icon = getIconUrlFromSource(parsingContext.withExtendedPath('.icon'), abilityMoveSource.icon);
         parsingContext.reducePath();
-        const pattern = await RotatablePattern.fromSource(parsingContext.withExtendedPath('.pattern'), abilityMoveSource.pattern, false);
+        const pattern = await RotatablePattern.fromSource(parsingContext.withExtendedPath('.pattern'), abilityMoveSource.pattern, true, false);
         parsingContext.reducePath();
         const condition = await buildCondition(parsingContext.withExtendedPath('.condition'), abilityMoveSource.condition, false);
         parsingContext.reducePath();
         const eventListeners = await getEventListenersFromActionSource(parsingContext.withExtendedPath('.actions'), abilityEventInfo, abilityMoveSource.actions);
         parsingContext.reducePath();
 
-        // Return created AbilityMove object
+        // Return created AbilityGeneric object
         parsingContext.localAttributes.ability = undefined;
-        EventRegistrar.call(eventRegistrarPartial, eventListeners, []);
+        EventRegistrar.call(eventRegistrarPartial, parsingContext.scenarioPartial as Scenario, eventListeners, []);
         AbilityMove.call(abilityPartial, parsingContext.shipPartial as Ship, descriptor, icon, pattern, condition, eventRegistrarPartial, attributes, builtinAttributes, attributeListeners);
         return abilityPartial as AbilityMove;
     }

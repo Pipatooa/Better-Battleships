@@ -23,6 +23,7 @@ export function initiateLobbyUI(): void {
  * Initiates all game UI managers for setup phase of game
  */
 export function initiateGameSetupUI(): void {
+    document.body.style.overflow = 'hidden';
     registerInfoPopupHandlers();
     initialiseViewManager();
 
@@ -40,7 +41,6 @@ export function initiateGameSetupUI(): void {
  */
 export function initiateGameMainUI(): void {
     new MainUIManager();
-
     $('#sidebar-ship-selection-section').remove();
     $('#sidebar-turn-section').removeClass('d-none');
 }

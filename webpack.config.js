@@ -6,8 +6,8 @@ const NodemonPlugin           = require('nodemon-webpack-plugin');
 const CopyWebpackPlugin       = require('copy-webpack-plugin');
 const ZipWebpackPlugin        = require('zip-file-webpack-plugin');
 const FileManagerPlugin       = require('filemanager-webpack-plugin');
-const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const MiniCssExtractPlugin    = require('mini-css-extract-plugin');
+const CssMinimizerPlugin      = require('css-minimizer-webpack-plugin');
 const TerserPlugin            = require('terser-webpack-plugin');
 const { readdirSync }         = require('fs');
 
@@ -184,7 +184,7 @@ const webConfig = {
     ],
     optimization: {
         minimizer: [
-            new OptimizeCssAssetsPlugin(),
+            new CssMinimizerPlugin(),
             new TerserPlugin({
                 parallel: true
             })

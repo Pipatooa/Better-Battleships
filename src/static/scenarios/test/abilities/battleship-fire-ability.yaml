@@ -35,8 +35,6 @@ effectPattern:
     - '#=#'
     - '.#.'
 
-displayEffectPatternValues: true
-
 condition:
   type: valueMeetsConstraint
   value:

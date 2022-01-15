@@ -13,12 +13,14 @@ const configFilePath = path.join(__dirname, './config.toml');
 export class Config {
 
     public readonly host: string;
+    public readonly port: number;
     public readonly siteName: string;
     public readonly baseUrl: string;
 
     public readonly gameLimit: number;
     public readonly gameIDLength: number;
     public readonly gameJoinTimeout: number;
+    public readonly gameRejoinTimeout: number;
     public readonly gameStartWaitDuration: number;
 
     public readonly parsingMaxFileSize: number;
@@ -46,12 +48,12 @@ export class Config {
      * @param  configRaw Parsed JSON config
      */
     public constructor(configRaw: any) {
-
         this.configRaw = configRaw;
 
         // Server section
         assert.deepStrictEqual(typeof configRaw.server, 'object', 'Config: could not find server section');
         this.host = this.getFromConfig('string', 'server.host');
+        this.port = this.getFromConfig('number', 'server.port');
         this.siteName = this.getFromConfig('string', 'server.siteName');
         this.baseUrl = this.getFromConfig('string', 'server.baseUrl');
 
@@ -60,6 +62,7 @@ export class Config {
         this.gameLimit = this.getFromConfig('number', 'game.limit');
         this.gameIDLength = this.getFromConfig('number', 'game.idLength');
         this.gameJoinTimeout = this.getFromConfig('number', 'game.joinTimeout');
+        this.gameRejoinTimeout = this.getFromConfig('number', 'game.rejoinTimeout');
         this.gameStartWaitDuration = this.getFromConfig('number', 'game.startWaitDuration');
 
         // Parsing section

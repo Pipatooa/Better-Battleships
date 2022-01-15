@@ -1,4 +1,5 @@
 import { AbilityFire }      from './ability-fire';
+import { AbilityGeneric }   from './ability-generic';
 import { AbilityMove }      from './ability-move';
 import { AbilityRotate }    from './ability-rotate';
 import type { Ship }        from '../ship';
@@ -27,6 +28,9 @@ export function getAbilities(ship: Ship, abilityInfos: AbilityInfo[]): Ability[]
                 break;
             case 'fire':
                 ability = AbilityFire.fromInfo(abilityInfo, ship, abilityIndex);
+                break;
+            case 'generic':
+                ability = AbilityGeneric.fromInfo(abilityInfo, ship, abilityIndex);
                 break;
         }
         abilities.push(ability);

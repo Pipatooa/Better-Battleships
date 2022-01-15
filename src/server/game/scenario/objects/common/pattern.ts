@@ -53,10 +53,11 @@ export class Pattern {
      *
      * @param    parsingContext Context for resolving scenario data
      * @param    patternSource  JSON data for Pattern
+     * @param    booleanise     Whether to convert pattern values to boolean values
      * @param    checkSchema    When true, validates source JSON data against schema
      * @returns                 Created Pattern object
      */
-    public static async fromSource(parsingContext: ParsingContext, patternSource: IPatternSource, checkSchema: boolean): Promise<Pattern> {
+    public static async fromSource(parsingContext: ParsingContext, patternSource: IPatternSource, booleanise: boolean, checkSchema: boolean): Promise<Pattern> {
 
         // Validate JSON against schema
         if (checkSchema)
@@ -65,7 +66,7 @@ export class Pattern {
         // Calculate center of the pattern
         const centerX: number = (patternSource.size[0] - 1) / 2;
         const centerY: number = (patternSource.size[1] - 1) / 2;
-        const patternEntries = Pattern.getPatternEntriesFromSource(parsingContext, patternSource, [0, 0]);
+        const patternEntries = Pattern.getPatternEntriesFromSource(parsingContext, patternSource, booleanise, [0, 0]);
 
         // Return new created Pattern object
         return new Pattern(patternEntries, [ centerX, centerY ]);
@@ -76,10 +77,11 @@ export class Pattern {
      *
      * @param    parsingContext Context for resolving scenario data
      * @param    patternSource  JSON data for Pattern
+     * @param    booleanise     Whether to convert pattern values to boolean values
      * @param    offset         Amount to offset all tile positions within defined pattern
      * @returns                 Array of pattern entries
      */
-    protected static getPatternEntriesFromSource(parsingContext: ParsingContext, patternSource: IPatternSource, offset: [number, number]): PatternEntry[] {
+    protected static getPatternEntriesFromSource(parsingContext: ParsingContext, patternSource: IPatternSource, booleanise: boolean, offset: [number, number]): PatternEntry[] {
 
         // Unpack value data
         const values: { [char: string]: number } = {};
@@ -104,17 +106,18 @@ export class Pattern {
             // Iterate through each character, each representing a pattern entry
             for (let x = 0; x < patternSource.size[0]; x++) {
                 const c: string = row.charAt(x);
+                let value = values[c];
 
                 // If character did not match any value within the values map
-                if (!(c in values))
+                if (value === undefined)
                     throw new UnpackingError(`Could not find value for the character '${c}' in value map at '${parsingContext.currentPathPrefix}pattern[${y}][${x}]'`, parsingContext);
-
-                // Get value for entry
-                const value: number = values[c];
 
                 // If entry has no value, do not store it in the pattern
                 if (value === 0)
                     continue;
+
+                if (booleanise)
+                    value = 1;
 
                 // Create new entry and store in pattern entries
                 patternEntries.push([x + offset[0], y + offset[1], value]);

@@ -8,8 +8,7 @@ import { BoardRenderer }          from './board-renderer';
 import { Renderer }               from './renderer';
 import type { Ability }           from '../../../scenario/abilities/ability';
 import type { Board }             from '../../../scenario/board';
-
-import type { ColorAtlas } from '../color-atlas';
+import type { ColorAtlas }        from '../color-atlas';
 
 /**
  * AbilityRenderer
@@ -25,6 +24,11 @@ export class AbilityRenderer extends BoardRenderer {
 
     private currentlyRenderedAbility: Ability | undefined;
 
+    /**
+     * AbilityRenderer constructor
+     *
+     * @param  colorAtlas Color atlas to use for tile colors for ability boards
+     */
     public constructor(colorAtlas: ColorAtlas) {
         const canvas = $('#ability-canvas').get(0) as HTMLCanvasElement;
         const gl = Renderer.getContext(canvas);

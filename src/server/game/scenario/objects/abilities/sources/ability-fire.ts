@@ -1,11 +1,11 @@
 import Joi                         from 'joi';
 import { actionSchema }            from '../../actions/sources/action';
 import { patternSchema }           from '../../common/sources/pattern';
-import { fireAbilityEventInfo }    from '../events/fire-ability-event';
+import { abilityFireEventInfo }    from '../events/ability-fire-events';
 import { baseAbilitySchema }       from './base-ability';
 import type { ActionSource }       from '../../actions/sources/action';
 import type { IPatternSource }     from '../../common/sources/pattern';
-import type { FireAbilityEvent }   from '../events/fire-ability-event';
+import type { AbilityFireEvent }   from '../events/ability-fire-events';
 import type { IBaseAbilitySource } from './base-ability';
 
 /**
@@ -15,8 +15,7 @@ export interface IAbilityFireSource extends IBaseAbilitySource {
     type: 'fire',
     selectionPattern: IPatternSource,
     effectPattern: IPatternSource,
-    displayEffectPatternValues: boolean,
-    actions: { [event in FireAbilityEvent]: ActionSource[] }
+    actions: { [event in AbilityFireEvent]: ActionSource[] }
 }
 
 /**
@@ -26,8 +25,7 @@ export const abilityFireSchema = baseAbilitySchema.keys({
     type: 'fire',
     selectionPattern: patternSchema.required(),
     effectPattern: patternSchema.required(),
-    displayEffectPatternValues: Joi.boolean().required(),
-    actions: Joi.object().pattern(Joi.valid(...Object.keys(fireAbilityEventInfo)), Joi.array().items(actionSchema.keys({
+    actions: Joi.object().pattern(Joi.valid(...Object.keys(abilityFireEventInfo)), Joi.array().items(actionSchema.keys({
         priority: Joi.number().required()
     }))).required()
 });

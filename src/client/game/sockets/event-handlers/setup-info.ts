@@ -1,13 +1,13 @@
-import { game }                 from '../../game';
-import { allPlayers }           from '../../player';
-import { AttributeCollection }  from '../../scenario/attribute-collection';
-import { Board }                from '../../scenario/board';
-import { Ship }                 from '../../scenario/ship';
-import { allTeams }             from '../../team';
-import { initiateRenderers }    from '../../ui/canvas/initiate';
-import { initiateGameSetupUI }  from '../../ui/initiate';
-import { setupTurnIndicator }   from '../../ui/updaters/turn-indicator-updater';
-import type { ISetupInfoEvent } from 'shared/network/events/i-setup-info';
+import { game }                                    from '../../game';
+import { allPlayers }                              from '../../player';
+import { AttributeCollection }                     from '../../scenario/attribute-collection';
+import { Board }                                   from '../../scenario/board';
+import { Ship }                                    from '../../scenario/ship';
+import { allTeams }                                from '../../team';
+import { initiateRenderers }                       from '../../ui/canvas/initiate';
+import { initiateGameMainUI, initiateGameSetupUI } from '../../ui/initiate';
+import { setupTurnIndicator }                      from '../../ui/updaters/turn-indicator-updater';
+import type { ISetupInfoEvent }                    from 'shared/network/events/i-setup-info';
 
 /**
  * Handles a setup info event from the server
@@ -33,10 +33,13 @@ export async function handleSetupInfo(setupInfoEvent: ISetupInfoEvent): Promise<
     }
 
     // Unpack ship info
-    const ships: Ship[] = [];
+    const unplacedShips: Ship[] = [];
     for (const [trackingID, shipInfo] of Object.entries(setupInfoEvent.ships)) {
         const ship = Ship.fromInfo(shipInfo, trackingID);
-        ships.push(ship);
+        if (ship.placed)
+            game.board.addShip(ship, true);
+        else
+            unplacedShips.push(ship);
     }
 
     // Unpack scenario and team attribute info
@@ -46,7 +49,10 @@ export async function handleSetupInfo(setupInfoEvent: ISetupInfoEvent): Promise<
         team.attributeCollection = new AttributeCollection(attributes);
     }
 
-    setupTurnIndicator(setupInfoEvent.turnOrder, setupInfoEvent.maxTurnTime);
-    initiateRenderers(ships);
+    setupTurnIndicator(setupInfoEvent.turnOrder, setupInfoEvent.turnStartIndex, setupInfoEvent.maxTurnTime);
+    initiateRenderers(unplacedShips);
     initiateGameSetupUI();
+
+    if (unplacedShips.length === 0)
+        initiateGameMainUI();
 }

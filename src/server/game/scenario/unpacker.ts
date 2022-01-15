@@ -2,6 +2,7 @@ import crypto                   from 'crypto';
 import fs                       from 'fs';
 import AdmZip                   from 'adm-zip';
 import yaml                     from 'yaml';
+import { YAMLSyntaxError }      from 'yaml/util';
 import { UnpackingError }       from './errors/unpacking-error';
 import { Scenario }             from './objects/scenario';
 import { ParsingContext }       from './parsing-context';
@@ -20,7 +21,7 @@ const entryRegex = /^(abilities|ships|players|teams)\/([a-zA-Z\-_\d]+)(\.json|\.
  */
 export async function unpack(fileJSON: FileJSON): Promise<[Scenario, string]> {
     // Read scenario zip file
-    const scenarioZip = new AdmZip(fileJSON.path);
+    const scenarioZip = new AdmZip(fileJSON.filepath);
 
     // Get format of scenario
     const formatEntry = await getEntryFromZip(scenarioZip, 'format.txt');
@@ -76,7 +77,7 @@ export async function unpack(fileJSON: FileJSON): Promise<[Scenario, string]> {
 
     // Compute hash of zip file
     const hash = crypto.createHash('sha256');
-    const stream = fs.createReadStream(fileJSON.path);
+    const stream = fs.createReadStream(fileJSON.filepath);
     const digest = await new Promise<string>((resolve) => {
         stream.on('end', () => {
             hash.setEncoding('hex');
@@ -145,7 +146,7 @@ export async function getJSONFromEntry(zipEntry: IZipEntry, format: 'JSON' | 'YA
                         break;
                 }
             } catch (e: unknown) {
-                if (e instanceof SyntaxError) {
+                if (e instanceof SyntaxError || e instanceof YAMLSyntaxError) {
                     reject(new UnpackingError(e.message, zipEntry.entryName));
                     return;
                 }

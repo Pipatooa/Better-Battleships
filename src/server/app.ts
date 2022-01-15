@@ -3,7 +3,7 @@ import path                          from 'path';
 import process                       from 'process';
 import cookieParser                  from 'cookie-parser';
 import express                       from 'express';
-import exphbs                        from 'express-handlebars';
+import { engine }                    from 'express-handlebars';
 import WebSocket                     from 'isomorphic-ws';
 import config                        from './config/config';
 import { executeDBStartupScript }    from './db/startup';
@@ -38,7 +38,7 @@ executeDBStartupScript().then(async () => {
     const wss = new WebSocket.Server({ noServer: true });
 
     // Express views configuration
-    app.engine('handlebars', exphbs({ defaultLayout: 'main' }));
+    app.engine('handlebars', engine({ defaultLayout: 'main' }));
     app.set('views', path.join(process.cwd(), 'views'));
     app.set('view engine', 'handlebars');
 
@@ -71,8 +71,14 @@ executeDBStartupScript().then(async () => {
     registerWebsocketHandlers(server, wss);
 
     // Start the server
-    server.listen(config.host, () => {
-        const datetime = new Date();
-        console.log(`Started server on '${config.host}'. The time is ${datetime.toLocaleTimeString()}`);
-    });
+    if (config.port === -1)
+        server.listen(config.host, () => {
+            const datetime = new Date();
+            console.log(`Started server on '${config.host}'. The time is ${datetime.toLocaleTimeString()}`);
+        });
+    else
+        server.listen(config.port, config.host, () => {
+            const datetime = new Date();
+            console.log(`Started server on '${config.host}:${config.port}'. The time is ${datetime.toLocaleTimeString()}`);
+        });
 });

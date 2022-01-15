@@ -8,7 +8,7 @@ import type {
     IUseAbilityRequest,
     IUseIndexedAbilityRequest,
     IUsePositionedAbilityRequest
-}                      from 'shared/network/requests/i-use-ability';
+}                            from 'shared/network/requests/i-use-ability';
 
 /**
  * Handles a ship placement request from the client
@@ -54,6 +54,7 @@ export async function handleUseAbilityRequest(client: Client, useAbilityRequest:
         ability.use(usePositionedAbilityRequest.x, usePositionedAbilityRequest.y);
     }
 }
+
 
 /**
  * Schema for validating request JSON

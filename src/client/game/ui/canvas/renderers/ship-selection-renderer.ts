@@ -94,9 +94,9 @@ export class ShipSelectionRenderer extends BoardRenderer {
         this.nextShipButtonListener = () => this.cycleNextShip();
         this.previousShipButtonListener = () => this.cyclePreviousShip();
         this.placementDoneButtonListener = () => this.onPlacementDone();
-        this.nextShipButtonElement.get(0).addEventListener('click', this.nextShipButtonListener);
-        this.previousShipButtonElement.get(0).addEventListener('click', this.previousShipButtonListener);
-        this.placementDoneButton.element.get(0).addEventListener('click', this.placementDoneButtonListener);
+        this.nextShipButtonElement.get(0)!.addEventListener('click', this.nextShipButtonListener);
+        this.previousShipButtonElement.get(0)!.addEventListener('click', this.previousShipButtonListener);
+        this.placementDoneButton.element.get(0)!.addEventListener('click', this.placementDoneButtonListener);
         this.doRender = true;
     }
 
@@ -104,9 +104,9 @@ export class ShipSelectionRenderer extends BoardRenderer {
      * Allows this object to be discarded
      */
     private deconstruct(): void {
-        this.nextShipButtonElement.get(0).removeEventListener('click', this.nextShipButtonListener);
-        this.previousShipButtonElement.get(0).removeEventListener('click', this.previousShipButtonListener);
-        this.placementDoneButton.element.get(0).removeEventListener('click', this.placementDoneButtonListener);
+        this.nextShipButtonElement.get(0)!.removeEventListener('click', this.nextShipButtonListener);
+        this.previousShipButtonElement.get(0)!.removeEventListener('click', this.previousShipButtonListener);
+        this.placementDoneButton.element.get(0)!.removeEventListener('click', this.placementDoneButtonListener);
     }
 
     /**

@@ -6,8 +6,10 @@ import { queryDatabase } from './query';
  */
 export async function executeDBStartupScript(): Promise<void> {
     const queryData = fs.readFileSync('./db-scripts/startup.sql');
-    if (queryData.length === 0)
-        return;
+    const queries = queryData.toString().trim().split(';');
 
-    await queryDatabase(queryData.toString());
+    for (const query of queries) {
+        if (query.length !== 0)
+            await queryDatabase(`${query};`);
+    }
 }

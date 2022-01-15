@@ -5,12 +5,14 @@ import { handleEnteringSetup }             from './event-handlers/entering-setup
 import { handleGameInfo }                  from './event-handlers/game-info';
 import { handleGameOver }                  from './event-handlers/game-over';
 import { handleGameStart }                 from './event-handlers/game-start';
+import { handleGameTerminated }            from './event-handlers/game-terminated';
 import { handleMessage }                   from './event-handlers/message';
 import { handlePlayerAttributeUpdate }     from './event-handlers/player-attribute-update';
 import { handlePlayerJoin }                from './event-handlers/player-join';
 import { handlePlayerLeave }               from './event-handlers/player-leave';
 import { handlePlayerLost }                from './event-handlers/player-lost';
 import { handlePlayerReady }               from './event-handlers/player-ready';
+import { handlePlayerTimedOut }            from './event-handlers/player-timed-out';
 import { handleScenarioAttributeUpdate }   from './event-handlers/scenario-attribute-update';
 import { handleSetupInfo }                 from './event-handlers/setup-info';
 import { handleShipAbilityUpdate }         from './event-handlers/ship-ability-update';
@@ -62,12 +64,14 @@ const handlers: Record<ServerEventID, (event: any) => void> = {
     gameInfo: handleGameInfo,
     gameOver: handleGameOver,
     gameStart: handleGameStart,
+    gameTerminated: handleGameTerminated,
     playerAttributeUpdate: handlePlayerAttributeUpdate,
     playerJoin: handlePlayerJoin,
     playerLeave: handlePlayerLeave,
     playerLost: handlePlayerLost,
     playerReady: handlePlayerReady,
     playerTeamAssignment: handlePlayerTeamAssignment,
+    playerTimedOut: handlePlayerTimedOut,
     scenarioAttributeUpdate: handleScenarioAttributeUpdate,
     setupInfo: handleSetupInfo,
     shipAbilityUpdate: handleShipAbilityUpdate,

@@ -17,6 +17,7 @@ import type { AttributeListener }                                               
 import type { IAttributeHolder, IBuiltinAttributeHolder, BuiltinAttributeRecord } from './attributes/attribute-holder';
 import type { AttributeMap }                                                      from './attributes/i-attribute-holder';
 import type { PlayerEvent, PlayerEventInfo }                                      from './events/player-events';
+import type { Scenario }                                                          from './scenario';
 import type { IPlayerSource }                                                     from './sources/player';
 import type { IShipSource }                                                       from './sources/ship';
 import type { Team }                                                              from './team';
@@ -140,7 +141,7 @@ export class Player implements IAttributeHolder, IBuiltinAttributeHolder<'player
         // Return created Player object
         parsingContext.localAttributes.player = undefined;
         parsingContext.playerPartial = undefined;
-        EventRegistrar.call(eventRegistrarPartial, eventListeners, subRegistrars);
+        EventRegistrar.call(eventRegistrarPartial, parsingContext.scenarioPartial as Scenario, eventListeners, subRegistrars);
         Player.call(playerPartial, parsingContext.teamPartial as Team, spawnRegion, color, highlightColor, ships, eventRegistrarPartial, attributes, builtinAttributes, attributeListeners);
         return playerPartial as Player;
     }

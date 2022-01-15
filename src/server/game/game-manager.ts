@@ -60,12 +60,12 @@ export async function createGame(scenario: Scenario, fileHash: string): Promise<
     games[gameID] = game;
     numGames++;
 
-    // Set game timeout function and start timeout
-    game.timeoutManager.setTimeoutFunction('gameJoinTimeout', () => removeGame(gameID, 'Timed out'), config.gameJoinTimeout, false);
-    game.timeoutManager.startTimeout('gameJoinTimeout');
-
     // When the game ends, remove it
-    game.gameOverCallback = (reason: string) => removeGame(gameID, reason);
+    game.gameKilledCallback = (reason: string) => removeGame(gameID, reason);
+
+    // Set game timeout function and start timeout
+    game.timeoutManager.setTimeoutFunction('gameJoinTimeout', () => game.killGame('Timed Out'), config.gameJoinTimeout, false);
+    game.timeoutManager.startTimeout('gameJoinTimeout');
 
     // Debug
     console.log(`Created game with id '${gameID}'. Current games: ${numGames}`);
@@ -81,11 +81,12 @@ export async function createGame(scenario: Scenario, fileHash: string): Promise<
  * @param  reason Reason for game removal
  */
 export function removeGame(gameID: string, reason: string): void {
+    const game = games[gameID];
+    if (game === undefined)
+        return;
 
     // Remove the game and decrement number of concurrent games
-    const deleted = delete games[gameID];
-    if (!deleted)
-        return;
+    delete games[gameID];
     numGames--;
 
     // Debug

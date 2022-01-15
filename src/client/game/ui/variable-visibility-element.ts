@@ -42,6 +42,6 @@ export class VariableVisibilityElement {
     }
 
     public get rawElement(): HTMLElement {
-        return this.element.get(0);
+        return this.element.get(0)!;
     }
 }

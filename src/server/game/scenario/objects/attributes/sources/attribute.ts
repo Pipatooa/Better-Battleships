@@ -21,6 +21,7 @@ export interface IAttributeSource {
  */
 export const attributeSchema = Joi.object({
     descriptor: Joi.alternatives(
+        null,
         Joi.object(),
         descriptorSchema
     ).required(),

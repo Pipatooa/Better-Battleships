@@ -20,11 +20,13 @@ export class TurnManager {
      *
      * @param  scenario     Scenario that this turn manager belongs to
      * @param  turnOrdering Definition of how turns should be grouped
+     * @param  randomise    Whether to randomise the turn order after it has been generated
      * @param  teams        List of teams to generate player turns for
      * @param  turnTimeout  Time given to each player before their turn is automatically advanced
      */
     public constructor(public readonly scenario: Scenario,
-                       public readonly turnOrdering: TurnOrdering,
+                       public readonly turnOrdering: 'team' | 'player',
+                       public readonly randomise: boolean,
                        public readonly teams: Team[],
                        public readonly turnTimeout: number) {
 
@@ -77,6 +79,10 @@ export class TurnManager {
                 } while (playersLeft);
             }
         }
+
+        // Randomise first turn within created turn array
+        if (this.randomise)
+            this.turnIndex = Math.floor(Math.random() * this._turnOrder.length);
     }
 
     /**
@@ -93,7 +99,7 @@ export class TurnManager {
             this.turnIndex++;
             this.turnIndex %= this._turnOrder!.length;
             newPlayer = this._turnOrder![this.turnIndex];
-        } while (this.turnIndex !== startIndex && newPlayer.lost);
+        } while (this.turnIndex !== startIndex && (newPlayer.lost || newPlayer.client!.inactive));
 
         oldPlayer.eventRegistrar.queueEvent('onTurnEnd',  {
             builtinAttributes: {},
@@ -139,17 +145,8 @@ export class TurnManager {
     public get currentTurn(): Player {
         return this._turnOrder![this.turnIndex];
     }
+
+    public get currentTurnIndex(): number {
+        return this.turnIndex;
+    }
 }
-
-/**
- * List of turn orderings
- */
-export const turnOrderings = [
-    'player',
-    'team'
-] as const;
-
-/**
- * Type matching all turn ordering strings
- */
-export type TurnOrdering = typeof turnOrderings[number];

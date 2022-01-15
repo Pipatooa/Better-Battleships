@@ -1,7 +1,6 @@
 import fs                              from 'fs';
 import express                         from 'express';
 import formidable                      from 'formidable';
-import stringify                       from 'json-stringify-safe';
 import config                          from 'server/config/config';
 import { capacityReached, createGame } from '../../game/game-manager';
 import { UnpackingError }              from '../../game/scenario/errors/unpacking-error';
@@ -12,6 +11,7 @@ import type { Scenario }               from '../../game/scenario/objects/scenari
 import type { FileJSON }               from 'formidable';
 
 const router = express.Router();
+export default router;
 
 /**
  * POST Route handler for /game/create
@@ -82,7 +82,7 @@ router.post('/', preventCSRF, requireAuth, async (req, res) => {
                 });
 
                 // Cleanup uploaded zip file
-                fs.unlinkSync(file.path);
+                fs.unlinkSync(file.filepath);
                 return;
             }
 
@@ -109,17 +109,14 @@ router.post('/', preventCSRF, requireAuth, async (req, res) => {
 
         } finally {
             // Remove scenario file
-            await new Promise<void>((resolve) => fs.unlink(file.path, () => resolve()));
+            await new Promise<void>((resolve) => fs.unlink(file.filepath, () => resolve()));
         }
 
         // Create a new game
         const game: Game = await createGame(scenario, hash);
         res.send({
             success: true,
-            gameID: game.gameID,
-            debug: JSON.parse(stringify(scenario))
+            gameID: game.gameID
         });
     });
 });
-
-export default router;

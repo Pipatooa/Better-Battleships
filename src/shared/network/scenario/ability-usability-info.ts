@@ -6,7 +6,8 @@ import type { IRotatablePatternInfo } from './i-rotatable-pattern-info';
 export type AbilityUsabilityInfo =
     IAbilityMoveUsabilityInfo |
     IAbilityRotateUsabilityInfo |
-    IAbilityFireUsabilityInfo;
+    IAbilityFireUsabilityInfo |
+    IAbilityGenericUsabilityInfo;
 
 /**
  * Enum describing usability of an ability's sub-abilities
@@ -50,3 +51,8 @@ export interface IAbilityRotateUsabilityInfo extends IBaseAbilityUsabilityInfo {
 export interface IAbilityFireUsabilityInfo extends IBaseAbilityUsabilityInfo {
     pattern: IRotatablePatternInfo
 }
+
+/**
+ * Type describing the usability of an AbilityGeneric object
+ */
+export type IAbilityGenericUsabilityInfo = IBaseAbilityUsabilityInfo;

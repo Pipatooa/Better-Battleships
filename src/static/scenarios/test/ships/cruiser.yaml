@@ -15,7 +15,8 @@ pattern:
     - '#'
 
 visibility: 7
-abilities: []
+abilities:
+  - test-generic-ability
 
 actions: {}
 

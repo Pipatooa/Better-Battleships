@@ -5,6 +5,8 @@
  */
 export class TimeoutManager<K extends string> {
 
+    private disabled = false;
+
     /**
      * Internal timeout dictionary
      *
@@ -31,6 +33,8 @@ export class TimeoutManager<K extends string> {
      * @param  duration Optional duration of timeout to override default
      */
     public startTimeout(name: K, duration?: number): void {
+        if (this.disabled)
+            return;
 
         // Get internal dictionary entry for timeout
         const [ timeoutFunction, defaultDuration, isInterval, timeoutID ] = this.timeouts[name];
@@ -89,7 +93,7 @@ export class TimeoutManager<K extends string> {
      * @param  isInterval      Whether this function is an interval function
      * @param  restart         Whether to start timeout again if timeout was already running
      */
-    public setTimeoutFunction(name: K, timeoutFunction: () => any, duration: number, isInterval: boolean, restart?: boolean): void {
+    public setTimeoutFunction(name: K, timeoutFunction: () => any, duration: number | undefined, isInterval: boolean, restart?: boolean): void {
 
         // Get existing timeout
         const [ , oldDefaultDuration, , oldTimeoutID ] = this.timeouts[name];
@@ -103,5 +107,14 @@ export class TimeoutManager<K extends string> {
         // If old timeout was running, optionally restart
         if (restart !== undefined && restart && oldTimeoutID !== undefined)
             this.startTimeout(name);
+    }
+
+    /**
+     * Disables this timeout manager, stopping all timeouts and prevent timeouts from starting again
+     */
+    public disable(): void {
+        this.disabled = true;
+        for (const timeoutName of Object.keys(this.timeouts))
+            this.stopTimeout(timeoutName as K);
     }
 }

@@ -1,3 +1,4 @@
+import fs                                                                         from 'fs';
 import { UnpackingError }                                                         from '../errors/unpacking-error';
 import { baseEventInfo }                                                          from '../events/base-events';
 import { EventRegistrar }                                                         from '../events/event-registrar';
@@ -63,6 +64,13 @@ export class Scenario implements IAttributeHolder, IBuiltinAttributeHolder<'scen
 
         this.attributeWatcher = new AttributeWatcher(this.attributes, this.builtinAttributes);
         this.eventRegistrar.eventEvaluationCompleteCallback = () => this.exportAttributeUpdates();
+    }
+
+    /**
+     * Allows this object to be discarded
+     */
+    public deconstruct(): void {
+        fs.unlink(this.fileJSON.filepath, () => {});
     }
 
     /**
@@ -144,7 +152,7 @@ export class Scenario implements IAttributeHolder, IBuiltinAttributeHolder<'scen
         }
 
         // Create turn manager
-        TurnManager.call(turnManagerPartial, scenarioPartial as Scenario, scenarioSource.turnOrdering, teamsList, scenarioSource.maxTurnTime);
+        TurnManager.call(turnManagerPartial, scenarioPartial as Scenario, scenarioSource.turnOrdering, scenarioSource.randomiseTurns, teamsList, scenarioSource.maxTurnTime);
 
         const eventListeners = await getEventListenersFromActionSource(parsingContext.withExtendedPath('.actions'), baseEventInfo, scenarioSource.actions);
         parsingContext.reducePath();
@@ -154,7 +162,7 @@ export class Scenario implements IAttributeHolder, IBuiltinAttributeHolder<'scen
         parsingContext.localAttributes.scenario = undefined;
         parsingContext.boardPartial = undefined;
         parsingContext.foreignAttributeRegistry = undefined;
-        EventRegistrar.call(eventRegistrarPartial, eventListeners, subRegistrars);
+        EventRegistrar.call(eventRegistrarPartial, parsingContext.scenarioPartial as Scenario, eventListeners, subRegistrars);
         Scenario.call(scenarioPartial, parsingContext.scenarioFile, scenarioSource.author, descriptor, board, teams, turnManagerPartial as TurnManager, eventRegistrarPartial, attributes, builtinAttributes);
         return scenarioPartial as Scenario;
     }
@@ -203,7 +211,7 @@ export class Scenario implements IAttributeHolder, IBuiltinAttributeHolder<'scen
     public checkGameOver(): boolean {
         let winningTeam: Team | undefined;
         for (const team of Object.values(this.teams)) {
-            if (!team.lost) {
+            if (!team.lost && !team.inactive) {
                 if (winningTeam === undefined)
                     winningTeam = team;
                 else
@@ -211,9 +219,27 @@ export class Scenario implements IAttributeHolder, IBuiltinAttributeHolder<'scen
             }
         }
 
-        this.eventRegistrar.eventEvaluationState!.terminate = true;
+        // Check if at least one player in the winning team is connected
+        if (winningTeam !== undefined) {
+            let winningTeamInvalid = true;
+            for (const player of winningTeam.players)
+                if (player.client!.connected)
+                    winningTeamInvalid = false;
+            if (winningTeamInvalid)
+                winningTeam = undefined;
+        }
+
+        if (winningTeam === undefined) {
+            this.turnManager.stop();
+            this.game!.killGame('No Winner');
+            return true;
+        }
+
+        if (this.eventRegistrar.eventEvaluationState !== undefined)
+            this.eventRegistrar.eventEvaluationState.terminate = true;
+
         this.turnManager.stop();
-        this.game!.endGame(winningTeam!.id, winningTeam!.winMessage);
+        this.game!.endGame(winningTeam.id, winningTeam.winMessage);
         return true;
     }
 }

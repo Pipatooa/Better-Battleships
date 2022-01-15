@@ -1,51 +1,37 @@
-import { Rotation }                          from 'shared/scenario/rotation';
-import { v4 }                                from 'uuid';
-import { UnpackingError }                    from '../errors/unpacking-error';
-import { EventListenerPrimaryPriority }      from '../events/event-listener';
-import { EventRegistrar }                    from '../events/event-registrar';
-import { checkAgainstSchema }                from '../schema-checker';
-import { getJSONFromEntry }                  from '../unpacker';
-import { buildAbility }                      from './abilities/ability-builder';
-import { getEventListenersFromActionSource } from './actions/action-getter';
-import {
-    getAttributeListeners
-}                                                                                 from './attribute-listeners/attribute-listener-getter';
-import {
-    AttributeCodeControlled
-}                                                                                 from './attributes/attribute-code-controlled';
-import { getAttributes }       from './attributes/attribute-getter';
-import { AttributeWatcher }    from './attributes/attribute-watcher';
-import { Descriptor }          from './common/descriptor';
-import { RotatablePattern }    from './common/rotatable-pattern';
-import { shipEventInfo }       from './events/ship-events';
-import { shipSchema }          from './sources/ship';
-import type { ParsingContext } from '../parsing-context';
-import type { Ability }        from './abilities/ability';
-import type { AbilitySource }  from './abilities/sources/ability';
-import type {
-    AttributeListener
-}                                                                                 from './attribute-listeners/attribute-listener';
+import { Rotation }                                                               from 'shared/scenario/rotation';
+import { v4 }                                                                     from 'uuid';
+import { UnpackingError }                                                         from '../errors/unpacking-error';
+import { EventListenerPrimaryPriority }                                           from '../events/event-listener';
+import { EventRegistrar }                                                         from '../events/event-registrar';
+import { checkAgainstSchema }                                                     from '../schema-checker';
+import { getJSONFromEntry }                                                       from '../unpacker';
+import { buildAbility }                                                           from './abilities/ability-builder';
+import { getEventListenersFromActionSource }                                      from './actions/action-getter';
+import { getAttributeListeners }                                                  from './attribute-listeners/attribute-listener-getter';
+import { AttributeCodeControlled }                                                from './attributes/attribute-code-controlled';
+import { getAttributes }                                                          from './attributes/attribute-getter';
+import { AttributeWatcher }                                                       from './attributes/attribute-watcher';
+import { Descriptor }                                                             from './common/descriptor';
+import { RotatablePattern }                                                       from './common/rotatable-pattern';
+import { shipEventInfo }                                                          from './events/ship-events';
+import { shipSchema }                                                             from './sources/ship';
+import type { ParsingContext }                                                    from '../parsing-context';
+import type { Ability }                                                           from './abilities/ability';
+import type { AbilitySource }                                                     from './abilities/sources/ability';
+import type { AttributeListener }                                                 from './attribute-listeners/attribute-listener';
 import type { BuiltinAttributeRecord, IAttributeHolder, IBuiltinAttributeHolder } from './attributes/attribute-holder';
-import type {
-    AttributeMap
-}                                                                                 from './attributes/i-attribute-holder';
-import type { Board }                    from './board';
-import type { ShipEvent, ShipEventInfo } from './events/ship-events';
-import type { Player }                   from './player';
-import type { Region }                   from './region';
-import type { IShipSource }              from './sources/ship';
-import type { Team }                     from './team';
-import type { AbilityInfo }              from 'shared/network/scenario/ability-info';
-import type {
-    AbilityUsabilityInfo
-}                                                                                 from 'shared/network/scenario/ability-usability-info';
-import type {
-    AttributeUpdates
-}                                                                                 from 'shared/network/scenario/i-attribute-info';
-import type {
-    IShipInfo,
-    IShipPrototypeInfo
-}                                                                                 from 'shared/network/scenario/i-ship-prototype-info';
+import type { AttributeMap }                                                      from './attributes/i-attribute-holder';
+import type { Board }                                                             from './board';
+import type { ShipEvent, ShipEventInfo }                                          from './events/ship-events';
+import type { Player }                                                            from './player';
+import type { Region }                                                            from './region';
+import type { Scenario }                                                          from './scenario';
+import type { IShipSource }                                                       from './sources/ship';
+import type { Team }                                                              from './team';
+import type { AbilityInfo }                                                       from 'shared/network/scenario/ability-info';
+import type { AbilityUsabilityInfo }                                              from 'shared/network/scenario/ability-usability-info';
+import type { AttributeUpdates }                                                  from 'shared/network/scenario/i-attribute-info';
+import type { IShipInfo, IShipPrototypeInfo }                                     from 'shared/network/scenario/i-ship-prototype-info';
 
 /**
  * Ship - Server Version
@@ -201,7 +187,7 @@ export class Ship implements IAttributeHolder, IBuiltinAttributeHolder<'ship'> {
         // Get component elements from source
         const descriptor = await Descriptor.fromSource(parsingContext.withExtendedPath('.descriptor'), shipSource.descriptor, false);
         parsingContext.reducePath();
-        const pattern = await RotatablePattern.fromSource(parsingContext.withExtendedPath('.pattern'), shipSource.pattern, false);
+        const pattern = await RotatablePattern.fromSource(parsingContext.withExtendedPath('.pattern'), shipSource.pattern, true, false);
         parsingContext.reducePath();
 
         // Get abilities
@@ -232,7 +218,7 @@ export class Ship implements IAttributeHolder, IBuiltinAttributeHolder<'ship'> {
         // Return created Ship object
         parsingContext.localAttributes.ship = undefined;
         parsingContext.shipPartial = undefined;
-        EventRegistrar.call(eventRegistrarPartial, eventListeners, subRegistrars);
+        EventRegistrar.call(eventRegistrarPartial, parsingContext.scenarioPartial as Scenario, eventListeners, subRegistrars);
         Ship.call(shipPartial, parsingContext.playerPartial as Player, parsingContext.boardPartial as Board, descriptor, pattern, shipSource.visibility, abilities, eventRegistrarPartial, attributes, builtinAttributes, attributeListeners);
         return shipPartial as Ship;
     }
@@ -291,7 +277,11 @@ export class Ship implements IAttributeHolder, IBuiltinAttributeHolder<'ship'> {
     public place(x: number, y: number, rotation: Rotation): void {
         this._x = x;
         this._y = y;
-        this._pattern = this._pattern.rotated(rotation);
+        if (rotation !== Rotation.None) {
+            this._pattern = this._pattern.rotated(rotation);
+            for (const ability of this.abilities)
+                ability.onShipRotate(rotation);
+        }
         this.board.addShip(this);
     }
 
@@ -328,7 +318,7 @@ export class Ship implements IAttributeHolder, IBuiltinAttributeHolder<'ship'> {
     private unSpot(): void {
 
         // Un-spot other ships
-        for (const [ dx, dy ] of this._pattern.patternEntries) {
+        for (const [dx, dy] of this._pattern.patternEntries) {
             const tile = this.board.tiles[this._y + dy][this._x + dx];
             for (const ship of tile[3])
                 if (ship !== this && ship.spottedBy.includes(this)) {
@@ -358,13 +348,9 @@ export class Ship implements IAttributeHolder, IBuiltinAttributeHolder<'ship'> {
             if (team !== this.owner.team)
                 spottedByCount++;
 
-            if (this.knownTo[team.id] !== undefined)
-                continue;
-
-            if (previousEntry === undefined)
-                this.knownTo[team.id] = [team, v4()];
-            else
-                this.knownTo[team.id] = previousEntry;
+            this.knownTo[team.id] ??= previousEntry === undefined
+                ? [ team, v4() ]
+                : previousEntry;
         }
 
         this.builtinAttributes.spottedBy.forceSetValue(spottedByCount);
@@ -377,6 +363,20 @@ export class Ship implements IAttributeHolder, IBuiltinAttributeHolder<'ship'> {
         for (const ship of this.needsSpottingUpdate)
             ship.updateKnown();
         this.needsSpottingUpdate = [];
+    }
+
+    /**
+     * Returns the tracking ID of this ship for a team if this ship is known to that team
+     *
+     * @param    team Team to check if this ship is known to
+     * @returns       Tracking ID of this ship for that team
+     */
+    public getTrackingID(team: Team): string | undefined {
+        for (const knownEntry of Object.values(this.knownTo)) {
+            if (knownEntry[0] === team)
+                return knownEntry[1];
+        }
+        return undefined;
     }
 
     /**

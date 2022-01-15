@@ -33,7 +33,7 @@ export async function signNewJwtToken(payload: IAuthPayload): Promise<string> {
 export async function verifyToken(token: string): Promise<JwtPayload | undefined> {
     return new Promise<JwtPayload | undefined>((resolve) => {
         jwt.verify(token, config.authJwtSecretToken, (err, payload) => {
-            resolve(payload);
+            resolve(payload as JwtPayload | undefined);
         });
     });
 }

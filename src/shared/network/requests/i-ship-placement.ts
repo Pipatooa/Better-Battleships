@@ -2,7 +2,7 @@ import type { Rotation }           from '../../scenario/rotation';
 import type { IBaseClientRequest } from './i-client-request';
 
 /**
- * Ship placement request sent to server when client initially places their ships at the start of the game
+ * Request sent when the client places their ships during setup
  */
 export interface IShipPlacementRequest extends IBaseClientRequest {
     request: 'shipPlacement',

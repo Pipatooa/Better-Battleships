@@ -16,7 +16,7 @@ export async function joinGame(gameIDElement: JQuery, gameIDFeedback: JQuery): P
     }
 
     // Query whether game exists
-    const result = await fetch(`http://localhost:8080/game/${gameID}?q=1`, {
+    const result = await fetch(`/game/${gameID}?q=1`, {
         'method': 'GET',
         'mode': 'cors'
     });

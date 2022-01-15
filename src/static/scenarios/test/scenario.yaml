@@ -21,6 +21,8 @@ teams:
 
 turnOrdering: team
 maxTurnTime: 120
+randomiseTurns: true
+
 attributes: {}
 attributeListeners: []
 actions: {}

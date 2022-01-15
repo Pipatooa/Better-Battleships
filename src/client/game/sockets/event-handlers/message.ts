@@ -1,6 +1,6 @@
 import { Message }            from 'client/game/ui/message';
 import { Popup }              from '../../ui/popups/popup';
-import type { IMessageEvent } from '../../../../shared/network/events/i-message';
+import type { IMessageEvent } from 'shared/network/events/i-message';
 
 /**
  * Handles a message event from the server

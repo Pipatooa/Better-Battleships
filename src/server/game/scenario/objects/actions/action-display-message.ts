@@ -4,13 +4,13 @@ import { buildCondition }                         from '../conditions/condition-
 import { Team }                                   from '../team';
 import { Action }                                 from './action';
 import { actionDisplayMessageSchema }             from './sources/action-display-message';
-import type { IMessageEvent }                     from '../../../../../shared/network/events/i-message';
 import type { EventContext, GenericEventContext } from '../../events/event-context';
 import type { EventEvaluationState }              from '../../events/event-evaluation-state';
 import type { ParsingContext }                    from '../../parsing-context';
 import type { Condition }                         from '../conditions/condition';
 import type { Player }                            from '../player';
 import type { IActionDisplayMessageSource }       from './sources/action-display-message';
+import type { IMessageEvent }                     from 'shared/network/events/i-message';
 
 /**
  * ActionDisplayMessage - Server Version

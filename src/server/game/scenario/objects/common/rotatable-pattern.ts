@@ -35,10 +35,11 @@ export class RotatablePattern extends Pattern {
      *
      * @param    parsingContext Context for resolving scenario data
      * @param    patternSource  JSON data for RotatablePattern
+     * @param    booleanise     Whether to convert pattern values to boolean values
      * @param    checkSchema    When true, validates source JSON data against schema
      * @returns                 Created RotatablePattern object
      */
-    public static async fromSource(parsingContext: ParsingContext, patternSource: IPatternSource, checkSchema: boolean): Promise<RotatablePattern> {
+    public static async fromSource(parsingContext: ParsingContext, patternSource: IPatternSource, booleanise: boolean, checkSchema: boolean): Promise<RotatablePattern> {
 
         // Validate JSON against schema
         if (checkSchema)
@@ -56,7 +57,7 @@ export class RotatablePattern extends Pattern {
         const centerX: number = (patternSource.size[0] - 1) / 2 + offsetX;
         const centerY: number = (patternSource.size[1] - 1) / 2 + offsetY;
 
-        const patternEntries = Pattern.getPatternEntriesFromSource(parsingContext, patternSource, [offsetX, offsetY]);
+        const patternEntries = Pattern.getPatternEntriesFromSource(parsingContext, patternSource, booleanise, [offsetX, offsetY]);
 
         // Return new created RotatablePattern object
         return new RotatablePattern(patternEntries, [ centerX, centerY ], [rotationalCenter, rotationalCenter]);

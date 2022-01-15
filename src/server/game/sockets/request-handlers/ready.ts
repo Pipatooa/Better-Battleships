@@ -13,7 +13,7 @@ import type { IReadyRequest } from 'shared/network/requests/i-ready';
 export async function handleReadyRequest(client: Client, readyRequest: IReadyRequest): Promise<void> {
 
     // If game has already started, ignore request
-    if (client.game.gamePhase !== GamePhase.Lobby)
+    if (client.game.gamePhase !== GamePhase.Lobby && client.game.gamePhase !== GamePhase.EnteringSetup)
         return;
 
     // If player is trying to ready and is not part of a team, ignore request

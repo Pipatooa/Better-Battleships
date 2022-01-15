@@ -28,7 +28,7 @@ export class Ship {
 
     protected _visibilityPattern: RotatablePattern;
 
-    public placed = false;
+    public placed;
     public lastSelectedAbility: Ability | undefined;
 
     /**
@@ -55,7 +55,8 @@ export class Ship {
                        public readonly player: Player,
                        public readonly abilities: Ability[],
                        public readonly attributeCollection: AttributeCollection) {
-        
+
+        this.placed = this._x !== undefined && this._y !== undefined;
         this._visibilityPattern = this._pattern.getExtendedPattern(visibility);
         
         if (this._trackingID !== undefined)

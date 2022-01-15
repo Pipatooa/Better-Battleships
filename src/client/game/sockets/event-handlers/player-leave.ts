@@ -1,4 +1,6 @@
 import { allPlayers }             from '../../player';
+import { Message }                from '../../ui/message';
+import { reconnectionTimeout }    from './connection-info';
 import type { IPlayerLeaveEvent } from 'shared/network/events/i-player-leave';
 
 /**
@@ -7,8 +9,12 @@ import type { IPlayerLeaveEvent } from 'shared/network/events/i-player-leave';
  * @param  playerLeave Event object to handle
  */
 export function handlePlayerLeave(playerLeave: IPlayerLeaveEvent): void {
-
-    // Deconstruct player
     const player = allPlayers[playerLeave.player];
-    player.deconstruct();
+    if (!playerLeave.temporary) {
+        player.deconstruct();
+        return;
+    }
+
+    const seconds = reconnectionTimeout / 1000;
+    new Message(`${player.name} has disconnected. ${seconds} seconds until they are timed out.`);
 }

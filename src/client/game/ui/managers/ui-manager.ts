@@ -95,7 +95,6 @@ export abstract class UIManager {
      * Updates game tooltip information
      */
     public updateTooltip(): void {
-
         const tileInfo: [number, number, Tile] | undefined
             = this.highlightedTile !== undefined
                 ? [...this.highlightedLocation, this.highlightedTile]
@@ -211,7 +210,6 @@ export abstract class UIManager {
      * Updates the visibility view when it is active
      */
     private updateVisibilityView(): void {
-
         game.board!.informationGenerator!.clearHighlight();
         
         // Client is not holding a ship and no ship on the board is selected
@@ -260,7 +258,8 @@ export abstract class UIManager {
             lastSelectedAbility.createAbilityView();
             this.updateSidebar();
             game.abilityRenderer!.renderAbility(lastSelectedAbility);
-        }
+        } else
+            this.updateSidebar();
     }
 
     /**
@@ -275,8 +274,7 @@ export abstract class UIManager {
             ability = undefined;
 
         this._selectedAbility?.gameElement!.removeClass('selected-ability');
-        if (this._hoveredAbility === undefined && ability === undefined)
-            this._selectedAbility?.removeAbilityView();
+        this._selectedAbility?.removeAbilityView();
         ability?.gameElement!.addClass('selected-ability');
         this._selectedAbility = ability;
         if (this._selectedShip !== undefined)

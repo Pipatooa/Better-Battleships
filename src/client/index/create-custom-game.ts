@@ -53,8 +53,7 @@ type IGameCreationResponse =
  */
 interface IGameCreationSuccessResponse {
     success: true,
-    gameID: string,
-    debug: string
+    gameID: string
 }
 
 /**

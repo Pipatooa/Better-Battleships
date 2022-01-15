@@ -19,5 +19,5 @@ export function handleShipMove(shipMoveEvent: IShipMoveEvent): void {
 
     // Display update messages to player
     if (ship.player.team !== selfPlayer.team)
-        new Message('An enemy ship has moved!');
+        new Message(`An enemy ${ship.descriptor.name} has moved!`);
 }

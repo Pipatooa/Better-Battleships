@@ -1,5 +1,6 @@
 [server]
-host = "localhost:8080"
+host = "localhost"
+port = 8080
 siteName = "Better Battleships"
 baseUrl = "http://localhost:8080"
 
@@ -7,6 +8,7 @@ baseUrl = "http://localhost:8080"
 limit = 8
 idLength = 6
 joinTimeout = 5000
+rejoinTimeout = 30000
 startWaitDuration = 5000
 
 [parsing]
@@ -14,7 +16,7 @@ maxFileSize = 50000
 maxFieldsSize = 256
 
 [evaluation]
-actionLimit = 50
+actionLimit = 25
 
 [stats]
 resultsPerPage = 20

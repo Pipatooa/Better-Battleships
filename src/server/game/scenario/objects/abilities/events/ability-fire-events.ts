@@ -3,9 +3,10 @@ import { abilityEventInfo } from './ability-events';
 /**
  * Record describing all fire ability events
  */
-export const fireAbilityEventInfo = {
+export const abilityFireEventInfo = {
     ...abilityEventInfo,
-    onHit: [['team', 'player', 'ship'], ['patternValue', 'hitCount'], ['tile'], []],
+    onHit: [['team', 'player', 'ship'], ['patternValue', 'hitCount', 'isThis', 'isFriendly', 'isVisible'], ['tile'], []],
+    onHitSingle: [[], [], [], []],
     onMiss: [[], [], ['tile'], []],
     onMissCompletely: [[], [], [], []]
 } as const;
@@ -13,9 +14,9 @@ export const fireAbilityEventInfo = {
 /**
  * Type matching record describing all fire ability events
  */
-export type FireAbilityEventInfo = typeof fireAbilityEventInfo;
+export type AbilityFireEventInfo = typeof abilityFireEventInfo;
 
 /**
  * Type matching all fire ability event name strings
  */
-export type FireAbilityEvent = keyof FireAbilityEventInfo;
+export type AbilityFireEvent = keyof AbilityFireEventInfo;

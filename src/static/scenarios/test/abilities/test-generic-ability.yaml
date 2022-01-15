@@ -1,0 +1,14 @@
+type: generic
+
+descriptor:
+  name: Generic Ability
+  description: This is a generic ability
+
+icon: dot
+condition: {}
+
+buttonText: Use
+
+actions: {}
+attributes: {}
+attributeListeners: []

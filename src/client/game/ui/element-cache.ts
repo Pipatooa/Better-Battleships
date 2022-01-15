@@ -50,6 +50,7 @@ export namespace SidebarElements {
     export const shipAbilityHelpText = $('#sidebar-ship-ability-help-text');
     export const shipAbilityAttributeSection = new VariableVisibilityElement($('#sidebar-ship-ability-attribute-section'));
     export const shipAbilityAttributeList = $('#sidebar-ship-ability-attribute-list');
+    export const shipAbilityUseButton = new VariableVisibilityElement($('#sidebar-ship-ability-use-button'));
     export const shipAbilityCanvasWrapper = new VariableVisibilityElement($('#sidebar-ship-ability-canvas-wrapper'));
 
     export const turnSection = $('#sidebar-turn-section');

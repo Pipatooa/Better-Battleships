@@ -1,5 +1,6 @@
 import { checkAgainstSchema }  from '../../schema-checker';
 import { AbilityFire }         from './ability-fire';
+import { AbilityGeneric }      from './ability-generic';
 import { AbilityMove }         from './ability-move';
 import { AbilityRotate }       from './ability-rotate';
 import { abilitySchema }       from './sources/ability';
@@ -32,6 +33,9 @@ export async function buildAbility(parsingContext: ParsingContext, abilitySource
             break;
         case 'fire':
             ability = await AbilityFire.fromSource(parsingContext, abilitySource, false);
+            break;
+        case 'generic':
+            ability = await AbilityGeneric.fromSource(parsingContext, abilitySource, false);
             break;
     }
 

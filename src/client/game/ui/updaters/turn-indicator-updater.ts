@@ -5,7 +5,6 @@ import { sendRequest }     from '../../sockets/opener';
 import { SidebarElements } from '../element-cache';
 import type { Player }     from '../../player';
 
-const playerTurns: Player[] = [];
 export let currentPlayerTurn: Player;
 export let ourTurn = false;
 
@@ -18,25 +17,26 @@ const turnTimeoutManager = new TimeoutManager({
 /**
  * Sets up correct elements for the turn indicator
  *
- * @param  identities Array of player identity strings
- * @param  turnLength Maximum turn length in seconds
+ * @param  identities     Array of player identity strings
+ * @param  turnStartIndex Starting index for turns to start from
+ * @param  turnLength     Maximum turn length in seconds
  */
-export function setupTurnIndicator(identities: string[], turnLength: number): void {
+export function setupTurnIndicator(identities: string[], turnStartIndex: number, turnLength: number): void {
 
     // Construct turn indicator elements
     for (let i = 0; i < identities.length; i++){
         const identity = identities[i];
         const player = allPlayers[identity];
         player.createTurnIndicatorElement();
-        playerTurns.push(player);
 
-        if (i === 0)
+        if (i === turnStartIndex) {
             player.turnIndicatorElement!.addClass('turn-indicator-active');
+            currentPlayerTurn = player;
+        }
     }
-    currentPlayerTurn = playerTurns[0];
 
     // Register event listeners
-    SidebarElements.turnButton.get(0).addEventListener('click', () => sendRequest({
+    SidebarElements.turnButton.get(0)!.addEventListener('click', () => sendRequest({
         request: 'endTurn'
     }));
 

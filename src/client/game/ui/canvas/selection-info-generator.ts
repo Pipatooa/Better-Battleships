@@ -1,9 +1,9 @@
 import { Pattern }                            from '../../scenario/pattern';
 import { getGLTextureLocation, TextureIndex } from './texture-index';
-import type { Rotation }                      from '../../../../shared/scenario/rotation';
 import type { RotatablePattern }              from '../../scenario/rotatable-pattern';
 import type { Ship }                          from '../../scenario/ship';
 import type { BoardProgram }                  from './model-programs/board-program';
+import type { Rotation }                      from 'shared/scenario/rotation';
 
 /**
  * SelectionInfoGenerator - Client Version

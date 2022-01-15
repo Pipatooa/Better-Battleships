@@ -26,16 +26,14 @@ interface Game {
  * Document load function
  */
 $(async () => {
-    const games = await getGames('', '', '', true);
-    if (games !== undefined)
-        displayGames(games);
+    $('#search-button').on('click', search);
+    await search();
 });
 
 /**
- * Search button
+ * Performs a game search using the currently selected parameters
  */
-$('#search-button').on('click', async () => {
-
+async function search(): Promise<void> {
     const gameID = gameIDField.value;
     const scenarioHash = scenarioHashField.value;
     const username = usernameField.value;
@@ -52,7 +50,7 @@ $('#search-button').on('click', async () => {
     const games = await getGames(gameID, scenarioHash, username, builtin);
     if (games !== undefined)
         displayGames(games);
-});
+}
 
 /**
  * Fetches a set of games from the server

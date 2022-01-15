@@ -9,7 +9,6 @@ import { tileEventInfo }                      from './events/board-events';
 import { Region }                             from './region';
 import { boardSchema }                        from './sources/board';
 import { TileType }                           from './tiletype';
-import type { Mutable }                       from '../../../../shared/types';
 import type { EventContextForEvent }          from '../events/event-context';
 import type { EventEvaluationState }          from '../events/event-evaluation-state';
 import type { EventListener, EventListeners } from '../events/event-listener';
@@ -29,6 +28,7 @@ import type { IBoardSource }  from './sources/board';
 import type { IBoardInfo }    from 'shared/network/scenario/i-board-info';
 import type { ITileTypeInfo } from 'shared/network/scenario/i-tiletype-info';
 import type { Rotation }      from 'shared/scenario/rotation';
+import type { Mutable }       from 'shared/types';
 
 /**
  * Board - Server Version
@@ -38,7 +38,6 @@ import type { Rotation }      from 'shared/scenario/rotation';
 export class Board {
 
     public readonly size: [number, number];
-    private readonly _allShips: Ship[] = [];
     
     private tileTypeUpdates: [string, [number, number][]][] = [];
     private tileTypeUpdateCount = 0;
@@ -213,7 +212,7 @@ export class Board {
             }
         }
 
-        const eventRegistrar = new EventRegistrar(boardEventListeners, []);
+        const eventRegistrar = new EventRegistrar(parsingContext.scenarioPartial as Scenario, boardEventListeners, []);
 
         // Return created Board object
         parsingContext.boardPartial = undefined;
@@ -444,14 +443,6 @@ export class Board {
         
         this.tileTypeUpdates = [];
         this.tileTypeUpdateCount = 0;
-    }
-
-    /**
-     * Getters and setters
-     */
-
-    public get allShips(): readonly Ship[] {
-        return this._allShips;
     }
 }
 

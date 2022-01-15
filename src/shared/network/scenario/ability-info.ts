@@ -1,6 +1,7 @@
 import type {
     AbilityUsabilityInfo,
     IAbilityFireUsabilityInfo,
+    IAbilityGenericUsabilityInfo,
     IAbilityMoveUsabilityInfo,
     IAbilityRotateUsabilityInfo
 } from './ability-usability-info';
@@ -14,7 +15,8 @@ import type { IRotatablePatternInfo } from './i-rotatable-pattern-info';
 export type AbilityInfo =
     IAbilityMoveInfo |
     IAbilityRotateInfo |
-    IAbilityFireInfo;
+    IAbilityFireInfo |
+    IAbilityGenericInfo;
 
 /**
  * Base interface for all network portable versions of Ability object
@@ -28,7 +30,7 @@ export interface IBaseAbilityInfo {
 }
 
 /**
- * Portable network version of AbilityMove object
+ * Portable network version of AbilityGeneric object
  */
 export interface IAbilityMoveInfo extends IBaseAbilityInfo {
     type: 'move',
@@ -50,4 +52,13 @@ export interface IAbilityFireInfo extends IBaseAbilityInfo {
     type: 'fire',
     effectPattern: IRotatablePatternInfo,
     usability: IAbilityFireUsabilityInfo
+}
+
+/**
+ * Portable network version of AbilityGeneric object
+ */
+export interface IAbilityGenericInfo extends IBaseAbilityInfo {
+    type: 'generic',
+    buttonText: string,
+    usability: IAbilityGenericUsabilityInfo
 }
