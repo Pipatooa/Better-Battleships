@@ -1,5 +1,5 @@
 [server]
-port = 8080
+host = "localhost:8080"
 siteName = "Better Battleships"
 baseUrl = "http://localhost:8080"
 

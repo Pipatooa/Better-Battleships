@@ -12,7 +12,7 @@ const configFilePath = path.join(__dirname, './config.toml');
  */
 export class Config {
 
-    public readonly port: number;
+    public readonly host: string;
     public readonly siteName: string;
     public readonly baseUrl: string;
 
@@ -51,7 +51,7 @@ export class Config {
 
         // Server section
         assert.deepStrictEqual(typeof configRaw.server, 'object', 'Config: could not find server section');
-        this.port = this.getFromConfig('number', 'server.port');
+        this.host = this.getFromConfig('string', 'server.host');
         this.siteName = this.getFromConfig('string', 'server.siteName');
         this.baseUrl = this.getFromConfig('string', 'server.baseUrl');
 

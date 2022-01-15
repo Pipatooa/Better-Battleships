@@ -71,8 +71,8 @@ executeDBStartupScript().then(async () => {
     registerWebsocketHandlers(server, wss);
 
     // Start the server
-    server.listen(config.port, () => {
+    server.listen(config.host, () => {
         const datetime = new Date();
-        console.log(`Started server on port ${config.port}. The time is ${datetime.toLocaleTimeString()}`);
+        console.log(`Started server on '${config.host}'. The time is ${datetime.toLocaleTimeString()}`);
     });
 });

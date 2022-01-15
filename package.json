@@ -80,6 +80,7 @@
     "webpack": "^5.47.1",
     "webpack-cli": "^4.7.2",
     "webpack-files-archive-plugin": "^1.0.1",
+    "webpack-pnp-externals": "^1.1.0",
     "zip-file-webpack-plugin": "^1.2.0"
   }
 }

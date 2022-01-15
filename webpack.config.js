@@ -1,5 +1,6 @@
 const path                    = require('path');
 const PnpWebpackPlugin        = require('pnp-webpack-plugin');
+const { WebpackPnpExternals } = require('webpack-pnp-externals');
 const TsconfigPathsPlugin     = require('tsconfig-paths-webpack-plugin');
 const NodemonPlugin           = require('nodemon-webpack-plugin');
 const CopyWebpackPlugin       = require('copy-webpack-plugin');
@@ -15,7 +16,7 @@ const { readdirSync }         = require('fs');
  */
 const commonConfig = {
     resolve: {
-        extensions: ['.js', '.json', '.ts', '.d.ts', '.glsl', '.vert', '.frag', '.html'],
+        extensions: ['.js', '.ts', '.d.ts'],
         plugins: [PnpWebpackPlugin, new TsconfigPathsPlugin()]
     },
     resolveLoader: {
@@ -28,8 +29,12 @@ const commonConfig = {
  */
 const nodeConfig = {
     name: 'node',
+    target: 'node',
     entry: './src/server/app.ts',
     ...commonConfig,
+    externals: [
+        WebpackPnpExternals()
+    ],
     module: {
         rules: [
             {
@@ -46,7 +51,6 @@ const nodeConfig = {
         filename: 'app.js',
         path: path.resolve(__dirname, './dist')
     },
-    target: 'node',
     ignoreWarnings: [
         {
             module: /\.\/\.yarn\/cache\//,
@@ -65,10 +69,7 @@ const nodeConfig = {
     ],
     optimization: {
         minimizer: [new TerserPlugin({
-            parallel: true,
-            terserOptions: {
-                mangle: false
-            }
+            parallel: true
         })]
     }
 };
