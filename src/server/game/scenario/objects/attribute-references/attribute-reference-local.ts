@@ -20,7 +20,7 @@ export class AttributeReferenceLocal extends AttributeReference {
      *
      * @param  attribute Fixed attribute to reference
      */
-    public constructor(protected readonly attribute: Attribute) {
+    private constructor(private readonly attribute: Attribute) {
         super();
     }
 

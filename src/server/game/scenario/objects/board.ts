@@ -37,7 +37,7 @@ import type { Mutable }       from 'shared/types';
  */
 export class Board {
 
-    public readonly size: [number, number];
+    private readonly size: [number, number];
     
     private tileTypeUpdates: [string, [number, number][]][] = [];
     private tileTypeUpdateCount = 0;
@@ -51,7 +51,7 @@ export class Board {
      * @param  regions        Dictionary of regions indexed by ID
      * @param  eventRegistrar Registrar of all board event listeners
      */
-    public constructor(public readonly scenario: Scenario,
+    public constructor(private readonly scenario: Scenario,
                        public readonly tileTypes: { [char: string]: TileType },
                        public readonly tiles: Tile[][],
                        public readonly regions: { [id: string]: Region },
@@ -163,7 +163,7 @@ export class Board {
                 // Listener called when a tile event is triggered but before actions are executed
                 const listenerCallback = (eventEvaluationState: EventEvaluationState, eventContext: EventContextForEvent<TileEventInfo, TileEvent, any>): void => {
                     // Check if tile type for event call matches this tile type
-                    const [ x, y ] = eventContext.locations.tile[0];
+                    const [x, y] = eventContext.locations.tile[0];
                     const tile = (boardPartial as Board).tiles[y][x];
                     if (tile[0] !== tileType)
                         return;

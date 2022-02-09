@@ -15,7 +15,7 @@ export abstract class ValueConstraint {
      * @param    value        Value to check
      * @returns               Whether value met this constraint
      */
-    abstract check(eventContext: GenericEventContext, value: number): boolean;
+    public abstract check(eventContext: GenericEventContext, value: number): boolean;
 
     /**
      * Changes a value to meet this constraint
@@ -24,5 +24,5 @@ export abstract class ValueConstraint {
      * @param    value        Value to constrain
      * @returns               New value that meets this constraint
      */
-    abstract constrain(eventContext: GenericEventContext, value: number): number;
+    public abstract constrain(eventContext: GenericEventContext, value: number): number;
 }

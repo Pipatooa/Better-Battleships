@@ -51,7 +51,7 @@ export async function createGame(scenario: Scenario, fileHash: string): Promise<
 
     // Create database entry for game
     query = 'INSERT INTO game (game_id, scenario) VALUES (?, ?) RETURNING id;';
-    const rows = await queryDatabase(query, [ gameID, fileHash ]);
+    const rows = await queryDatabase(query, [gameID, fileHash]);
     const gameInternalID = rows[0].id;
 
     // Create game object and save it to list of games

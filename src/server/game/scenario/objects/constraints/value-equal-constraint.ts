@@ -21,7 +21,7 @@ export class ValueEqualConstraint extends ValueConstraint {
      *
      * @param  target Value to check against
      */
-    protected constructor(public readonly target: Value) {
+    private constructor(private readonly target: Value) {
         super();
     }
 
@@ -42,7 +42,6 @@ export class ValueEqualConstraint extends ValueConstraint {
         const target = await buildValue(parsingContext.withExtendedPath('.exactly'), valueEqualConstraintSource.exactly, false);
         parsingContext.reducePath();
 
-        // Return created ValueEqualConstraint object
         return new ValueEqualConstraint(target);
     }
 
@@ -67,4 +66,3 @@ export class ValueEqualConstraint extends ValueConstraint {
         return this.target.evaluate(eventContext);
     }
 }
-

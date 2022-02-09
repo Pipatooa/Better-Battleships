@@ -53,5 +53,5 @@ export function rotatePoint(point: [number, number], center: [number, number], r
     // Offset new dx and dy from pattern center
     const newX = newDx + center[0];
     const newY = newDy + center[1];
-    return [ newX, newY ];
+    return [newX, newY];
 }

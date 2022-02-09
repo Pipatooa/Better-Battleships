@@ -43,7 +43,7 @@ export const actionSchema = baseActionSchema.keys({
         { is: 'lose', then: Joi.required(), otherwise: Joi.forbidden() }),
     display: Joi.valid('message', 'popup').when('type',
         { is: 'displayMessage', then: Joi.required(), otherwise: Joi.forbidden() }),
-    target: Joi.valid('local:team', 'local:player', 'foreign:team', 'foreign:player').when('type',
+    target: Joi.valid('local:team', 'local:player', 'foreign:team', 'foreign:player', 'all').when('type',
         { is: 'displayMessage', then: Joi.required(), otherwise: Joi.forbidden() }),
     message: Joi.string().when('type',
         { is: 'displayMessage', then: Joi.required(), otherwise: Joi.forbidden() }),

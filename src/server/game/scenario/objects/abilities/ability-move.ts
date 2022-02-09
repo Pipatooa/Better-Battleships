@@ -39,8 +39,8 @@ export class AbilityMove extends PositionedAbility {
      * @param  ship               Parent ship which this ability belongs to
      * @param  descriptor         Descriptor for ability
      * @param  icon               Url to icon for this ability
-     * @param  pattern            Pattern describing possible movements
      * @param  condition          Condition which must hold true to be able to use this action
+     * @param  pattern            Pattern describing possible movements
      * @param  eventRegistrar     Registrar of all ability event listeners
      * @param  attributes         Attributes for the ability
      * @param  builtinAttributes  Built-in attributes for the ability
@@ -49,8 +49,8 @@ export class AbilityMove extends PositionedAbility {
     public constructor(ship: Ship,
                        descriptor: Descriptor,
                        icon: string,
-                       private pattern: RotatablePattern,
                        condition: Condition,
+                       private pattern: RotatablePattern,
                        eventRegistrar: EventRegistrar<AbilityEventInfo, AbilityEvent>,
                        attributes: AttributeMap,
                        builtinAttributes: BuiltinAttributeRecord<'ability'>,
@@ -100,7 +100,7 @@ export class AbilityMove extends PositionedAbility {
         // Return created AbilityGeneric object
         parsingContext.localAttributes.ability = undefined;
         EventRegistrar.call(eventRegistrarPartial, parsingContext.scenarioPartial as Scenario, eventListeners, []);
-        AbilityMove.call(abilityPartial, parsingContext.shipPartial as Ship, descriptor, icon, pattern, condition, eventRegistrarPartial, attributes, builtinAttributes, attributeListeners);
+        AbilityMove.call(abilityPartial, parsingContext.shipPartial as Ship, descriptor, icon, condition, pattern, eventRegistrarPartial, attributes, builtinAttributes, attributeListeners);
         return abilityPartial as AbilityMove;
     }
 

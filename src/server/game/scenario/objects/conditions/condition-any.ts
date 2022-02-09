@@ -9,7 +9,7 @@ import type { IConditionAnySource } from './sources/condition-any';
 /**
  * ConditionAny - Server Version
  *
- * Condition which holds true when any sub condition holds true
+ * Condition which holds true when any sub-condition holds true
  *
  * Extends ConditionMultiple
  */
@@ -23,15 +23,15 @@ export class ConditionAny extends ConditionMultiple {
      */
     public check(eventContext: GenericEventContext): boolean {
 
-        // Loop through sub conditions
+        // Loop through sub-conditions
         for (const item of this.subConditions) {
 
-            // If any sub condition holds true, return true (unless inverted)
+            // If any sub-condition holds true, return true (unless inverted)
             if (item.check(eventContext))
                 return !this.inverted;
         }
 
-        // If no sub conditions hold true, return false (unless inverted)
+        // If no sub-conditions hold true, return false (unless inverted)
         return this.inverted;
     }
 
@@ -49,11 +49,13 @@ export class ConditionAny extends ConditionMultiple {
         if (checkSchema)
             conditionAnySource = await checkAgainstSchema(conditionAnySource, conditionAnySchema, parsingContext);
 
-        // Get sub conditions from source
+        // Get sub-conditions from source
         const subConditions: Condition[] = await ConditionMultiple.getSubConditions(parsingContext.withExtendedPath('.subConditions'), conditionAnySource.subConditions);
         parsingContext.reducePath();
 
-        // Return created ConditionAny object
-        return new ConditionAny(subConditions, conditionAnySource.inverted !== undefined ? conditionAnySource.inverted : false);
+        const inverted = conditionAnySource.inverted !== undefined
+            ? conditionAnySource.inverted
+            : false;
+        return new ConditionAny(inverted, subConditions);
     }
 }

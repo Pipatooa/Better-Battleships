@@ -19,18 +19,8 @@ export class ValueAttributeReference extends Value {
      *
      * @param  attributeReference Reference to an attribute to take value from
      */
-    protected constructor(public readonly attributeReference: AttributeReference) {
+    protected constructor(private readonly attributeReference: AttributeReference) {
         super();
-    }
-
-    /**
-     * Evaluate this dynamic value as a number
-     *
-     * @param    eventContext Context for resolving objects and values when an event is triggered
-     * @returns               Value of referenced attribute
-     */
-    public evaluate(eventContext: GenericEventContext): number {
-        return this.attributeReference.getValue(eventContext);
     }
 
     /**
@@ -51,8 +41,17 @@ export class ValueAttributeReference extends Value {
         const attribute = await buildAttributeReference(parsingContext.withExtendedPath('.attribute'), valueAttributeReferenceSource.attribute, false);
         parsingContext.reducePath();
 
-        // Return created ValueAttributeReference object
         return new ValueAttributeReference(attribute);
+    }
+
+    /**
+     * Evaluate this dynamic value as a number
+     *
+     * @param    eventContext Context for resolving objects and values when an event is triggered
+     * @returns               Value of referenced attribute
+     */
+    public evaluate(eventContext: GenericEventContext): number {
+        return this.attributeReference.getValue(eventContext);
     }
 }
 

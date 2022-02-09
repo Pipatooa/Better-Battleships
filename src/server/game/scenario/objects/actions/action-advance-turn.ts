@@ -26,9 +26,9 @@ export class ActionAdvanceTurn extends Action {
      * @param  condition   Condition which must hold true for this action to execute
      * @param  turnManager Turn manager to advance turn
      */
-    public constructor(private readonly player: Player,
-                       priority: number,
-                       condition: Condition,
+    private constructor(private readonly player: Player,
+                        priority: number,
+                        condition: Condition,
                        private readonly turnManager: TurnManager) {
         super(priority, condition);
     }

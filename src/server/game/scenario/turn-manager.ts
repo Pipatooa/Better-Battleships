@@ -10,7 +10,7 @@ import type { Team }      from './objects/team';
  */
 export class TurnManager {
 
-    private _turnOrder: Player[] | undefined = undefined;
+    private _turnOrder: Player[] | undefined;
     private turnIndex = 0;
 
     private readonly timeoutManager: TimeoutManager<'turnTimeout'>;
@@ -21,13 +21,13 @@ export class TurnManager {
      * @param  scenario     Scenario that this turn manager belongs to
      * @param  turnOrdering Definition of how turns should be grouped
      * @param  randomise    Whether to randomise the turn order after it has been generated
-     * @param  teams        List of teams to generate player turns for
+     * @param  teams        Array of teams to generate player turns for
      * @param  turnTimeout  Time given to each player before their turn is automatically advanced
      */
-    public constructor(public readonly scenario: Scenario,
-                       public readonly turnOrdering: 'team' | 'player',
-                       public readonly randomise: boolean,
-                       public readonly teams: Team[],
+    public constructor(private readonly scenario: Scenario,
+                       private readonly turnOrdering: 'team' | 'player',
+                       private readonly randomise: boolean,
+                       private readonly teams: Team[],
                        public readonly turnTimeout: number) {
 
         this.timeoutManager = new TimeoutManager({
@@ -47,7 +47,7 @@ export class TurnManager {
     }
 
     /**
-     * Generates a list of players turns using the current players from each team
+     * Generates an array of players turns using the current players from each team
      */
     public generateTurns(): void {
         this._turnOrder = [];

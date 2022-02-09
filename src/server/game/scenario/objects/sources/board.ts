@@ -1,18 +1,18 @@
-import Joi                   from 'joi';
-import { actionSchema }      from '../actions/sources/action';
-import { genericNameSchema } from '../common/sources/generic-name';
-import { tileEventInfo }     from '../events/board-events';
-import { tileTypeSchema }    from './tile-type';
-import type { ActionSource } from '../actions/sources/action';
-import type { TileEvent }    from '../events/board-events';
-import type { TileType }     from '../tiletype';
+import Joi                      from 'joi';
+import { actionSchema }         from '../actions/sources/action';
+import { genericNameSchema }    from '../common/sources/generic-name';
+import { tileEventInfo }        from '../events/board-events';
+import { tileTypeSchema }       from './tile-type';
+import type { ActionSource }    from '../actions/sources/action';
+import type { TileEvent }       from '../events/board-events';
+import type { ITileTypeSource } from './tile-type';
 
 /**
  * JSON source interface reflecting schema
  */
 export interface IBoardSource {
     size: [ x: number, y: number ];
-    tilePalette: { [char: string]: TileType },
+    tilePalette: { [char: string]: ITileTypeSource },
     regionPalette: { [char: string]: string[] },
     tiles: string[],
     regions: string[],

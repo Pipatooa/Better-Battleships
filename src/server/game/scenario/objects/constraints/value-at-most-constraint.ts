@@ -21,7 +21,7 @@ export class ValueAtMostConstraint extends ValueConstraint {
      *
      * @param  max Maximum value that other values can hold to meet this constraint
      */
-    protected constructor(public readonly max: Value) {
+    private constructor(private readonly max: Value) {
         super();
     }
 
@@ -42,7 +42,6 @@ export class ValueAtMostConstraint extends ValueConstraint {
         const max = await buildValue(parsingContext.withExtendedPath('.max'), valueAtMostConstraintSource.max, false);
         parsingContext.reducePath();
 
-        // Return created ValueAtMostConstraint object
         return new ValueAtMostConstraint(max);
     }
 

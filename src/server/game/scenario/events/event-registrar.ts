@@ -43,17 +43,15 @@ export class EventRegistrar<T extends Record<S, EventInfoEntry>, S extends strin
     }
 
     /**
-     * Adds a listener for an event
+     * Adds an arrayener for an event
      *
      * @param  event    Event to register listener for
      * @param  listener Event listener
      */
     public addEventListener<X extends S>(event: X, listener: EventListener<T, S, X>): void {
-        if (this.eventListeners[event] === undefined)
+        if (this.eventListeners[event] === undefined) {
             this.eventListeners[event] = [listener];
-        else {
-            this.eventListeners[event].push(listener);
-            this.eventListeners[event].sort((f, s) => f[0] === s[0] ? f[1] - s[1] : f[0] - s[0]);
+            return;
         }
 
         const existingListeners = this.eventListeners[event];

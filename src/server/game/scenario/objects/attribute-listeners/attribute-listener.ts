@@ -27,7 +27,7 @@ export class AttributeListener {
     private previouslyMetConstraint = false;
 
     private constructor(private readonly attribute: Attribute,
-                        public readonly eventRegistrar: EventRegistrar<any, any>,
+                        private readonly eventRegistrar: EventRegistrar<any, any>,
                         private readonly priority: number,
                         private readonly constraint: ValueConstraint,
                         private readonly actions: Action[],
@@ -44,7 +44,7 @@ export class AttributeListener {
      * @param    checkSchema             When true, validates source JSON data against schema
      * @returns                          Created AttributeListener object
      */
-    public static async fromSource(parsingContext: ParsingContext, attributeListenerSource: IAttributeListenerSource, eventRegistrar: EventRegistrar<any, string>, checkSchema: boolean): Promise<AttributeListener> {
+    public static async fromSource(parsingContext: ParsingContext, attributeListenerSource: IAttributeListenerSource, eventRegistrar: EventRegistrar<any, any>, checkSchema: boolean): Promise<AttributeListener> {
 
         // Validate JSON data against schema
         if (checkSchema)
@@ -52,7 +52,6 @@ export class AttributeListener {
 
         // Find attribute to register this listener for
         const [referenceType, objectSelector, builtin, attributeName] = AttributeReference.deconstructReferenceString(attributeListenerSource.attribute);
-
         if (referenceType !== 'local')
             throw new UnpackingError(`Cannot register attribute listener at '${parsingContext.currentPath}' for attribute '${attributeListenerSource.attribute}'. Attribute type must be local.`,
                 parsingContext);

@@ -55,7 +55,7 @@ export class Board {
         let primaryTileType: TileType | undefined;
         const tileTypes: { [char: string]: TileType } = {};
         for (const entry of Object.entries(boardInfo.tilePalette)) {
-            const [ char, tileTypeInfo ] = entry;
+            const [char, tileTypeInfo] = entry;
             const tileType = await TileType.fromInfo(tileTypeInfo);
             tileTypes[char] = tileType;
             if (primaryTileType === undefined)

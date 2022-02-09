@@ -42,7 +42,7 @@ export async function handleRequestFromMessage(client: Client, msg: Data): Promi
             client.ws.close(1002, `Unknown request '${schemaAndHandler}'`);
 
         // Unpack schema and handler into separate variables
-        const [ schema, handlerFunction ] = schemaAndHandler;
+        const [schema, handlerFunction] = schemaAndHandler;
 
         // Validate request against specific request schema
         request = await schema.validateAsync(request);
@@ -65,9 +65,9 @@ export async function handleRequestFromMessage(client: Client, msg: Data): Promi
  * Typescript record type enforces an entry for each request id
  */
 const requestSchemaAndHandlers: Record<ClientRequestID, [ Joi.Schema, (client: Client, request: any) => Promise<void> ]> = {
-    joinTeam: [ joinTeamRequestSchema, handleJoinTeamRequest ],
-    ready: [ readyRequestSchema, handleReadyRequest ],
-    shipPlacement: [ shipPlacementRequestSchema, handleShipPlacementRequest ],
-    useAbility: [ baseUseAbilityRequestSchema, handleUseAbilityRequest ],
-    endTurn: [ endTurnRequestSchema, handleEndTurnRequest ]
+    joinTeam: [joinTeamRequestSchema, handleJoinTeamRequest],
+    ready: [readyRequestSchema, handleReadyRequest],
+    shipPlacement: [shipPlacementRequestSchema, handleShipPlacementRequest],
+    useAbility: [baseUseAbilityRequestSchema, handleUseAbilityRequest],
+    endTurn: [endTurnRequestSchema, handleEndTurnRequest]
 };

@@ -4,7 +4,7 @@ import Joi from 'joi';
  * JSON source interface reflecting schema
  */
 export interface IPatternSource {
-    size: [ number, number ],
+    size: [number, number],
     values: { [char: string]: number },
     pattern: string[]
 }

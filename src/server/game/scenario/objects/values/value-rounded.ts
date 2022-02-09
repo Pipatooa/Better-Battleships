@@ -20,24 +20,9 @@ export class ValueRounded extends Value {
      * @param  step  Multiple to round value to
      * @protected
      */
-    protected constructor(public readonly value: Value,
-                          public readonly step: Value) {
+    protected constructor(private readonly value: Value,
+                          private readonly step: Value) {
         super();
-    }
-
-    /**
-     * Evaluate this dynamic value as a number
-     *
-     * @param    eventContext Context for resolving objects and values when an event is triggered
-     * @returns               Static value
-     */
-    public evaluate(eventContext: GenericEventContext): number {
-
-        // Evaluate step value once in-case it is changing
-        const step: number = this.step.evaluate(eventContext);
-
-        // Round evaluated sub-value and round to nearest multiple of step
-        return Math.round(this.value.evaluate(eventContext) / step) * step;
     }
 
     /**
@@ -60,7 +45,18 @@ export class ValueRounded extends Value {
         const step = await buildValue(parsingContext.withExtendedPath('.step'), valueRoundedSource.step, true);
         parsingContext.reducePath();
 
-        // Return created ValueRounded object
         return new ValueRounded(value, step);
+    }
+
+    /**
+     * Evaluate this dynamic value as a number
+     *
+     * @param    eventContext Context for resolving objects and values when an event is triggered
+     * @returns               Static value
+     */
+    public evaluate(eventContext: GenericEventContext): number {
+        // Evaluate step and round evaluated sub-value to the nearest multiple of step
+        const step: number = this.step.evaluate(eventContext);
+        return Math.round(this.value.evaluate(eventContext) / step) * step;
     }
 }

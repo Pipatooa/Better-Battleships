@@ -20,13 +20,13 @@ export class RotatablePattern extends Pattern {
      *
      * @param  _patternEntries  Array of pattern entries for pattern
      * @param  center           Center of the pattern
-     * @param  rotationalCenter Point about which the pattern rotates
      * @param  integerCenter    Center snapped to an integer coordinate
+     * @param  rotationalCenter Point about which the pattern rotates
      */
     public constructor(_patternEntries: PatternEntry[],
                        center: [number, number],
-                       public readonly rotationalCenter: [number, number],
-                       integerCenter?: [number, number]) {
+                       integerCenter: [number, number] | undefined,
+                       public readonly rotationalCenter: [number, number]) {
         super(_patternEntries, center, integerCenter);
     }
     
@@ -60,7 +60,7 @@ export class RotatablePattern extends Pattern {
         const patternEntries = Pattern.getPatternEntriesFromSource(parsingContext, patternSource, booleanise, [offsetX, offsetY]);
 
         // Return new created RotatablePattern object
-        return new RotatablePattern(patternEntries, [ centerX, centerY ], [rotationalCenter, rotationalCenter]);
+        return new RotatablePattern(patternEntries, [centerX, centerY], undefined, [rotationalCenter, rotationalCenter]);
     }
 
     /**
@@ -93,7 +93,7 @@ export class RotatablePattern extends Pattern {
 
         const newCenter = rotatePoint(this.center, this.rotationalCenter, rotation);
         const newIntegerCenter = rotatePoint(this.integerCenter, this.rotationalCenter, rotation);
-        return new RotatablePattern(patternEntries, newCenter, this.rotationalCenter, newIntegerCenter);
+        return new RotatablePattern(patternEntries, newCenter, newIntegerCenter, this.rotationalCenter);
     }
 
     /**
@@ -104,6 +104,6 @@ export class RotatablePattern extends Pattern {
      */
     public getExtendedPattern(radius: number): RotatablePattern {
         const patternEntries = this.getExtendedPatternEntries(radius);
-        return new RotatablePattern(patternEntries, this.center, this.rotationalCenter);
+        return new RotatablePattern(patternEntries, this.center, undefined, this.rotationalCenter);
     }
 }

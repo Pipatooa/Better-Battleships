@@ -18,7 +18,7 @@ export class Descriptor {
      * @param  description Description for descriptor
      */
     public constructor(public readonly name: string,
-                          public readonly description: string) {
+                       public readonly description: string) {
     }
 
     /**

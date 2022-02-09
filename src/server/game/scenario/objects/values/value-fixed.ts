@@ -17,7 +17,7 @@ export class ValueFixed extends Value {
      * @param  value Number that this value will always be evaluated as
      * @protected
      */
-    protected constructor(public readonly value: number) {
+    protected constructor(private readonly value: number) {
         super();
     }
 

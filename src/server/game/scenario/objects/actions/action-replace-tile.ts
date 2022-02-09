@@ -21,19 +21,19 @@ export class ActionReplaceTile extends Action {
     /**
      * ActionReplaceTile constructor
      *
+     * @param  priority    Priority to use for event listener created for this action
+     * @param  condition   Condition that must hold true for this action to execute
      * @param  board       Board to update tiles on
      * @param  location    Location to replace tiles within
      * @param  oldTileType Existing tile type to replace
      * @param  newTileType Tile type to replace tiles with
-     * @param  priority    Priority to use for event listener created for this action
-     * @param  condition   Condition that must hold true for this action to execute
      */
-    private constructor(private readonly board: Board,
+    private constructor(priority: number,
+                        condition: Condition,
+                        private readonly board: Board,
                         private readonly location: string,
                         private readonly oldTileType: TileType,
-                        private readonly newTileType: TileType,
-                        priority: number,
-                        condition: Condition) {
+                        private readonly newTileType: TileType) {
         super(priority, condition);
     }
 
@@ -77,7 +77,7 @@ export class ActionReplaceTile extends Action {
                 parsingContext);
 
         // Return created ActionReplaceTile object
-        return new ActionReplaceTile(board, location, oldTileType, newTileType, actionReplaceTileSource.priority ?? 0, condition);
+        return new ActionReplaceTile(actionReplaceTileSource.priority ?? 0, condition, board, location, oldTileType, newTileType);
     }
 
     /**

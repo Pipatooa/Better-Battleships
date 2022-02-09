@@ -31,9 +31,9 @@ import type { ITeamInfo }                                                       
  */
 export class Team implements IAttributeHolder, IBuiltinAttributeHolder<'team'> {
 
-    private _players: Player[] = [];
-    protected _lost = false;
-    protected _inactive = false;
+    private readonly _players: Player[] = [];
+    private _lost = false;
+    private _inactive = false;
 
     public readonly attributeWatcher: AttributeWatcher;
 
@@ -55,9 +55,9 @@ export class Team implements IAttributeHolder, IBuiltinAttributeHolder<'team'> {
                        public readonly id: string,
                        public readonly descriptor: Descriptor,
                        public readonly winMessage: string,
-                       protected _playerPrototypes: Player[][],
-                       public readonly color: string,
-                       public readonly highlightColor: string,
+                       private _playerPrototypes: Player[][],
+                       private readonly color: string,
+                       private readonly highlightColor: string,
                        public readonly eventRegistrar: EventRegistrar<TeamEventInfo, TeamEvent>,
                        public readonly attributes: AttributeMap,
                        public readonly builtinAttributes: BuiltinAttributeRecord<'team'>) {
@@ -74,7 +74,7 @@ export class Team implements IAttributeHolder, IBuiltinAttributeHolder<'team'> {
      */
     private static generateBuiltinAttributes(object: Team): BuiltinAttributeRecord<'team'> {
         return {
-            playerCount: new AttributeCodeControlled(() => object._players.length, () => {}, true)
+            playerCount: new AttributeCodeControlled(undefined, true, () => object._players.length, () => {})
         };
     }
 
@@ -244,21 +244,17 @@ export class Team implements IAttributeHolder, IBuiltinAttributeHolder<'team'> {
     /**
      * Broadcasts a server event to all players of this team
      *
-     * @param  serverEvent   Event to broadcast
-     * @param  excludePlayer Player to exclude from the broadcast
+     * @param  serverEvent Event to broadcast
      */
-    public broadcastEvent(serverEvent: ServerEvent, excludePlayer?: Player): void {
-        for (const player of this._players) {
-            if (player === excludePlayer)
-                continue;
+    public broadcastEvent(serverEvent: ServerEvent): void {
+        for (const player of this._players)
             player.client!.sendEvent(serverEvent);
-        }
     }
 
     /**
      * Notifies clients of any attribute updates which have occurred on this team
      */
-    public exportAttributeUpdates(): void {
+    private exportAttributeUpdates(): void {
         if (!this.attributeWatcher.updatesAvailable)
             return;
 

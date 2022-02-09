@@ -14,9 +14,16 @@ export class TileType {
 
     public exportChar: string | undefined;
 
-    public constructor(public readonly descriptor: Descriptor,
-                       public readonly color: string,
-                       public readonly traversable: boolean) {
+    /**
+     * TileType constructor
+     *
+     * @param  descriptor  Descriptor for TileTYpe
+     * @param  color       Color of TileType
+     * @param  traversable Whether ships are allowed to occupy tiles of this type
+     */
+    private constructor(private readonly descriptor: Descriptor,
+                        private readonly color: string,
+                        public readonly traversable: boolean) {
     }
 
     /**

@@ -72,7 +72,7 @@ async function getGames(scenarioID: string, scenarioHash: string, username: stri
 
     queryStatus.text('Fetching Results...');
 
-    // Fetch a list of games
+    // Fetch an array of games
     const response = await fetch(`/stats/api/games?${searchParams.toString()}`);
     if (response.status !== 200) {
         queryStatus.text(`Error ${response.statusText}: ${response.statusText}`);
@@ -82,7 +82,7 @@ async function getGames(scenarioID: string, scenarioHash: string, username: stri
 }
 
 /**
- * Displays a list of games to the user
+ * Displays an array of games to the user
  *
  * @param  games Array of games to display
  */

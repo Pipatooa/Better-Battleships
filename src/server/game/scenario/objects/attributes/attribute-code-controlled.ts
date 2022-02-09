@@ -11,16 +11,16 @@ export class AttributeCodeControlled extends Attribute {
     /**
      * AttributeCodeControlled constructor
      *
+     * @param  descriptor       Optional descriptor for this attribute
+     * @param  readonly         Whether to allow the user to set the value of this attribute
      * @param  getValue         Function to obtain the value of this attribute
      * @param  setValueFunction Function exposed to user to set the value of this attribute
-     * @param  readonly         Whether to allow the user to set the value of this attribute
-     * @param  descriptor       Optional descriptor for this attribute
      */
-    public constructor(public readonly getValue: () => number,
-                       private readonly setValueFunction: (value: number) => void,
-                       private readonly readonly: boolean,
-                       descriptor?: Descriptor) {
-        super(descriptor);
+    public constructor(descriptor: Descriptor | undefined,
+                       readonly: boolean,
+                       public readonly getValue: () => number,
+                       private readonly setValueFunction: (value: number) => void) {
+        super(descriptor, readonly);
     }
 
     /**

@@ -60,9 +60,9 @@ export class CharacterMapGenerator<T> {
     }
 
     /**
-     * Gets a string representing a list of items
+     * Gets a string representing an array of items
      *
-     * @param    items List of items to generate string for
+     * @param    items Array of items to generate string for
      * @returns        String representing list of items
      */
     public getString(items: T[]): string {

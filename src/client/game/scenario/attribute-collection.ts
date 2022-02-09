@@ -32,7 +32,7 @@ export class AttributeCollection {
             const name = attributeInfo.descriptor.name;
             const value = AttributeCollection.convertToDisplayForm(attributeInfo.value);
             for (const elementSet of this.elements) {
-                const [ nameElement, attributeElement ] = elementSet[1][name];
+                const [nameElement, attributeElement] = elementSet[1][name];
                 nameElement.text(`${name}: `);
                 attributeElement.text(value);
             }

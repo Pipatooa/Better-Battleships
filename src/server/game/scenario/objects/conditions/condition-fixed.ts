@@ -13,7 +13,7 @@ export class ConditionFixed extends Condition {
      * @param  result Result to return when checked
      * @protected
      */
-    public constructor(public readonly result: boolean) {
+    public constructor(private readonly result: boolean) {
         super(false);
     }
 

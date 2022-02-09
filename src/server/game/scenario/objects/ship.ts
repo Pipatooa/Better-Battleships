@@ -40,20 +40,20 @@ import type { IShipInfo, IShipPrototypeInfo }                                   
  */
 export class Ship implements IAttributeHolder, IBuiltinAttributeHolder<'ship'> {
 
-    protected _x = 0;
-    protected _y = 0;
+    private _x = 0;
+    private _y = 0;
     private _destroyed = false;
 
-    protected _visibilityPattern: RotatablePattern;
+    private _visibilityPattern: RotatablePattern;
 
     public readonly teamTrackingID: string = v4();
 
-    protected spottedBy: Ship[] = [];
+    private spottedBy: Ship[] = [];
     private spottedByCount = 0;
-    protected needsSpottingUpdate: Ship[] = [];
+    private needsSpottingUpdate: Ship[] = [];
 
-    protected oldKnownTo: { [id: string]: [team: Team, trackingID: string] } = {};
-    protected knownTo: { [id: string]: [team: Team, trackingID: string] } = {};
+    private oldKnownTo: { [id: string]: [team: Team, trackingID: string] } = {};
+    private knownTo: { [id: string]: [team: Team, trackingID: string] } = {};
 
     private readonly attributeWatcher: AttributeWatcher;
     private hasMoved = false;
@@ -78,7 +78,7 @@ export class Ship implements IAttributeHolder, IBuiltinAttributeHolder<'ship'> {
     public constructor(public readonly owner: Player,
                        public readonly board: Board,
                        public readonly descriptor: Descriptor,
-                       protected _pattern: RotatablePattern,
+                       private _pattern: RotatablePattern,
                        private _visibility: number,
                        public readonly abilities: Ability[],
                        public readonly eventRegistrar: EventRegistrar<ShipEventInfo, ShipEvent>,
@@ -132,9 +132,11 @@ export class Ship implements IAttributeHolder, IBuiltinAttributeHolder<'ship'> {
      */
     private static generateBuiltinAttributes(object: Ship): BuiltinAttributeRecord<'ship'> {
         return {
-            size: new AttributeCodeControlled(() => object._pattern.patternEntries.length, () => {}, true),
-            abilityCount: new AttributeCodeControlled(() => object.abilities.length, () => {}, true),
+            size: new AttributeCodeControlled(undefined, true, () => object._pattern.patternEntries.length, () => {}),
+            abilityCount: new AttributeCodeControlled(undefined, true, () => object.abilities.length, () => {}),
             visibility: new AttributeCodeControlled(
+                new Descriptor('Visibility', 'Number of tiles from which this ship is visible to other teams'),
+                false,
                 () => object._visibility,
                 (value: number) => {
                     value = Math.min(Math.round(Math.abs(value)), 15);
@@ -144,14 +146,12 @@ export class Ship implements IAttributeHolder, IBuiltinAttributeHolder<'ship'> {
                     object.spot();
                     object.updateKnown();
                     object.updateOthers();
-                },
-                false,
-                new Descriptor('Visibility', 'Number of tiles from which this ship is visible to other teams')),
+                }),
             spottedBy: new AttributeCodeControlled(
-                () => object.spottedByCount,
-                (newValue) => object.spottedByCount = newValue,
+                new Descriptor('Spotted By', 'Number of enemy ships which can see this ship'),
                 true,
-                new Descriptor('Spotted By', 'Number of ships which can see this ship')
+                () => object.spottedByCount,
+                (newValue) => object.spottedByCount = newValue
             )
         };
     }
@@ -291,7 +291,7 @@ export class Ship implements IAttributeHolder, IBuiltinAttributeHolder<'ship'> {
     private spot(): void {
 
         // Spot other ships
-        for (const [ dx, dy ] of this._pattern.patternEntries) {
+        for (const [dx, dy] of this._pattern.patternEntries) {
             const tile = this.board.tiles[this._y + dy][this._x + dx];
             for (const ship of tile[3])
                 if (ship !== this && !ship.spottedBy.includes(this)) {

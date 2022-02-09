@@ -36,7 +36,6 @@ import type { ITeamInfo }                                                       
 export class Scenario implements IAttributeHolder, IBuiltinAttributeHolder<'scenario'> {
 
     public game: Game | undefined;
-
     public readonly attributeWatcher: AttributeWatcher;
 
     /**
@@ -52,7 +51,7 @@ export class Scenario implements IAttributeHolder, IBuiltinAttributeHolder<'scen
      * @param  attributes        Attributes for scenario
      * @param  builtinAttributes Built-in attributes for scenario
      */
-    public constructor(public readonly fileJSON: FileJSON,
+    public constructor(private readonly fileJSON: FileJSON,
                        public readonly author: string,
                        public readonly descriptor: Descriptor,
                        public readonly board: Board,
@@ -81,7 +80,7 @@ export class Scenario implements IAttributeHolder, IBuiltinAttributeHolder<'scen
      */
     private static generateBuiltinAttributes(object: Scenario): BuiltinAttributeRecord<'scenario'> {
         return {
-            teamCount: new AttributeCodeControlled(() => Object.entries(object.teams).length, () => {}, true)
+            teamCount: new AttributeCodeControlled(undefined, true, () => Object.entries(object.teams).length, () => {})
         };
     }
 
@@ -178,7 +177,7 @@ export class Scenario implements IAttributeHolder, IBuiltinAttributeHolder<'scen
         const teamInfo: { [name: string]: ITeamInfo } = {};
 
         // Make all team objects transportable
-        for (const [ name, team ] of Object.entries(this.teams)) {
+        for (const [name, team] of Object.entries(this.teams)) {
             teamInfo[name] = team.makeTransportable();
         }
 

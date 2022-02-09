@@ -9,31 +9,11 @@ import type { Value }               from './value';
 /**
  * ValueProduct - Server Version
  *
- * Value which evaluates to the product of all sub values
+ * Value which evaluates to the product of all sub-values
  *
  * Extends ValueMultiple
  */
 export class ValueProduct extends ValueMultiple {
-
-    /**
-     * Evaluate this dynamic value as a number
-     *
-     * @param    eventContext Context for resolving objects and values when an event is triggered
-     * @returns               Static value
-     */
-    public evaluate(eventContext: GenericEventContext): number {
-
-        // Keep track of product of values
-        let product = 1;
-
-        // Loop through sub values and add to running product
-        for (const subValue of this.subValues) {
-            product *= subValue.evaluate(eventContext);
-        }
-
-        // Return product
-        return product;
-    }
 
     /**
      * Factory function to generate ValueProduct from JSON scenario data
@@ -49,12 +29,24 @@ export class ValueProduct extends ValueMultiple {
         if (checkSchema)
             valueProductSource = await checkAgainstSchema(valueProductSource, valueProductSchema, parsingContext);
 
-        // Get sub values from source
+        // Get sub-values from source
         const subValues: Value[] = await ValueMultiple.getSubValues(parsingContext.withExtendedPath('.values'), valueProductSource.values);
         parsingContext.reducePath();
 
-        // Return created ValueRandom object
         return new ValueProduct(subValues);
+    }
+
+    /**
+     * Evaluate this dynamic value as a number
+     *
+     * @param    eventContext Context for resolving objects and values when an event is triggered
+     * @returns               Static value
+     */
+    public evaluate(eventContext: GenericEventContext): number {
+        let product = 1;
+        for (const subValue of this.subValues)
+            product *= subValue.evaluate(eventContext);
+        return product;
     }
 }
 

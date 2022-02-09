@@ -31,7 +31,7 @@ import type { IPlayerInfo }                                                     
 export class Player implements IAttributeHolder, IBuiltinAttributeHolder<'player'> {
     
     public client: Client | undefined;
-    protected _lost = false;
+    private _lost = false;
 
     public readonly ships: { [trackingID: string]: Ship };
 
@@ -80,10 +80,11 @@ export class Player implements IAttributeHolder, IBuiltinAttributeHolder<'player
     private static generateBuiltinAttributes(object: Player): BuiltinAttributeRecord<'player'> {
         return {
             shipCount: new AttributeCodeControlled(
-                () => object.shipCount,
-                (newValue: number) => object.shipCount = newValue,
+                new Descriptor('Ships', 'Number of ships this player owns'),
                 true,
-                new Descriptor('Ships', 'Number of ships this player owns'))
+                () => object.shipCount,
+                (newValue: number) => object.shipCount = newValue
+            )
         };
     }
 
@@ -184,7 +185,7 @@ export class Player implements IAttributeHolder, IBuiltinAttributeHolder<'player
     /**
      * Notifies clients of any attribute updates which have occurred on this player
      */
-    public exportAttributeUpdates(): void {
+    private exportAttributeUpdates(): void {
         if (!this.attributeWatcher.updatesAvailable)
             return;
 

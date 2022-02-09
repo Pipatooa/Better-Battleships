@@ -22,15 +22,15 @@ export class ActionSetAttribute extends Action {
     /**
      * ActionSetAttribute constructor
      *
-     * @param  attributeReference Reference to attribute to update
-     * @param  value              New value to assign to the attribute
      * @param  priority           Priority to use for event listener created for this action
      * @param  condition          Condition that must hold true for this action to execute
+     * @param  attributeReference Reference to attribute to update
+     * @param  value              New value to assign to the attribute
      */
-    public constructor(public readonly attributeReference: AttributeReference,
-                       public readonly value: Value,
-                       priority: number,
-                       condition: Condition) {
+    private constructor(priority: number,
+                        condition: Condition,
+                        private readonly attributeReference: AttributeReference,
+                        private readonly value: Value) {
         super(priority, condition);
     }
 
@@ -56,8 +56,7 @@ export class ActionSetAttribute extends Action {
         const value = await buildValue(parsingContext.withExtendedPath('.value'), actionSetAttributeSource.value, false);
         parsingContext.reducePath();
 
-        // Return created ActionSetAttribute object
-        return new ActionSetAttribute(attribute, value, actionSetAttributeSource.priority ?? 0, condition);
+        return new ActionSetAttribute(actionSetAttributeSource.priority ?? 0, condition, attribute, value);
     }
 
     /**

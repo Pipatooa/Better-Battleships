@@ -12,7 +12,7 @@ import type { IPatternInfo }   from 'shared/network/scenario/i-pattern-info';
  */
 export class Pattern {
 
-    protected readonly patternEntryMap: { [key: string]: number };
+    private readonly patternEntryMap: { [key: string]: number };
     public readonly integerCenter: [number, number];
 
     /**
@@ -35,17 +35,51 @@ export class Pattern {
     }
 
     /**
-     * Queries the pattern to get a value at a location
+     * Retrieves a set of pattern entries from JSON source data
      *
-     * Queries outside the pattern will return 0 as a default value
-     *
-     * @param    x X coordinate of query position
-     * @param    y Y coordinate of query position
-     * @returns    Value at position
+     * @param    parsingContext Context for resolving scenario data
+     * @param    patternSource  JSON data for Pattern
+     * @param    booleanise     Whether to convert pattern values to boolean values
+     * @param    offset         Amount to offset all tile positions within defined pattern
+     * @returns                 Array of pattern entries
      */
-    public query(x: number, y: number): number {
-        const key = `${x},${y}`;
-        return this.patternEntryMap[key] ?? 0;
+    protected static getPatternEntriesFromSource(parsingContext: ParsingContext, patternSource: IPatternSource, booleanise: boolean, offset: [number, number]): PatternEntry[] {
+
+        // Ensure that the number of entries in 'pattern' matches the declared size of the pattern
+        if (patternSource.pattern.length !== patternSource.size[1])
+            throw new UnpackingError(`"${parsingContext.currentPathPrefix}pattern" must contain ${patternSource.size[1]} items to match "${parsingContext.currentPathPrefix}size[1]"`, parsingContext);
+
+        // Unpack pattern data
+        const patternEntries: PatternEntry[] = [];
+        for (let y = 0; y < patternSource.pattern.length; y++) {
+            const row: string = patternSource.pattern[y];
+
+            // Ensure that the number of patterns entries within a row matches the declared size of the board
+            if (row.length !== patternSource.size[0])
+                throw new UnpackingError(`"${parsingContext.currentPathPrefix}pattern[${y}]" length must be ${patternSource.size[0]} characters long to match "${parsingContext.currentPathPrefix}size[0]"`, parsingContext);
+
+            // Iterate through each character, each representing a pattern entry
+            for (let x = 0; x < patternSource.size[0]; x++) {
+                const c: string = row.charAt(x);
+                let value = patternSource.values[c];
+
+                // If character did not match any value within the values map
+                if (value === undefined)
+                    throw new UnpackingError(`Could not find value for the character '${c}' in value map at '${parsingContext.currentPathPrefix}pattern[${y}][${x}]'`, parsingContext);
+
+                // If entry has no value, do not store it in the pattern
+                if (value === 0)
+                    continue;
+
+                if (booleanise)
+                    value = 1;
+
+                // Create new entry and store in pattern entries
+                patternEntries.push([x + offset[0], y + offset[1], value]);
+            }
+        }
+
+        return patternEntries;
     }
 
     /**
@@ -69,62 +103,47 @@ export class Pattern {
         const patternEntries = Pattern.getPatternEntriesFromSource(parsingContext, patternSource, booleanise, [0, 0]);
 
         // Return new created Pattern object
-        return new Pattern(patternEntries, [ centerX, centerY ]);
+        return new Pattern(patternEntries, [centerX, centerY]);
     }
 
     /**
-     * Retrieves a set of pattern entries from JSON source data
+     * Returns network transportable form of this object.
      *
-     * @param    parsingContext Context for resolving scenario data
-     * @param    patternSource  JSON data for Pattern
-     * @param    booleanise     Whether to convert pattern values to boolean values
-     * @param    offset         Amount to offset all tile positions within defined pattern
-     * @returns                 Array of pattern entries
+     * May not include all details of the object. Just those that the client needs to know.
+     *
+     * @param    includeValue Whether to include the value for each pattern entry
+     * @returns               Created IPatternInfo object
      */
-    protected static getPatternEntriesFromSource(parsingContext: ParsingContext, patternSource: IPatternSource, booleanise: boolean, offset: [number, number]): PatternEntry[] {
+    public makeTransportable(includeValue: boolean): IPatternInfo {
 
-        // Unpack value data
-        const values: { [char: string]: number } = {};
-        for (const entry of Object.entries(patternSource.values)) {
-            const [ char, value ] = entry;
-            values[char] = value;
+        // Convert pattern entries to list of number entries
+        const tiles: [number, number, number][] | [number, number][] = [];
+        for (const [x, y, value] of this._patternEntries) {
+            if (includeValue)
+                (tiles as [number, number, number][]).push([x, y, value]);
+            else
+                (tiles as [number, number][]).push([x, y]);
         }
 
-        // Ensure that the number of entries in 'pattern' matches the declared size of the pattern
-        if (patternSource.pattern.length !== patternSource.size[1])
-            throw new UnpackingError(`"${parsingContext.currentPathPrefix}pattern" must contain ${patternSource.size[1]} items to match "${parsingContext.currentPathPrefix}size[1]"`, parsingContext);
+        return {
+            center: this.center,
+            integerCenter: this.integerCenter,
+            tiles: tiles
+        };
+    }
 
-        // Unpack pattern data
-        const patternEntries: PatternEntry[] = [];
-        for (let y = 0; y < patternSource.pattern.length; y++) {
-            const row: string = patternSource.pattern[y];
-
-            // Ensure that the number of patterns entries within a row matches the declared size of the board
-            if (row.length !== patternSource.size[0])
-                throw new UnpackingError(`"${parsingContext.currentPathPrefix}pattern[${y}]" length must be ${patternSource.size[0]} characters long to match "${parsingContext.currentPathPrefix}size[0]"`, parsingContext);
-
-            // Iterate through each character, each representing a pattern entry
-            for (let x = 0; x < patternSource.size[0]; x++) {
-                const c: string = row.charAt(x);
-                let value = values[c];
-
-                // If character did not match any value within the values map
-                if (value === undefined)
-                    throw new UnpackingError(`Could not find value for the character '${c}' in value map at '${parsingContext.currentPathPrefix}pattern[${y}][${x}]'`, parsingContext);
-
-                // If entry has no value, do not store it in the pattern
-                if (value === 0)
-                    continue;
-
-                if (booleanise)
-                    value = 1;
-
-                // Create new entry and store in pattern entries
-                patternEntries.push([x + offset[0], y + offset[1], value]);
-            }
-        }
-
-        return patternEntries;
+    /**
+     * Queries the pattern to get a value at a location
+     *
+     * Queries outside the pattern will return 0 as a default value
+     *
+     * @param    x X coordinate of query position
+     * @param    y Y coordinate of query position
+     * @returns    Value at position
+     */
+    public query(x: number, y: number): number {
+        const key = `${x},${y}`;
+        return this.patternEntryMap[key] ?? 0;
     }
 
     /**
@@ -163,32 +182,6 @@ export class Pattern {
         }
 
         return patternEntries;
-    }
-
-    /**
-     * Returns network transportable form of this object.
-     *
-     * May not include all details of the object. Just those that the client needs to know.
-     *
-     * @param    includeValue Whether to include the value for each pattern entry
-     * @returns               Created IPatternInfo object
-     */
-    public makeTransportable(includeValue: boolean): IPatternInfo {
-
-        // Convert pattern entries to list of number entries
-        const tiles: [number, number, number][] | [number, number][] = [];
-        for (const [x, y, value] of this._patternEntries) {
-            if (includeValue)
-                (tiles as [number, number, number][]).push([x, y, value]);
-            else
-                (tiles as [number, number][]).push([ x, y ]);
-        }
-
-        return {
-            center: this.center,
-            integerCenter: this.integerCenter,
-            tiles: tiles
-        };
     }
 
     /**

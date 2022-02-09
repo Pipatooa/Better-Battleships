@@ -19,10 +19,10 @@ export class RotatablePattern extends Pattern {
      * @param  integerCenter    Center snapped to an integer coordinate
      * @param  rotationalCenter Point about which the pattern rotates
      */
-    protected constructor(_patternEntries: PatternEntry[],
-                          center: [number, number],
-                          integerCenter: [number, number],
-                          public readonly rotationalCenter: [number, number]) {
+    private constructor(_patternEntries: PatternEntry[],
+                        center: [number, number],
+                        integerCenter: [number, number],
+                        public readonly rotationalCenter: [number, number]) {
         super(_patternEntries, center, integerCenter);
     }
 

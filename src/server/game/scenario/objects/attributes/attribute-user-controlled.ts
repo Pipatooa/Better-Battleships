@@ -23,15 +23,15 @@ export class AttributeUserControlled extends Attribute {
      * AttributeUserControlled constructor
      *
      * @param  descriptor   Optional descriptor for this attribute
+     * @param  readonly     Whether this value should be readonly
      * @param  initialValue Initial value for this attribute
      * @param  constraint   Constraint to apply to held value
-     * @param  readonly     Whether this value should be readonly
      */
     public constructor(descriptor: Descriptor | undefined,
-                       protected readonly initialValue: Value,
-                       protected readonly constraint: ValueConstraint | undefined,
-                       public readonly readonly: boolean) {
-        super(descriptor);
+                       readonly: boolean,
+                       private readonly initialValue: Value,
+                       private readonly constraint: ValueConstraint | undefined) {
+        super(descriptor, readonly);
     }
 
     /**
@@ -66,7 +66,7 @@ export class AttributeUserControlled extends Attribute {
         }
 
         // Return created AttributeUserControlled object
-        return new AttributeUserControlled(descriptor, initialValue, constraint, attributeSource.readonly);
+        return new AttributeUserControlled(descriptor, attributeSource.readonly, initialValue, constraint);
     }
 
     /**
@@ -92,7 +92,6 @@ export class AttributeUserControlled extends Attribute {
      * @param  value New value
      */
     public setValue(value: number): void {
-        // If value is readonly, ignore new value
         if (this.readonly)
             return;
 

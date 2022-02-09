@@ -9,31 +9,11 @@ import type { Value }               from './value';
 /**
  * ValueSum - Server Version
  *
- * Value which evaluates to the sum of all sub values
+ * Value which evaluates to the sum of all sub-values
  *
  * Extends ValueMultiple
  */
 export class ValueSum extends ValueMultiple {
-
-    /**
-     * Evaluate this dynamic value as a number
-     *
-     * @param    eventContext Context for resolving objects and values when an event is triggered
-     * @returns               Static value
-     */
-    public evaluate(eventContext: GenericEventContext): number {
-
-        // Keep track of sum of values
-        let sum = 0;
-
-        // Loop through sub values and add to running sum
-        for (const subValue of this.subValues) {
-            sum += subValue.evaluate(eventContext);
-        }
-
-        // Return sum
-        return sum;
-    }
 
     /**
      * Factory function to generate ValueSum from JSON scenario data
@@ -49,12 +29,23 @@ export class ValueSum extends ValueMultiple {
         if (checkSchema)
             valueSumSource = await checkAgainstSchema(valueSumSource, valueSumSchema, parsingContext);
 
-        // Get sub values from source
+        // Get sub-values from source
         const subValues: Value[] = await ValueMultiple.getSubValues(parsingContext.withExtendedPath('.values'), valueSumSource.values);
         parsingContext.reducePath();
 
-        // Return created ValueRandom object
         return new ValueSum(subValues);
     }
-}
 
+    /**
+     * Evaluate this dynamic value as a number
+     *
+     * @param    eventContext Context for resolving objects and values when an event is triggered
+     * @returns               Static value
+     */
+    public evaluate(eventContext: GenericEventContext): number {
+        let sum = 0;
+        for (const subValue of this.subValues)
+            sum += subValue.evaluate(eventContext);
+        return sum;
+    }
+}

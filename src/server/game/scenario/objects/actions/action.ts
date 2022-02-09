@@ -16,7 +16,7 @@ export abstract class Action {
      * @param  condition Condition that must hold true for this action to execute
      */
     protected constructor(public readonly priority: number,
-                          public readonly condition: Condition) {
+                          protected readonly condition: Condition) {
     }
 
     /**

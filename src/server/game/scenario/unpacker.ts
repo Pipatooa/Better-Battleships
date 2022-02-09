@@ -30,7 +30,7 @@ export async function unpack(fileJSON: FileJSON): Promise<[Scenario, string]> {
         throw new UnpackingError(`Invalid scenario format '${format}'. Must be either 'JSON' or 'YAML'.`, 'format.txt');
     const fileExtension = `.${format.toLowerCase()}`;
 
-    // Get a list of all zip entries
+    // Get an array of all zip entries
     const zipEntries: AdmZip.IZipEntry[] = scenarioZip.getEntries();
 
     // Get entries for named objects

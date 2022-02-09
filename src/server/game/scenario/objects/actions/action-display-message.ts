@@ -1,6 +1,7 @@
 import { UnpackingError }                         from '../../errors/unpacking-error';
 import { checkAgainstSchema }                     from '../../schema-checker';
 import { buildCondition }                         from '../conditions/condition-builder';
+import { Player }                                 from '../player';
 import { Team }                                   from '../team';
 import { Action }                                 from './action';
 import { actionDisplayMessageSchema }             from './sources/action-display-message';
@@ -8,7 +9,7 @@ import type { EventContext, GenericEventContext } from '../../events/event-conte
 import type { EventEvaluationState }              from '../../events/event-evaluation-state';
 import type { ParsingContext }                    from '../../parsing-context';
 import type { Condition }                         from '../conditions/condition';
-import type { Player }                            from '../player';
+import type { Scenario }                          from '../scenario';
 import type { IActionDisplayMessageSource }       from './sources/action-display-message';
 import type { IMessageEvent }                     from 'shared/network/events/i-message';
 
@@ -22,17 +23,17 @@ export class ActionDisplayMessage extends Action {
     /**
      * ActionDisplayMessage constructor
      *
+     * @param  priority  Priority to use for event listener created for this action
+     * @param  condition Condition that must hold true for this action to execute.
      * @param  display   Where to display the message
      * @param  target    Target to display message to
      * @param  message   Message to display
-     * @param  priority  Priority to use for event listener created for this action
-     * @param  condition Condition that must hold true for this action to execute.
      */
-    private constructor(private readonly display: 'message' | 'popup',
-                        private readonly target: Team | Player | 'team' | 'player',
-                        private readonly message: string,
-                        priority: number,
-                        condition: Condition) {
+    private constructor(priority: number,
+                        condition: Condition,
+                        private readonly display: 'message' | 'popup',
+                        private readonly target: Team | Player | Scenario | 'team' | 'player',
+                        private readonly message: string) {
         super(priority, condition);
     }
 
@@ -55,7 +56,7 @@ export class ActionDisplayMessage extends Action {
         parsingContext.reducePath();
 
         // Find target
-        let target: Team | Player | 'team' | 'player';
+        let target: Team | Player | Scenario | 'team' | 'player';
         switch (actionDisplayMessageSource.target) {
             case 'local:team':
                 if (parsingContext.teamPartial === undefined)
@@ -81,10 +82,13 @@ export class ActionDisplayMessage extends Action {
                         parsingContext);
                 target = 'player';
                 break;
+            case 'all':
+                target = parsingContext.scenarioPartial as Scenario;
+                break;
         }
 
         // Return created ActionDisplayMessage object
-        return new ActionDisplayMessage(actionDisplayMessageSource.display, target, actionDisplayMessageSource.message, actionDisplayMessageSource.priority ?? 0, condition);
+        return new ActionDisplayMessage(actionDisplayMessageSource.priority ?? 0, condition, actionDisplayMessageSource.display, target, actionDisplayMessageSource.message);
     }
 
     /**
@@ -99,11 +103,18 @@ export class ActionDisplayMessage extends Action {
             return;
 
         // Select target dynamically if necessary
-        const target = this.target === 'team'
-            ? (eventContext as EventContext<'team', any, any, any>).foreignTeam
-            : this.target === 'player'
-                ? (eventContext as EventContext<'player', any, any, any>).foreignPlayer
-                : this.target;
+        let target: Team | Player | Scenario;
+        switch (this.target) {
+            case 'team':
+                target = (eventContext as EventContext<'team', any, any, any>).foreignTeam;
+                break;
+            case 'player':
+                target = (eventContext as EventContext<'player', any, any, any>).foreignPlayer;
+                break;
+            default:
+                target = this.target;
+                break;
+        }
 
         // Send message event to clients
         const event: IMessageEvent = {
@@ -113,7 +124,9 @@ export class ActionDisplayMessage extends Action {
         };
         if (target instanceof Team)
             target.broadcastEvent(event);
-        else
+        else if (target instanceof Player)
             target.client!.sendEvent(event);
+        else
+            target.game!.broadcastEvent(event);
     }
 }

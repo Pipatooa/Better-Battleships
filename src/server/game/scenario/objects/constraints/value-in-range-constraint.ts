@@ -24,8 +24,8 @@ export class ValueInRangeConstraint extends ValueConstraint {
      * @param  min Minimum value that other values can hold to meet this constraint
      * @param  max Maximum value that other values can hold to meet this constraint
      */
-    protected constructor(public readonly min: Value,
-                          public readonly max: Value) {
+    private constructor(private readonly min: Value,
+                        private readonly max: Value) {
         super();
     }
 
@@ -48,7 +48,6 @@ export class ValueInRangeConstraint extends ValueConstraint {
         const max = await buildValue(parsingContext.withExtendedPath('.max'), valueInRangeConstraintSource.max, false);
         parsingContext.reducePath();
 
-        // Return created ValueInRangeConstraint object
         return new ValueInRangeConstraint(min, max);
     }
 
@@ -74,4 +73,3 @@ export class ValueInRangeConstraint extends ValueConstraint {
         return clamp(value, this.min.evaluate(eventContext), this.max.evaluate(eventContext));
     }
 }
-

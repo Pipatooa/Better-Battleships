@@ -9,31 +9,11 @@ import type { IConditionAllSource } from './sources/condition-all';
 /**
  * ConditionAll - Server Version
  *
- * Condition which holds true when all sub conditions hold true
+ * Condition which holds true when all sub-conditions hold true
  *
  * Extends ConditionMultiple
  */
 export class ConditionAll extends ConditionMultiple {
-
-    /**
-     * Checks whether this condition holds true
-     *
-     * @param    eventContext Context for resolving objects and values when an event is triggered
-     * @returns               Whether this condition holds true
-     */
-    public check(eventContext: GenericEventContext): boolean {
-
-        // Loop through sub conditions
-        for (const item of this.subConditions) {
-
-            // If any sub condition holds false, return false (unless inverted)
-            if (!item.check(eventContext))
-                return this.inverted;
-        }
-
-        // If no sub conditions hold false, return true (unless inverted)
-        return !this.inverted;
-    }
 
     /**
      * Factory function to generate ConditionAll from JSON scenario data
@@ -49,11 +29,26 @@ export class ConditionAll extends ConditionMultiple {
         if (checkSchema)
             conditionAllSource = await checkAgainstSchema(conditionAllSource, conditionAllSchema, parsingContext);
 
-        // Get sub conditions from source
+        // Get sub-conditions from source
         const subConditions: Condition[] = await ConditionMultiple.getSubConditions(parsingContext.withExtendedPath('.subConditions'), conditionAllSource.subConditions);
         parsingContext.reducePath();
 
-        // Return created ConditionAll object
-        return new ConditionAll(subConditions, conditionAllSource.inverted !== undefined ? conditionAllSource.inverted : false);
+        const inverted = conditionAllSource.inverted !== undefined
+            ? conditionAllSource.inverted
+            : false;
+        return new ConditionAll(inverted, subConditions);
+    }
+
+    /**
+     * Checks whether this condition holds true
+     *
+     * @param    eventContext Context for resolving objects and values when an event is triggered
+     * @returns               Whether this condition holds true
+     */
+    public check(eventContext: GenericEventContext): boolean {
+        for (const item of this.subConditions)
+            if (!item.check(eventContext))
+                return this.inverted;
+        return !this.inverted;
     }
 }

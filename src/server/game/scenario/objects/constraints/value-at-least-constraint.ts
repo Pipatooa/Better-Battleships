@@ -21,7 +21,7 @@ export class ValueAtLeastConstraint extends ValueConstraint {
      *
      * @param  min Minimum value that other values can hold to meet this constraint
      */
-    protected constructor(public readonly min: Value) {
+    private constructor(private readonly min: Value) {
         super();
     }
 
@@ -42,7 +42,6 @@ export class ValueAtLeastConstraint extends ValueConstraint {
         const min = await buildValue(parsingContext.withExtendedPath('.min'), valueAtLeastConstraintSource.min, false);
         parsingContext.reducePath();
 
-        // Return created ValueAtLeastConstraint object
         return new ValueAtLeastConstraint(min);
     }
 

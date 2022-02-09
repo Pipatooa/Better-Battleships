@@ -17,7 +17,7 @@ export class AttributeReferenceEvent extends AttributeReference {
      *
      * @param  attributeName Name of referenced attribute
      */
-    public constructor(protected readonly attributeName: string) {
+    private constructor(private readonly attributeName: string) {
         super();
     }
 

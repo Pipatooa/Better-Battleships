@@ -27,53 +27,11 @@ export class ValueRandom extends Value {
      * @param  generateOnce If true, random value will be generated once and returned for all new evaluation calls
      * @protected
      */
-    protected constructor(public readonly min: Value,
-                          public readonly max: Value,
-                          public readonly step: Value | undefined,
-                          public readonly generateOnce: boolean) {
+    protected constructor(private readonly min: Value,
+                          private readonly max: Value,
+                          private readonly step: Value | undefined,
+                          private readonly generateOnce: boolean) {
         super();
-    }
-
-    /**
-     * Gets a random value between a minimum and maximum value
-     *
-     * If step is not undefined, returned value will be a multiple of the step value
-     *
-     * @param    eventContext Context for resolving objects and values when an event is triggered
-     * @returns               Randomly generated value
-     * @protected
-     */
-    protected getRandom(eventContext: GenericEventContext): number {
-
-        // Evaluate sub-values to numbers
-        const min: number = this.min.evaluate(eventContext);
-        const max: number = this.max.evaluate(eventContext);
-        const step: number | undefined = this.step?.evaluate(eventContext);
-
-        // Returns free-floating random value between min and max
-        if (step === undefined) {
-            return Math.random() * (max - min) + min;
-        }
-
-        // Returns random value between min and max that is a multiple of step
-        return Math.floor(Math.random() * ((max - min) / step + 1)) * step + min;
-    }
-
-    /**
-     * Evaluate this dynamic value as a number
-     *
-     * @param    eventContext Context for resolving objects and values when an event is triggered
-     * @returns               Static value
-     */
-    public evaluate(eventContext: GenericEventContext): number {
-        if (this.generateOnce) {
-            if (this.generatedValue === undefined)
-                this.generatedValue = this.getRandom(eventContext);
-
-            return this.generatedValue;
-        }
-
-        return this.getRandom(eventContext);
     }
 
     /**
@@ -102,8 +60,48 @@ export class ValueRandom extends Value {
             parsingContext.reducePath();
         }
 
-        // Return created ValueRandom object
         return new ValueRandom(min, max, step, valueRandomSource.generateOnce);
+    }
+
+    /**
+     * Gets a random value between a minimum and maximum value
+     *
+     * If step is not undefined, returned value will be a multiple of the step value
+     *
+     * @param    eventContext Context for resolving objects and values when an event is triggered
+     * @returns               Randomly generated value
+     * @protected
+     */
+    private getRandom(eventContext: GenericEventContext): number {
+
+        // Evaluate sub-values to numbers
+        const min: number = this.min.evaluate(eventContext);
+        const max: number = this.max.evaluate(eventContext);
+        const step: number | undefined = this.step?.evaluate(eventContext);
+
+        // Returns free-floating random value between min and max
+        if (step === undefined)
+            return Math.random() * (max - min) + min;
+
+        // Otherwise, returns random value between min and max that is a multiple of step
+        return Math.floor(Math.random() * ((max - min) / step + 1)) * step + min;
+    }
+
+    /**
+     * Evaluate this dynamic value as a number
+     *
+     * @param    eventContext Context for resolving objects and values when an event is triggered
+     * @returns               Static value
+     */
+    public evaluate(eventContext: GenericEventContext): number {
+        if (this.generateOnce) {
+            if (this.generatedValue === undefined)
+                this.generatedValue = this.getRandom(eventContext);
+
+            return this.generatedValue;
+        }
+
+        return this.getRandom(eventContext);
     }
 }
 

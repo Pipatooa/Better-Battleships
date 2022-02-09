@@ -41,10 +41,10 @@ export class AbilityRotate extends IndexedAbility {
      * @param  ship               Parent ship which this ability belongs to
      * @param  descriptor         Descriptor for ability
      * @param  icon               Url to icon for this ability
+     * @param  condition          Condition which must hold true to be able to use this action
      * @param  rot90allowed       Whether a rotation by 90 degrees is allowed
      * @param  rot180allowed      Whether a rotation by 180 degrees is allowed
      * @param  rot270allowed      Whether a rotation by 270 degrees is allowed
-     * @param  condition          Condition which must hold true to be able to use this action
      * @param  eventRegistrar     Registrar of all ability event listeners
      * @param  attributes         Attributes for the ability
      * @param  builtinAttributes  Built-in attributes for the ability
@@ -53,10 +53,10 @@ export class AbilityRotate extends IndexedAbility {
     public constructor(ship: Ship,
                        descriptor: Descriptor,
                        icon: string,
+                       condition: Condition,
                        rot90allowed: boolean,
                        rot180allowed: boolean,
                        rot270allowed: boolean,
-                       condition: Condition,
                        eventRegistrar: EventRegistrar<AbilityEventInfo, AbilityEvent>,
                        attributes: AttributeMap,
                        builtinAttributes: BuiltinAttributeRecord<'ability'>,
@@ -107,7 +107,7 @@ export class AbilityRotate extends IndexedAbility {
         // Return created AbilityRotate object
         parsingContext.localAttributes.ability = undefined;
         EventRegistrar.call(eventRegistrarPartial, parsingContext.scenarioPartial as Scenario, eventListeners, []);
-        AbilityRotate.call(abilityPartial, parsingContext.shipPartial as Ship, descriptor, icon, abilityRotateSource.rot90, abilityRotateSource.rot180, abilityRotateSource.rot270, condition, eventRegistrarPartial, attributes, builtinAttributes, attributeListeners);
+        AbilityRotate.call(abilityPartial, parsingContext.shipPartial as Ship, descriptor, icon, condition, abilityRotateSource.rot90, abilityRotateSource.rot180, abilityRotateSource.rot270, eventRegistrarPartial, attributes, builtinAttributes, attributeListeners);
         return abilityPartial as AbilityRotate;
     }
 

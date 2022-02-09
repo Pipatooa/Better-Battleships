@@ -11,14 +11,16 @@ import type { IAttributeInfo }    from 'shared/network/scenario/i-attribute-info
 export abstract class Attribute {
 
     private attributeListeners: AttributeListener[] = [];
-    protected _attributeUpdateCallbacks: ((newValue: number) => void)[] = [];
+    private _attributeUpdateCallbacks: ((newValue: number) => void)[] = [];
 
     /**
      * Attribute Constructor
      *
      * @param  descriptor Optional descriptor for this attribute
+     * @param  readonly   Whether this value should be readonly
      */
-    protected constructor(public readonly descriptor?: Descriptor) {
+    protected constructor(public readonly descriptor: Descriptor | undefined,
+                          protected readonly readonly: boolean) {
     }
 
     /**

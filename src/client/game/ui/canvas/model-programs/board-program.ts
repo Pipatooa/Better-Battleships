@@ -25,7 +25,7 @@ export class BoardProgram extends ModelProgram<'vertPosition' | 'vertTextureCoor
 }
 
 /**
- * List of shader uniform names
+ * Array of shader uniform names
  */
 const uniformNames = [
     'offset', 'scale',

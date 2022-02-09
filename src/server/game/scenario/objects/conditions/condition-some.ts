@@ -11,7 +11,7 @@ import type { IConditionSomeSource } from './sources/condition-some';
 /**
  * ConditionSome - Server Version
  *
- * Condition which holds true when the number of sub conditions which hold true meet a value constraint
+ * Condition which holds true when the number of sub-conditions which hold true meet a value constraint
  *
  * Extends ConditionMultiple
  */
@@ -20,39 +20,14 @@ export class ConditionSome extends ConditionMultiple {
     /**
      * ConditionSome constructor
      *
-     * @param  subConditions   List of sub conditions to check
-     * @param  valueConstraint Value constraint defining the number of sub conditions
-     *                         that must hold true for the condition as a whole to hold true
      * @param  inverted        Whether the condition result will be inverted before it is returned
+     * @param  subConditions   Array of sub-conditions to check that must hold true for the condition as a whole to hold true
+     * @param  valueConstraint Value constraint defining the number of sub-conditions
      */
-    public constructor(subConditions: Condition[],
-                       public readonly valueConstraint: ValueConstraint,
-                       inverted: boolean) {
-        super(subConditions, inverted);
-    }
-
-    /**
-     * Checks whether this condition holds true
-     *
-     * @param    eventContext Context for resolving objects and values when an event is triggered
-     * @returns               Whether this condition holds true
-     */
-    public check(eventContext: GenericEventContext): boolean {
-
-        // Keep count of number of sub conditions which hold true
-        let count = 0;
-
-        // Loop through sub conditions and increment count for each condition that holds true
-        for (const item of this.subConditions) {
-            if (item.check(eventContext))
-                count++;
-        }
-
-        // Check whether the count meets the held value constraint
-        const meetsConstraint: boolean = this.valueConstraint.check(eventContext, count);
-
-        // Return result (invert result if necessary)
-        return this.inverted ? !meetsConstraint : meetsConstraint;
+    private constructor(inverted: boolean,
+                        subConditions: Condition[],
+                        private readonly valueConstraint: ValueConstraint) {
+        super(inverted, subConditions);
     }
 
     /**
@@ -69,13 +44,32 @@ export class ConditionSome extends ConditionMultiple {
         if (checkSchema)
             conditionSomeSource = await checkAgainstSchema(conditionSomeSource, conditionSomeSchema, parsingContext);
 
-        // Get sub conditions and value constraint from source
+        // Get sub-conditions and value constraint from source
         const subConditions: Condition[] = await ConditionMultiple.getSubConditions(parsingContext.withExtendedPath('.subConditions'), conditionSomeSource.subConditions);
         parsingContext.reducePath();
         const valueConstraint = await buildValueConstraint(parsingContext.withExtendedPath('.valueConstraint'), conditionSomeSource.valueConstraint, true);
         parsingContext.reducePath();
 
-        // Return created ConditionSome object
-        return new ConditionSome(subConditions, valueConstraint, conditionSomeSource.inverted !== undefined ? conditionSomeSource.inverted : false);
+        const inverted = conditionSomeSource.inverted !== undefined
+            ? conditionSomeSource.inverted
+            : false;
+        return new ConditionSome(inverted, subConditions, valueConstraint);
+    }
+
+    /**
+     * Checks whether this condition holds true
+     *
+     * @param    eventContext Context for resolving objects and values when an event is triggered
+     * @returns               Whether this condition holds true
+     */
+    public check(eventContext: GenericEventContext): boolean {
+        let count = 0;
+        for (const item of this.subConditions)
+            if (item.check(eventContext))
+                count++;
+
+        // Check whether the count of values which holds true meets the held value constraint
+        const meetsConstraint: boolean = this.valueConstraint.check(eventContext, count);
+        return this.inverted ? !meetsConstraint : meetsConstraint;
     }
 }

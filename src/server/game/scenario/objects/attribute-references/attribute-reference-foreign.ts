@@ -23,9 +23,9 @@ export class AttributeReferenceForeign extends AttributeReference {
      * @param  attributeName  Name of referenced attribute
      * @param  builtin        Whether this attribute reference refers to a built-in value or a user defined value
      */
-    public constructor(protected readonly objectSelector: AttributeReferenceForeignObjectSelector,
-                       protected readonly attributeName: string,
-                       protected readonly builtin: boolean) {
+    private constructor(private readonly objectSelector: AttributeReferenceForeignObjectSelector,
+                        private readonly attributeName: string,
+                        private readonly builtin: boolean) {
         super();
     }
 
@@ -66,9 +66,7 @@ export class AttributeReferenceForeign extends AttributeReference {
      * @returns               Referenced attribute
      */
     private getAttribute(eventContext: GenericEventContext): Attribute {
-
         let attributeHolder: IAttributeHolder & IBuiltinAttributeHolder<any>;
-
         switch (this.objectSelector) {
             case 'team':
                 attributeHolder = (eventContext as EventContext<'team', any, any, any>).foreignTeam;

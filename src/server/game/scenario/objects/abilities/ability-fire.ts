@@ -211,7 +211,7 @@ export class AbilityFire extends PositionedAbility {
 
         // Container to act as persistent reference to hitCount so events raised refer to final hit count
         const hitCountContainer = { hitCount: 0 };
-        const hitCountAttribute = new AttributeCodeControlled(() => hitCountContainer.hitCount, () => {}, true);
+        const hitCountAttribute = new AttributeCodeControlled(undefined, true, () => hitCountContainer.hitCount, () => {});
 
         const centerX = dx + this.ship.x + this.ship.pattern.integerCenter[0];
         const centerY = dy + this.ship.y + this.ship.pattern.integerCenter[1];
@@ -226,7 +226,10 @@ export class AbilityFire extends PositionedAbility {
 
                 // Event for every missed tile
                 this.eventRegistrar.queueEvent('onMiss', {
-                    builtinAttributes: {},
+                    builtinAttributes: {
+                        patternValue: new AttributeCodeControlled(undefined, true, () => v, () => {}),
+                        hitCount: hitCountAttribute
+                    },
                     locations: {
                         tile: [[x, y]]
                     }
@@ -241,11 +244,11 @@ export class AbilityFire extends PositionedAbility {
             // Event for every hit tile
             this.eventRegistrar.queueEvent('onHit', {
                 builtinAttributes: {
-                    patternValue: new AttributeCodeControlled(() => v, () => {}, true),
+                    patternValue: new AttributeCodeControlled(undefined, true, () => v, () => {}),
                     hitCount: hitCountAttribute,
-                    isThis: new AttributeCodeControlled(() => isThis, () => {}, true),
-                    isFriendly: new AttributeCodeControlled(() => isFriendly, () => {}, true),
-                    isVisible: new AttributeCodeControlled(() => isVisible, () => {}, true)
+                    isThis: new AttributeCodeControlled(undefined, true, () => isThis, () => {}),
+                    isFriendly: new AttributeCodeControlled(undefined, true, () => isFriendly, () => {}),
+                    isVisible: new AttributeCodeControlled(undefined, true, () => isVisible, () => {})
                 },
                 foreignTeam: ship.owner.team,
                 foreignPlayer: ship.owner,
@@ -260,14 +263,18 @@ export class AbilityFire extends PositionedAbility {
         // Event for no hits
         if (hitCountContainer.hitCount === 0)
             this.eventRegistrar.queueEvent('onMissCompletely', {
-                builtinAttributes: {},
+                builtinAttributes: {
+                    hitCount: hitCountAttribute
+                },
                 locations: {}
             });
 
         // Event for any hit
         else
-            this.eventRegistrar.queueEvent('onHitSingle', {
-                builtinAttributes: {},
+            this.eventRegistrar.queueEvent('onAnyHit', {
+                builtinAttributes: {
+                    hitCount: hitCountAttribute
+                },
                 locations: {}
             });
 

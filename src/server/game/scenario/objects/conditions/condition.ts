@@ -13,7 +13,7 @@ export abstract class Condition {
      * @param  inverted Whether the condition result will be inverted before it is returned
      * @protected
      */
-    protected constructor(public readonly inverted: boolean) {
+    protected constructor(protected readonly inverted: boolean) {
     }
 
     /**

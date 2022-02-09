@@ -36,7 +36,7 @@ export abstract class Ability implements IAttributeHolder, BuiltinAttributeRecor
     public constructor(public readonly ship: Ship,
                        public readonly descriptor: Descriptor,
                        protected readonly icon: string,
-                       public readonly condition: Condition,
+                       protected readonly condition: Condition,
                        public readonly eventRegistrar: EventRegistrar<AbilityEventInfo, AbilityEvent>,
                        public readonly attributes: AttributeMap,
                        public readonly builtinAttributes: BuiltinAttributeRecord<'ability'>,
@@ -65,6 +65,14 @@ export abstract class Ability implements IAttributeHolder, BuiltinAttributeRecor
     }
 
     /**
+     * Registers all attribute listeners for this object and all sub-objects
+     */
+    public registerAttributeListeners(): void {
+        for (const attributeListener of this.attributeListeners)
+            attributeListener.register();
+    }
+
+    /**
      * Returns network transportable form of this object.
      *
      * May not include all details of the object. Just those that the client needs to know.
@@ -73,14 +81,6 @@ export abstract class Ability implements IAttributeHolder, BuiltinAttributeRecor
      * @returns                           Created AbilityInfo object
      */
     public abstract makeTransportable(includeSubAbilityDetails: boolean): AbilityInfo;
-
-    /**
-     * Registers all attribute listeners for this object and all sub-objects
-     */
-    public registerAttributeListeners(): void {
-        for (const attributeListener of this.attributeListeners)
-            attributeListener.register();
-    }
 
     /**
      * Returns an object describing the usability of this ability and its sub-abilities

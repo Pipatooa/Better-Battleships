@@ -19,30 +19,15 @@ export class ConditionValueMeetsConstraint extends Condition {
     /**
      * ConditionValueMeetsConstraint constructor
      *
+     * @param  inverted        Whether the condition result will be inverted before it is returned
      * @param  value           Value to check
      * @param  valueConstraint Constraint to check attribute value against
-     * @param  inverted        Whether the condition result will be inverted before it is returned
      * @protected
      */
-    protected constructor(public readonly value: Value,
-                          public readonly valueConstraint: ValueConstraint,
-                          inverted: boolean) {
+    protected constructor(inverted: boolean,
+                          private readonly value: Value,
+                          private readonly valueConstraint: ValueConstraint) {
         super(inverted);
-    }
-
-    /**
-     * Checks whether this condition holds true
-     *
-     * @param    eventContext Context for resolving objects and values when an event is triggered
-     * @returns               Whether this condition holds true
-     */
-    public check(eventContext: GenericEventContext): boolean {
-        // Check value against value constraint
-        const value: number = this.value.evaluate(eventContext);
-        const result: boolean = this.valueConstraint.check(eventContext, value);
-
-        // Return result (invert if necessary)
-        return this.inverted ? !result : result;
     }
 
     /**
@@ -65,7 +50,21 @@ export class ConditionValueMeetsConstraint extends Condition {
         const valueConstraint = await buildValueConstraint(parsingContext.withExtendedPath('.valueConstraint'), conditionValueMeetsConstraintSource.constraint, true);
         parsingContext.reducePath();
 
-        // Return created ConditionValueMeetsConstraint object
-        return new ConditionValueMeetsConstraint(value, valueConstraint, conditionValueMeetsConstraintSource.inverted !== undefined ? conditionValueMeetsConstraintSource.inverted : false);
+        const inverted = conditionValueMeetsConstraintSource.inverted !== undefined
+            ? conditionValueMeetsConstraintSource.inverted
+            : false;
+        return new ConditionValueMeetsConstraint(inverted, value, valueConstraint);
+    }
+
+    /**
+     * Checks whether this condition holds true
+     *
+     * @param    eventContext Context for resolving objects and values when an event is triggered
+     * @returns               Whether this condition holds true
+     */
+    public check(eventContext: GenericEventContext): boolean {
+        const value: number = this.value.evaluate(eventContext);
+        const result: boolean = this.valueConstraint.check(eventContext, value);
+        return this.inverted ? !result : result;
     }
 }

@@ -79,7 +79,7 @@ export class ShipPlacerUiManager extends UIManager {
      */
     private checkPlacementValid(): void {
         if (this._mainCanvasCoordinates !== undefined && this.heldShip !== undefined) {
-            const [ placementValid, invalidReason ] = this.heldShip.checkPlacementValid(...this.heldShipCoordinates, game.board!);
+            const [placementValid, invalidReason] = this.heldShip.checkPlacementValid(...this.heldShipCoordinates, game.board!);
             this.tooltipInfoText = placementValid
                 ? undefined
                 : [ 'Invalid Placement!', invalidReason! ];

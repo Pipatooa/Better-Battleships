@@ -13,9 +13,9 @@ export class EmptyValueConstraint extends ValueConstraint {
     /**
      * Checks whether a value meets this constraint
      *
-     * @returns  Values will always meet this constraint
+     * @returns  True, values will always meet this constraint
      */
-    public check(): boolean {
+    public check(): true {
         return true;
     }
 

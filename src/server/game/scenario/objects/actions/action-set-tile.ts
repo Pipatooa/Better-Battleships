@@ -21,18 +21,18 @@ export class ActionSetTile extends Action {
     /**
      * ActionSetTile constructor
      *
+     * @param  priority  Priority to use for event listener created for this action
+     * @param  condition Condition that must hold true for this action to execute
      * @param  board     Board to update tiles on
      * @param  location  Location to replace tiles within
      * @param  tileType  Tile type to replace tiles with
-     * @param  priority  Priority to use for event listener created for this action
-     * @param  condition Condition that must hold true for this action to execute
      * @private
      */
-    private constructor(private readonly board: Board,
+    private constructor(priority: number,
+                        condition: Condition,
+                        private readonly board: Board,
                         private readonly location: string,
-                        private readonly tileType: TileType,
-                        priority: number,
-                        condition: Condition) {
+                        private readonly tileType: TileType) {
         super(priority, condition);
     }
 
@@ -69,7 +69,7 @@ export class ActionSetTile extends Action {
                 parsingContext);
 
         // Return created ActionSetTile object
-        return new ActionSetTile(board, location, tileType, actionSetTileSource.priority ?? 0, condition);
+        return new ActionSetTile(actionSetTileSource.priority ?? 0, condition, board, location, tileType);
     }
 
     /**

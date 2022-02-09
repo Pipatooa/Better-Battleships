@@ -75,11 +75,6 @@ export type AttributeReferenceLocalObjectSelector = typeof attributeReferenceLoc
 export type AttributeReferenceForeignObjectSelector = typeof attributeReferenceForeignObjectSelectors[number];
 
 /**
- * Type matching all reference special object selector strings
- */
-export type AttributeReferenceSpecialObjectSelector = typeof attributeReferenceBuiltinObjectSelectors[number];
-
-/**
  * Type matching all attribute reference strings
  */
 export type AttributeReferenceSource = string;

@@ -20,7 +20,7 @@ export class Game {
     public readonly timeoutManager: TimeoutManager<'gameJoinTimeout' | 'startSetup'>;
     public clients: Client[] = [];
 
-    protected _gamePhase: GamePhase = GamePhase.Lobby;
+    private _gamePhase: GamePhase = GamePhase.Lobby;
     public gameKilledCallback: ((reason: string) => void) | undefined;
 
     /**
@@ -30,7 +30,7 @@ export class Game {
      * @param  gameID     Published game ID used by clients to connect
      * @param  scenario   Scenario object used for game logic
      */
-    public constructor(public readonly internalID: number,
+    public constructor(private readonly internalID: number,
                        public readonly gameID: string,
                        public readonly scenario: Scenario) {
 
@@ -83,7 +83,7 @@ export class Game {
      * @param  client            Client to disconnect from the game
      * @param  allowReconnection Whether to allow client to reconnect to the game, or to remove them completely
      */
-    public disconnectClient(client: Client, allowReconnection: boolean): void {
+    private disconnectClient(client: Client, allowReconnection: boolean): void {
         console.log(`Client ${client.identity} disconnected from game ${this.gameID}`);
 
         // Construct new array of clients and broadcast disconnect event to existing clients
@@ -207,7 +207,7 @@ export class Game {
         for (const client of this.clients)
             playerInfo[client.identity] = client.team 
                 ? [ client.team.id, client.ready ] 
-                : [ null, false ];
+                : [null, false];
         return playerInfo;
     }
 
@@ -274,7 +274,7 @@ export class Game {
         }
 
         // Check that every team has a number of players supported by the scenario definition
-        for (const [ name, playerCount ] of Object.entries(teamPlayerCounts)) {
+        for (const [name, playerCount] of Object.entries(teamPlayerCounts)) {
             const team = this.scenario.teams[name];
             const maxPlayers = team.playerPrototypes.length;
 
@@ -312,7 +312,7 @@ export class Game {
     /**
      * Enters the setup phase of the game
      */
-    public startSetup(): void {
+    private startSetup(): void {
 
         // Set game phase to setup
         this._gamePhase = GamePhase.Setup;
